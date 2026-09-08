@@ -1,31 +1,38 @@
 # Project Carter — website
 
-Marketing website for **Project Carter**, an Australian property development
-business delivering boutique townhouse communities and commercial value-add
-projects nationwide.
+Website for **Project Carter** — Trent Macartney, a corporate property advisor
+working with property developments, value-add commercial, family offices and
+managed funds. Positioning: a creative angle where others see roadblocks —
+"there is always a solution to every property".
 
 The site's structure and visual language are modelled on
 [essentialsstudio.com.au](https://www.essentialsstudio.com.au) — a dark,
-editorial, single-page layout with an amber accent — adapted for a property
-developer.
+editorial layout with an amber accent.
 
 ## Stack
 
 Plain static site. No build step, no framework, no dependencies.
 
 ```
-index.html      home page — hero, about, projects, approach
-enquire.html    standalone ad landing page (form over a photo/video background)
-thanks.html     post-submit confirmation page (drop ad conversion tags here)
-styles.css      design system + layout (home + landing)
-script.js       header scroll state, mobile nav, scroll reveals
-assets/         favicon, social image, image drop-in guide
-.nojekyll       serve files as-is on GitHub Pages
+index.html                      home — hero, about (Trent), projects, "what I do"
+project-haig-on-the-park.html   project detail — Haig On The Park (completed)
+project-royal-terraces.html     project detail — Royal Terraces (in planning)
+project-city-west-villas.html   project detail — City West Villas (selling soon)
+enquire.html                    standalone ad landing page (form over a photo/video bg)
+thanks.html                     post-submit confirmation page (drop ad conversion tags here)
+styles.css                      design system + layout (home, project pages, landing)
+script.js                       header scroll state, mobile nav, scroll reveals
+assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
+assets/images/team/             Trent portrait
+.nojekyll                       serve files as-is on GitHub Pages
 ```
 
-Every "Enquire" / "Contact" / "View project" link on the home page now points to
-`enquire.html`. There is no in-page contact section anymore — send all ad traffic
-straight to `enquire.html`.
+The three project cards on the home page open their detail page in a **new tab**
+(`target="_blank"`). Project detail pages carry the same header/footer as the
+home page. Every "Enquire" / "Contact" link points to `enquire.html`; there is no
+in-page contact section.
+
+The brand wordmark is **"PROJECT CARTER"** only (no "DEVELOPMENT" sub-line).
 
 ## Run locally
 
@@ -64,11 +71,23 @@ Everything below is placeholder and should be replaced before the site goes publ
 | Landing page headline + sub-text | `enquire.html` → between the `EDIT THIS WORDING` comments |
 | Landing background photo or video | `enquire.html` → `.landing-media` (instructions in the file + `assets/images/README.md`) |
 | Ad conversion tracking (Google Ads / Meta Pixel) | `thanks.html` → `AD CONVERSION TRACKING` comment |
-| Project names, sizes, locations, descriptions | `index.html` → `#projects` section |
-| LinkedIn / Instagram URLs | `index.html` → footer |
-| Hero + project photography | see `assets/images/README.md` |
-| Privacy Policy link | footer (`index.html`) |
+| Hero words ("Every property / has a / solution") | `index.html` → `.hero-words` |
+| About / bio copy | `index.html` → `#about` |
+| Project copy, stats and galleries | `project-*.html` |
+| Contact phone / email | `enquire.html` (currently `0411 940 010` / `trent@cartersinvestments.com.au`) |
+| Royal Terraces / City West Villas renders | placeholder concept images — swap for final renders when available (`assets/images/projects/`) |
+| LinkedIn / Instagram URLs | `index.html` → footer (not yet added) |
+| Privacy Policy link | footer (all pages) |
 | ABN / registered entity details | footer, if required |
+
+### Project images
+
+Photography and renders under `assets/images/projects/` were pulled from
+**cartersinvestments.com.au** (your own site), resized to 1800px wide and
+recompressed. Haig On The Park has real completion photography; Royal Terraces
+and City West Villas currently use concept renders / line drawings — replace
+these with final renders or photography as they're produced. The floor-plan PNGs
+on the City West Villas page are the WIP plans from the current site.
 
 ## Making the enquiry form email you
 
