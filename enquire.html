@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enquire | Project Carter — Property Development</title>
+  <meta name="description" content="Tell Project Carter about your development site, commercial asset or investment mandate. We reply within two business days." />
+  <meta name="theme-color" content="#0e0e0f" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Enquire | Project Carter" />
+  <meta property="og:description" content="Start a conversation about your site, mandate or investment interest." />
+  <meta property="og:image" content="assets/og-image.svg" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="landing-page">
+  <a class="skip-link" href="#form">Skip to form</a>
+
+  <header class="landing-header">
+    <div class="wrap">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+        <span class="brand-sub">DEVELOPMENT</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="landing" id="main">
+    <!-- ===== BACKGROUND MEDIA =================================================
+         A photo or video sits behind the form. With nothing added it falls back
+         to the same dark gradient + blueprint grid used on the home page.
+
+         IMAGE:  add an inline style below, e.g.
+                 <div class="landing-media" aria-hidden="true"
+                      style="background-image:url('assets/images/landing.jpg')"></div>
+
+         VIDEO:  uncomment the <video> block. Keep it muted + playsinline + loop,
+                 use an .mp4 under ~5 MB, and set a poster image.
+    ====================================================================== -->
+    <div class="landing-media" aria-hidden="true">
+      <!--
+      <video class="landing-video" autoplay muted loop playsinline
+             poster="assets/images/landing-poster.jpg">
+        <source src="assets/images/landing.mp4" type="video/mp4" />
+      </video>
+      -->
+    </div>
+    <div class="landing-scrim" aria-hidden="true"></div>
+
+    <div class="wrap landing-inner">
+      <div class="landing-copy">
+        <!-- ===== EDIT THIS WORDING ===== -->
+        <p class="kicker">Project Carter — Property Development</p>
+        <h1 class="landing-head">Have a site, mandate or capital looking for the right partner?</h1>
+        <p class="landing-sub">Boutique townhouse communities and commercial value-add projects, delivered Australia-wide. Tell us what you have — we reply within two business days.</p>
+        <!-- ===== /EDIT ===== -->
+      </div>
+
+      <form class="landing-form card" id="form"
+            action="https://formspree.io/f/YOUR_FORM_ID"
+            method="POST">
+        <!-- Formspree settings: sends each submission to your inbox.
+             Replace YOUR_FORM_ID above with the id from your Formspree form. -->
+        <input type="hidden" name="_subject" value="New enquiry — Project Carter landing page" />
+        <input type="hidden" name="_next" value="thanks.html" />
+        <!-- Spam honeypot: bots fill this, humans never see it -->
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
+
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="Name" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="Email" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="Phone" autocomplete="tel" />
+        </div>
+        <div class="field">
+          <label for="subject">I'm enquiring about</label>
+          <select id="subject" name="Enquiry">
+            <option>A development site</option>
+            <option>A commercial asset / value-add</option>
+            <option>Investment / partnership</option>
+            <option>General enquiry</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="Message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-accent btn-block">Send enquiry</button>
+        <p class="form-fineprint">We'll only use your details to respond to this enquiry.</p>
+      </form>
+    </div>
+  </main>
+
+  <footer class="landing-foot">
+    <div class="wrap">
+      <p>&copy; <span id="year">2026</span> Project Carter &middot; <a href="index.html">Main site</a></p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = String(new Date().getFullYear());
+  </script>
+</body>
+</html>

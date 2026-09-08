@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thanks | Project Carter</title>
+  <meta name="description" content="Thanks — your enquiry has reached Project Carter." />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#0e0e0f" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="landing-page">
+  <header class="landing-header">
+    <div class="wrap">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+        <span class="brand-sub">DEVELOPMENT</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="landing thanks" id="main">
+    <div class="landing-media" aria-hidden="true"></div>
+    <div class="landing-scrim" aria-hidden="true"></div>
+
+    <div class="wrap landing-inner">
+      <div class="landing-copy">
+        <p class="kicker">Project Carter</p>
+        <h1 class="landing-head">Thanks — we've got your enquiry.</h1>
+        <p class="landing-sub">One of the team will be in touch within two business days. In the meantime you can explore recent work on our main site.</p>
+        <a href="index.html" class="btn btn-accent">Back to Project Carter</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="landing-foot">
+    <div class="wrap">
+      <p>&copy; <span id="year">2026</span> Project Carter</p>
+    </div>
+  </footer>
+
+  <!-- ===== AD CONVERSION TRACKING =====
+       Paste your Google Ads / Meta Pixel conversion snippet here. It fires on
+       page load, so every visitor who lands here has submitted the form. -->
+
+  <script>
+    var y = document.getElementById("year");
+    if (y) y.textContent = String(new Date().getFullYear());
+  </script>
+</body>
+</html>

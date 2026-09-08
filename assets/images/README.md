@@ -33,4 +33,23 @@ assets.
    background-position: center;
    ```
 
-Only use images you own or have a licence to use.
+## Add a background to the landing page (`enquire.html`)
+
+The landing page has a full-bleed media layer behind the form. With nothing
+added it falls back to the same dark gradient + grid as the home hero.
+
+**Image** — add an inline style to the `.landing-media` div in `enquire.html`:
+
+```html
+<div class="landing-media" aria-hidden="true"
+     style="background-image:url('assets/images/landing.jpg')"></div>
+```
+
+Recommended ~2400×1600, < 500 KB. A dark scrim already sits over it for text
+contrast, so a mid-to-bright photo works fine.
+
+**Video** — uncomment the `<video class="landing-video">` block already in
+`enquire.html`. Use a short, muted, looping `.mp4` under ~5 MB and set a
+`poster` image for the first frame / slow connections.
+
+Only use images or video you own or have a licence to use.
