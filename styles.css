@@ -986,15 +986,18 @@ h1, h2, h3 {
 .calc-assumptions li strong { color: var(--text); font-weight: 600; }
 
 .input-money, .input-pct { position: relative; }
+.input-money input, .input-pct input { width: 100%; }
 .input-money::before {
   content: "$";
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
   color: var(--muted); font-size: 15px; pointer-events: none;
 }
 .input-money input { padding-left: 28px; }
+/* right-align percent fields so the % sits directly after the number */
+.input-pct input { text-align: right; padding-right: 26px; }
 .input-pct::after {
   content: "%";
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
   color: var(--muted); font-size: 15px; pointer-events: none;
 }
 
