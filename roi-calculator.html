@@ -112,6 +112,12 @@
                 <label for="term">Term of ownership <span>(years)</span></label>
                 <input type="text" inputmode="numeric" id="term" autocomplete="off" placeholder="5" />
               </div>
+
+              <div class="field">
+                <label for="exitCap">Exit cap rate on sale <span>(optional)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="exitCap" autocomplete="off" placeholder="6.0" /></div>
+                <p class="field-hint">The yield a buyer pays on exit, for local cap rate, yield compression or market shifts. Blank holds the entry yield. Lower than entry lifts value; higher softens it.</p>
+              </div>
             </div>
 
             <div class="calc-group">
@@ -156,6 +162,7 @@
             <div class="result-row"><dt>Deposit</dt><dd data-out="deposit">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Total cash required</dt><dd data-out="cashRequired">&mdash;</dd></div>
             <div class="result-row"><dt>Entry net yield</dt><dd data-out="entryYield">&mdash;</dd></div>
+            <div class="result-row"><dt>Exit cap rate on sale</dt><dd data-out="exitCap">&mdash;</dd></div>
             <div class="result-row"><dt>Property value at sale</dt><dd data-out="saleValue">&mdash;</dd></div>
             <div class="result-row"><dt>Loan balance at sale</dt><dd data-out="loanAtSale">&mdash;</dd></div>
             <div class="result-row"><dt>Net sale proceeds</dt><dd data-out="netProceeds">&mdash;</dd></div>
@@ -165,6 +172,11 @@
             <div class="result-row"><dt>Return per year (simple avg)</dt><dd data-out="roiPerYear">&mdash;</dd></div>
             <div class="result-row"><dt>Equity multiple</dt><dd data-out="equityMultiple">&mdash;</dd></div>
             <div class="result-row is-key"><dt>IRR (compound)</dt><dd data-out="irr">&mdash;</dd></div>
+
+            <div class="calc-cta">
+              <button type="button" class="btn btn-accent btn-block" id="openLead">Download ROI summary (PDF)</button>
+              <p class="form-fineprint">You'll enter your name, email and phone on the next step. Project Carter gets a copy of your figures and follows up only if you ask.</p>
+            </div>
           </dl>
         </div>
 
@@ -192,38 +204,40 @@
           </div>
         </div>
 
-        <div class="calc-lead">
-          <h2>Get this as a PDF</h2>
-          <p>Enter your details and the page builds a one-page PDF of these numbers, including the year-by-year schedule, for you to download. A copy of your figures and contact details is sent to Project Carter, so we can follow up if you'd like us to.</p>
+        <!-- Lead-capture modal, opened by the "Download ROI summary" button.
+             Replace YOUR_FORM_ID with your Formspree id. The submit is sent in
+             the background so the visitor keeps the page and their PDF. -->
+        <div class="modal" id="leadModal" hidden>
+          <div class="modal-backdrop" data-close></div>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+            <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
+            <h2 id="leadModalTitle">Get your ROI summary</h2>
+            <p>The page builds a one-page PDF of your figures and the year-by-year schedule. A copy is sent to Project Carter so we can follow up if you'd like.</p>
 
-          <!-- Reuses the same Formspree form as the enquiry page. Replace
-               YOUR_FORM_ID with your Formspree id. The submit is sent in the
-               background so the visitor stays on this page with their PDF. -->
-          <form class="calc-lead-form" id="leadForm"
-                action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
-            <input type="hidden" name="_subject" value="ROI Calculator request" />
-            <input type="hidden" name="Figures" id="figuresField" value="" />
-            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
-            <div class="row2">
+            <form class="calc-lead-form" id="leadForm"
+                  action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+              <input type="hidden" name="_subject" value="ROI Calculator request" />
+              <input type="hidden" name="Figures" id="figuresField" value="" />
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
               <div class="field">
                 <label for="leadName">Name</label>
                 <input type="text" id="leadName" name="Name" autocomplete="name" required />
               </div>
               <div class="field">
+                <label for="leadEmail">Email</label>
+                <input type="email" id="leadEmail" name="Email" autocomplete="email" required />
+              </div>
+              <div class="field">
                 <label for="leadPhone">Phone</label>
                 <input type="tel" id="leadPhone" name="Phone" autocomplete="tel" required />
               </div>
-            </div>
-            <div class="field">
-              <label for="leadEmail">Email</label>
-              <input type="email" id="leadEmail" name="Email" autocomplete="email" required />
-            </div>
-            <button type="submit" class="btn btn-accent" id="leadBtn">Download my ROI summary (PDF)</button>
-            <p class="form-fineprint">I'll only use your details to send this summary and to respond if you ask me to.</p>
-          </form>
+              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my ROI summary (PDF)</button>
+              <p class="form-fineprint">I'll only use your details to send this summary and to respond if you ask me to.</p>
+            </form>
 
-          <div class="calc-done" id="calcDone" hidden>
-            <p><strong>Done.</strong> Your PDF has downloaded. If it didn't, <button type="button" class="linklike" id="redownload">download it again</button>. Project Carter has your figures and will be in touch if you asked for a follow-up.</p>
+            <div class="calc-done" id="calcDone" hidden>
+              <p><strong>Done.</strong> Your PDF has downloaded. If it didn't, <button type="button" class="linklike" id="redownload">download it again</button>. Project Carter has your figures and will be in touch if you asked for a follow-up.</p>
+            </div>
           </div>
         </div>
 
@@ -233,13 +247,13 @@
             <li><strong>Loan and deposit.</strong> The loan is the percentage of purchase price you enter. The deposit is the rest.</li>
             <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan and valuation cost, solicitor cost and other purchasing cost.</li>
             <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
-            <li><strong>Property value</strong> is held at the entry net yield (Year 1 net rent &divide; purchase price), so value moves with net rent. A rent uplift therefore lifts the value too.</li>
+            <li><strong>Property value</strong> is net rent &divide; capitalisation rate. The cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale. Leave the exit cap rate blank to hold the entry yield. A rent uplift lifts value too.</li>
             <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
             <li><strong>At sale</strong> (end of the term) the property is sold at its value that year, the loan is repaid, and net sale proceeds plus all rental cash kept, less the cash you put in, is the total profit.</li>
             <li><strong>IRR</strong> is the annual compound return that makes the cash you put in and the cash you take out balance over time.</li>
           </ul>
           <p class="form-fineprint" style="margin-top:18px;max-width:78ch">
-            This tool gives a rough estimate from the figures you enter. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes, loan amortisation of principal beyond the debt-reduction you set, and costs specific to a deal. Value is modelled purely off net rent at a fixed yield, which will differ from a real valuation. It is not financial, tax or investment advice. Talk to Project Carter and a licensed adviser before acting on it.
+            This tool gives a rough estimate from the figures you enter. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes, loan amortisation of principal beyond the debt-reduction you set, and costs specific to a deal. Value is modelled off net rent at a capitalisation rate you set, which will differ from a real valuation. It is not financial, tax or investment advice. Talk to Project Carter and a licensed adviser before acting on it.
           </p>
         </div>
       </div>
@@ -309,6 +323,8 @@
       var uG = num("upliftGrowth") / 100;
 
       var entryYield = price > 0 ? nr1 / price : null;
+      var exitCapIn = num("exitCap") / 100;
+      var exitCap = (entryYield && exitCapIn > 0) ? exitCapIn : entryYield;
 
       var rows = [];
       var balance = loan;
@@ -329,7 +345,10 @@
           balance -= debtPay;
           var kept = cashAfterInterest - debtPay;
           totalKept += kept;
-          var value = entryYield ? rent / entryYield : 0;
+          /* cap rate glides from the entry yield to the exit cap rate over the hold */
+          var frac = term > 1 ? (t - 1) / (term - 1) : 1;
+          var capT = entryYield + (exitCap - entryYield) * frac;
+          var value = capT ? rent / capT : 0;
           rows.push({
             year: t, rent: rent, interest: interest,
             cashAfterInterest: cashAfterInterest, debtPay: debtPay,
@@ -361,7 +380,7 @@
         acqCosts: acqCosts, cashRequired: cashRequired,
         nr1: nr1, g: g, rate: rate, term: term, dr: dr,
         uplift: uplift, uYear: uYear, uRent: uRent, uG: uG,
-        entryYield: entryYield, rows: rows,
+        entryYield: entryYield, exitCap: exitCap, rows: rows,
         saleValue: saleValue, loanAtSale: loanAtSale, netProceeds: netProceeds,
         totalKept: totalKept, totalProfit: totalProfit, totalRoi: totalRoi,
         roiPerYear: roiPerYear, equityMultiple: equityMultiple, irr: irrVal,
@@ -403,6 +422,7 @@
       setOut("deposit", m.price > 0 ? money(m.deposit) : "—");
       setOut("cashRequired", m.cashRequired > 0 ? money(m.cashRequired) : "—");
       setOut("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—");
+      setOut("exitCap", m.exitCap ? pct(m.exitCap * 100) : "—");
       setOut("saleValue", m.valid ? money(m.saleValue) : "—");
       setOut("loanAtSale", m.valid ? money(m.loanAtSale) : "—");
       setOut("netProceeds", m.valid ? money(m.netProceeds) : "—");
@@ -507,6 +527,7 @@
       row("Rental increase", (m.g * 100).toFixed(2) + "% / year");
       row("Loan interest", (m.rate * 100).toFixed(2) + "% / year");
       row("Term of ownership", m.term + " year" + (m.term === 1 ? "" : "s"));
+      row("Exit cap rate on sale", m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "-");
       row("Profit used for debt reduction", (m.dr * 100).toFixed(0) + "%");
       if (m.uplift && m.uRent > 0) {
         row("Value uplift", "Year " + m.uYear + ", new base rent " + money(m.uRent) +
@@ -519,6 +540,7 @@
       section("Your return");
       row("Total cash required", money(m.cashRequired));
       row("Entry net yield", m.entryYield ? (m.entryYield * 100).toFixed(2) + "%" : "-", true);
+      row("Exit cap rate on sale", m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "-", true);
       row("Property value at sale", money(m.saleValue));
       row("Loan balance at sale", money(m.loanAtSale));
       row("Net sale proceeds", money(m.netProceeds));
@@ -550,7 +572,7 @@
 
       y += 14;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. Property value is modelled off net rent at a fixed entry yield and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This estimate is a guide only, generated from the figures entered above. Property value is modelled off net rent at a capitalisation rate that runs from the entry yield to the exit cap rate over the hold, and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -570,6 +592,7 @@
         "Rental increase: " + (m.g * 100).toFixed(2) + "%/yr",
         "Loan interest: " + (m.rate * 100).toFixed(2) + "%/yr",
         "Term of ownership: " + m.term + " years",
+        "Exit cap rate on sale: " + (m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "n/a"),
         "Profit used for debt reduction: " + (m.dr * 100).toFixed(0) + "%"
       ];
       if (m.uplift && m.uRent > 0) {
@@ -625,6 +648,31 @@
     });
 
     document.getElementById("redownload").addEventListener("click", saveDoc);
+
+    /* ---- lead-capture modal --------------------------------------------- */
+    var openLead = document.getElementById("openLead");
+    var leadModal = document.getElementById("leadModal");
+
+    function onModalKey(e) { if (e.key === "Escape") closeModal(); }
+
+    function openModal() {
+      leadModal.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      document.addEventListener("keydown", onModalKey);
+      var first = document.getElementById("leadName");
+      if (first) first.focus();
+    }
+    function closeModal() {
+      leadModal.hidden = true;
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("keydown", onModalKey);
+      openLead.focus();
+    }
+
+    openLead.addEventListener("click", openModal);
+    leadModal.addEventListener("click", function (e) {
+      if (e.target.hasAttribute("data-close")) closeModal();
+    });
   })();
   </script>
 </body>
