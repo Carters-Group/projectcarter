@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Development Site (DA) Calculator | Project Carter</title>
-  <meta name="description" content="Cost the run from buying a development site to a lodged and approved DA: acquisition, consultants, site works, council fees and holding costs, with optional debt and interest over the DA period. See the all-in cost, the cash required and a one-page PDF. A guide only, not financial advice." />
+  <meta name="description" content="Cost the run from buying a development site to a lodged and approved DA: acquisition, consultants, site works, council fees and holding costs, with optional debt and interest over the DA period. Enter the address and site characteristics to see which reports are likely at lodgement, plus a state-based demolition range. A guide only, not financial advice." />
   <meta name="theme-color" content="#0c1016" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Development Site (DA) Calculator | Project Carter" />
-  <meta property="og:description" content="From buying a block to DA approval: acquisition, consultants, site works, council fees, holding costs and interest. All-in cost, cash required, one-page PDF." />
+  <meta property="og:description" content="From buying a block to DA approval: acquisition, consultants, site works, council fees, holding costs and interest. Report flags from the site's characteristics, a state-based demolition range, all-in cost, cash required, one-page PDF." />
   <meta property="og:image" content="assets/og-image.svg" />
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
@@ -53,11 +53,58 @@
         <div class="calc-intro">
           <p class="kicker">Project Carter</p>
           <h1>Development Site (DA) Calculator</h1>
-          <p>Work out what it costs to buy a block and take it to development approval. Enter the land and buying costs, the consultants and site works the DA needs, the council fees and the holding costs, then set the DA timeframe and any debt. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial advice.</p>
+          <p>Work out what it costs to buy a block and take it to development approval. Enter the address and what the site is like, then the land and buying costs, the consultants and site works, the council fees and the holding costs, then set the DA timeframe and any debt. The tool flags which reports are likely at lodgement and gives a state-based demolition range. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial or planning advice.</p>
         </div>
 
         <div class="calc-grid">
           <div class="calc-inputs" id="calcInputs">
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">The site</h2>
+
+              <div class="field">
+                <label for="address">Property address</label>
+                <input type="text" id="address" autocomplete="off" placeholder="12 Example Street, Suburb STATE 2000" />
+                <p class="field-hint">For your reference and the summary. Nothing is looked up or sent anywhere as you type.</p>
+              </div>
+
+              <div class="field">
+                <label for="council">Council / LGA <span>(optional)</span></label>
+                <input type="text" id="council" autocomplete="off" placeholder="Example City Council" />
+                <p class="field-hint">Report requirements are set by the council's LEP and DCP, or the local planning scheme.</p>
+              </div>
+
+              <div class="field">
+                <label for="daType">Type of development</label>
+                <select id="daType">
+                  <option value="">Select the type</option>
+                  <option value="house">Detached house / dual occupancy</option>
+                  <option value="multi">Multi-unit residential (3+ dwellings)</option>
+                  <option value="mixed">Mixed use</option>
+                  <option value="commercial">Commercial / industrial</option>
+                  <option value="subdivision">Subdivision only</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Site characteristics</label>
+                <div class="site-checks" id="siteChecks">
+                  <label class="calc-check"><input type="checkbox" id="scDemo" /><span>Existing building to be demolished</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scAsbestos" /><span>Building is pre-1990, so asbestos is likely</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scHeritage" /><span>Heritage listed, in a conservation area, or next to one</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scTrees" /><span>Trees on the site or on adjoining land</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scSlope" /><span>Sloping site, cut and fill, or retaining walls</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scFlood" /><span>Flood-prone, low-lying, or near a watercourse</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scBushfire" /><span>Bushfire-prone land</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scAcoustic" /><span>Near a main road, rail line, or licensed venue</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scContam" /><span>Former service station, industrial use, or filled land</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scVegetation" /><span>Native vegetation or known biodiversity value</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scStormwater" /><span>Cannot drain to the street; needs on-site detention or an easement</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scCorner" /><span>New or altered driveway near an intersection</span></label>
+                  <p class="field-hint">The consultant list below is tagged from what you tick here. It is a guide, not a determination. Book a pre-lodgement (pre-DA) meeting with the council to confirm exactly what your DA must include.</p>
+                </div>
+              </div>
+            </div>
 
             <div class="calc-group">
               <h2 class="calc-subhead">Land purchase</h2>
@@ -96,6 +143,7 @@
                   <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
                   <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
                 </div>
+                <p class="field-hint">The state you pick here also sets the demolition rate range further down.</p>
               </div>
 
               <div class="field">
@@ -150,6 +198,26 @@
               <div class="field">
                 <label for="demolition">Demolition <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="demolition" autocomplete="off" placeholder="0" /></div>
+                <div class="demo-est" id="demoEst" hidden>
+                  <div class="field">
+                    <label for="demoArea">Floor area to demolish <span>(m²)</span></label>
+                    <input type="text" inputmode="numeric" id="demoArea" autocomplete="off" placeholder="125" />
+                  </div>
+                  <div class="field">
+                    <label for="demoType">Structure type</label>
+                    <select id="demoType">
+                      <option value="house">House / low-rise</option>
+                      <option value="comm">Commercial / multi-storey</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="demoUplift">Asbestos uplift <span>(%)</span></label>
+                    <div class="input-pct"><input type="text" inputmode="decimal" id="demoUplift" autocomplete="off" placeholder="40" value="40" /></div>
+                    <p class="field-hint">Added to the range when "asbestos is likely" is ticked in Site characteristics.</p>
+                  </div>
+                  <p class="field-hint" id="demoEstNote">Pick a state in the stamp duty field and enter a floor area to see an indicative range.</p>
+                  <p class="stamp-disclaimer">Indicative demolition rates only, compiled from Australian price guides. They vary widely with access, materials, service disconnections, site conditions and contractor demand, and a minimum job cost applies regardless of area. Not a quote. Asbestos, when present, is usually priced into the demolition contract; the separate "Asbestos / hazardous material removal" line is for standalone remediation.</p>
+                </div>
               </div>
               <div class="field">
                 <label for="asbestos">Asbestos / hazardous material removal <span>(optional)</span></label>
@@ -175,75 +243,107 @@
 
             <div class="calc-group">
               <h2 class="calc-subhead">Consultant costs</h2>
-              <p class="field-hint">Add the reports the site and the council actually call for. The specialist lines are often not all required.</p>
+              <p class="field-hint">Each line is tagged from your Site characteristics. <strong>&#10033; Likely for this site</strong> means plan for it at lodgement; "may be required" means raise it at a pre-lodgement meeting. Tags are a guide, not a determination.</p>
 
               <div class="field">
                 <label for="architect">Architect / building designer <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="architect" autocomplete="off" placeholder="22,000" /></div>
+                <p class="report-flag" data-report="architect"></p>
               </div>
               <div class="field">
                 <label for="planner">Town planner (SEE / planning report) <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="planner" autocomplete="off" placeholder="10,000" /></div>
+                <p class="report-flag" data-report="planner"></p>
               </div>
               <div class="field">
                 <label for="surveyor">Surveyor (detail &amp; level) <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="surveyor" autocomplete="off" placeholder="10,000" /></div>
+                <p class="report-flag" data-report="surveyor"></p>
               </div>
               <div class="field">
                 <label for="civil">Civil / stormwater engineer <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="civil" autocomplete="off" placeholder="20,000" /></div>
+                <p class="report-flag" data-report="civil"></p>
+              </div>
+              <div class="field">
+                <label for="flood">Flood / overland flow assessment <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="flood" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="flood"></p>
               </div>
               <div class="field">
                 <label for="structural">Structural engineer <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="structural" autocomplete="off" placeholder="20,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="structural" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="structural"></p>
               </div>
               <div class="field">
                 <label for="geotech">Geotechnical engineer (soil report) <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="geotech" autocomplete="off" placeholder="6,000" /></div>
+                <p class="report-flag" data-report="geotech"></p>
+              </div>
+              <div class="field">
+                <label for="contamination">Contamination assessment (Phase 1 / 2) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="contamination" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="contamination"></p>
               </div>
               <div class="field">
                 <label for="certifier">Building surveyor / certifier (pre-DA) <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="certifier" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="certifier"></p>
+              </div>
+              <div class="field">
+                <label for="access">Access / DDA consultant <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="access" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="access"></p>
               </div>
               <div class="field">
                 <label for="traffic">Traffic &amp; parking <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="traffic" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="traffic"></p>
               </div>
               <div class="field">
                 <label for="landscape">Landscape architect <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="landscape" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="landscape"></p>
               </div>
               <div class="field">
                 <label for="arborist">Arborist <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="arborist" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="arborist"></p>
               </div>
               <div class="field">
                 <label for="basix">BASIX / NatHERS / ESD <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="basix" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="basix"></p>
               </div>
               <div class="field">
                 <label for="acoustic">Acoustic <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="acoustic" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="acoustic"></p>
               </div>
               <div class="field">
                 <label for="bushfire">Bushfire (BAL) <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="bushfire" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="bushfire"></p>
               </div>
               <div class="field">
                 <label for="heritage">Heritage <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="heritage" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="heritage"></p>
               </div>
               <div class="field">
                 <label for="waste">Waste management plan <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="waste" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="waste"></p>
               </div>
               <div class="field">
                 <label for="qs">Quantity surveyor (cost report) <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="qs" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="qs"></p>
               </div>
               <div class="field">
                 <label for="ecologist">Ecologist / biodiversity <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="ecologist" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-report="ecologist"></p>
               </div>
               <div class="field">
                 <label for="otherConsult">Other consultant <span>(optional)</span></label>
@@ -371,6 +471,13 @@
         </div>
 
         <div class="calc-schedule-wrap">
+          <h2 class="calc-subhead">Reports for this site</h2>
+          <div id="reportSummary" class="calc-assumptions">
+            <p><strong>Standard for most DAs:</strong> architect / design drawings, town planner (SEE), detail &amp; level survey, civil / stormwater, landscape plan, BASIX / NatHERS.</p>
+            <p><strong>&#10033; Likely for this site:</strong> <span id="likelyList">tick the site characteristics above</span></p>
+            <p><strong>May also be required:</strong> <span id="possibleList">&mdash;</span> Confirm the list at a council pre-lodgement meeting.</p>
+          </div>
+
           <h2 class="calc-subhead">Month by month</h2>
           <div class="calc-schedule-scroll">
             <table class="calc-schedule" id="calcSchedule">
@@ -398,7 +505,7 @@
           <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
             <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
             <h2 id="leadModalTitle">Get your cost summary</h2>
-            <p>The page builds a one-page PDF of your figures and the month-by-month schedule. A copy is sent to Project Carter so we can follow up if you'd like.</p>
+            <p>The page builds a one-page PDF of your figures, the flagged reports and the month-by-month schedule. A copy is sent to Project Carter so we can follow up if you'd like.</p>
 
             <form class="calc-lead-form" id="leadForm"
                   action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
@@ -434,9 +541,11 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
+            <li><strong>The site.</strong> The address and council are for your reference and the summary only; nothing is looked up or sent as you type. The <strong>site characteristics</strong> you tick drive the report tags in the consultant list and the standing prompt to hold a pre-lodgement meeting. The tags are a guide, not a determination by the council.</li>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of the land price you enter. The deposit is the rest, and it is cash. Leave the loan blank and the whole purchase is funded with cash.</li>
-            <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, and is an estimate, not the state revenue office's figure.</li>
-            <li><strong>Site, consultant and statutory costs</strong> are the one-off costs of getting the DA prepared, lodged and assessed. Enter only the lines that apply to your site and council.</li>
+            <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It is an estimate, not the state revenue office's figure.</li>
+            <li><strong>Demolition.</strong> Click the field, and with a state chosen in stamp duty and a floor area entered it fills with the midpoint of an indicative $/m² range for that state and structure type. Ticking "asbestos is likely" adds the uplift percentage to the range. The figures are compiled from price guides, not quotes; a minimum job cost applies. Editing the field pins your own number; clearing it brings the estimate back.</li>
+            <li><strong>Site, consultant and statutory costs</strong> are the one-off costs of getting the DA prepared, lodged and assessed. Enter only the lines that apply.</li>
             <li><strong>Holding costs</strong> are entered per year and charged for the DA period only, worked out as months &divide; 12. <strong>Rental income during the DA</strong>, if an existing dwelling stays leased, is netted off, so the holding line can be a credit.</li>
             <li><strong>Contingency</strong> is your percentage applied to the site, consultant, statutory and holding costs. It is not applied to the land price or stamp duty.</li>
             <li><strong>Interest during the DA.</strong> The land loan is drawn at settlement. If "fund the development costs from the loan" is ticked, every other cost is treated as drawn evenly across the DA period; otherwise it is cash. Interest is charged monthly on the balance outstanding and added to the loan (it compounds and is not paid in cash along the way).</li>
@@ -485,14 +594,18 @@
     var stampState = document.getElementById("stampState");
     var stampCommercial = document.getElementById("stampCommercial");
     var stampEstNote = document.getElementById("stampEstNote");
-    var touched = { stampDuty: false };
+    var demoEst = document.getElementById("demoEst");
+    var demoEstNote = document.getElementById("demoEstNote");
+    var daType = document.getElementById("daType");
+    var touched = { stampDuty: false, demolition: false };
     var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
 
     /* cost-line groups, reused for summing, the blur formatter and the PDF */
     var SITE = ["demolition", "asbestos", "treeRemoval", "clearing", "serviceLoc", "otherSite"];
-    var CONSULT = ["architect", "planner", "surveyor", "civil", "structural", "geotech", "certifier", "traffic", "landscape", "arborist", "basix", "acoustic", "bushfire", "heritage", "waste", "qs", "ecologist", "otherConsult"];
+    var CONSULT = ["architect", "planner", "surveyor", "civil", "flood", "structural", "geotech", "contamination", "certifier", "access", "traffic", "landscape", "arborist", "basix", "acoustic", "bushfire", "heritage", "waste", "qs", "ecologist", "otherConsult"];
     var STAT = ["preDA", "daFee", "advertising", "lsl", "contributions", "rezoning"];
     var HOLD = ["councilRates", "landTax", "insurances", "utilities", "maintenance", "otherHold"];
+    var SC = ["scDemo", "scAsbestos", "scHeritage", "scTrees", "scSlope", "scFlood", "scBushfire", "scAcoustic", "scContam", "scVegetation", "scStormwater", "scCorner"];
 
     var SITE_LABELS = {
       demolition: "Demolition", asbestos: "Asbestos / hazmat removal", treeRemoval: "Approved tree removal",
@@ -500,11 +613,12 @@
     };
     var CONSULT_LABELS = {
       architect: "Architect / building designer", planner: "Town planner (SEE)", surveyor: "Surveyor (detail & level)",
-      civil: "Civil / stormwater engineer", structural: "Structural engineer", geotech: "Geotechnical engineer",
-      certifier: "Building surveyor / certifier", traffic: "Traffic & parking", landscape: "Landscape architect",
-      arborist: "Arborist", basix: "BASIX / NatHERS / ESD", acoustic: "Acoustic", bushfire: "Bushfire (BAL)",
-      heritage: "Heritage", waste: "Waste management plan", qs: "Quantity surveyor", ecologist: "Ecologist / biodiversity",
-      otherConsult: "Other consultant"
+      civil: "Civil / stormwater engineer", flood: "Flood / overland flow assessment", structural: "Structural engineer",
+      geotech: "Geotechnical engineer", contamination: "Contamination assessment (Phase 1 / 2)",
+      certifier: "Building surveyor / certifier", access: "Access / DDA consultant", traffic: "Traffic & parking",
+      landscape: "Landscape architect", arborist: "Arborist", basix: "BASIX / NatHERS / ESD", acoustic: "Acoustic",
+      bushfire: "Bushfire (BAL)", heritage: "Heritage", waste: "Waste management plan", qs: "Quantity surveyor",
+      ecologist: "Ecologist / biodiversity", otherConsult: "Other consultant"
     };
     var STAT_LABELS = {
       preDA: "Pre-DA meeting fee", daFee: "DA lodgement fee", advertising: "Advertising / notification fee",
@@ -513,6 +627,14 @@
     var HOLD_LABELS = {
       councilRates: "Council & water rates", landTax: "Land tax", insurances: "Insurances",
       utilities: "Utilities & standing charges", maintenance: "Slashing, maintenance & security", otherHold: "Other holding cost"
+    };
+    var SC_LABELS = {
+      scDemo: "Existing building to demolish", scAsbestos: "Pre-1990, asbestos likely",
+      scHeritage: "Heritage / conservation area", scTrees: "Trees on or near the site",
+      scSlope: "Sloping site / cut and fill / retaining", scFlood: "Flood-prone or near a watercourse",
+      scBushfire: "Bushfire-prone land", scAcoustic: "Near a road, rail or venue",
+      scContam: "Ex-industrial / servo / filled land", scVegetation: "Native vegetation / biodiversity",
+      scStormwater: "Cannot drain to the street", scCorner: "Driveway near an intersection"
     };
 
     function num(id) {
@@ -523,6 +645,7 @@
       return isNaN(n) || n < 0 ? 0 : n;
     }
     function sumIds(arr) { var s = 0; arr.forEach(function (id) { s += num(id); }); return s; }
+    function checked(id) { var e = document.getElementById(id); return !!(e && e.checked); }
     function money(n) { return money0.format(Math.round(n)); }
     function signedMoney(n) { return (n < 0 ? "-" : "") + money(Math.abs(n)); }
     function pct(n) { return n.toFixed(2) + "%"; }
@@ -538,6 +661,44 @@
         if (seen) return "•";
         seen = true; return d;
       });
+    }
+
+    /* ---- report requirements: tier per consultant from the site characteristics --- */
+    function isBig(t) { return t === "multi" || t === "mixed" || t === "commercial"; }
+    var RULES = {
+      architect: function () { return "standard"; },
+      planner: function () { return "standard"; },
+      surveyor: function () { return "standard"; },
+      civil: function () { return "standard"; },
+      landscape: function (c) { return c.type === "commercial" ? "possible" : "standard"; },
+      basix: function (c) { return (c.type === "commercial" || c.type === "subdivision") ? "possible" : "standard"; },
+      flood: function (c) { return c.sc("scFlood") ? "likely" : "possible"; },
+      structural: function (c) { return c.sc("scSlope") ? "likely" : "possible"; },
+      geotech: function (c) { return (c.sc("scSlope") || c.sc("scContam") || isBig(c.type)) ? "likely" : "possible"; },
+      contamination: function (c) { return c.sc("scContam") ? "likely" : "possible"; },
+      certifier: function (c) { return isBig(c.type) ? "likely" : "possible"; },
+      access: function (c) { return isBig(c.type) ? "likely" : "possible"; },
+      traffic: function (c) { return (isBig(c.type) || c.sc("scCorner")) ? "likely" : "possible"; },
+      arborist: function (c) { return c.sc("scTrees") ? "likely" : "possible"; },
+      acoustic: function (c) { return c.sc("scAcoustic") ? "likely" : "possible"; },
+      bushfire: function (c) { return c.sc("scBushfire") ? "likely" : "possible"; },
+      heritage: function (c) { return c.sc("scHeritage") ? "likely" : "possible"; },
+      waste: function (c) { return (c.sc("scDemo") || isBig(c.type)) ? "likely" : "possible"; },
+      qs: function (c) { return isBig(c.type) ? "likely" : "possible"; },
+      ecologist: function (c) { return (c.sc("scVegetation") || c.sc("scFlood")) ? "likely" : "possible"; }
+    };
+    var FLAG_TEXT = {
+      standard: "Standard for most DAs",
+      likely: "✳ Likely for this site",
+      possible: "May be required. Confirm at a pre-lodgement meeting."
+    };
+
+    function reportCtx() {
+      return { type: daType.value, sc: function (id) { return checked(id); } };
+    }
+    function reportTier(id) {
+      var fn = RULES[id];
+      return fn ? fn(reportCtx()) : "none";
     }
 
     /* ---- stamp duty: general (non-concessional) transfer duty by state ----
@@ -641,10 +802,44 @@
       return name + " estimate for " + money(price) + ". Edit it if you have the exact figure.";
     }
 
+    /* ---- demolition: indicative $/m2 low-high by state, compiled from
+       Australian demolition price guides. Not quotes. A minimum job cost
+       applies regardless of area. House = detached / low-rise brick or timber;
+       Comm = commercial or multi-storey. */
+    var DEMO_RATES = {
+      NSW: { house: { lo: 55, hi: 130 }, comm: { lo: 110, hi: 260 } },
+      VIC: { house: { lo: 55, hi: 125 }, comm: { lo: 110, hi: 250 } },
+      QLD: { house: { lo: 45, hi: 100 }, comm: { lo: 90, hi: 210 } },
+      WA:  { house: { lo: 45, hi: 100 }, comm: { lo: 90, hi: 210 } },
+      SA:  { house: { lo: 45, hi: 95 },  comm: { lo: 85, hi: 200 } },
+      TAS: { house: { lo: 45, hi: 95 },  comm: { lo: 85, hi: 200 } },
+      ACT: { house: { lo: 55, hi: 125 }, comm: { lo: 110, hi: 240 } },
+      NT:  { house: { lo: 55, hi: 120 }, comm: { lo: 100, hi: 230 } }
+    };
+    var MIN_DEMO = { lo: 8000, hi: 14000 };
+
+    function demoEstimate() {
+      var st = stampState.value;
+      var area = num("demoArea");
+      if (!st || !DEMO_RATES[st] || area <= 0) return null;
+      var t = document.getElementById("demoType").value === "comm" ? "comm" : "house";
+      var r = DEMO_RATES[st][t];
+      var lo = Math.max(area * r.lo, MIN_DEMO.lo);
+      var hi = Math.max(area * r.hi, MIN_DEMO.hi);
+      var asb = checked("scAsbestos");
+      var up = num("demoUplift") / 100;
+      if (asb && up > 0) { lo = lo * (1 + up); hi = hi * (1 + up); }
+      var mid = Math.round((lo + hi) / 2);
+      var note = "Indicative: " + money(lo) + " to " + money(hi) + " for " + Math.round(area) +
+        " m² in " + st + " (" + (t === "comm" ? "commercial / multi-storey" : "house / low-rise") + ")" +
+        (asb && up > 0 ? ". Includes a " + (up * 100).toFixed(0) + "% asbestos uplift." : ".");
+      return { lo: lo, hi: hi, mid: mid, note: note };
+    }
+
     function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
 
     /* Slide the "%" suffix to sit right after the typed number, left-aligned */
-    var PCT_FIELDS = ["lvr", "rate", "contingency"];
+    var PCT_FIELDS = ["lvr", "rate", "contingency", "demoUplift"];
     var pctCanvas = document.createElement("canvas").getContext("2d");
     function positionPct() {
       PCT_FIELDS.forEach(function (id) {
@@ -658,7 +853,7 @@
       });
     }
 
-    /* Keep stamp duty filled from the price + state, unless typed over. */
+    /* Keep stamp duty + demolition filled from their estimators, unless typed over. */
     function recalcAutofills() {
       var price = num("price");
       if (!touched.stampDuty && stampState.value) {
@@ -666,6 +861,13 @@
         stampDutyEl.value = est == null ? "" : (est === 0 ? "0" : fmtAmount(est));
       }
       stampEstNote.textContent = stampNote(stampState.value, price, stampCommercial.checked);
+
+      var demo = demoEstimate();
+      if (!touched.demolition && demo) {
+        document.getElementById("demolition").value = fmtAmount(demo.mid);
+      }
+      demoEstNote.textContent = demo ? demo.note
+        : "Pick a state in the stamp duty field and enter a floor area to see an indicative range.";
     }
 
     /* ---- core model ------------------------------------------------------ */
@@ -753,8 +955,31 @@
       if (el) el.textContent = val;
     }
 
+    function renderReports() {
+      var likely = [], possible = [];
+      Object.keys(RULES).forEach(function (id) {
+        var tier = reportTier(id);
+        var flag = document.querySelector('.report-flag[data-report="' + id + '"]');
+        var fieldEl = document.getElementById(id);
+        var field = fieldEl && fieldEl.closest(".field");
+        if (flag) {
+          flag.textContent = FLAG_TEXT[tier] || "";
+          flag.className = "report-flag" + (tier !== "none" ? " is-" + tier : "");
+          flag.hidden = tier === "none";
+        }
+        if (field) field.classList.toggle("is-likely", tier === "likely");
+        if (tier === "likely") likely.push(CONSULT_LABELS[id]);
+        if (tier === "possible") possible.push(CONSULT_LABELS[id]);
+      });
+      document.getElementById("likelyList").textContent =
+        likely.length ? likely.join(", ") : "tick the site characteristics above";
+      document.getElementById("possibleList").textContent =
+        possible.length ? possible.join(", ") + "." : "—";
+    }
+
     function render() {
       positionPct();
+      renderReports();
       var m = model();
 
       document.getElementById("loanBreakdown").textContent =
@@ -826,6 +1051,24 @@
       render();
     });
 
+    /* Demolition $/m2 estimator */
+    var demoField = document.getElementById("demolition");
+    demoField.addEventListener("focus", function () { demoEst.hidden = false; });
+    demoField.addEventListener("input", function () {
+      touched.demolition = demoField.value.trim() !== "";
+    });
+    ["demoArea", "demoType", "demoUplift", "scAsbestos", "scDemo"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", function () { recalcAutofills(); render(); });
+      el.addEventListener("change", function () {
+        if (id === "scDemo" && el.checked) demoEst.hidden = false;
+        touched.demolition = false;
+        recalcAutofills();
+        render();
+      });
+    });
+
     /* Tidy money fields with thousands separators on blur */
     ["price", "stampDuty", "legalCost", "buyersAgent", "dueDiligence", "estFee", "holdIncome", "pmFee"]
       .concat(SITE).concat(CONSULT).concat(STAT).concat(HOLD)
@@ -848,6 +1091,10 @@
     var lastDoc = null;
 
     function optMoney(n) { return n > 0 ? money(n) : "Not entered"; }
+    function daTypeLabel() {
+      var o = daType.options[daType.selectedIndex];
+      return (daType.value && o) ? o.text : "Not specified";
+    }
 
     function makePDF() {
       if (!window.jspdf || !window.jspdf.jsPDF) return null;
@@ -871,11 +1118,11 @@
       doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
       doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
 
-      y += 90;
+      y += 88;
       function section(title) {
         doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
         doc.text(title, L, y); y += 7;
-        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 16;
+        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 15;
       }
       function row(k, v, strong) {
         doc.setFontSize(9.5);
@@ -883,19 +1130,34 @@
         doc.text(k, L, y);
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         doc.text(String(v), w - L, y, { align: "right" });
-        y += 15.5;
+        y += 15;
+      }
+      function wrapLine(label, text) {
+        doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(90);
+        doc.text(label, L, y);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(40);
+        var lines = doc.splitTextToSize(text || "-", w - 2 * L - 96);
+        doc.text(lines, L + 96, y);
+        y += Math.max(lines.length * 11, 14);
       }
       function rowIf(k, n) { if (n > 0) row(k, money(n)); }
-      function groupRows(ids, labels) {
-        ids.forEach(function (id) { rowIf(labels[id], num(id)); });
-      }
+      function groupRows(ids, labels) { ids.forEach(function (id) { rowIf(labels[id], num(id)); }); }
 
+      section("The site");
+      wrapLine("Address", document.getElementById("address").value.trim() || "Not entered");
+      var council = document.getElementById("council").value.trim();
+      if (council) wrapLine("Council / LGA", council);
+      wrapLine("Development type", daTypeLabel());
+      var ticked = SC.filter(function (id) { return checked(id); }).map(function (id) { return SC_LABELS[id]; });
+      wrapLine("Site notes", ticked.length ? ticked.join("; ") : "None ticked");
+
+      y += 4;
       section("Land purchase");
       row("Land purchase price", money(m.price));
       row("Loan", m.loan > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "% of price)" : "None");
       row("Deposit (cash)", money(m.deposit));
-      var sState = document.getElementById("stampState").value;
-      var sComm = document.getElementById("stampCommercial").checked;
+      var sState = stampState.value;
+      var sComm = stampCommercial.checked;
       if (m.stamp > 0 || sState) {
         row("Stamp duty" + (sState ? " (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""),
             sState ? money(m.stamp) : optMoney(m.stamp));
@@ -905,10 +1167,12 @@
       rowIf("Due diligence & searches", m.dueDiligence);
       row("Total purchase costs", money(m.purchaseCosts), true);
 
-      y += 6;
+      y += 4;
       section("Costs to DA");
       row("DA timeframe", m.months + " month" + (m.months === 1 ? "" : "s"));
       groupRows(SITE, SITE_LABELS);
+      var demo = demoEstimate();
+      if (demo) row("Demolition (indicative range)", money(demo.lo) + " to " + money(demo.hi));
       row("Site costs", money(m.site), true);
       groupRows(CONSULT, CONSULT_LABELS);
       row("Consultant costs", money(m.consult), true);
@@ -923,7 +1187,7 @@
       row("Development costs funded by", m.costsInLoan ? "Loan facility" : "Cash");
       row("Interest during the DA", m.interestDA > 0 ? money(m.interestDA) : "None", true);
 
-      y += 6;
+      y += 4;
       section("Result");
       row("Total cost to DA", money(m.totalCostToDA), true);
       row("Cost to reach DA, excluding land", money(m.costExclLand));
@@ -931,9 +1195,21 @@
       row("Debt at DA (loan + interest)", money(m.debtAtDA), true);
       row("Cost to DA as a % of land price", m.costOnPrice != null ? m.costOnPrice.toFixed(2) + "%" : "-");
 
-      y += 12;
+      y += 4;
+      section("Reports flagged for this site");
+      var likely = [], possible = [];
+      Object.keys(RULES).forEach(function (id) {
+        var t = reportTier(id);
+        if (t === "likely") likely.push(CONSULT_LABELS[id]);
+        if (t === "possible") possible.push(CONSULT_LABELS[id]);
+      });
+      wrapLine("Standard", "Architect / design, town planner (SEE), detail survey, civil / stormwater, landscape, BASIX / NatHERS.");
+      wrapLine("Likely", likely.length ? likely.join(", ") : "Standard set only.");
+      wrapLine("May be needed", possible.length ? possible.join(", ") : "-");
+
+      y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. Any stamp duty shown is estimated from published state general transfer duty rates, not the state revenue office's figure, and excludes surcharges and concessions. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. Council fees vary by council and by the estimated cost of works. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This estimate is a guide only, generated from the figures entered above. Report tags are derived from the site characteristics you ticked and are not a determination by the council; confirm the required documents at a pre-lodgement meeting. Any stamp duty shown is estimated from published state general transfer duty rates, not the state revenue office's figure. Demolition figures are indicative $/m2 ranges from price guides, not quotes, with a minimum job cost. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -941,11 +1217,25 @@
 
     function figuresSummary(m) {
       function el(label, id) { return label + ": " + optMoney(num(id)); }
+      var ticked = SC.filter(function (id) { return checked(id); }).map(function (id) { return SC_LABELS[id]; });
+      var likely = [], possible = [];
+      Object.keys(RULES).forEach(function (id) {
+        var t = reportTier(id);
+        if (t === "likely") likely.push(CONSULT_LABELS[id]);
+        if (t === "possible") possible.push(CONSULT_LABELS[id]);
+      });
       var lines = [
+        "Address: " + (document.getElementById("address").value.trim() || "not entered"),
+        "Council / LGA: " + (document.getElementById("council").value.trim() || "not entered"),
+        "Development type: " + daTypeLabel(),
+        "Site notes: " + (ticked.length ? ticked.join("; ") : "none ticked"),
+        "Reports likely at lodgement: " + (likely.length ? likely.join(", ") : "standard set only"),
+        "Reports possibly required: " + (possible.length ? possible.join(", ") : "none"),
+        "----",
         "Land purchase price: " + money(m.price),
         "Loan: " + (m.loan > 0 ? money(m.loan) + " (" + m.lvr.toFixed(0) + "%)" : "none"),
         "Deposit (cash): " + money(m.deposit),
-        "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + (document.getElementById("stampCommercial").checked ? " commercial" : "") + " estimate)" : "") + ": " + optMoney(m.stamp),
+        "Stamp duty" + (stampState.value ? " (" + stampState.value + (stampCommercial.checked ? " commercial" : "") + " estimate)" : "") + ": " + optMoney(m.stamp),
         "Legal / conveyancing: " + optMoney(m.legal),
         "Buyer's agent: " + optMoney(m.buyersAgent),
         "Due diligence & searches: " + optMoney(m.dueDiligence),
@@ -953,6 +1243,8 @@
         "DA timeframe: " + m.months + " months",
         "----"
       ];
+      var demo = demoEstimate();
+      if (demo) lines.push("Demolition indicative range: " + money(demo.lo) + " to " + money(demo.hi));
       SITE.forEach(function (id) { if (num(id) > 0) lines.push(el(SITE_LABELS[id], id)); });
       lines.push("Site costs: " + money(m.site));
       CONSULT.forEach(function (id) { if (num(id) > 0) lines.push(el(CONSULT_LABELS[id], id)); });
@@ -1068,7 +1360,9 @@
     resultsEl.addEventListener("click", function (e) {
       if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
     });
-    scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+    scheduleWrap.addEventListener("click", function (e) {
+      if (!unlocked && !e.target.closest("#reportSummary")) openModal();
+    });
   })();
   </script>
 </body>

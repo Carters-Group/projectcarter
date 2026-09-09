@@ -1057,6 +1057,29 @@ h1, h2, h3 {
 .stamp-est[hidden] { display: none; }
 .stamp-disclaimer { margin: 0; font-size: 11px; line-height: 1.55; color: var(--muted); }
 
+/* Demolition $/m2 estimator (DA calculator) */
+.demo-est {
+  display: grid; gap: 8px;
+  margin-top: 4px; padding: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+}
+.demo-est[hidden] { display: none; }
+
+/* Site characteristics + report-requirement flags (DA calculator) */
+.site-checks {
+  display: grid; gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+}
+.report-flag { margin: 4px 0 0; font-size: 12px; font-weight: 500; }
+.report-flag[hidden] { display: none; }
+.report-flag.is-standard { color: var(--muted); }
+.report-flag.is-likely { color: var(--accent); }
+.report-flag.is-possible { color: var(--muted); }
+.field.is-likely > label { color: var(--accent); }
+
 /* ---- year-by-year schedule ---- */
 .calc-schedule-wrap { margin-top: clamp(40px, 6vw, 64px); }
 .calc-schedule-scroll { overflow-x: auto; margin-top: 18px; }
