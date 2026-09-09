@@ -1027,20 +1027,13 @@ h1, h2, h3 {
 .calc-cta .form-fineprint { margin: 0; }
 .btn-block { display: block; width: 100%; text-align: center; }
 
-/* Reveal gate: figures update live but stay blurred until details are given */
+/* Reveal gate: figures update live but each digit after the first is masked
+   until the visitor submits their details */
 .calc-lock-note {
   margin: 0; font-size: 12px; line-height: 1.5; color: var(--accent);
   border: 1px solid rgba(95, 161, 208, 0.4); background: rgba(95, 161, 208, 0.08);
   padding: 10px 12px;
 }
-.calc-lock-tag {
-  display: none;
-  font-family: var(--font-body); font-weight: 600; font-size: 10px;
-  letter-spacing: 0.14em; color: var(--accent);
-  border: 1px solid rgba(95, 161, 208, 0.4); padding: 3px 8px;
-  vertical-align: middle; margin-left: 6px;
-}
-.calc-schedule-wrap.is-locked .calc-lock-tag { display: inline-block; }
 
 .calc-results.is-locked .result-row:not(.is-teaser) { cursor: pointer; }
 .calc-results.is-locked .result-row:not(.is-teaser) dd,

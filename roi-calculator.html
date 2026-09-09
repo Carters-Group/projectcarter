@@ -208,7 +208,7 @@
         </div>
 
         <div class="calc-schedule-wrap">
-          <h2 class="calc-subhead">Year by year <span class="calc-lock-tag">Locked</span></h2>
+          <h2 class="calc-subhead">Year by year</h2>
           <div class="calc-schedule-scroll">
             <table class="calc-schedule" id="calcSchedule">
               <thead>
@@ -458,7 +458,7 @@
       var price = num("price");
       if (!touched.stampDuty && stampState.value) {
         var est = stampEstimate(stampState.value, price, stampCommercial.checked);
-        stampDutyEl.value = est != null ? fmtAmount(est) : "";
+        stampDutyEl.value = est == null ? "" : (est === 0 ? "0" : fmtAmount(est));
       }
       stampEstNote.textContent = stampNote(stampState.value, price, stampCommercial.checked);
     }
@@ -649,8 +649,9 @@
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
+        var raw = (el.value || "").replace(/[^0-9.]/g, "");
         var n = num(id);
-        el.value = n > 0 ? n.toLocaleString("en-AU") : "";
+        el.value = n > 0 ? n.toLocaleString("en-AU") : (parseFloat(raw) === 0 ? "0" : "");
       });
     });
 
@@ -705,7 +706,8 @@
       row("Deposit", money(m.deposit));
       var sState = document.getElementById("stampState").value;
       var sComm = document.getElementById("stampCommercial").checked;
-      row("Stamp duty" + (sState ? " (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""), optMoney(num("stampDuty")));
+      row("Stamp duty" + (sState ? " (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""),
+          sState ? money(num("stampDuty")) : optMoney(num("stampDuty")));
       row("Loan / valuation cost", optMoney(num("valuationCost")));
       row("Legal cost", optMoney(num("legalCost")));
       row("Building inspection", optMoney(num("buildingInspection")));
@@ -770,7 +772,7 @@
         "Purchase price: " + money(m.price),
         "Total loan: " + money(m.loan) + " (" + m.lvr.toFixed(0) + "%)",
         "Deposit: " + money(m.deposit),
-        "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + (document.getElementById("stampCommercial").checked ? " commercial" : "") + " estimate)" : "") + ": " + optMoney(num("stampDuty")),
+        "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + (document.getElementById("stampCommercial").checked ? " commercial" : "") + " estimate)" : "") + ": " + (document.getElementById("stampState").value ? money(num("stampDuty")) : optMoney(num("stampDuty"))),
         "Loan / valuation cost: " + optMoney(num("valuationCost")),
         "Legal cost: " + optMoney(num("legalCost")),
         "Building inspection: " + optMoney(num("buildingInspection")),
