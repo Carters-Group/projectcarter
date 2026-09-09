@@ -672,6 +672,16 @@ h1, h2, h3 {
 
 .q-contact { gap: 14px; }
 
+.form-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+  min-height: 1em;
+}
+.form-note.is-checking { color: var(--muted); }
+.form-note.is-bad { color: #e0a34a; }
+
 .form-nav { display: flex; gap: 12px; margin-top: 4px; }
 .form-nav .btn { flex: 1; text-align: center; }
 .form-nav .btn[hidden] { display: none; }

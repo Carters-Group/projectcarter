@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Enquire | Project Carter, Corporate Property Advisor</title>
-  <meta name="description" content="Tell Project Carter about your development, value-add commercial, family office or fund mandate, especially the ones with a roadblock. Reply within two business days." />
+  <meta name="description" content="Tell Project Carter about your site, commercial property, family office or fund. A few quick questions, and most enquiries are answered within minutes." />
   <meta name="theme-color" content="#0c1016" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Enquire | Project Carter" />
-  <meta property="og:description" content="Start a conversation about your site, mandate or investment interest." />
+  <meta property="og:description" content="Start a conversation about your site, property or investment. Most enquiries answered within minutes." />
   <meta property="og:image" content="assets/og-image.svg" />
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
@@ -41,8 +41,8 @@
     <div class="wrap landing-inner">
       <div class="landing-copy">
         <p class="kicker">Project Carter, Corporate Property Advisor</p>
-        <h1 class="landing-head">Have a site, mandate or capital looking for the right partner?</h1>
-        <p class="landing-sub">Advisory for property developers, value-add commercial, family offices and managed funds, especially the deals with a roadblock in the way. Answer a few quick questions and I'll come back to you within two business days.</p>
+        <h1 class="landing-head">Have a site, property or capital looking for the right partner?</h1>
+        <p class="landing-sub">Advice for property developers, commercial investors, family offices and funds, including the deals with a problem in the way. Answer a few quick questions. I usually reply within minutes.</p>
       </div>
 
       <!-- ===== MULTI-STEP LEAD FORM ==========================================
@@ -50,10 +50,14 @@
            bar moves in 25% jumps. All fields stay in the DOM and post together
            to Formspree on the final step.
 
-           Replace YOUR_FORM_ID below with the id from your Formspree form so
-           submissions reach your inbox. On Formspree's free plan the _next
-           value needs to be the full URL, e.g.
-           https://your-domain.com/thanks.html
+           SETUP (two placeholders to fill in):
+           1. YOUR_FORM_ID  - the id from your Formspree form, so submissions
+              reach your inbox. On Formspree's free plan the _next value needs
+              the full URL, e.g. https://your-domain.com/thanks.html
+           2. YOUR_ABSTRACT_API_KEY (in the <script> below) - a free key from
+              abstractapi.com Email Validation. With it, the form checks the
+              visitor's email is real and deliverable before the lead is sent.
+              Leave it as-is and that check is simply skipped.
       ================================================================== -->
       <form class="landing-form card" id="form"
             action="https://formspree.io/f/YOUR_FORM_ID"
@@ -70,37 +74,37 @@
 
         <!-- STEP 1 ---------------------------------------------------------- -->
         <fieldset class="form-step" data-step="1">
-          <legend>About the opportunity</legend>
+          <legend>What you're working on</legend>
 
           <div class="q">
-            <p class="q-label">What brings you to Project Carter?</p>
-            <div class="opts" role="radiogroup" aria-label="What brings you to Project Carter?">
-              <label class="opt"><input type="radio" name="Interest" value="Development site" /><span>Development site</span></label>
-              <label class="opt"><input type="radio" name="Interest" value="Value-add commercial asset" /><span>Value-add commercial asset</span></label>
-              <label class="opt"><input type="radio" name="Interest" value="Family office property strategy" /><span>Family office property strategy</span></label>
-              <label class="opt"><input type="radio" name="Interest" value="Managed fund mandate" /><span>Managed fund mandate</span></label>
-              <label class="opt"><input type="radio" name="Interest" value="A problem or stalled project" /><span>A problem or stalled project</span></label>
+            <p class="q-label">What can I help you with?</p>
+            <div class="opts" role="radiogroup" aria-label="What can I help you with?">
+              <label class="opt"><input type="radio" name="Interest" value="A development site" /><span>A development site</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="A commercial property to improve" /><span>A commercial property to improve</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="Help finding a property to buy" /><span>Help finding a property to buy</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="Family office property investing" /><span>Family office property investing</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="Fund investment mandate" /><span>Fund investment mandate</span></label>
             </div>
           </div>
 
           <div class="q">
             <p class="q-label">Where is it up to?</p>
             <div class="opts" role="radiogroup" aria-label="Where is it up to?">
-              <label class="opt"><input type="radio" name="Stage" value="Still exploring" /><span>Still exploring</span></label>
-              <label class="opt"><input type="radio" name="Stage" value="Site or asset identified" /><span>Site or asset identified</span></label>
-              <label class="opt"><input type="radio" name="Stage" value="Under contract or owned" /><span>Under contract or owned</span></label>
-              <label class="opt"><input type="radio" name="Stage" value="Stalled, needs a path forward" /><span>Stalled, needs a path forward</span></label>
+              <label class="opt"><input type="radio" name="Stage" value="Still looking around" /><span>Still looking around</span></label>
+              <label class="opt"><input type="radio" name="Stage" value="Found a site or property" /><span>Found a site or property</span></label>
+              <label class="opt"><input type="radio" name="Stage" value="Bought it or under contract" /><span>Bought it, or under contract</span></label>
+              <label class="opt"><input type="radio" name="Stage" value="Stuck and needs a way forward" /><span>Stuck, and needs a way forward</span></label>
             </div>
           </div>
         </fieldset>
 
         <!-- STEP 2 ---------------------------------------------------------- -->
         <fieldset class="form-step" data-step="2" hidden>
-          <legend>Scale &amp; timing</legend>
+          <legend>Size &amp; timing</legend>
 
           <div class="q">
-            <p class="q-label">How soon do you want to act?</p>
-            <div class="opts" role="radiogroup" aria-label="How soon do you want to act?">
+            <p class="q-label">How soon do you want to move?</p>
+            <div class="opts" role="radiogroup" aria-label="How soon do you want to move?">
               <label class="opt"><input type="radio" name="Timeframe" value="Ready now" /><span>Ready now</span></label>
               <label class="opt"><input type="radio" name="Timeframe" value="1 to 3 months" /><span>1 to 3 months</span></label>
               <label class="opt"><input type="radio" name="Timeframe" value="3 to 6 months" /><span>3 to 6 months</span></label>
@@ -109,39 +113,39 @@
           </div>
 
           <div class="q">
-            <p class="q-label">Indicative deal size</p>
-            <div class="opts" role="radiogroup" aria-label="Indicative deal size">
-              <label class="opt"><input type="radio" name="Deal size" value="Under $2M" /><span>Under $2M</span></label>
-              <label class="opt"><input type="radio" name="Deal size" value="$2M to $5M" /><span>$2M to $5M</span></label>
-              <label class="opt"><input type="radio" name="Deal size" value="$5M to $15M" /><span>$5M to $15M</span></label>
-              <label class="opt"><input type="radio" name="Deal size" value="$15M to $50M" /><span>$15M to $50M</span></label>
-              <label class="opt"><input type="radio" name="Deal size" value="$50M or more" /><span>$50M or more</span></label>
+            <p class="q-label">Rough budget or project value</p>
+            <div class="opts" role="radiogroup" aria-label="Rough budget or project value">
+              <label class="opt"><input type="radio" name="Budget" value="Under $2M" /><span>Under $2M</span></label>
+              <label class="opt"><input type="radio" name="Budget" value="$2M to $5M" /><span>$2M to $5M</span></label>
+              <label class="opt"><input type="radio" name="Budget" value="$5M to $15M" /><span>$5M to $15M</span></label>
+              <label class="opt"><input type="radio" name="Budget" value="$15M to $50M" /><span>$15M to $50M</span></label>
+              <label class="opt"><input type="radio" name="Budget" value="$50M or more" /><span>$50M or more</span></label>
             </div>
           </div>
         </fieldset>
 
         <!-- STEP 3 ---------------------------------------------------------- -->
         <fieldset class="form-step" data-step="3" hidden>
-          <legend>Capital &amp; scope</legend>
+          <legend>Money &amp; help needed</legend>
 
           <div class="q">
-            <p class="q-label">Capital position</p>
-            <div class="opts" role="radiogroup" aria-label="Capital position">
-              <label class="opt"><input type="radio" name="Capital position" value="Equity ready to deploy" /><span>Equity ready to deploy</span></label>
-              <label class="opt"><input type="radio" name="Capital position" value="Part equity, seeking a partner" /><span>Part equity, seeking a partner</span></label>
-              <label class="opt"><input type="radio" name="Capital position" value="Seeking funding or JV" /><span>Seeking funding or JV</span></label>
-              <label class="opt"><input type="radio" name="Capital position" value="Advisory only, capital not required" /><span>Advisory only, capital not required</span></label>
+            <p class="q-label">How would you fund it?</p>
+            <div class="opts" role="radiogroup" aria-label="How would you fund it?">
+              <label class="opt"><input type="radio" name="Funding" value="I have the cash ready" /><span>I have the cash ready</span></label>
+              <label class="opt"><input type="radio" name="Funding" value="Some cash, need a partner for the rest" /><span>Some cash, need a partner for the rest</span></label>
+              <label class="opt"><input type="radio" name="Funding" value="I need funding or a joint venture partner" /><span>I need funding or a joint venture partner</span></label>
+              <label class="opt"><input type="radio" name="Funding" value="Just advice, no funding needed" /><span>Just advice, no funding needed</span></label>
             </div>
           </div>
 
           <div class="q">
-            <p class="q-label">What do you need? Choose any that apply.</p>
+            <p class="q-label">What do you need a hand with? Pick any that apply.</p>
             <div class="opts">
-              <label class="opt"><input type="checkbox" name="Support needed" value="Feasibility and site strategy" /><span>Feasibility and site strategy</span></label>
-              <label class="opt"><input type="checkbox" name="Support needed" value="Planning pathway" /><span>Planning pathway</span></label>
-              <label class="opt"><input type="checkbox" name="Support needed" value="Capital structuring and JV" /><span>Capital structuring and JV</span></label>
-              <label class="opt"><input type="checkbox" name="Support needed" value="Delivery oversight" /><span>Delivery oversight</span></label>
-              <label class="opt"><input type="checkbox" name="Support needed" value="Sale or lease-up" /><span>Sale or lease-up</span></label>
+              <label class="opt"><input type="checkbox" name="Help needed" value="Working out if the numbers stack up" /><span>Working out if the numbers stack up</span></label>
+              <label class="opt"><input type="checkbox" name="Help needed" value="Getting council approval" /><span>Getting council approval</span></label>
+              <label class="opt"><input type="checkbox" name="Help needed" value="Setting up funding or a partnership" /><span>Setting up funding or a partnership</span></label>
+              <label class="opt"><input type="checkbox" name="Help needed" value="Managing the project build" /><span>Managing the project build</span></label>
+              <label class="opt"><input type="checkbox" name="Help needed" value="Selling or leasing it out" /><span>Selling or leasing it out</span></label>
             </div>
           </div>
         </fieldset>
@@ -151,13 +155,13 @@
           <legend>Your details</legend>
 
           <div class="q">
-            <p class="q-label">Your role</p>
-            <div class="opts" role="radiogroup" aria-label="Your role">
-              <label class="opt"><input type="radio" name="Your role" value="Owner or principal" /><span>Owner or principal</span></label>
-              <label class="opt"><input type="radio" name="Your role" value="Fund manager or director" /><span>Fund manager or director</span></label>
-              <label class="opt"><input type="radio" name="Your role" value="Family office" /><span>Family office</span></label>
-              <label class="opt"><input type="radio" name="Your role" value="Development manager" /><span>Development manager</span></label>
-              <label class="opt"><input type="radio" name="Your role" value="Adviser or broker" /><span>Adviser or broker</span></label>
+            <p class="q-label">Which best describes you?</p>
+            <div class="opts" role="radiogroup" aria-label="Which best describes you?">
+              <label class="opt"><input type="radio" name="About you" value="I'm the buyer or investor" /><span>I'm the buyer or investor</span></label>
+              <label class="opt"><input type="radio" name="About you" value="Buying with business partners" /><span>Buying with business partners</span></label>
+              <label class="opt"><input type="radio" name="About you" value="I represent a family office" /><span>I represent a family office</span></label>
+              <label class="opt"><input type="radio" name="About you" value="I represent a fund" /><span>I represent a fund</span></label>
+              <label class="opt"><input type="radio" name="About you" value="I'm an agent or adviser" /><span>I'm an agent or adviser</span></label>
             </div>
           </div>
 
@@ -169,13 +173,14 @@
             <div class="field">
               <label for="email">Email</label>
               <input type="email" id="email" name="Email" autocomplete="email" required />
+              <p class="form-note" id="emailNote" aria-live="polite"></p>
             </div>
             <div class="field">
               <label for="phone">Phone</label>
               <input type="tel" id="phone" name="Phone" autocomplete="tel" required />
             </div>
             <div class="field">
-              <label for="message">Anything I should know? (optional)</label>
+              <label for="message">Anything else I should know? (optional)</label>
               <textarea id="message" name="Message" rows="3"></textarea>
             </div>
           </div>
@@ -194,6 +199,11 @@
   <script>
   (function () {
     "use strict";
+
+    /* Free key from abstractapi.com -> Email Validation. Left as the placeholder,
+       the deliverability check is skipped and the form still works. */
+    var EMAIL_API_KEY = "YOUR_ABSTRACT_API_KEY";
+
     var form = document.getElementById("form");
     var steps = Array.prototype.slice.call(form.querySelectorAll(".form-step"));
     var fill = document.getElementById("progressFill");
@@ -201,8 +211,63 @@
     var backBtn = document.getElementById("backBtn");
     var nextBtn = document.getElementById("nextBtn");
     var submitBtn = document.getElementById("submitBtn");
+    var emailInput = document.getElementById("email");
+    var emailNote = document.getElementById("emailNote");
     var total = steps.length;
     var current = 0;
+
+    var emailCheck = { email: "", ok: null, busy: false };
+
+    function keyReady() {
+      return EMAIL_API_KEY && EMAIL_API_KEY.indexOf("YOUR_") !== 0;
+    }
+
+    function setNote(msg, kind) {
+      emailNote.textContent = msg || "";
+      emailNote.className = "form-note" + (kind ? " is-" + kind : "");
+    }
+
+    function emailVerified() {
+      return emailCheck.email === emailInput.value.trim() && emailCheck.ok === true;
+    }
+    function emailRejected() {
+      return emailCheck.email === emailInput.value.trim() && emailCheck.ok === false;
+    }
+
+    function verifyEmail() {
+      return new Promise(function (resolve) {
+        var email = emailInput.value.trim();
+        if (!email || !emailInput.checkValidity()) { resolve(false); return; }
+        if (!keyReady()) { resolve(true); return; }
+        if (emailCheck.email === email && emailCheck.ok !== null) { resolve(emailCheck.ok); return; }
+
+        emailCheck.busy = true;
+        setNote("Checking your email address…", "checking");
+        refresh();
+
+        fetch("https://emailvalidation.abstractapi.com/v1/?api_key=" +
+              encodeURIComponent(EMAIL_API_KEY) + "&email=" + encodeURIComponent(email))
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            var bad = !!d && (
+              (d.is_valid_format && d.is_valid_format.value === false) ||
+              (d.is_disposable_email && d.is_disposable_email.value === true) ||
+              d.deliverability === "UNDELIVERABLE"
+            );
+            emailCheck = { email: email, ok: !bad, busy: false };
+            setNote(bad ? "That email address doesn't look reachable. Please double-check it." : "", bad ? "bad" : "");
+            refresh();
+            resolve(!bad);
+          })
+          .catch(function () {
+            /* Never lose a real lead to an API hiccup: fail open. */
+            emailCheck = { email: email, ok: true, busy: false };
+            setNote("");
+            refresh();
+            resolve(true);
+          });
+      });
+    }
 
     function stepValid(i) {
       var step = steps[i];
@@ -225,7 +290,7 @@
     function refresh() {
       var valid = stepValid(current);
       nextBtn.disabled = !valid;
-      submitBtn.disabled = !valid;
+      submitBtn.disabled = !valid || emailCheck.busy || emailRejected();
     }
 
     function render(moveFocus) {
@@ -247,6 +312,13 @@
     form.addEventListener("change", refresh);
     form.addEventListener("input", refresh);
 
+    emailInput.addEventListener("input", function () {
+      if (emailCheck.email !== emailInput.value.trim()) setNote("");
+    });
+    emailInput.addEventListener("blur", function () {
+      if (emailInput.value.trim() && emailInput.checkValidity() && !emailVerified()) verifyEmail();
+    });
+
     nextBtn.addEventListener("click", function () {
       if (stepValid(current) && current < total - 1) { current++; render(true); }
     });
@@ -254,7 +326,11 @@
       if (current > 0) { current--; render(true); }
     });
     form.addEventListener("submit", function (e) {
-      if (!stepValid(current)) e.preventDefault();
+      if (!stepValid(current)) { e.preventDefault(); return; }
+      if (keyReady() && !emailVerified()) {
+        e.preventDefault();
+        verifyEmail().then(function (ok) { if (ok) form.submit(); });
+      }
     });
 
     render(false);
