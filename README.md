@@ -45,16 +45,21 @@ reports total cash required, net sale proceeds, total profit, total ROI, return
 per year, equity multiple and IRR.
 
 **Stamp duty estimator.** Focusing the stamp duty field opens a state/territory
-picker; choosing one fills the field from that jurisdiction's published
-**general (non-concessional) transfer duty scale** for the purchase price — the
-rate a company or investor purchase attracts (no first-home or owner-occupier
-concession). Scales for all eight jurisdictions are in `STAMP` / `stampEstimate()`
-in the page script, keyed off published **2024–25** rates (NT uses its quadratic
-formula under $525k). It is an estimate, not the SRO's figure, and excludes
-foreign-purchaser surcharges and concessions; a disclaimer says so by the field
-and in the PDF. Editing the field pins your own number; clearing it re-enables
-the estimate. **Other purchasing cost** auto-fills to 2% of price + GST (2.2%)
-and behaves the same way (edit to pin, clear to re-enable). There is also an optional **exit cap rate on sale**: the capitalisation rate used
+picker plus a **Commercial / non-residential** checkbox; choosing a state fills
+the field from that jurisdiction's published **general transfer duty scale** for
+the purchase price — the rate a company or investor purchase attracts (no
+first-home or owner-occupier concession). Scales for all eight jurisdictions are
+in `STAMP` / `stampEstimate()` in the page script, keyed off published **2024–25**
+general rates (NT uses its quadratic formula under $525k). Commercial handling
+(current for 2025–26): **SA** → nil (abolished on qualifying non-residential
+property from 1 July 2018); **ACT** → nil up to `ACT_COMM_THRESHOLD` ($2.1M from
+1 July 2026), then a flat 5% of the whole value; **VIC** → still charged (with a
+note that commercial/industrial pays duty once more post-1 July 2024 then moves
+to annual CIPT); other states → same as the general scale. It is an estimate,
+not the SRO's figure, and excludes foreign-purchaser surcharges and concessions;
+a disclaimer says so by the field and in the PDF. Editing the field pins your own
+number; clearing it re-enables the estimate. **Other purchasing cost** is a plain
+optional field (no auto-default). There is also an optional **exit cap rate on sale**: the capitalisation rate used
 for value glides straight-line from the entry net yield in year 1 to that exit
 cap rate by the final year (blank holds the entry yield), so yield compression or
 softening can be modelled. The "Your return" figures and the year-by-year table

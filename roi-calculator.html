@@ -82,8 +82,12 @@
                     <option value="ACT">Australian Capital Territory</option>
                     <option value="NT">Northern Territory</option>
                   </select>
-                  <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from that state's general transfer duty rates. Edit it if you have the exact figure.</p>
-                  <p class="stamp-disclaimer">Estimate only. Based on published 2024&ndash;25 state revenue office general (non-concessional) transfer duty scales. Rates and thresholds change and several index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
+                  <label class="calc-check">
+                    <input type="checkbox" id="stampCommercial" />
+                    <span>Commercial / non-residential property</span>
+                  </label>
+                  <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
+                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
                 </div>
               </div>
 
@@ -106,8 +110,8 @@
 
               <div class="field">
                 <label for="otherCost">Other purchasing cost <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="44,000" /></div>
-                <p class="field-hint" id="otherCostNote">Defaults to 2% of the purchase price plus GST (2.2%). Edit or clear it if it does not apply.</p>
+                <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="10,000" /></div>
+                <p class="field-hint">Due diligence, buyer's agent and adviser fees, and anything else.</p>
               </div>
             </div>
 
@@ -273,8 +277,7 @@
           <ul>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of purchase price you enter. The deposit is the rest.</li>
             <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan / valuation cost, legal cost, building inspection and other purchasing cost.</li>
-            <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state, and it fills from that state's published general (non-concessional) transfer duty rates for a company or investor purchase at your price. It is an estimate, not the state revenue office's figure, and excludes foreign purchaser surcharges and concessions.</li>
-            <li><strong>Other purchasing cost</strong> defaults to 2% of the purchase price plus GST (2.2%). Overwrite or clear it if it does not apply.</li>
+            <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions. Commercial and industrial property is treated differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax.</li>
             <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
             <li><strong>Property value</strong> is net rent &divide; capitalisation rate. The cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale. Leave the exit cap rate blank to hold the entry yield. A rent uplift lifts value too.</li>
             <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
@@ -316,11 +319,11 @@
     var upliftOn = document.getElementById("upliftOn");
     var upliftFields = document.getElementById("upliftFields");
     var stampDutyEl = document.getElementById("stampDuty");
-    var otherCostEl = document.getElementById("otherCost");
     var stampEst = document.getElementById("stampEst");
     var stampState = document.getElementById("stampState");
+    var stampCommercial = document.getElementById("stampCommercial");
     var stampEstNote = document.getElementById("stampEstNote");
-    var touched = { stampDuty: false, otherCost: false };
+    var touched = { stampDuty: false };
     var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
 
     function num(id) {
@@ -418,8 +421,13 @@
         { up: Infinity, over: 0, base: 0, rate: 0.0454 }
       ]
     };
-    function stampEstimate(state, price) {
+    /* ACT abolishes commercial duty up to this dutiable value (from 1 July 2026) */
+    var ACT_COMM_THRESHOLD = 2100000;
+
+    function stampEstimate(state, price, commercial) {
       if (!state || !price || price <= 0) return null;
+      if (commercial && state === "SA") return 0;
+      if (commercial && state === "ACT") return price <= ACT_COMM_THRESHOLD ? 0 : price * 0.05;
       if (state === "NT") {
         if (price <= 525000) { var V = price / 1000; return 0.06571441 * V * V + 15 * V; }
         if (price <= 3000000) return price * 0.0495;
@@ -432,24 +440,27 @@
       return d == null ? null : Math.max(d, 0);
     }
 
+    function stampNote(state, price, commercial) {
+      if (!state) return "Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.";
+      var name = stampState.options[stampState.selectedIndex].text;
+      if (!price) return "Enter a purchase price and this fills with a " + state + " estimate.";
+      if (commercial && state === "SA") return "No duty. SA abolished stamp duty on qualifying non-residential property from 1 July 2018.";
+      if (commercial && state === "ACT" && price <= ACT_COMM_THRESHOLD) return "No duty. ACT commercial property up to $2,100,000 is exempt (from 1 July 2026).";
+      if (commercial && state === "ACT") return "ACT commercial over $2,100,000: flat $5.00 per $100 of the whole value.";
+      if (commercial && state === "VIC") return name + " estimate for " + money(price) + ". VIC commercial / industrial pays duty on the first sale after 1 July 2024, then an annual tax; later transfers are exempt.";
+      return name + " estimate for " + money(price) + ". Edit it if you have the exact figure.";
+    }
+
     function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
 
-    /* Keep stamp duty (when a state is chosen) and other purchasing cost
-       (2% + GST) filled from the price, unless the visitor has typed over them. */
+    /* Keep stamp duty filled from the price + state, unless typed over. */
     function recalcAutofills() {
       var price = num("price");
-      if (!touched.otherCost) {
-        otherCostEl.value = price > 0 ? fmtAmount(price * 0.022) : "";
-      }
       if (!touched.stampDuty && stampState.value) {
-        var est = stampEstimate(stampState.value, price);
+        var est = stampEstimate(stampState.value, price, stampCommercial.checked);
         stampDutyEl.value = est != null ? fmtAmount(est) : "";
       }
-      if (stampState.value) {
-        stampEstNote.textContent = price > 0
-          ? stampState.options[stampState.selectedIndex].text + " estimate for " + money(price) + ". Edit it if you have the exact figure."
-          : "Enter a purchase price and this fills with a " + stampState.value + " estimate.";
-      }
+      stampEstNote.textContent = stampNote(stampState.value, price, stampCommercial.checked);
     }
 
     /* ---- core model ------------------------------------------------------ */
@@ -617,11 +628,13 @@
     stampDutyEl.addEventListener("input", function () {
       touched.stampDuty = stampDutyEl.value.trim() !== "";
     });
-    otherCostEl.addEventListener("input", function () {
-      touched.otherCost = otherCostEl.value.trim() !== "";
-    });
     stampState.addEventListener("change", function () {
       if (stampState.value) stampEst.hidden = false;
+      touched.stampDuty = false;
+      recalcAutofills();
+      render();
+    });
+    stampCommercial.addEventListener("change", function () {
       touched.stampDuty = false;
       recalcAutofills();
       render();
@@ -691,7 +704,8 @@
       row("Total loan", money(m.loan) + "  (" + m.lvr.toFixed(0) + "% of price)");
       row("Deposit", money(m.deposit));
       var sState = document.getElementById("stampState").value;
-      row("Stamp duty" + (sState ? " (" + sState + " estimate)" : ""), optMoney(num("stampDuty")));
+      var sComm = document.getElementById("stampCommercial").checked;
+      row("Stamp duty" + (sState ? " (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""), optMoney(num("stampDuty")));
       row("Loan / valuation cost", optMoney(num("valuationCost")));
       row("Legal cost", optMoney(num("legalCost")));
       row("Building inspection", optMoney(num("buildingInspection")));
@@ -756,7 +770,7 @@
         "Purchase price: " + money(m.price),
         "Total loan: " + money(m.loan) + " (" + m.lvr.toFixed(0) + "%)",
         "Deposit: " + money(m.deposit),
-        "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + " estimate)" : "") + ": " + optMoney(num("stampDuty")),
+        "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + (document.getElementById("stampCommercial").checked ? " commercial" : "") + " estimate)" : "") + ": " + optMoney(num("stampDuty")),
         "Loan / valuation cost: " + optMoney(num("valuationCost")),
         "Legal cost: " + optMoney(num("legalCost")),
         "Building inspection: " + optMoney(num("buildingInspection")),
