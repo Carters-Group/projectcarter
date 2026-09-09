@@ -142,7 +142,7 @@
                     <span>Commercial / non-residential property</span>
                   </label>
                   <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
-                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
+                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. The filled figure also adds the land-titles-office fees to register the transfer, and the mortgage where a loan is entered; the seller pays to discharge their own mortgage, so that is not included. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amounts with the relevant state revenue office and titles registry.</p>
                 </div>
                 <p class="field-hint">The state also sets the demolition rates below. The address check above can fill it in for you.</p>
               </div>
@@ -543,9 +543,9 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
-            <li><strong>The site.</strong> The address is checked once, when you click out of the field, against public map data to confirm the suburb and set the state, which drives stamp duty and the demolition rates. The council name is filled from the same check where the data allows. Nothing else is sent, and nothing is stored. The <strong>site characteristics</strong> you tick drive the report tags in the consultant list and the standing prompt to hold a pre-lodgement meeting. The tags are a guide, not a determination by the council.</li>
+            <li><strong>The site.</strong> The address is checked once, when you click out of the field, against public map data to confirm the suburb and set the state, which drives stamp duty and the demolition rates. A matched address is also rewritten as a tidy one-line version for the summary, and the council name is filled (and corrected) from the same check until you type your own. Nothing else is sent, and nothing is stored. The <strong>site characteristics</strong> you tick drive the report tags in the consultant list and the standing prompt to hold a pre-lodgement meeting. The tags are a guide, not a determination by the council.</li>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of the land price you enter. The deposit is the rest, and it is cash. Leave the loan blank and the whole purchase is funded with cash.</li>
-            <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It is an estimate, not the state revenue office's figure.</li>
+            <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. The filled figure is transfer duty plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's or titles registry's figure.</li>
             <li><strong>Demolition.</strong> Click the field, and with a state set (from the address check or the stamp duty box) and a footprint area entered it fills with an indicative figure for that state and structure type. The rate per m² runs higher for a small footprint and lower for a large one, because plant still has to be mobilised either way. Ticking "asbestos is likely" adds the uplift percentage. Figures are from price guides, not quotes, and a minimum job cost applies. Editing the field pins your own number; clearing it brings the estimate back.</li>
             <li><strong>Site, consultant and statutory costs</strong> are the one-off costs of getting the DA prepared, lodged and assessed. Enter only the lines that apply.</li>
             <li><strong>Holding costs</strong> are entered per year and charged for the DA period only, worked out as months &divide; 12. <strong>Rental income during the DA</strong>, if an existing dwelling stays leased, is netted off, so the holding line can be a credit.</li>
@@ -599,7 +599,7 @@
     var demoEst = document.getElementById("demoEst");
     var demoEstNote = document.getElementById("demoEstNote");
     var daType = document.getElementById("daType");
-    var touched = { stampDuty: false, demolition: false };
+    var touched = { stampDuty: false, demolition: false, council: false };
     var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
 
     /* cost-line groups, reused for summing, the blur formatter and the PDF */
@@ -777,6 +777,40 @@
     /* ACT abolishes commercial duty up to this dutiable value (from 1 July 2026) */
     var ACT_COMM_THRESHOLD = 2100000;
 
+    /* ---- title-office registration fees, indicative 2024-25 -------------
+       A land purchase also attracts land-titles-office fees on top of
+       transfer duty. Some jurisdictions charge a flat lodgement fee, others
+       scale it with price. "transfer" registers the change of title;
+       "mortgage" registers the buyer's incoming mortgage and is charged only
+       when there is a loan. Registering the discharge of the seller's
+       existing mortgage is the seller's cost and is not included here.
+       Rounded, published titles-registry schedules, not quotes. */
+    var REGO = {
+      NSW: { mortgage: 180, transfer: function () { return 180; } },
+      VIC: { mortgage: 121, transfer: function (p) { return Math.min(3600, 92 + p * 0.00234); } },
+      QLD: { mortgage: 231, transfer: function (p) {
+               return 231 + (p > 180000 ? Math.ceil((p - 180000) / 10000) * 43 : 0); } },
+      WA:  { mortgage: 178, transfer: function (p) {
+               return 178 + (p > 85000 ? Math.ceil((p - 85000) / 100000) * 178 : 0); } },
+      SA:  { mortgage: 190, transfer: function (p) {
+               var b = [[5000, 190], [20000, 205], [40000, 260], [50000, 315], [100000, 475],
+                        [200000, 830], [250000, 1010], [300000, 1190], [500000, 1720],
+                        [1000000, 3945]];
+               for (var i = 0; i < b.length; i++) { if (p <= b[i][0]) return b[i][1]; }
+               return 6930; } },
+      TAS: { mortgage: 155, transfer: function () { return 233; } },
+      ACT: { mortgage: 174, transfer: function () { return 465; } },
+      NT:  { mortgage: 166, transfer: function () { return 166; } }
+    };
+
+    function regoFees(state, price, hasLoan) {
+      var r = REGO[state];
+      if (!r || !price || price <= 0) return { transfer: 0, mortgage: 0, total: 0 };
+      var t = Math.round(r.transfer(price));
+      var m = hasLoan ? r.mortgage : 0;
+      return { transfer: t, mortgage: m, total: t + m };
+    }
+
     function stampEstimate(state, price, commercial) {
       if (!state || !price || price <= 0) return null;
       if (commercial && state === "SA") return 0;
@@ -863,11 +897,23 @@
     /* Keep stamp duty + demolition filled from their estimators, unless typed over. */
     function recalcAutofills() {
       var price = num("price");
-      if (!touched.stampDuty && stampState.value) {
-        var est = stampEstimate(stampState.value, price, stampCommercial.checked);
-        stampDutyEl.value = est == null ? "" : (est === 0 ? "0" : fmtAmount(est));
+      var state = stampState.value;
+      var est = state ? stampEstimate(state, price, stampCommercial.checked) : null;
+      var fees = regoFees(state, price, num("lvr") > 0);
+      if (!touched.stampDuty && state) {
+        if (est == null) {
+          stampDutyEl.value = "";
+        } else {
+          var total = est + fees.total;
+          stampDutyEl.value = total === 0 ? "0" : fmtAmount(total);
+        }
       }
-      stampEstNote.textContent = stampNote(stampState.value, price, stampCommercial.checked);
+      var note = stampNote(state, price, stampCommercial.checked);
+      if (est != null && price > 0 && fees.total > 0) {
+        note += " Includes " + money(fees.transfer) + " transfer registration" +
+          (fees.mortgage ? " and " + money(fees.mortgage) + " mortgage registration" : "") + ".";
+      }
+      stampEstNote.textContent = note;
 
       var demo = demoEstimate();
       if (!touched.demolition && demo) {
@@ -1057,6 +1103,7 @@
       recalcAutofills();
       render();
     });
+    document.getElementById("lvr").addEventListener("input", recalcAutofills);
 
     /* Demolition $/m2 estimator */
     var demoField = document.getElementById("demolition");
@@ -1089,9 +1136,23 @@
       SA: "South Australia", TAS: "Tasmania", ACT: "Australian Capital Territory", NT: "Northern Territory"
     };
 
+    /* Once the user types in the council field themselves, the address check
+       stops overwriting it (clearing it hands control back). */
+    councilEl.addEventListener("input", function () {
+      touched.council = councilEl.value.trim() !== "";
+    });
+
     function setAddressNote(msg) {
       addressNote.textContent = msg || "";
       addressNote.hidden = !msg;
+    }
+
+    /* Neaten a name for the summary: "12 example ST" -> "12 Example St".
+       Leaves digits and short direction/ordinal tokens alone. */
+    function titleCase(s) {
+      return String(s).toLowerCase().replace(/\b[a-z]/g, function (c) {
+        return c.toUpperCase();
+      }).replace(/\bMc([a-z])/g, function (_, c) { return "Mc" + c.toUpperCase(); });
     }
 
     function checkAddress() {
@@ -1129,13 +1190,33 @@
             recalcAutofills();
             render();
           }
-          if (lga && !councilEl.value.trim()) councilEl.value = lga;
+          /* Fill / correct the council name unless the user has typed their own. */
+          if (lga && !touched.council) councilEl.value = titleCase(lga);
+
+          /* Rebuild the address as a tidy one-liner from the matched parts,
+             but only when a street was actually resolved. */
+          var street = ((a.house_number || "") + " " + (a.road || "")).trim();
+          var neat = "";
+          if (street) {
+            var parts = [titleCase(street)];
+            if (place) parts.push(titleCase(place));
+            var tail = [];
+            if (code) tail.push(code);
+            if (a.postcode) tail.push(a.postcode);
+            if (tail.length) parts.push(tail.join(" "));
+            neat = parts.join(", ");
+            addressEl.value = neat;
+            lastGeocode = neat;
+          }
+
           var bits = [];
           if (place) bits.push(place);
           if (code) bits.push(code);
-          setAddressNote(bits.length
-            ? "Looks like " + bits.join(", ") + "." + (code ? " State set for stamp duty and demolition." : "")
-            : "Address found. Check the state in the stamp duty box.");
+          setAddressNote(neat
+            ? "Confirmed " + neat + "." + (code ? " State set for stamp duty and demolition." : "")
+            : bits.length
+              ? "Looks like " + bits.join(", ") + "." + (code ? " State set for stamp duty and demolition." : "")
+              : "Address found. Check the state in the stamp duty box.");
         })
         ["catch"](function () {
           clearTimeout(to);
@@ -1234,7 +1315,7 @@
       var sState = stampState.value;
       var sComm = stampCommercial.checked;
       if (m.stamp > 0 || sState) {
-        row("Stamp duty" + (sState ? " (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""),
+        row("Stamp duty" + (sState ? " + registration (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""),
             sState ? money(m.stamp) : optMoney(m.stamp));
       }
       rowIf("Legal / conveyancing", m.legal);
@@ -1284,7 +1365,7 @@
 
       y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. Report tags are derived from the site characteristics you ticked and are not a determination by the council; confirm the required documents at a pre-lodgement meeting. Any stamp duty shown is estimated from published state general transfer duty rates, not the state revenue office's figure. Demolition figures are indicative $/m2 ranges from price guides, not quotes, with a minimum job cost. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This estimate is a guide only, generated from the figures entered above. Report tags are derived from the site characteristics you ticked and are not a determination by the council; confirm the required documents at a pre-lodgement meeting. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure. Demolition figures are indicative $/m2 ranges from price guides, not quotes, with a minimum job cost. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -1310,7 +1391,7 @@
         "Land purchase price: " + money(m.price),
         "Loan: " + (m.loan > 0 ? money(m.loan) + " (" + m.lvr.toFixed(0) + "%)" : "none"),
         "Deposit (cash): " + money(m.deposit),
-        "Stamp duty" + (stampState.value ? " (" + stampState.value + (stampCommercial.checked ? " commercial" : "") + " estimate)" : "") + ": " + optMoney(m.stamp),
+        "Stamp duty" + (stampState.value ? " + registration (" + stampState.value + (stampCommercial.checked ? " commercial" : "") + " estimate)" : "") + ": " + optMoney(m.stamp),
         "Legal / conveyancing: " + optMoney(m.legal),
         "Buyer's agent: " + optMoney(m.buyersAgent),
         "Due diligence & searches: " + optMoney(m.dueDiligence),

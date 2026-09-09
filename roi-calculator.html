@@ -94,7 +94,7 @@
                     <span>Commercial / non-residential property</span>
                   </label>
                   <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
-                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
+                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. The filled figure also adds the land-titles-office fees to register the transfer, and the mortgage where a loan is entered; the seller pays to discharge their own mortgage, so that is not included. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amounts with the relevant state revenue office and titles registry.</p>
                 </div>
               </div>
 
@@ -284,7 +284,7 @@
           <ul>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of purchase price you enter. The deposit is the rest.</li>
             <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan / valuation cost, legal cost, building inspection and other purchasing cost.</li>
-            <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions. Commercial and industrial property is treated differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax.</li>
+            <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions. Commercial and industrial property is treated differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax.</li>
             <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
             <li><strong>Property value</strong> is net rent &divide; capitalisation rate. The cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale. Leave the exit cap rate blank to hold the entry yield. A rent uplift lifts value too.</li>
             <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
@@ -433,6 +433,40 @@
     /* ACT abolishes commercial duty up to this dutiable value (from 1 July 2026) */
     var ACT_COMM_THRESHOLD = 2100000;
 
+    /* ---- title-office registration fees, indicative 2024-25 -------------
+       A property transfer also attracts land-titles-office fees on top of
+       transfer duty. Some jurisdictions charge a flat lodgement fee, others
+       scale it with price. "transfer" registers the change of title;
+       "mortgage" registers the buyer's incoming mortgage and is charged only
+       when there is a loan. Registering the discharge of the seller's
+       existing mortgage is the seller's cost and is not included here.
+       Rounded, published titles-registry schedules, not quotes. */
+    var REGO = {
+      NSW: { mortgage: 180, transfer: function () { return 180; } },
+      VIC: { mortgage: 121, transfer: function (p) { return Math.min(3600, 92 + p * 0.00234); } },
+      QLD: { mortgage: 231, transfer: function (p) {
+               return 231 + (p > 180000 ? Math.ceil((p - 180000) / 10000) * 43 : 0); } },
+      WA:  { mortgage: 178, transfer: function (p) {
+               return 178 + (p > 85000 ? Math.ceil((p - 85000) / 100000) * 178 : 0); } },
+      SA:  { mortgage: 190, transfer: function (p) {
+               var b = [[5000, 190], [20000, 205], [40000, 260], [50000, 315], [100000, 475],
+                        [200000, 830], [250000, 1010], [300000, 1190], [500000, 1720],
+                        [1000000, 3945]];
+               for (var i = 0; i < b.length; i++) { if (p <= b[i][0]) return b[i][1]; }
+               return 6930; } },
+      TAS: { mortgage: 155, transfer: function () { return 233; } },
+      ACT: { mortgage: 174, transfer: function () { return 465; } },
+      NT:  { mortgage: 166, transfer: function () { return 166; } }
+    };
+
+    function regoFees(state, price, hasLoan) {
+      var r = REGO[state];
+      if (!r || !price || price <= 0) return { transfer: 0, mortgage: 0, total: 0 };
+      var t = Math.round(r.transfer(price));
+      var m = hasLoan ? r.mortgage : 0;
+      return { transfer: t, mortgage: m, total: t + m };
+    }
+
     function stampEstimate(state, price, commercial) {
       if (!state || !price || price <= 0) return null;
       if (commercial && state === "SA") return 0;
@@ -477,14 +511,28 @@
       });
     }
 
-    /* Keep stamp duty filled from the price + state, unless typed over. */
+    /* Keep stamp duty filled from the price + state, unless typed over. The
+       filled figure is transfer duty plus the title-office registration fees
+       (transfer, and mortgage registration when there is a loan). */
     function recalcAutofills() {
       var price = num("price");
-      if (!touched.stampDuty && stampState.value) {
-        var est = stampEstimate(stampState.value, price, stampCommercial.checked);
-        stampDutyEl.value = est == null ? "" : (est === 0 ? "0" : fmtAmount(est));
+      var state = stampState.value;
+      var est = state ? stampEstimate(state, price, stampCommercial.checked) : null;
+      var fees = regoFees(state, price, num("lvr") > 0);
+      if (!touched.stampDuty && state) {
+        if (est == null) {
+          stampDutyEl.value = "";
+        } else {
+          var total = est + fees.total;
+          stampDutyEl.value = total === 0 ? "0" : fmtAmount(total);
+        }
       }
-      stampEstNote.textContent = stampNote(stampState.value, price, stampCommercial.checked);
+      var note = stampNote(state, price, stampCommercial.checked);
+      if (est != null && price > 0 && fees.total > 0) {
+        note += " Includes " + money(fees.transfer) + " transfer registration" +
+          (fees.mortgage ? " and " + money(fees.mortgage) + " mortgage registration" : "") + ".";
+      }
+      stampEstNote.textContent = note;
     }
 
     /* ---- core model ------------------------------------------------------ */
@@ -668,6 +716,7 @@
       recalcAutofills();
       render();
     });
+    document.getElementById("lvr").addEventListener("input", recalcAutofills);
 
     /* Tidy money fields with thousands separators on blur */
     ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "rent", "upliftRent"].forEach(function (id) {
@@ -733,7 +782,7 @@
       row("Deposit", money(m.deposit));
       var sState = document.getElementById("stampState").value;
       var sComm = document.getElementById("stampCommercial").checked;
-      row("Stamp duty" + (sState ? " (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""),
+      row("Stamp duty" + (sState ? " + registration (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""),
           sState ? money(num("stampDuty")) : optMoney(num("stampDuty")));
       row("Loan / valuation cost", optMoney(num("valuationCost")));
       row("Legal cost", optMoney(num("legalCost")));
@@ -788,7 +837,7 @@
 
       y += 14;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. Any stamp duty shown is estimated from published state general transfer duty rates, not the state revenue office's figure, and excludes surcharges and concessions. Property value is modelled off net rent at a capitalisation rate that runs from the entry yield to the exit cap rate over the hold, and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This estimate is a guide only, generated from the figures entered above. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure, and excludes surcharges and concessions. Property value is modelled off net rent at a capitalisation rate that runs from the entry yield to the exit cap rate over the hold, and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
