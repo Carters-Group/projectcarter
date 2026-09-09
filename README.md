@@ -37,12 +37,24 @@ then the **Enquire** button; the footer nav adds a **Contact** link.
 `enquire.html` is the multi-step lead-capture form (no footer, no personal phone
 or email; enquiries arrive only through the form). `roi-calculator.html` is a
 client-side property-hold ROI model. You enter the purchase price, the loan (as a
-% of price), one-off buying costs (stamp duty, loan/valuation, solicitor, other),
-the Year 1 net rent, rental growth, interest rate, term, the share of annual
-profit used to pay down the loan, and an optional value uplift (year, new base
-rent, new growth rate). It builds a year-by-year schedule and reports total cash
-required, net sale proceeds, total profit, total ROI, return per year, equity
-multiple and IRR. There is also an optional **exit cap rate on sale**: the capitalisation rate used
+% of price), one-off buying costs (stamp duty, loan/valuation, legal, building
+inspection, other), the Year 1 net rent, rental growth, interest rate, term, the
+share of annual profit used to pay down the loan, and an optional value uplift
+(year, new base rent, new growth rate). It builds a year-by-year schedule and
+reports total cash required, net sale proceeds, total profit, total ROI, return
+per year, equity multiple and IRR.
+
+**Stamp duty estimator.** Focusing the stamp duty field opens a state/territory
+picker; choosing one fills the field from that jurisdiction's published
+**general (non-concessional) transfer duty scale** for the purchase price — the
+rate a company or investor purchase attracts (no first-home or owner-occupier
+concession). Scales for all eight jurisdictions are in `STAMP` / `stampEstimate()`
+in the page script, keyed off published **2024–25** rates (NT uses its quadratic
+formula under $525k). It is an estimate, not the SRO's figure, and excludes
+foreign-purchaser surcharges and concessions; a disclaimer says so by the field
+and in the PDF. Editing the field pins your own number; clearing it re-enables
+the estimate. **Other purchasing cost** auto-fills to 2% of price + GST (2.2%)
+and behaves the same way (edit to pin, clear to re-enable). There is also an optional **exit cap rate on sale**: the capitalisation rate used
 for value glides straight-line from the entry net yield in year 1 to that exit
 cap rate by the final year (blank holds the entry yield), so yield compression or
 softening can be modelled. The "Your return" figures and the year-by-year table

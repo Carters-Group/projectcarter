@@ -941,6 +941,16 @@ h1, h2, h3 {
   background: var(--bg-2);
 }
 
+/* Stamp duty state estimator */
+.stamp-est {
+  display: grid; gap: 8px;
+  margin-top: 4px; padding: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+}
+.stamp-est[hidden] { display: none; }
+.stamp-disclaimer { margin: 0; font-size: 11px; line-height: 1.55; color: var(--muted); }
+
 /* ---- year-by-year schedule ---- */
 .calc-schedule-wrap { margin-top: clamp(40px, 6vw, 64px); }
 .calc-schedule-scroll { overflow-x: auto; margin-top: 18px; }

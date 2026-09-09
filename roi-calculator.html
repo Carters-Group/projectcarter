@@ -57,7 +57,7 @@
 
               <div class="field">
                 <label for="price">Purchase price</label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="1,000,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="2,000,000" /></div>
               </div>
 
               <div class="field">
@@ -68,24 +68,46 @@
 
               <div class="field">
                 <label for="stampDuty">Stamp duty <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="40,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="92,000" /></div>
+                <div class="stamp-est" id="stampEst" hidden>
+                  <label for="stampState">Estimate for a company purchase in</label>
+                  <select id="stampState">
+                    <option value="">Select state or territory</option>
+                    <option value="NSW">New South Wales</option>
+                    <option value="VIC">Victoria</option>
+                    <option value="QLD">Queensland</option>
+                    <option value="WA">Western Australia</option>
+                    <option value="SA">South Australia</option>
+                    <option value="TAS">Tasmania</option>
+                    <option value="ACT">Australian Capital Territory</option>
+                    <option value="NT">Northern Territory</option>
+                  </select>
+                  <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from that state's general transfer duty rates. Edit it if you have the exact figure.</p>
+                  <p class="stamp-disclaimer">Estimate only. Based on published 2024&ndash;25 state revenue office general (non-concessional) transfer duty scales. Rates and thresholds change and several index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
+                </div>
               </div>
 
               <div class="field">
                 <label for="valuationCost">Loan / valuation cost <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="valuationCost" autocomplete="off" placeholder="2,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="valuationCost" autocomplete="off" placeholder="4,000" /></div>
                 <p class="field-hint">Bank fees and the valuation ordered for finance.</p>
               </div>
 
               <div class="field">
-                <label for="solicitorCost">Solicitor cost <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="solicitorCost" autocomplete="off" placeholder="3,000" /></div>
+                <label for="legalCost">Legal cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="legalCost" autocomplete="off" placeholder="5,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="buildingInspection">Building inspection <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="buildingInspection" autocomplete="off" placeholder="2,500" /></div>
+                <p class="field-hint">Building and pest, and any specialist reports.</p>
               </div>
 
               <div class="field">
                 <label for="otherCost">Other purchasing cost <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="5,000" /></div>
-                <p class="field-hint">Building and pest, due diligence, adviser fees.</p>
+                <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="44,000" /></div>
+                <p class="field-hint" id="otherCostNote">Defaults to 2% of the purchase price plus GST (2.2%). Edit or clear it if it does not apply.</p>
               </div>
             </div>
 
@@ -250,16 +272,15 @@
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of purchase price you enter. The deposit is the rest.</li>
-            <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan and valuation cost, solicitor cost and other purchasing cost.</li>
+            <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan / valuation cost, legal cost, building inspection and other purchasing cost.</li>
+            <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state, and it fills from that state's published general (non-concessional) transfer duty rates for a company or investor purchase at your price. It is an estimate, not the state revenue office's figure, and excludes foreign purchaser surcharges and concessions.</li>
+            <li><strong>Other purchasing cost</strong> defaults to 2% of the purchase price plus GST (2.2%). Overwrite or clear it if it does not apply.</li>
             <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
             <li><strong>Property value</strong> is net rent &divide; capitalisation rate. The cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale. Leave the exit cap rate blank to hold the entry yield. A rent uplift lifts value too.</li>
             <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
             <li><strong>At sale</strong> (end of the term) the property is sold at its value that year, the loan is repaid, and net sale proceeds plus all rental cash kept, less the cash you put in, is the total profit.</li>
             <li><strong>IRR</strong> is the annual compound return that makes the cash you put in and the cash you take out balance over time.</li>
           </ul>
-          <p class="form-fineprint" style="margin-top:18px;max-width:78ch">
-            This tool gives a rough estimate from the figures you enter. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes, loan amortisation of principal beyond the debt-reduction you set, and costs specific to a deal. Value is modelled off net rent at a capitalisation rate you set, which will differ from a real valuation. It is not financial, tax or investment advice. Talk to Project Carter and a licensed adviser before acting on it.
-          </p>
         </div>
       </div>
     </section>
@@ -294,6 +315,12 @@
     var leadForm = document.getElementById("leadForm");
     var upliftOn = document.getElementById("upliftOn");
     var upliftFields = document.getElementById("upliftFields");
+    var stampDutyEl = document.getElementById("stampDuty");
+    var otherCostEl = document.getElementById("otherCost");
+    var stampEst = document.getElementById("stampEst");
+    var stampState = document.getElementById("stampState");
+    var stampEstNote = document.getElementById("stampEstNote");
+    var touched = { stampDuty: false, otherCost: false };
     var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
 
     function num(id) {
@@ -320,13 +347,118 @@
       });
     }
 
+    /* ---- stamp duty: general (non-concessional) transfer duty by state ----
+       Company / investor purchases get no first-home or owner-occupier
+       concession, so these are the standard scales. Published 2024-25 rates;
+       thresholds in several states index yearly. Estimate only. */
+    function bracketDuty(v, rows) {
+      for (var i = 0; i < rows.length; i++) {
+        if (v <= rows[i].up) return rows[i].base + (v - rows[i].over) * rows[i].rate;
+      }
+      return null;
+    }
+    var STAMP = {
+      NSW: [
+        { up: 17000, over: 0, base: 0, rate: 0.0125 },
+        { up: 37000, over: 17000, base: 212, rate: 0.015 },
+        { up: 99000, over: 37000, base: 512, rate: 0.0175 },
+        { up: 372000, over: 99000, base: 1597, rate: 0.035 },
+        { up: 1240000, over: 372000, base: 11152, rate: 0.045 },
+        { up: 3721000, over: 1240000, base: 50212, rate: 0.055 },
+        { up: Infinity, over: 3721000, base: 186668, rate: 0.07 }
+      ],
+      VIC: [
+        { up: 25000, over: 0, base: 0, rate: 0.014 },
+        { up: 130000, over: 25000, base: 350, rate: 0.024 },
+        { up: 960000, over: 130000, base: 2870, rate: 0.06 },
+        { up: 2000000, over: 0, base: 0, rate: 0.055 },
+        { up: Infinity, over: 2000000, base: 110000, rate: 0.065 }
+      ],
+      QLD: [
+        { up: 5000, over: 0, base: 0, rate: 0 },
+        { up: 75000, over: 5000, base: 0, rate: 0.015 },
+        { up: 540000, over: 75000, base: 1050, rate: 0.035 },
+        { up: 1000000, over: 540000, base: 17325, rate: 0.045 },
+        { up: Infinity, over: 1000000, base: 38025, rate: 0.0575 }
+      ],
+      WA: [
+        { up: 120000, over: 0, base: 0, rate: 0.019 },
+        { up: 150000, over: 120000, base: 2280, rate: 0.0285 },
+        { up: 360000, over: 150000, base: 3135, rate: 0.038 },
+        { up: 725000, over: 360000, base: 11115, rate: 0.0475 },
+        { up: Infinity, over: 725000, base: 28453, rate: 0.0515 }
+      ],
+      SA: [
+        { up: 12000, over: 0, base: 0, rate: 0.01 },
+        { up: 30000, over: 12000, base: 120, rate: 0.02 },
+        { up: 50000, over: 30000, base: 480, rate: 0.03 },
+        { up: 100000, over: 50000, base: 1080, rate: 0.035 },
+        { up: 200000, over: 100000, base: 2830, rate: 0.04 },
+        { up: 250000, over: 200000, base: 6830, rate: 0.0425 },
+        { up: 300000, over: 250000, base: 8955, rate: 0.0475 },
+        { up: 500000, over: 300000, base: 11330, rate: 0.05 },
+        { up: Infinity, over: 500000, base: 21330, rate: 0.055 }
+      ],
+      TAS: [
+        { up: 3000, over: 0, base: 50, rate: 0 },
+        { up: 25000, over: 3000, base: 50, rate: 0.0175 },
+        { up: 75000, over: 25000, base: 435, rate: 0.0225 },
+        { up: 200000, over: 75000, base: 1560, rate: 0.035 },
+        { up: 375000, over: 200000, base: 5935, rate: 0.04 },
+        { up: 725000, over: 375000, base: 12935, rate: 0.0425 },
+        { up: Infinity, over: 725000, base: 27810, rate: 0.045 }
+      ],
+      ACT: [
+        { up: 200000, over: 0, base: 0, rate: 0.006 },
+        { up: 300000, over: 200000, base: 1200, rate: 0.022 },
+        { up: 500000, over: 300000, base: 3400, rate: 0.034 },
+        { up: 750000, over: 500000, base: 10200, rate: 0.0432 },
+        { up: 1000000, over: 750000, base: 21000, rate: 0.059 },
+        { up: 1455000, over: 1000000, base: 35750, rate: 0.064 },
+        { up: Infinity, over: 0, base: 0, rate: 0.0454 }
+      ]
+    };
+    function stampEstimate(state, price) {
+      if (!state || !price || price <= 0) return null;
+      if (state === "NT") {
+        if (price <= 525000) { var V = price / 1000; return 0.06571441 * V * V + 15 * V; }
+        if (price <= 3000000) return price * 0.0495;
+        if (price <= 5000000) return price * 0.0575;
+        return price * 0.0595;
+      }
+      var rows = STAMP[state];
+      if (!rows) return null;
+      var d = bracketDuty(price, rows);
+      return d == null ? null : Math.max(d, 0);
+    }
+
+    function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
+
+    /* Keep stamp duty (when a state is chosen) and other purchasing cost
+       (2% + GST) filled from the price, unless the visitor has typed over them. */
+    function recalcAutofills() {
+      var price = num("price");
+      if (!touched.otherCost) {
+        otherCostEl.value = price > 0 ? fmtAmount(price * 0.022) : "";
+      }
+      if (!touched.stampDuty && stampState.value) {
+        var est = stampEstimate(stampState.value, price);
+        stampDutyEl.value = est != null ? fmtAmount(est) : "";
+      }
+      if (stampState.value) {
+        stampEstNote.textContent = price > 0
+          ? stampState.options[stampState.selectedIndex].text + " estimate for " + money(price) + ". Edit it if you have the exact figure."
+          : "Enter a purchase price and this fills with a " + stampState.value + " estimate.";
+      }
+    }
+
     /* ---- core model ------------------------------------------------------ */
     function model() {
       var price = num("price");
       var lvr = num("lvr");
       var loan = price * lvr / 100;
       var deposit = Math.max(price - loan, 0);
-      var acqCosts = num("stampDuty") + num("valuationCost") + num("solicitorCost") + num("otherCost");
+      var acqCosts = num("stampDuty") + num("valuationCost") + num("legalCost") + num("buildingInspection") + num("otherCost");
       var cashRequired = deposit + acqCosts;
 
       var nr1 = num("rent");
@@ -480,8 +612,27 @@
       render();
     });
 
+    /* Stamp duty state estimator + 2% + GST default on other purchasing cost */
+    stampDutyEl.addEventListener("focus", function () { stampEst.hidden = false; });
+    stampDutyEl.addEventListener("input", function () {
+      touched.stampDuty = stampDutyEl.value.trim() !== "";
+    });
+    otherCostEl.addEventListener("input", function () {
+      touched.otherCost = otherCostEl.value.trim() !== "";
+    });
+    stampState.addEventListener("change", function () {
+      if (stampState.value) stampEst.hidden = false;
+      touched.stampDuty = false;
+      recalcAutofills();
+      render();
+    });
+    document.getElementById("price").addEventListener("input", function () {
+      recalcAutofills();
+      render();
+    });
+
     /* Tidy money fields with thousands separators on blur */
-    ["price", "stampDuty", "valuationCost", "solicitorCost", "otherCost", "rent", "upliftRent"].forEach(function (id) {
+    ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "rent", "upliftRent"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -490,6 +641,7 @@
       });
     });
 
+    recalcAutofills();
     render();
 
     /* ---- PDF --------------------------------------------------------- */
@@ -538,9 +690,11 @@
       row("Purchase price", money(m.price));
       row("Total loan", money(m.loan) + "  (" + m.lvr.toFixed(0) + "% of price)");
       row("Deposit", money(m.deposit));
-      row("Stamp duty", optMoney(num("stampDuty")));
+      var sState = document.getElementById("stampState").value;
+      row("Stamp duty" + (sState ? " (" + sState + " estimate)" : ""), optMoney(num("stampDuty")));
       row("Loan / valuation cost", optMoney(num("valuationCost")));
-      row("Solicitor cost", optMoney(num("solicitorCost")));
+      row("Legal cost", optMoney(num("legalCost")));
+      row("Building inspection", optMoney(num("buildingInspection")));
       row("Other purchasing cost", optMoney(num("otherCost")));
       row("Year 1 net rental income", money(m.nr1) + " / year");
       row("Rental increase", (m.g * 100).toFixed(2) + "% / year");
@@ -591,7 +745,7 @@
 
       y += 14;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. Property value is modelled off net rent at a capitalisation rate that runs from the entry yield to the exit cap rate over the hold, and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This estimate is a guide only, generated from the figures entered above. Any stamp duty shown is estimated from published state general transfer duty rates, not the state revenue office's figure, and excludes surcharges and concessions. Property value is modelled off net rent at a capitalisation rate that runs from the entry yield to the exit cap rate over the hold, and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -602,9 +756,10 @@
         "Purchase price: " + money(m.price),
         "Total loan: " + money(m.loan) + " (" + m.lvr.toFixed(0) + "%)",
         "Deposit: " + money(m.deposit),
-        "Stamp duty: " + optMoney(num("stampDuty")),
+        "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + " estimate)" : "") + ": " + optMoney(num("stampDuty")),
         "Loan / valuation cost: " + optMoney(num("valuationCost")),
-        "Solicitor cost: " + optMoney(num("solicitorCost")),
+        "Legal cost: " + optMoney(num("legalCost")),
+        "Building inspection: " + optMoney(num("buildingInspection")),
         "Other purchasing cost: " + optMoney(num("otherCost")),
         "Total cash required: " + money(m.cashRequired),
         "Year 1 net rental income: " + money(m.nr1) + "/yr",
