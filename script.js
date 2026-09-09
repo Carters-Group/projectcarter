@@ -1,4 +1,4 @@
-/* Project Carter — site interactions */
+/* Project Carter - site interactions */
 (function () {
   "use strict";
 
