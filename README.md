@@ -20,6 +20,7 @@ project-royal-terraces.html     project detail — Royal Terraces (construction 
 project-city-west-villas.html   project detail — City West Villas (construction commencing)
 roi-calculator.html             property-hold ROI model — costs, rent growth, interest, debt reduction, value uplift; downloads a PDF, pings Formspree
 noi-calculator.html             single-year net operating income model — optional purchase price, income lines, operating expenses (every line, property management included, has a "recovered from tenant" tick that drops it from the total), strata/body corp line, NOI, net operating income as a % (of income and of purchase price), implied value from a cap rate; same reveal gate, PDF and Formspree ping as the ROI page
+da-calculator.html              "Development Site (DA)" — cost to take a block to development approval: land + buying costs (state-based stamp duty estimator, shared with the ROI page), site works, DA consultants, council/statutory fees, per-year holding costs pro-rated over a DA timeframe in months, optional rental income during the DA netted off, contingency %, PM allowance, and an optional land loan with interest compounded monthly and capitalised over the DA period (tick to also draw the development costs from the loan). Outputs total cost to DA, cash (equity) required, debt at DA, cost excl. land and cost as a % of land price, plus a month-by-month schedule. Same reveal gate (pc_da_unlocked), PDF and Formspree ping as the other two.
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
 styles.css                      design system + layout (home, project pages, landing, calculator)
@@ -31,13 +32,13 @@ assets/images/team/             Trent portrait
 
 Every link on the site opens in the same tab (no `target="_blank"`); visitors use
 the browser back button to return. Every page (home, project details,
-`roi-calculator.html`, `noi-calculator.html`, `enquire.html`) carries the same
-fixed site header and footer. Top-nav order is
+`roi-calculator.html`, `noi-calculator.html`, `da-calculator.html`,
+`enquire.html`) carries the same fixed site header and footer. Top-nav order is
 **About, Projects, Approach, Calculators**, then the **Enquire** button.
 **Calculators** is a dropdown (`.nav-dropdown`, toggled by `script.js`) with
-**Net Operating Income (NOI)** then **Return on Equity (ROI)**; on mobile it
-expands inline in the slide-down menu. The footer nav lists both calculators
-flat plus a **Contact** link.
+**Net Operating Income (NOI)**, **Return on Equity (ROI)** then
+**Development Site (DA)**; on mobile it expands inline in the slide-down menu.
+The footer nav lists all three calculators flat plus a **Contact** link.
 
 `enquire.html` is the multi-step lead-capture form (no footer, no personal phone
 or email; enquiries arrive only through the form). `roi-calculator.html` is a
@@ -118,7 +119,7 @@ Everything below is placeholder and should be replaced before the site goes publ
 
 | Item | Where |
 | --- | --- |
-| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html`, `roi-calculator.html` and `noi-calculator.html` → `action="https://formspree.io/f/YOUR_FORM_ID"` |
+| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html`, `roi-calculator.html`, `noi-calculator.html` and `da-calculator.html` → `action="https://formspree.io/f/YOUR_FORM_ID"` |
 | Landing page headline + sub-text | `enquire.html` → between the `EDIT THIS WORDING` comments |
 | Landing background photo or video | `enquire.html` → `.landing-media` (instructions in the file + `assets/images/README.md`) |
 | Ad conversion tracking (Google Ads / Meta Pixel) | `thanks.html` → `AD CONVERSION TRACKING` comment |

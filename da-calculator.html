@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Development Site (DA) Calculator | Project Carter</title>
+  <meta name="description" content="Cost the run from buying a development site to a lodged and approved DA: acquisition, consultants, site works, council fees and holding costs, with optional debt and interest over the DA period. See the all-in cost, the cash required and a one-page PDF. A guide only, not financial advice." />
+  <meta name="theme-color" content="#0c1016" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Development Site (DA) Calculator | Project Carter" />
+  <meta property="og:description" content="From buying a block to DA approval: acquisition, consultants, site works, council fees, holding costs and interest. All-in cost, cash required, one-page PDF." />
+  <meta property="og:image" content="assets/og-image.svg" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER (shared) ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <div class="nav-dropdown" id="calcDropdown">
+          <button type="button" class="nav-dropdown-toggle" id="calcDropdownToggle" aria-expanded="false" aria-controls="calcDropdownMenu">Calculators<svg class="nav-caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-dropdown-menu" id="calcDropdownMenu" role="menu">
+            <a href="noi-calculator.html" role="menuitem">Net Operating Income (NOI)</a>
+            <a href="roi-calculator.html" role="menuitem">Return on Equity (ROI)</a>
+            <a href="da-calculator.html" role="menuitem">Development Site (DA)</a>
+          </div>
+        </div>
+      </nav>
+      <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="calc">
+      <div class="wrap">
+        <div class="calc-intro">
+          <p class="kicker">Project Carter</p>
+          <h1>Development Site (DA) Calculator</h1>
+          <p>Work out what it costs to buy a block and take it to development approval. Enter the land and buying costs, the consultants and site works the DA needs, the council fees and the holding costs, then set the DA timeframe and any debt. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial advice.</p>
+        </div>
+
+        <div class="calc-grid">
+          <div class="calc-inputs" id="calcInputs">
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Land purchase</h2>
+
+              <div class="field">
+                <label for="price">Land purchase price</label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="750,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="lvr">Loan <span>(% of land price)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="lvr" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint" id="loanBreakdown">Loan &mdash; &nbsp;·&nbsp; Deposit &mdash;</p>
+              </div>
+
+              <div class="field">
+                <label for="stampDuty">Stamp duty <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="32,000" /></div>
+                <div class="stamp-est" id="stampEst" hidden>
+                  <label for="stampState">Estimate for a company purchase in</label>
+                  <select id="stampState">
+                    <option value="">Select state or territory</option>
+                    <option value="NSW">New South Wales</option>
+                    <option value="VIC">Victoria</option>
+                    <option value="QLD">Queensland</option>
+                    <option value="WA">Western Australia</option>
+                    <option value="SA">South Australia</option>
+                    <option value="TAS">Tasmania</option>
+                    <option value="ACT">Australian Capital Territory</option>
+                    <option value="NT">Northern Territory</option>
+                  </select>
+                  <label class="calc-check">
+                    <input type="checkbox" id="stampCommercial" />
+                    <span>Commercial / non-residential property</span>
+                  </label>
+                  <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
+                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="legalCost">Legal / conveyancing <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="legalCost" autocomplete="off" placeholder="2,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="buyersAgent">Buyer's agent <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="buyersAgent" autocomplete="off" placeholder="22,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="dueDiligence">Due diligence &amp; searches <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="dueDiligence" autocomplete="off" placeholder="3,000" /></div>
+                <p class="field-hint">Building and pest, identification survey, title and planning searches, contamination Phase 1.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Finance</h2>
+
+              <div class="field">
+                <label for="rate">Loan interest <span>(% per year)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="rate" autocomplete="off" placeholder="7.5" /></div>
+                <p class="field-hint">Charged on the loan through the DA period. Leave the loan and rate blank for an unleveraged hold.</p>
+              </div>
+
+              <div class="field">
+                <label for="months">DA timeframe <span>(months)</span></label>
+                <input type="text" inputmode="numeric" id="months" autocomplete="off" placeholder="12" />
+                <p class="field-hint">From settlement to development consent. Many councils run 6 to 18 months.</p>
+              </div>
+
+              <div class="field">
+                <label for="estFee">Loan set-up &amp; fees <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="estFee" autocomplete="off" placeholder="5,000" /></div>
+                <p class="field-hint">Establishment, valuation and legal fees on the facility.</p>
+              </div>
+
+              <label class="calc-check">
+                <input type="checkbox" id="fundCostsOn" />
+                <span>Fund the development costs from the loan too</span>
+              </label>
+              <p class="field-hint">On: every cost other than the land deposit is treated as drawn from the loan across the DA period, and interest builds on it. Off: those costs are cash.</p>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Site costs</h2>
+              <p class="field-hint">Works to make the site ready. Leave blank anything that does not apply.</p>
+
+              <div class="field">
+                <label for="demolition">Demolition <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="demolition" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="asbestos">Asbestos / hazardous material removal <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="asbestos" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="treeRemoval">Approved tree removal <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="treeRemoval" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="clearing">Site clearing, fencing &amp; hoarding <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="clearing" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="serviceLoc">Service location &amp; potholing <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="serviceLoc" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="otherSite">Other site cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="otherSite" autocomplete="off" placeholder="0" /></div>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Consultant costs</h2>
+              <p class="field-hint">Add the reports the site and the council actually call for. The specialist lines are often not all required.</p>
+
+              <div class="field">
+                <label for="architect">Architect / building designer <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="architect" autocomplete="off" placeholder="22,000" /></div>
+              </div>
+              <div class="field">
+                <label for="planner">Town planner (SEE / planning report) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="planner" autocomplete="off" placeholder="10,000" /></div>
+              </div>
+              <div class="field">
+                <label for="surveyor">Surveyor (detail &amp; level) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="surveyor" autocomplete="off" placeholder="10,000" /></div>
+              </div>
+              <div class="field">
+                <label for="civil">Civil / stormwater engineer <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="civil" autocomplete="off" placeholder="20,000" /></div>
+              </div>
+              <div class="field">
+                <label for="structural">Structural engineer <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="structural" autocomplete="off" placeholder="20,000" /></div>
+              </div>
+              <div class="field">
+                <label for="geotech">Geotechnical engineer (soil report) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="geotech" autocomplete="off" placeholder="6,000" /></div>
+              </div>
+              <div class="field">
+                <label for="certifier">Building surveyor / certifier (pre-DA) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="certifier" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="traffic">Traffic &amp; parking <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="traffic" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="landscape">Landscape architect <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="landscape" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="arborist">Arborist <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="arborist" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="basix">BASIX / NatHERS / ESD <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="basix" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="acoustic">Acoustic <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="acoustic" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="bushfire">Bushfire (BAL) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="bushfire" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="heritage">Heritage <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="heritage" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="waste">Waste management plan <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="waste" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="qs">Quantity surveyor (cost report) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="qs" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="ecologist">Ecologist / biodiversity <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="ecologist" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="otherConsult">Other consultant <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="otherConsult" autocomplete="off" placeholder="0" /></div>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Authority &amp; statutory fees</h2>
+
+              <div class="field">
+                <label for="preDA">Pre-DA meeting fee <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="preDA" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="daFee">DA lodgement fee <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="daFee" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Council's fee, usually scaled to the estimated cost of works. Check the council's fee schedule.</p>
+              </div>
+              <div class="field">
+                <label for="advertising">Advertising / notification fee <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="advertising" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="lsl">Long service levy <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="lsl" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Payable in some states on works over a threshold, for example 0.25% in NSW.</p>
+              </div>
+              <div class="field">
+                <label for="contributions">Developer contributions (s7.11 / s7.12) <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="contributions" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Often payable later, at construction certificate. Include here if you want them in the total.</p>
+              </div>
+              <div class="field">
+                <label for="rezoning">Rezoning / planning proposal cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="rezoning" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Only if the site needs a planning proposal or LEP amendment alongside the DA.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Holding costs</h2>
+              <p class="field-hint">Entered per year. The calculator applies them for the months the DA takes.</p>
+
+              <div class="field">
+                <label for="councilRates">Council &amp; water rates <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="councilRates" autocomplete="off" placeholder="5,000" /></div>
+              </div>
+              <div class="field">
+                <label for="landTax">Land tax <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="landTax" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="insurances">Insurances <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="insurances" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Public liability, and vacant land or building cover.</p>
+              </div>
+              <div class="field">
+                <label for="utilities">Utilities &amp; standing charges <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="utilities" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="maintenance">Slashing, maintenance &amp; security <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="maintenance" autocomplete="off" placeholder="0" /></div>
+              </div>
+              <div class="field">
+                <label for="otherHold">Other holding cost <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="otherHold" autocomplete="off" placeholder="0" /></div>
+              </div>
+
+              <div class="field">
+                <label for="holdIncome">Rental income during the DA <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="holdIncome" autocomplete="off" placeholder="0" /></div>
+                <label class="calc-check">
+                  <input type="checkbox" id="incomeWeekOn" />
+                  <span>Enter as per week</span>
+                </label>
+                <p class="field-hint" id="holdIncomeHint">If an existing dwelling stays leased through the DA. Reduces the net holding cost.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Contingency &amp; management</h2>
+
+              <div class="field">
+                <label for="contingency">Contingency <span>(% of costs)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="contingency" autocomplete="off" placeholder="10" /></div>
+                <p class="field-hint">Applied to site, consultant, statutory and holding costs. Not to the land or stamp duty.</p>
+              </div>
+              <div class="field">
+                <label for="pmFee">Project management / your time <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="pmFee" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">An allowance for running the DA process.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <dl class="calc-results" id="calcResults" aria-live="polite">
+            <h2>Your cost to DA</h2>
+            <div class="result-row is-teaser"><dt>Loan amount</dt><dd data-out="loan">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Deposit <span>(cash)</span></dt><dd data-out="deposit">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Total purchase costs</dt><dd data-out="purchaseCosts">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>DA timeframe</dt><dd data-out="months">&mdash;</dd></div>
+            <div class="result-row"><dt>Site costs</dt><dd data-out="site">&mdash;</dd></div>
+            <div class="result-row"><dt>Consultant costs</dt><dd data-out="consult">&mdash;</dd></div>
+            <div class="result-row"><dt>Authority &amp; statutory fees</dt><dd data-out="statutory">&mdash;</dd></div>
+            <div class="result-row"><dt>Holding costs <span>(net of income)</span></dt><dd data-out="netHold">&mdash;</dd></div>
+            <div class="result-row"><dt>Contingency</dt><dd data-out="contingency">&mdash;</dd></div>
+            <div class="result-row"><dt>Project management</dt><dd data-out="pmFee">&mdash;</dd></div>
+            <div class="result-row"><dt>Loan set-up &amp; fees</dt><dd data-out="estFee">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Interest during the DA</dt><dd data-out="interestDA">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total cost to DA</dt><dd data-out="totalCostToDA">&mdash;</dd></div>
+            <div class="result-row"><dt>Cost to reach DA, excluding land</dt><dd data-out="costExclLand">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Cash (equity) required</dt><dd data-out="equityRequired">&mdash;</dd></div>
+            <div class="result-row"><dt>Debt at DA <span>(loan + interest)</span></dt><dd data-out="debtAtDA">&mdash;</dd></div>
+            <div class="result-row"><dt>Cost to DA as a % of land price</dt><dd data-out="costOnPrice">&mdash;</dd></div>
+
+            <div class="calc-cta">
+              <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
+              <button type="button" class="btn btn-accent btn-block" id="openLead">Download cost summary (PDF)</button>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
+            </div>
+          </dl>
+        </div>
+
+        <div class="calc-schedule-wrap">
+          <h2 class="calc-subhead">Month by month</h2>
+          <div class="calc-schedule-scroll">
+            <table class="calc-schedule" id="calcSchedule">
+              <thead>
+                <tr>
+                  <th scope="col">Month</th>
+                  <th scope="col">Costs drawn</th>
+                  <th scope="col">Interest</th>
+                  <th scope="col">Loan balance</th>
+                  <th scope="col">Equity in (to date)</th>
+                </tr>
+              </thead>
+              <tbody id="calcScheduleBody">
+                <tr><td colspan="5" class="calc-schedule-empty">Enter a land price and a DA timeframe in months to see the schedule.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Lead-capture modal, opened by the "Download cost summary" button.
+             Replace YOUR_FORM_ID with your Formspree id. The submit is sent in
+             the background so the visitor keeps the page and their PDF. -->
+        <div class="modal" id="leadModal" hidden>
+          <div class="modal-backdrop" data-close></div>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+            <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
+            <h2 id="leadModalTitle">Get your cost summary</h2>
+            <p>The page builds a one-page PDF of your figures and the month-by-month schedule. A copy is sent to Project Carter so we can follow up if you'd like.</p>
+
+            <form class="calc-lead-form" id="leadForm"
+                  action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+              <input type="hidden" name="_subject" value="Development Site (DA) Calculator request" />
+              <input type="hidden" name="Figures" id="figuresField" value="" />
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
+              <div class="field">
+                <label for="leadName">Name</label>
+                <input type="text" id="leadName" name="Name" autocomplete="name" required />
+              </div>
+              <div class="field">
+                <label for="leadEmail">Email</label>
+                <input type="email" id="leadEmail" name="Email" autocomplete="email" required />
+              </div>
+              <div class="field">
+                <label for="leadPhone">Phone</label>
+                <input type="tel" id="leadPhone" name="Phone" autocomplete="tel" required />
+              </div>
+              <label class="calc-check">
+                <input type="checkbox" id="leadHelp" name="Assessment requested" value="Yes, review these figures and get back to me" />
+                <span>Can you review these figures and summarise them for me?</span>
+              </label>
+              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my cost summary (PDF)</button>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
+            </form>
+
+            <div class="calc-done" id="calcDone" hidden>
+              <p><strong>Done.</strong> Your PDF has downloaded. If it didn't, <button type="button" class="linklike" id="redownload">download it again</button>. Project Carter has your figures and will be in touch if you asked for a follow-up.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-assumptions">
+          <h2 class="calc-subhead">How the numbers work</h2>
+          <ul>
+            <li><strong>Loan and deposit.</strong> The loan is the percentage of the land price you enter. The deposit is the rest, and it is cash. Leave the loan blank and the whole purchase is funded with cash.</li>
+            <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, and is an estimate, not the state revenue office's figure.</li>
+            <li><strong>Site, consultant and statutory costs</strong> are the one-off costs of getting the DA prepared, lodged and assessed. Enter only the lines that apply to your site and council.</li>
+            <li><strong>Holding costs</strong> are entered per year and charged for the DA period only, worked out as months &divide; 12. <strong>Rental income during the DA</strong>, if an existing dwelling stays leased, is netted off, so the holding line can be a credit.</li>
+            <li><strong>Contingency</strong> is your percentage applied to the site, consultant, statutory and holding costs. It is not applied to the land price or stamp duty.</li>
+            <li><strong>Interest during the DA.</strong> The land loan is drawn at settlement. If "fund the development costs from the loan" is ticked, every other cost is treated as drawn evenly across the DA period; otherwise it is cash. Interest is charged monthly on the balance outstanding and added to the loan (it compounds and is not paid in cash along the way).</li>
+            <li><strong>Total cost to DA</strong> is the land price plus every cost above plus the interest. <strong>Cash (equity) required</strong> is that total less the debt owing at DA. <strong>Debt at DA</strong> is the loan drawn plus the interest added to it.</li>
+            <li>This is a pre-construction view. It excludes GST, the build itself, construction certificate costs, finance beyond the DA period, selling or holding past approval, and it is not financial, tax or planning advice.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="noi-calculator.html">NOI Calculator</a>
+        <a href="roi-calculator.html">ROI Calculator</a>
+        <a href="da-calculator.html">DA Calculator</a>
+        <a href="enquire.html">Contact</a>
+      </nav>
+    </div>
+    <div class="wrap footer-legal">
+      <p>Privacy Policy &nbsp;·&nbsp; © <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var inputs = document.getElementById("calcInputs");
+    var leadForm = document.getElementById("leadForm");
+    var fundCostsOn = document.getElementById("fundCostsOn");
+    var incomeWeekOn = document.getElementById("incomeWeekOn");
+    var holdIncomeHint = document.getElementById("holdIncomeHint");
+    var stampDutyEl = document.getElementById("stampDuty");
+    var stampEst = document.getElementById("stampEst");
+    var stampState = document.getElementById("stampState");
+    var stampCommercial = document.getElementById("stampCommercial");
+    var stampEstNote = document.getElementById("stampEstNote");
+    var touched = { stampDuty: false };
+    var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
+
+    /* cost-line groups, reused for summing, the blur formatter and the PDF */
+    var SITE = ["demolition", "asbestos", "treeRemoval", "clearing", "serviceLoc", "otherSite"];
+    var CONSULT = ["architect", "planner", "surveyor", "civil", "structural", "geotech", "certifier", "traffic", "landscape", "arborist", "basix", "acoustic", "bushfire", "heritage", "waste", "qs", "ecologist", "otherConsult"];
+    var STAT = ["preDA", "daFee", "advertising", "lsl", "contributions", "rezoning"];
+    var HOLD = ["councilRates", "landTax", "insurances", "utilities", "maintenance", "otherHold"];
+
+    var SITE_LABELS = {
+      demolition: "Demolition", asbestos: "Asbestos / hazmat removal", treeRemoval: "Approved tree removal",
+      clearing: "Site clearing, fencing & hoarding", serviceLoc: "Service location & potholing", otherSite: "Other site cost"
+    };
+    var CONSULT_LABELS = {
+      architect: "Architect / building designer", planner: "Town planner (SEE)", surveyor: "Surveyor (detail & level)",
+      civil: "Civil / stormwater engineer", structural: "Structural engineer", geotech: "Geotechnical engineer",
+      certifier: "Building surveyor / certifier", traffic: "Traffic & parking", landscape: "Landscape architect",
+      arborist: "Arborist", basix: "BASIX / NatHERS / ESD", acoustic: "Acoustic", bushfire: "Bushfire (BAL)",
+      heritage: "Heritage", waste: "Waste management plan", qs: "Quantity surveyor", ecologist: "Ecologist / biodiversity",
+      otherConsult: "Other consultant"
+    };
+    var STAT_LABELS = {
+      preDA: "Pre-DA meeting fee", daFee: "DA lodgement fee", advertising: "Advertising / notification fee",
+      lsl: "Long service levy", contributions: "Developer contributions (s7.11 / s7.12)", rezoning: "Rezoning / planning proposal"
+    };
+    var HOLD_LABELS = {
+      councilRates: "Council & water rates", landTax: "Land tax", insurances: "Insurances",
+      utilities: "Utilities & standing charges", maintenance: "Slashing, maintenance & security", otherHold: "Other holding cost"
+    };
+
+    function num(id) {
+      var el = document.getElementById(id);
+      if (!el) return 0;
+      var raw = (el.value || "").replace(/[^0-9.]/g, "");
+      var n = parseFloat(raw);
+      return isNaN(n) || n < 0 ? 0 : n;
+    }
+    function sumIds(arr) { var s = 0; arr.forEach(function (id) { s += num(id); }); return s; }
+    function money(n) { return money0.format(Math.round(n)); }
+    function signedMoney(n) { return (n < 0 ? "-" : "") + money(Math.abs(n)); }
+    function pct(n) { return n.toFixed(2) + "%"; }
+
+    /* Reveal gate: figures update live, but every digit after the first is
+       masked until the visitor leaves their details (persisted per browser). */
+    var LOCK_KEY = "pc_da_unlocked";
+    var unlocked = false;
+    try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
+    function mask(str) {
+      var seen = false;
+      return String(str).replace(/\d/g, function (d) {
+        if (seen) return "•";
+        seen = true; return d;
+      });
+    }
+
+    /* ---- stamp duty: general (non-concessional) transfer duty by state ----
+       Company / investor purchases get no first-home or owner-occupier
+       concession, so these are the standard scales. Published 2024-25 rates;
+       thresholds in several states index yearly. Estimate only. */
+    function bracketDuty(v, rows) {
+      for (var i = 0; i < rows.length; i++) {
+        if (v <= rows[i].up) return rows[i].base + (v - rows[i].over) * rows[i].rate;
+      }
+      return null;
+    }
+    var STAMP = {
+      NSW: [
+        { up: 17000, over: 0, base: 0, rate: 0.0125 },
+        { up: 37000, over: 17000, base: 212, rate: 0.015 },
+        { up: 99000, over: 37000, base: 512, rate: 0.0175 },
+        { up: 372000, over: 99000, base: 1597, rate: 0.035 },
+        { up: 1240000, over: 372000, base: 11152, rate: 0.045 },
+        { up: 3721000, over: 1240000, base: 50212, rate: 0.055 },
+        { up: Infinity, over: 3721000, base: 186668, rate: 0.07 }
+      ],
+      VIC: [
+        { up: 25000, over: 0, base: 0, rate: 0.014 },
+        { up: 130000, over: 25000, base: 350, rate: 0.024 },
+        { up: 960000, over: 130000, base: 2870, rate: 0.06 },
+        { up: 2000000, over: 0, base: 0, rate: 0.055 },
+        { up: Infinity, over: 2000000, base: 110000, rate: 0.065 }
+      ],
+      QLD: [
+        { up: 5000, over: 0, base: 0, rate: 0 },
+        { up: 75000, over: 5000, base: 0, rate: 0.015 },
+        { up: 540000, over: 75000, base: 1050, rate: 0.035 },
+        { up: 1000000, over: 540000, base: 17325, rate: 0.045 },
+        { up: Infinity, over: 1000000, base: 38025, rate: 0.0575 }
+      ],
+      WA: [
+        { up: 120000, over: 0, base: 0, rate: 0.019 },
+        { up: 150000, over: 120000, base: 2280, rate: 0.0285 },
+        { up: 360000, over: 150000, base: 3135, rate: 0.038 },
+        { up: 725000, over: 360000, base: 11115, rate: 0.0475 },
+        { up: Infinity, over: 725000, base: 28453, rate: 0.0515 }
+      ],
+      SA: [
+        { up: 12000, over: 0, base: 0, rate: 0.01 },
+        { up: 30000, over: 12000, base: 120, rate: 0.02 },
+        { up: 50000, over: 30000, base: 480, rate: 0.03 },
+        { up: 100000, over: 50000, base: 1080, rate: 0.035 },
+        { up: 200000, over: 100000, base: 2830, rate: 0.04 },
+        { up: 250000, over: 200000, base: 6830, rate: 0.0425 },
+        { up: 300000, over: 250000, base: 8955, rate: 0.0475 },
+        { up: 500000, over: 300000, base: 11330, rate: 0.05 },
+        { up: Infinity, over: 500000, base: 21330, rate: 0.055 }
+      ],
+      TAS: [
+        { up: 3000, over: 0, base: 50, rate: 0 },
+        { up: 25000, over: 3000, base: 50, rate: 0.0175 },
+        { up: 75000, over: 25000, base: 435, rate: 0.0225 },
+        { up: 200000, over: 75000, base: 1560, rate: 0.035 },
+        { up: 375000, over: 200000, base: 5935, rate: 0.04 },
+        { up: 725000, over: 375000, base: 12935, rate: 0.0425 },
+        { up: Infinity, over: 725000, base: 27810, rate: 0.045 }
+      ],
+      ACT: [
+        { up: 200000, over: 0, base: 0, rate: 0.006 },
+        { up: 300000, over: 200000, base: 1200, rate: 0.022 },
+        { up: 500000, over: 300000, base: 3400, rate: 0.034 },
+        { up: 750000, over: 500000, base: 10200, rate: 0.0432 },
+        { up: 1000000, over: 750000, base: 21000, rate: 0.059 },
+        { up: 1455000, over: 1000000, base: 35750, rate: 0.064 },
+        { up: Infinity, over: 0, base: 0, rate: 0.0454 }
+      ]
+    };
+    /* ACT abolishes commercial duty up to this dutiable value (from 1 July 2026) */
+    var ACT_COMM_THRESHOLD = 2100000;
+
+    function stampEstimate(state, price, commercial) {
+      if (!state || !price || price <= 0) return null;
+      if (commercial && state === "SA") return 0;
+      if (commercial && state === "ACT") return price <= ACT_COMM_THRESHOLD ? 0 : price * 0.05;
+      if (state === "NT") {
+        if (price <= 525000) { var V = price / 1000; return 0.06571441 * V * V + 15 * V; }
+        if (price <= 3000000) return price * 0.0495;
+        if (price <= 5000000) return price * 0.0575;
+        return price * 0.0595;
+      }
+      var rows = STAMP[state];
+      if (!rows) return null;
+      var d = bracketDuty(price, rows);
+      return d == null ? null : Math.max(d, 0);
+    }
+
+    function stampNote(state, price, commercial) {
+      if (!state) return "Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.";
+      var name = stampState.options[stampState.selectedIndex].text;
+      if (!price) return "Enter a land price and this fills with a " + state + " estimate.";
+      if (commercial && state === "SA") return "No duty. SA abolished stamp duty on qualifying non-residential property from 1 July 2018.";
+      if (commercial && state === "ACT" && price <= ACT_COMM_THRESHOLD) return "No duty. ACT commercial property up to $2,100,000 is exempt (from 1 July 2026).";
+      if (commercial && state === "ACT") return "ACT commercial over $2,100,000: flat $5.00 per $100 of the whole value.";
+      if (commercial && state === "VIC") return name + " estimate for " + money(price) + ". VIC commercial / industrial pays duty on the first sale after 1 July 2024, then an annual tax; later transfers are exempt.";
+      return name + " estimate for " + money(price) + ". Edit it if you have the exact figure.";
+    }
+
+    function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
+
+    /* Slide the "%" suffix to sit right after the typed number, left-aligned */
+    var PCT_FIELDS = ["lvr", "rate", "contingency"];
+    var pctCanvas = document.createElement("canvas").getContext("2d");
+    function positionPct() {
+      PCT_FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var cs = getComputedStyle(el);
+        pctCanvas.font = cs.font || (cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily);
+        var txt = el.value !== "" ? el.value : (el.placeholder || "");
+        var padLeft = parseFloat(cs.paddingLeft) || 15;
+        el.parentNode.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 3) + "px");
+      });
+    }
+
+    /* Keep stamp duty filled from the price + state, unless typed over. */
+    function recalcAutofills() {
+      var price = num("price");
+      if (!touched.stampDuty && stampState.value) {
+        var est = stampEstimate(stampState.value, price, stampCommercial.checked);
+        stampDutyEl.value = est == null ? "" : (est === 0 ? "0" : fmtAmount(est));
+      }
+      stampEstNote.textContent = stampNote(stampState.value, price, stampCommercial.checked);
+    }
+
+    /* ---- core model ------------------------------------------------------ */
+    function model() {
+      var price = num("price");
+      var lvr = num("lvr");
+      var loan = price * lvr / 100;
+      var deposit = Math.max(price - loan, 0);
+
+      var stamp = num("stampDuty");
+      var legal = num("legalCost");
+      var buyersAgent = num("buyersAgent");
+      var dueDiligence = num("dueDiligence");
+      var purchaseCosts = stamp + legal + buyersAgent + dueDiligence;
+
+      var site = sumIds(SITE);
+      var consult = sumIds(CONSULT);
+      var statutory = sumIds(STAT);
+
+      var months = Math.max(Math.round(num("months")), 0);
+      var yearFrac = months / 12;
+      var holdAnnual = sumIds(HOLD);
+      var holdCosts = holdAnnual * yearFrac;
+
+      var incByWeek = incomeWeekOn.checked;
+      var incRaw = num("holdIncome");
+      var holdIncomeAnnual = incByWeek ? incRaw * 52 : incRaw;
+      var holdIncome = holdIncomeAnnual * yearFrac;
+      var netHold = holdCosts - holdIncome;
+
+      var contPct = num("contingency");
+      var contBase = site + consult + statutory + holdCosts;
+      var contingency = contBase * contPct / 100;
+
+      var pmFee = num("pmFee");
+      var estFee = num("estFee");
+
+      /* everything that is not the land deposit */
+      var devCosts = purchaseCosts + site + consult + statutory + netHold + contingency + pmFee + estFee;
+
+      var rate = num("rate") / 100;
+      var costsInLoan = fundCostsOn.checked;
+      var costsToFund = costsInLoan ? Math.max(devCosts, 0) : 0;
+
+      var rows = [];
+      var balance = loan;
+      var capInterest = 0;
+      var monthlyDraw = months > 0 ? costsToFund / months : 0;
+      for (var mo = 1; mo <= months; mo++) {
+        balance += monthlyDraw;
+        var interest = balance * (rate / 12);
+        capInterest += interest;
+        balance += interest;
+        var equityIn = deposit + (costsInLoan ? 0 : devCosts * (mo / months));
+        rows.push({ month: mo, draw: monthlyDraw, interest: interest, balance: balance, equityIn: equityIn });
+      }
+
+      var interestDA = capInterest;
+      var debtAtDA = balance; /* months 0 -> just the loan */
+
+      var totalCostToDA = price + devCosts + interestDA;
+      var costExclLand = devCosts + interestDA;
+      var equityRequired = totalCostToDA - debtAtDA;
+      var costOnPrice = price > 0 ? costExclLand / price * 100 : null;
+
+      var valid = price > 0;
+
+      return {
+        price: price, lvr: lvr, loan: loan, deposit: deposit,
+        stamp: stamp, legal: legal, buyersAgent: buyersAgent, dueDiligence: dueDiligence, purchaseCosts: purchaseCosts,
+        site: site, consult: consult, statutory: statutory,
+        months: months, holdAnnual: holdAnnual, holdCosts: holdCosts,
+        incByWeek: incByWeek, incRaw: incRaw, holdIncomeAnnual: holdIncomeAnnual, holdIncome: holdIncome, netHold: netHold,
+        contPct: contPct, contingency: contingency, pmFee: pmFee, estFee: estFee,
+        devCosts: devCosts, rate: rate, costsInLoan: costsInLoan,
+        rows: rows, interestDA: interestDA, debtAtDA: debtAtDA,
+        totalCostToDA: totalCostToDA, costExclLand: costExclLand,
+        equityRequired: equityRequired, costOnPrice: costOnPrice, valid: valid
+      };
+    }
+
+    /* ---- render -------------------------------------------------------- */
+    function setOut(key, val) {
+      var el = document.querySelector('[data-out="' + key + '"]');
+      if (el) el.textContent = val;
+    }
+
+    function render() {
+      positionPct();
+      var m = model();
+
+      document.getElementById("loanBreakdown").textContent =
+        "Loan " + (m.price > 0 ? money(m.loan) : "—") +
+        "   ·   Deposit " + (m.price > 0 ? money(m.deposit) : "—");
+
+      holdIncomeHint.textContent = (m.incByWeek && m.incRaw > 0)
+        ? "≈ " + money(m.holdIncomeAnnual) + " per year. Reduces the net holding cost."
+        : "If an existing dwelling stays leased through the DA. Reduces the net holding cost.";
+
+      /* teaser rows (input-derived) stay in full; the rest is masked until unlocked */
+      function put(key, str, teaser) {
+        setOut(key, (unlocked || teaser) ? str : mask(str));
+      }
+      put("loan", m.price > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "%)" : "—", true);
+      put("deposit", m.price > 0 ? money(m.deposit) : "—", true);
+      put("purchaseCosts", m.purchaseCosts > 0 ? money(m.purchaseCosts) : "—", true);
+      put("months", m.months > 0 ? m.months + " month" + (m.months === 1 ? "" : "s") : "—", true);
+      put("site", m.valid ? money(m.site) : "—");
+      put("consult", m.valid ? money(m.consult) : "—");
+      put("statutory", m.valid ? money(m.statutory) : "—");
+      put("netHold", m.valid ? signedMoney(m.netHold) : "—");
+      put("contingency", m.valid ? money(m.contingency) : "—");
+      put("pmFee", m.valid ? money(m.pmFee) : "—");
+      put("estFee", m.valid ? money(m.estFee) : "—");
+      put("interestDA", m.valid ? money(m.interestDA) : "—");
+      put("totalCostToDA", m.valid ? money(m.totalCostToDA) : "—");
+      put("costExclLand", m.valid ? money(m.costExclLand) : "—");
+      put("equityRequired", m.valid ? money(m.equityRequired) : "—");
+      put("debtAtDA", m.valid ? money(m.debtAtDA) : "—");
+      put("costOnPrice", (m.valid && m.costOnPrice != null) ? pct(m.costOnPrice) : "—");
+
+      var body = document.getElementById("calcScheduleBody");
+      if (!m.valid || !m.rows.length) {
+        body.innerHTML = '<tr><td colspan="5" class="calc-schedule-empty">Enter a land price and a DA timeframe in months to see the schedule.</td></tr>';
+        return;
+      }
+      var html = "";
+      m.rows.forEach(function (r) {
+        var cells = [money(r.draw), money(r.interest), money(r.balance), money(r.equityIn)];
+        html += "<tr><td>" + r.month + "</td>";
+        cells.forEach(function (c) { html += "<td>" + (unlocked ? c : mask(c)) + "</td>"; });
+        html += "</tr>";
+      });
+      body.innerHTML = html;
+    }
+
+    inputs.addEventListener("input", render);
+    inputs.addEventListener("change", render);
+
+    /* Stamp duty state estimator */
+    stampDutyEl.addEventListener("focus", function () { stampEst.hidden = false; });
+    stampDutyEl.addEventListener("input", function () {
+      touched.stampDuty = stampDutyEl.value.trim() !== "";
+    });
+    stampState.addEventListener("change", function () {
+      if (stampState.value) stampEst.hidden = false;
+      touched.stampDuty = false;
+      recalcAutofills();
+      render();
+    });
+    stampCommercial.addEventListener("change", function () {
+      touched.stampDuty = false;
+      recalcAutofills();
+      render();
+    });
+    document.getElementById("price").addEventListener("input", function () {
+      recalcAutofills();
+      render();
+    });
+
+    /* Tidy money fields with thousands separators on blur */
+    ["price", "stampDuty", "legalCost", "buyersAgent", "dueDiligence", "estFee", "holdIncome", "pmFee"]
+      .concat(SITE).concat(CONSULT).concat(STAT).concat(HOLD)
+      .forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("blur", function () {
+          var raw = (el.value || "").replace(/[^0-9.]/g, "");
+          var n = num(id);
+          el.value = n > 0 ? n.toLocaleString("en-AU") : (parseFloat(raw) === 0 ? "0" : "");
+        });
+      });
+
+    recalcAutofills();
+    render();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(positionPct);
+    window.addEventListener("resize", positionPct);
+
+    /* ---- PDF --------------------------------------------------------- */
+    var lastDoc = null;
+
+    function optMoney(n) { return n > 0 ? money(n) : "Not entered"; }
+
+    function makePDF() {
+      if (!window.jspdf || !window.jspdf.jsPDF) return null;
+      var m = model();
+      var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+      var w = doc.internal.pageSize.getWidth();
+      var L = 48;
+      var y = 56;
+
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.text("PROJECT CARTER", L, y);
+      doc.setFont("helvetica", "normal");
+      doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
+      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+
+      doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+      doc.text("Development Site (DA)", L, y + 44);
+
+      var name = document.getElementById("leadName").value.trim();
+      var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
+      doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
+
+      y += 90;
+      function section(title) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
+        doc.text(title, L, y); y += 7;
+        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 16;
+      }
+      function row(k, v, strong) {
+        doc.setFontSize(9.5);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
+        doc.text(k, L, y);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        doc.text(String(v), w - L, y, { align: "right" });
+        y += 15.5;
+      }
+      function rowIf(k, n) { if (n > 0) row(k, money(n)); }
+      function groupRows(ids, labels) {
+        ids.forEach(function (id) { rowIf(labels[id], num(id)); });
+      }
+
+      section("Land purchase");
+      row("Land purchase price", money(m.price));
+      row("Loan", m.loan > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "% of price)" : "None");
+      row("Deposit (cash)", money(m.deposit));
+      var sState = document.getElementById("stampState").value;
+      var sComm = document.getElementById("stampCommercial").checked;
+      if (m.stamp > 0 || sState) {
+        row("Stamp duty" + (sState ? " (" + sState + (sComm ? " commercial" : "") + " estimate)" : ""),
+            sState ? money(m.stamp) : optMoney(m.stamp));
+      }
+      rowIf("Legal / conveyancing", m.legal);
+      rowIf("Buyer's agent", m.buyersAgent);
+      rowIf("Due diligence & searches", m.dueDiligence);
+      row("Total purchase costs", money(m.purchaseCosts), true);
+
+      y += 6;
+      section("Costs to DA");
+      row("DA timeframe", m.months + " month" + (m.months === 1 ? "" : "s"));
+      groupRows(SITE, SITE_LABELS);
+      row("Site costs", money(m.site), true);
+      groupRows(CONSULT, CONSULT_LABELS);
+      row("Consultant costs", money(m.consult), true);
+      groupRows(STAT, STAT_LABELS);
+      row("Authority & statutory fees", money(m.statutory), true);
+      groupRows(HOLD, HOLD_LABELS);
+      if (m.holdIncome > 0) row("Rental income during the DA", "(" + money(m.holdIncome) + ")");
+      row("Holding costs, net of income (" + m.months + " mth)", signedMoney(m.netHold), true);
+      rowIf("Contingency (" + m.contPct.toFixed(1) + "%)", m.contingency);
+      rowIf("Project management / your time", m.pmFee);
+      rowIf("Loan set-up & fees", m.estFee);
+      row("Development costs funded by", m.costsInLoan ? "Loan facility" : "Cash");
+      row("Interest during the DA", m.interestDA > 0 ? money(m.interestDA) : "None", true);
+
+      y += 6;
+      section("Result");
+      row("Total cost to DA", money(m.totalCostToDA), true);
+      row("Cost to reach DA, excluding land", money(m.costExclLand));
+      row("Cash (equity) required", money(m.equityRequired), true);
+      row("Debt at DA (loan + interest)", money(m.debtAtDA), true);
+      row("Cost to DA as a % of land price", m.costOnPrice != null ? m.costOnPrice.toFixed(2) + "%" : "-");
+
+      y += 12;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+      var disc = "This estimate is a guide only, generated from the figures entered above. Any stamp duty shown is estimated from published state general transfer duty rates, not the state revenue office's figure, and excludes surcharges and concessions. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. Council fees vary by council and by the estimated cost of works. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
+      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      return doc;
+    }
+
+    function figuresSummary(m) {
+      function el(label, id) { return label + ": " + optMoney(num(id)); }
+      var lines = [
+        "Land purchase price: " + money(m.price),
+        "Loan: " + (m.loan > 0 ? money(m.loan) + " (" + m.lvr.toFixed(0) + "%)" : "none"),
+        "Deposit (cash): " + money(m.deposit),
+        "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + (document.getElementById("stampCommercial").checked ? " commercial" : "") + " estimate)" : "") + ": " + optMoney(m.stamp),
+        "Legal / conveyancing: " + optMoney(m.legal),
+        "Buyer's agent: " + optMoney(m.buyersAgent),
+        "Due diligence & searches: " + optMoney(m.dueDiligence),
+        "Total purchase costs: " + money(m.purchaseCosts),
+        "DA timeframe: " + m.months + " months",
+        "----"
+      ];
+      SITE.forEach(function (id) { if (num(id) > 0) lines.push(el(SITE_LABELS[id], id)); });
+      lines.push("Site costs: " + money(m.site));
+      CONSULT.forEach(function (id) { if (num(id) > 0) lines.push(el(CONSULT_LABELS[id], id)); });
+      lines.push("Consultant costs: " + money(m.consult));
+      STAT.forEach(function (id) { if (num(id) > 0) lines.push(el(STAT_LABELS[id], id)); });
+      lines.push("Authority & statutory fees: " + money(m.statutory));
+      HOLD.forEach(function (id) { if (num(id) > 0) lines.push(el(HOLD_LABELS[id], id) + "/yr"); });
+      if (m.holdIncome > 0) lines.push("Rental income during the DA: " + money(m.holdIncomeAnnual) + "/yr");
+      lines.push("Holding costs, net of income (" + m.months + " mth): " + signedMoney(m.netHold));
+      lines.push("Contingency (" + m.contPct.toFixed(1) + "%): " + optMoney(m.contingency));
+      lines.push("Project management / your time: " + optMoney(m.pmFee));
+      lines.push("Loan set-up & fees: " + optMoney(m.estFee));
+      lines.push("Development costs funded by: " + (m.costsInLoan ? "loan facility" : "cash"));
+      lines.push("Loan interest rate: " + (m.rate > 0 ? (m.rate * 100).toFixed(2) + "%/yr" : "n/a"));
+      lines.push("----");
+      lines.push("Interest during the DA: " + (m.interestDA > 0 ? money(m.interestDA) : "none"));
+      lines.push("Total cost to DA: " + money(m.totalCostToDA));
+      lines.push("Cost to reach DA, excluding land: " + money(m.costExclLand));
+      lines.push("Cash (equity) required: " + money(m.equityRequired));
+      lines.push("Debt at DA (loan + interest): " + money(m.debtAtDA));
+      lines.push("Cost to DA as a % of land price: " + (m.costOnPrice != null ? m.costOnPrice.toFixed(2) + "%" : "n/a"));
+      return lines.join("\n");
+    }
+
+    function saveDoc() {
+      if (!lastDoc) lastDoc = makePDF();
+      if (lastDoc) lastDoc.save("project-carter-development-site-da.pdf");
+    }
+
+    leadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = document.getElementById("leadName");
+      var email = document.getElementById("leadEmail");
+      var phone = document.getElementById("leadPhone");
+      if (!name.value.trim() || !phone.value.trim() || !email.value.trim() || !email.checkValidity()) {
+        if (leadForm.reportValidity) leadForm.reportValidity();
+        return;
+      }
+
+      lastDoc = makePDF();
+      saveDoc();
+
+      document.getElementById("figuresField").value = figuresSummary(model());
+      var help = document.getElementById("leadHelp");
+      var subj = leadForm.querySelector('input[name="_subject"]');
+      if (subj) subj.value = (help && help.checked)
+        ? "Development Site (DA) Calculator - assessment requested"
+        : "Development Site (DA) Calculator request";
+      fetch(leadForm.action, {
+        method: "POST",
+        body: new FormData(leadForm),
+        headers: { "Accept": "application/json" }
+      })["catch"](function () { /* the visitor still has their PDF */ })
+        .then(function () {
+          unlock();
+          leadForm.hidden = true;
+          var done = document.getElementById("calcDone");
+          done.hidden = false;
+          done.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+
+    document.getElementById("redownload").addEventListener("click", saveDoc);
+
+    /* ---- lead-capture modal --------------------------------------------- */
+    var openLead = document.getElementById("openLead");
+    var leadModal = document.getElementById("leadModal");
+
+    function onModalKey(e) { if (e.key === "Escape") closeModal(); }
+
+    function openModal() {
+      leadModal.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      document.addEventListener("keydown", onModalKey);
+      var first = document.getElementById("leadName");
+      if (first) first.focus();
+    }
+    function closeModal() {
+      leadModal.hidden = true;
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("keydown", onModalKey);
+      openLead.focus();
+    }
+
+    leadModal.addEventListener("click", function (e) {
+      if (e.target.hasAttribute("data-close")) closeModal();
+    });
+
+    /* ---- reveal gate wiring ------------------------------------------------ */
+    var resultsEl = document.querySelector(".calc-results");
+    var scheduleWrap = document.querySelector(".calc-schedule-wrap");
+    var lockNote = document.getElementById("lockNote");
+
+    function applyLock() {
+      resultsEl.classList.toggle("is-locked", !unlocked);
+      scheduleWrap.classList.toggle("is-locked", !unlocked);
+      if (lockNote) lockNote.hidden = unlocked;
+      openLead.textContent = unlocked ? "Download the PDF again" : "Download cost summary (PDF)";
+      render();
+    }
+    function unlock() {
+      if (unlocked) return;
+      unlocked = true;
+      try { window.localStorage.setItem(LOCK_KEY, "1"); } catch (e) {}
+      applyLock();
+    }
+    applyLock();
+
+    openLead.addEventListener("click", function () {
+      if (unlocked) { lastDoc = makePDF(); saveDoc(); }
+      else openModal();
+    });
+    resultsEl.addEventListener("click", function (e) {
+      if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
+    });
+    scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+  })();
+  </script>
+</body>
+</html>
