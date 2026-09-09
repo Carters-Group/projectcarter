@@ -72,7 +72,7 @@
               <div class="field">
                 <label for="council">Council / LGA <span>(optional)</span></label>
                 <input type="text" id="council" autocomplete="off" placeholder="Example City Council" />
-                <p class="field-hint">Filled from the address check where the data allows (map data, so confirm the exact name). Report requirements are set by the council's LEP and DCP, or the local planning scheme.</p>
+                <p class="field-hint">Enter this yourself, from the rates notice or the council's own site. It is not filled from the address check, because the exact LGA name matters and map data gets it wrong. Report requirements are set by the council's LEP and DCP, or the local planning scheme. Always hold a pre-lodgement (pre-DA) meeting with the council before you submit, unless you already have certainty on the outcome.</p>
               </div>
 
               <div class="field">
@@ -102,7 +102,7 @@
                   <label class="calc-check"><input type="checkbox" id="scVegetation" /><span>Native vegetation or known biodiversity value</span></label>
                   <label class="calc-check"><input type="checkbox" id="scStormwater" /><span>Cannot drain to the street; needs on-site detention or an easement</span></label>
                   <label class="calc-check"><input type="checkbox" id="scCorner" /><span>New or altered driveway near an intersection</span></label>
-                  <p class="field-hint">The consultant list below is tagged from what you tick here. It is a guide, not a determination. Book a pre-lodgement (pre-DA) meeting with the council to confirm exactly what your DA must include.</p>
+                  <p class="field-hint">The consultant list below is tagged from what you tick here. It is a guide, not a determination. Always book a pre-lodgement (pre-DA) meeting with the council to confirm exactly what your DA must include, unless the outcome is already certain.</p>
                 </div>
               </div>
             </div>
@@ -478,6 +478,7 @@
             <p><strong>Standard for most DAs:</strong> architect / design drawings, town planner (SEE), detail &amp; level survey, civil / stormwater, landscape plan, BASIX / NatHERS.</p>
             <p><strong>&#10033; Likely for this site:</strong> <span id="likelyList">tick the site characteristics above</span></p>
             <p><strong>May also be required:</strong> <span id="possibleList">&mdash;</span> Confirm the list at a council pre-lodgement meeting.</p>
+            <p>Always hold a pre-lodgement (pre-DA) meeting with the council before lodging, unless you already have certainty on the outcome. It is the cheapest way to find out what the assessment will turn on.</p>
           </div>
 
           <h2 class="calc-subhead">Month by month</h2>
@@ -543,7 +544,7 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
-            <li><strong>The site.</strong> The address is checked once, when you click out of the field, against public map data to confirm the suburb and set the state, which drives stamp duty and the demolition rates. A matched address is also rewritten as a tidy one-line version for the summary, and the council name is filled (and corrected) from the same check until you type your own. Nothing else is sent, and nothing is stored. The <strong>site characteristics</strong> you tick drive the report tags in the consultant list and the standing prompt to hold a pre-lodgement meeting. The tags are a guide, not a determination by the council.</li>
+            <li><strong>The site.</strong> The address is checked once, when you click out of the field, against public map data to confirm the suburb and set the state, which drives stamp duty and the demolition rates. A matched address is also rewritten as a tidy one-line version for the summary, keeping the street number you typed if the map data has none. The council field is never auto-filled: the exact LGA name matters for the LEP / DCP and map data is not reliable enough, so enter it yourself. Nothing else is sent, and nothing is stored. The <strong>site characteristics</strong> you tick drive the report tags in the consultant list. The tags are a guide, not a determination by the council: always hold a pre-lodgement (pre-DA) meeting before you lodge, unless the outcome is already certain.</li>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of the land price you enter. The deposit is the rest, and it is cash. Leave the loan blank and the whole purchase is funded with cash.</li>
             <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. The filled figure is transfer duty plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's or titles registry's figure.</li>
             <li><strong>Demolition.</strong> Click the field, and with a state set (from the address check or the stamp duty box) and a footprint area entered it fills with an indicative figure for that state and structure type. The rate per m² runs higher for a small footprint and lower for a large one, because plant still has to be mobilised either way. Ticking "asbestos is likely" adds the uplift percentage. Figures are from price guides, not quotes, and a minimum job cost applies. Editing the field pins your own number; clearing it brings the estimate back.</li>
@@ -599,7 +600,7 @@
     var demoEst = document.getElementById("demoEst");
     var demoEstNote = document.getElementById("demoEstNote");
     var daType = document.getElementById("daType");
-    var touched = { stampDuty: false, demolition: false, council: false };
+    var touched = { stampDuty: false, demolition: false };
     var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
 
     /* cost-line groups, reused for summing, the blur formatter and the PDF */
@@ -1124,23 +1125,18 @@
     });
 
     /* ---- address check: one lookup when the field loses focus ------------
-       Free, keyless OpenStreetMap geocode. Confirms the suburb, sets the
-       state (which drives stamp duty and demolition), and fills the council
-       name where the data allows. Fails soft. */
+       Free, keyless OpenStreetMap geocode. Confirms the suburb and sets the
+       state (which drives stamp duty and demolition). It does not touch the
+       council field: the LGA name has to be exactly right for the LEP / DCP
+       lookup, and map data is not reliable enough, so that stays manual.
+       Fails soft. */
     var addressEl = document.getElementById("address");
-    var councilEl = document.getElementById("council");
     var addressNote = document.getElementById("addressNote");
     var lastGeocode = "";
     var STATE_NAMES = {
       NSW: "New South Wales", VIC: "Victoria", QLD: "Queensland", WA: "Western Australia",
       SA: "South Australia", TAS: "Tasmania", ACT: "Australian Capital Territory", NT: "Northern Territory"
     };
-
-    /* Once the user types in the council field themselves, the address check
-       stops overwriting it (clearing it hands control back). */
-    councilEl.addEventListener("input", function () {
-      touched.council = councilEl.value.trim() !== "";
-    });
 
     function setAddressNote(msg) {
       addressNote.textContent = msg || "";
@@ -1150,9 +1146,10 @@
     /* Neaten a name for the summary: "12 example ST" -> "12 Example St".
        Leaves digits and short direction/ordinal tokens alone. */
     function titleCase(s) {
-      return String(s).toLowerCase().replace(/\b[a-z]/g, function (c) {
-        return c.toUpperCase();
-      }).replace(/\bMc([a-z])/g, function (_, c) { return "Mc" + c.toUpperCase(); });
+      return String(s).toLowerCase()
+        .replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); })
+        .replace(/(\d)([a-z])\b/g, function (_, d, c) { return d + c.toUpperCase(); })
+        .replace(/\bMc([a-z])/g, function (_, c) { return "Mc" + c.toUpperCase(); });
     }
 
     function checkAddress() {
@@ -1180,7 +1177,6 @@
             });
           }
           var place = a.suburb || a.city || a.town || a.village || a.municipality || a.county || "";
-          var lga = a.local_government_area || a.municipality || a.city || a.county || a.region || "";
           if (code && STATE_NAMES[code]) {
             if (stampState.value !== code) {
               stampState.value = code;
@@ -1190,14 +1186,15 @@
             recalcAutofills();
             render();
           }
-          /* Fill / correct the council name unless the user has typed their own. */
-          if (lga && !touched.council) councilEl.value = titleCase(lga);
 
           /* Rebuild the address as a tidy one-liner from the matched parts,
-             but only when a street was actually resolved. */
-          var street = ((a.house_number || "") + " " + (a.road || "")).trim();
+             but only when a street name was resolved. Keep the street number
+             the user typed if the geocode did not return one. */
+          var typedNum = (q.match(/^\s*(\d+[a-zA-Z]?(?:-\d+[a-zA-Z]?)?)/) || [])[1] || "";
+          var houseNo = a.house_number || typedNum;
+          var street = ((houseNo || "") + " " + (a.road || "")).trim();
           var neat = "";
-          if (street) {
+          if (a.road) {
             var parts = [titleCase(street)];
             if (place) parts.push(titleCase(place));
             var tail = [];
@@ -1365,7 +1362,7 @@
 
       y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. Report tags are derived from the site characteristics you ticked and are not a determination by the council; confirm the required documents at a pre-lodgement meeting. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure. Demolition figures are indicative $/m2 ranges from price guides, not quotes, with a minimum job cost. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This estimate is a guide only, generated from the figures entered above. Report tags are derived from the site characteristics you ticked and are not a determination by the council; always confirm the required documents at a pre-lodgement (pre-DA) meeting before lodging, unless the outcome is already certain. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure. Demolition figures are indicative $/m2 ranges from price guides, not quotes, with a minimum job cost. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
