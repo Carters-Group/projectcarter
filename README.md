@@ -19,7 +19,7 @@ project-haig-on-the-park.html   project detail — Haig On The Park (completed)
 project-royal-terraces.html     project detail — Royal Terraces (construction commencing)
 project-city-west-villas.html   project detail — City West Villas (construction commencing)
 roi-calculator.html             property-hold ROI model — costs, rent growth, interest, debt reduction, value uplift; downloads a PDF, pings Formspree
-noi-calculator.html             single-year net operating income model — income lines, operating expenses (every line, property management included, has a "recovered from tenant" tick that drops it from the total), strata/body corp line, NOI, net operating income as a %, implied value from a cap rate; same reveal gate, PDF and Formspree ping as the ROI page
+noi-calculator.html             single-year net operating income model — optional purchase price, income lines, operating expenses (every line, property management included, has a "recovered from tenant" tick that drops it from the total), strata/body corp line, NOI, net operating income as a % (of income and of purchase price), implied value from a cap rate; same reveal gate, PDF and Formspree ping as the ROI page
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
 styles.css                      design system + layout (home, project pages, landing, calculator)
