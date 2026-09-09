@@ -42,11 +42,20 @@ the Year 1 net rent, rental growth, interest rate, term, the share of annual
 profit used to pay down the loan, and an optional value uplift (year, new base
 rent, new growth rate). It builds a year-by-year schedule and reports total cash
 required, net sale proceeds, total profit, total ROI, return per year, equity
-multiple and IRR. Value is held at the entry net yield (Year 1 net rent ÷ price),
-so it moves with net rent. Figures update live, the lead form builds a one-page
-PDF with **jsPDF** (loaded from cdnjs) that downloads in the browser, and the
-figures + contact details are POSTed to Formspree in the background. Both forms
-share the same `YOUR_FORM_ID` Formspree placeholder.
+multiple and IRR. There is also an optional **exit cap rate on sale**: the capitalisation rate used
+for value glides straight-line from the entry net yield in year 1 to that exit
+cap rate by the final year (blank holds the entry yield), so yield compression or
+softening can be modelled. The "Your return" figures and the year-by-year table
+**update live but stay blurred** until the visitor submits their name, email and
+phone in the modal behind the **Download ROI summary (PDF)** button; the unlock
+is remembered per browser in `localStorage` (`pc_roi_unlocked`). A handful of
+input-derived rows (loan, deposit, total cash required, entry/exit yield) stay
+visible as a teaser. This deters casual screenshotting only — the real values are
+still in the DOM, so a determined visitor can read them; a true gate needs
+server-side rendering, which a static site can't do. Figures update live, the
+modal form builds a one-page PDF with **jsPDF** (loaded from cdnjs) that downloads
+in the browser, and the figures + contact details are POSTed to Formspree in the
+background. Both forms share the same `YOUR_FORM_ID` Formspree placeholder.
 
 The brand wordmark is **"PROJECT CARTER"** only (no "DEVELOPMENT" sub-line).
 

@@ -158,11 +158,11 @@
 
           <dl class="calc-results" id="calcResults" aria-live="polite">
             <h2>Your return</h2>
-            <div class="result-row"><dt>Loan amount</dt><dd data-out="loan">&mdash;</dd></div>
-            <div class="result-row"><dt>Deposit</dt><dd data-out="deposit">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Total cash required</dt><dd data-out="cashRequired">&mdash;</dd></div>
-            <div class="result-row"><dt>Entry net yield</dt><dd data-out="entryYield">&mdash;</dd></div>
-            <div class="result-row"><dt>Exit cap rate on sale</dt><dd data-out="exitCap">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Loan amount</dt><dd data-out="loan">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Deposit</dt><dd data-out="deposit">&mdash;</dd></div>
+            <div class="result-row is-key is-teaser"><dt>Total cash required</dt><dd data-out="cashRequired">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Entry net yield</dt><dd data-out="entryYield">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Exit cap rate on sale</dt><dd data-out="exitCap">&mdash;</dd></div>
             <div class="result-row"><dt>Property value at sale</dt><dd data-out="saleValue">&mdash;</dd></div>
             <div class="result-row"><dt>Loan balance at sale</dt><dd data-out="loanAtSale">&mdash;</dd></div>
             <div class="result-row"><dt>Net sale proceeds</dt><dd data-out="netProceeds">&mdash;</dd></div>
@@ -174,14 +174,15 @@
             <div class="result-row is-key"><dt>IRR (compound)</dt><dd data-out="irr">&mdash;</dd></div>
 
             <div class="calc-cta">
+              <p class="calc-lock-note" id="lockNote">The full return is hidden. Enter your details to reveal every figure and download the one-page PDF.</p>
               <button type="button" class="btn btn-accent btn-block" id="openLead">Download ROI summary (PDF)</button>
-              <p class="form-fineprint">You'll enter your name, email and phone on the next step. Project Carter gets a copy of your figures and follows up only if you ask.</p>
+              <p class="form-fineprint">Name, email and phone on the next step. Project Carter gets a copy of your figures and follows up only if you ask.</p>
             </div>
           </dl>
         </div>
 
         <div class="calc-schedule-wrap">
-          <h2 class="calc-subhead">Year by year</h2>
+          <h2 class="calc-subhead">Year by year <span class="calc-lock-tag">Locked</span></h2>
           <div class="calc-schedule-scroll">
             <table class="calc-schedule" id="calcSchedule">
               <thead>
@@ -640,6 +641,7 @@
         headers: { "Accept": "application/json" }
       })["catch"](function () { /* the visitor still has their PDF */ })
         .then(function () {
+          unlock();
           leadForm.hidden = true;
           var done = document.getElementById("calcDone");
           done.hidden = false;
@@ -669,10 +671,41 @@
       openLead.focus();
     }
 
-    openLead.addEventListener("click", openModal);
     leadModal.addEventListener("click", function (e) {
       if (e.target.hasAttribute("data-close")) closeModal();
     });
+
+    /* ---- reveal gate: the return updates live but stays blurred until the
+       visitor leaves their details (persisted per browser) ---------------- */
+    var LOCK_KEY = "pc_roi_unlocked";
+    var resultsEl = document.querySelector(".calc-results");
+    var scheduleWrap = document.querySelector(".calc-schedule-wrap");
+    var lockNote = document.getElementById("lockNote");
+    var unlocked = false;
+    try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
+
+    function applyLock() {
+      resultsEl.classList.toggle("is-locked", !unlocked);
+      scheduleWrap.classList.toggle("is-locked", !unlocked);
+      if (lockNote) lockNote.hidden = unlocked;
+      openLead.textContent = unlocked ? "Download the PDF again" : "Download ROI summary (PDF)";
+    }
+    function unlock() {
+      if (unlocked) return;
+      unlocked = true;
+      try { window.localStorage.setItem(LOCK_KEY, "1"); } catch (e) {}
+      applyLock();
+    }
+    applyLock();
+
+    openLead.addEventListener("click", function () {
+      if (unlocked) { lastDoc = makePDF(); saveDoc(); }
+      else openModal();
+    });
+    resultsEl.addEventListener("click", function (e) {
+      if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
+    });
+    scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
   })();
   </script>
 </body>
