@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Enquire | Project Carter, Corporate Property Advisor</title>
-  <meta name="description" content="Tell Trent Macartney about your development, value-add commercial, family office or fund mandate, especially the ones with a roadblock. Reply within two business days." />
+  <meta name="description" content="Tell Project Carter about your development, value-add commercial, family office or fund mandate, especially the ones with a roadblock. Reply within two business days." />
   <meta name="theme-color" content="#0c1016" />
 
   <!-- Open Graph -->
@@ -33,92 +33,232 @@
   </header>
 
   <main class="landing" id="main">
-    <!-- ===== BACKGROUND MEDIA =================================================
-         A photo or video sits behind the form. With nothing added it falls back
-         to the same dark gradient + blueprint grid used on the home page.
-
-         IMAGE:  add an inline style below, e.g.
-                 <div class="landing-media" aria-hidden="true"
-                      style="background-image:url('assets/images/landing.jpg')"></div>
-
-         VIDEO:  uncomment the <video> block. Keep it muted + playsinline + loop,
-                 use an .mp4 under ~5 MB, and set a poster image.
-    ====================================================================== -->
-    <div class="landing-media" aria-hidden="true">
-      <!--
-      <video class="landing-video" autoplay muted loop playsinline
-             poster="assets/images/landing-poster.jpg">
-        <source src="assets/images/landing.mp4" type="video/mp4" />
-      </video>
-      -->
-    </div>
+    <!-- Background photo: 189 Balaclava Road corner freehold, under a dark scrim -->
+    <div class="landing-media" aria-hidden="true"
+         style="background-image:url('assets/images/projects/balaclava/balaclava-corner.jpg')"></div>
     <div class="landing-scrim" aria-hidden="true"></div>
 
     <div class="wrap landing-inner">
       <div class="landing-copy">
-        <!-- ===== EDIT THIS WORDING ===== -->
         <p class="kicker">Project Carter, Corporate Property Advisor</p>
         <h1 class="landing-head">Have a site, mandate or capital looking for the right partner?</h1>
-        <p class="landing-sub">Advisory for property developers, value-add commercial, family offices and managed funds, especially the deals with a roadblock in the way. Tell me what you have and I'll come back to you within two business days.</p>
-        <p class="landing-sub" style="margin-top:18px;font-size:0.95rem">
-          Trent Macartney &nbsp;·&nbsp;
-          <a href="tel:+61411940010" style="color:var(--accent);text-decoration:none">0411 940 010</a> &nbsp;·&nbsp;
-          <a href="mailto:trent@cartersinvestments.com.au" style="color:var(--accent);text-decoration:none">trent@cartersinvestments.com.au</a>
-        </p>
-        <!-- ===== /EDIT ===== -->
+        <p class="landing-sub">Advisory for property developers, value-add commercial, family offices and managed funds, especially the deals with a roadblock in the way. Answer a few quick questions and I'll come back to you within two business days.</p>
       </div>
 
+      <!-- ===== MULTI-STEP LEAD FORM ==========================================
+           Four steps, two questions each, contact details last. The progress
+           bar moves in 25% jumps. All fields stay in the DOM and post together
+           to Formspree on the final step.
+
+           Replace YOUR_FORM_ID below with the id from your Formspree form so
+           submissions reach your inbox. On Formspree's free plan the _next
+           value needs to be the full URL, e.g.
+           https://your-domain.com/thanks.html
+      ================================================================== -->
       <form class="landing-form card" id="form"
             action="https://formspree.io/f/YOUR_FORM_ID"
-            method="POST">
-        <!-- Formspree settings: sends each submission to your inbox.
-             Replace YOUR_FORM_ID above with the id from your Formspree form. -->
+            method="POST" novalidate>
         <input type="hidden" name="_subject" value="New enquiry, Project Carter landing page" />
         <input type="hidden" name="_next" value="thanks.html" />
         <!-- Spam honeypot: bots fill this, humans never see it -->
         <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
 
-        <div class="field">
-          <label for="name">Name</label>
-          <input type="text" id="name" name="Name" autocomplete="name" required />
+        <div class="form-progress">
+          <div class="form-progress-bar"><span id="progressFill" style="width:25%"></span></div>
+          <p class="form-progress-label" id="progressLabel" aria-live="polite">Step 1 of 4 &middot; 25%</p>
         </div>
-        <div class="field">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="Email" autocomplete="email" required />
+
+        <!-- STEP 1 ---------------------------------------------------------- -->
+        <fieldset class="form-step" data-step="1">
+          <legend>About the opportunity</legend>
+
+          <div class="q">
+            <p class="q-label">What brings you to Project Carter?</p>
+            <div class="opts" role="radiogroup" aria-label="What brings you to Project Carter?">
+              <label class="opt"><input type="radio" name="Interest" value="Development site" /><span>Development site</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="Value-add commercial asset" /><span>Value-add commercial asset</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="Family office property strategy" /><span>Family office property strategy</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="Managed fund mandate" /><span>Managed fund mandate</span></label>
+              <label class="opt"><input type="radio" name="Interest" value="A problem or stalled project" /><span>A problem or stalled project</span></label>
+            </div>
+          </div>
+
+          <div class="q">
+            <p class="q-label">Where is it up to?</p>
+            <div class="opts" role="radiogroup" aria-label="Where is it up to?">
+              <label class="opt"><input type="radio" name="Stage" value="Still exploring" /><span>Still exploring</span></label>
+              <label class="opt"><input type="radio" name="Stage" value="Site or asset identified" /><span>Site or asset identified</span></label>
+              <label class="opt"><input type="radio" name="Stage" value="Under contract or owned" /><span>Under contract or owned</span></label>
+              <label class="opt"><input type="radio" name="Stage" value="Stalled, needs a path forward" /><span>Stalled, needs a path forward</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- STEP 2 ---------------------------------------------------------- -->
+        <fieldset class="form-step" data-step="2" hidden>
+          <legend>Scale &amp; timing</legend>
+
+          <div class="q">
+            <p class="q-label">How soon do you want to act?</p>
+            <div class="opts" role="radiogroup" aria-label="How soon do you want to act?">
+              <label class="opt"><input type="radio" name="Timeframe" value="Ready now" /><span>Ready now</span></label>
+              <label class="opt"><input type="radio" name="Timeframe" value="1 to 3 months" /><span>1 to 3 months</span></label>
+              <label class="opt"><input type="radio" name="Timeframe" value="3 to 6 months" /><span>3 to 6 months</span></label>
+              <label class="opt"><input type="radio" name="Timeframe" value="6 to 12 months" /><span>6 to 12 months</span></label>
+            </div>
+          </div>
+
+          <div class="q">
+            <p class="q-label">Indicative deal size</p>
+            <div class="opts" role="radiogroup" aria-label="Indicative deal size">
+              <label class="opt"><input type="radio" name="Deal size" value="Under $2M" /><span>Under $2M</span></label>
+              <label class="opt"><input type="radio" name="Deal size" value="$2M to $5M" /><span>$2M to $5M</span></label>
+              <label class="opt"><input type="radio" name="Deal size" value="$5M to $15M" /><span>$5M to $15M</span></label>
+              <label class="opt"><input type="radio" name="Deal size" value="$15M to $50M" /><span>$15M to $50M</span></label>
+              <label class="opt"><input type="radio" name="Deal size" value="$50M or more" /><span>$50M or more</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- STEP 3 ---------------------------------------------------------- -->
+        <fieldset class="form-step" data-step="3" hidden>
+          <legend>Capital &amp; scope</legend>
+
+          <div class="q">
+            <p class="q-label">Capital position</p>
+            <div class="opts" role="radiogroup" aria-label="Capital position">
+              <label class="opt"><input type="radio" name="Capital position" value="Equity ready to deploy" /><span>Equity ready to deploy</span></label>
+              <label class="opt"><input type="radio" name="Capital position" value="Part equity, seeking a partner" /><span>Part equity, seeking a partner</span></label>
+              <label class="opt"><input type="radio" name="Capital position" value="Seeking funding or JV" /><span>Seeking funding or JV</span></label>
+              <label class="opt"><input type="radio" name="Capital position" value="Advisory only, capital not required" /><span>Advisory only, capital not required</span></label>
+            </div>
+          </div>
+
+          <div class="q">
+            <p class="q-label">What do you need? Choose any that apply.</p>
+            <div class="opts">
+              <label class="opt"><input type="checkbox" name="Support needed" value="Feasibility and site strategy" /><span>Feasibility and site strategy</span></label>
+              <label class="opt"><input type="checkbox" name="Support needed" value="Planning pathway" /><span>Planning pathway</span></label>
+              <label class="opt"><input type="checkbox" name="Support needed" value="Capital structuring and JV" /><span>Capital structuring and JV</span></label>
+              <label class="opt"><input type="checkbox" name="Support needed" value="Delivery oversight" /><span>Delivery oversight</span></label>
+              <label class="opt"><input type="checkbox" name="Support needed" value="Sale or lease-up" /><span>Sale or lease-up</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- STEP 4 ---------------------------------------------------------- -->
+        <fieldset class="form-step" data-step="4" hidden>
+          <legend>Your details</legend>
+
+          <div class="q">
+            <p class="q-label">Your role</p>
+            <div class="opts" role="radiogroup" aria-label="Your role">
+              <label class="opt"><input type="radio" name="Your role" value="Owner or principal" /><span>Owner or principal</span></label>
+              <label class="opt"><input type="radio" name="Your role" value="Fund manager or director" /><span>Fund manager or director</span></label>
+              <label class="opt"><input type="radio" name="Your role" value="Family office" /><span>Family office</span></label>
+              <label class="opt"><input type="radio" name="Your role" value="Development manager" /><span>Development manager</span></label>
+              <label class="opt"><input type="radio" name="Your role" value="Adviser or broker" /><span>Adviser or broker</span></label>
+            </div>
+          </div>
+
+          <div class="q q-contact">
+            <div class="field">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="Name" autocomplete="name" required />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="Email" autocomplete="email" required />
+            </div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="Phone" autocomplete="tel" required />
+            </div>
+            <div class="field">
+              <label for="message">Anything I should know? (optional)</label>
+              <textarea id="message" name="Message" rows="3"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-nav">
+          <button type="button" class="btn btn-ghost" id="backBtn" hidden>Back</button>
+          <button type="button" class="btn btn-accent" id="nextBtn" disabled>Next</button>
+          <button type="submit" class="btn btn-accent" id="submitBtn" hidden>Send enquiry</button>
         </div>
-        <div class="field">
-          <label for="phone">Phone</label>
-          <input type="tel" id="phone" name="Phone" autocomplete="tel" />
-        </div>
-        <div class="field">
-          <label for="subject">I'm enquiring about</label>
-          <select id="subject" name="Enquiry">
-            <option>Property development</option>
-            <option>Value-add commercial</option>
-            <option>Family office</option>
-            <option>Managed fund</option>
-            <option>A problem site</option>
-            <option>General enquiry</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="message">Message</label>
-          <textarea id="message" name="Message" rows="4" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-accent btn-block">Send enquiry</button>
-        <p class="form-fineprint">We'll only use your details to respond to this enquiry.</p>
+        <p class="form-fineprint">I'll only use your details to respond to this enquiry.</p>
       </form>
     </div>
   </main>
 
-  <footer class="landing-foot">
-    <div class="wrap">
-      <p>&copy; <span id="year">2026</span> Project Carter &middot; <a href="index.html">Main site</a></p>
-    </div>
-  </footer>
-
   <script>
-    document.getElementById("year").textContent = String(new Date().getFullYear());
+  (function () {
+    "use strict";
+    var form = document.getElementById("form");
+    var steps = Array.prototype.slice.call(form.querySelectorAll(".form-step"));
+    var fill = document.getElementById("progressFill");
+    var label = document.getElementById("progressLabel");
+    var backBtn = document.getElementById("backBtn");
+    var nextBtn = document.getElementById("nextBtn");
+    var submitBtn = document.getElementById("submitBtn");
+    var total = steps.length;
+    var current = 0;
+
+    function stepValid(i) {
+      var step = steps[i];
+      var groups = {};
+      Array.prototype.forEach.call(step.querySelectorAll('input[type="radio"]'), function (r) {
+        if (!(r.name in groups)) groups[r.name] = false;
+      });
+      Array.prototype.forEach.call(step.querySelectorAll('input[type="radio"]:checked'), function (r) {
+        groups[r.name] = true;
+      });
+      for (var k in groups) { if (!groups[k]) return false; }
+      var ok = true;
+      Array.prototype.forEach.call(step.querySelectorAll('input[required], textarea[required]'), function (el) {
+        if (!el.value.trim()) ok = false;
+        else if (el.type === "email" && !el.checkValidity()) ok = false;
+      });
+      return ok;
+    }
+
+    function refresh() {
+      var valid = stepValid(current);
+      nextBtn.disabled = !valid;
+      submitBtn.disabled = !valid;
+    }
+
+    function render(moveFocus) {
+      steps.forEach(function (s, i) { s.hidden = i !== current; });
+      var pct = Math.round(((current + 1) / total) * 100);
+      fill.style.width = pct + "%";
+      label.textContent = "Step " + (current + 1) + " of " + total + " · " + pct + "%";
+      backBtn.hidden = current === 0;
+      var last = current === total - 1;
+      nextBtn.hidden = last;
+      submitBtn.hidden = !last;
+      refresh();
+      if (moveFocus) {
+        var el = steps[current].querySelector("input, textarea");
+        if (el) el.focus({ preventScroll: true });
+      }
+    }
+
+    form.addEventListener("change", refresh);
+    form.addEventListener("input", refresh);
+
+    nextBtn.addEventListener("click", function () {
+      if (stepValid(current) && current < total - 1) { current++; render(true); }
+    });
+    backBtn.addEventListener("click", function () {
+      if (current > 0) { current--; render(true); }
+    });
+    form.addEventListener("submit", function (e) {
+      if (!stepValid(current)) e.preventDefault();
+    });
+
+    render(false);
+  })();
   </script>
 </body>
 </html>

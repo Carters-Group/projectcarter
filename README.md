@@ -27,10 +27,12 @@ assets/images/team/             Trent portrait
 .nojekyll                       serve files as-is on GitHub Pages
 ```
 
-The three project cards on the home page open their detail page in a **new tab**
-(`target="_blank"`). Project detail pages carry the same header/footer as the
-home page. Every "Enquire" / "Contact" link points to `enquire.html`; there is no
-in-page contact section.
+Every link on the site opens in the same tab (no `target="_blank"`); visitors use
+the browser back button to return. Project detail pages carry the same
+header/footer as the home page. Every "Enquire" / "Contact" link points to
+`enquire.html`, which is a standalone multi-step lead-capture page with no site
+nav or footer. It carries no personal phone or email; enquiries arrive only
+through the form.
 
 The brand wordmark is **"PROJECT CARTER"** only (no "DEVELOPMENT" sub-line).
 
