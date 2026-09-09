@@ -46,13 +46,17 @@ multiple and IRR. There is also an optional **exit cap rate on sale**: the capit
 for value glides straight-line from the entry net yield in year 1 to that exit
 cap rate by the final year (blank holds the entry yield), so yield compression or
 softening can be modelled. The "Your return" figures and the year-by-year table
-**update live but stay blurred** until the visitor submits their name, email and
-phone in the modal behind the **Download ROI summary (PDF)** button; the unlock
-is remembered per browser in `localStorage` (`pc_roi_unlocked`). A handful of
-input-derived rows (loan, deposit, total cash required, entry/exit yield) stay
-visible as a teaser. This deters casual screenshotting only — the real values are
-still in the DOM, so a determined visitor can read them; a true gate needs
-server-side rendering, which a static site can't do. Figures update live, the
+**update live but every digit after the first is masked** (`$4••,•••`,
+`1••.••%`) until the visitor submits the modal behind the **Download ROI
+summary (PDF)** button; the unlock is remembered per browser in `localStorage`
+(`pc_roi_unlocked`) and the button then becomes "Download the PDF again". A
+handful of input-derived rows (loan, deposit, total cash required, entry/exit
+yield) and the schedule's Year column stay in full as a teaser. The modal has an
+optional **"Can you review these figures and summarise them for me?"** checkbox
+(`Assessment requested`) that also bumps the Formspree `_subject`. Masking is
+done in JS so the real values are not in the DOM, but a determined visitor can
+still re-run the model from the script; a true gate needs server-side rendering,
+which a static site can't do. With JavaScript off, nothing is masked. Figures update live, the
 modal form builds a one-page PDF with **jsPDF** (loaded from cdnjs) that downloads
 in the browser, and the figures + contact details are POSTed to Formspree in the
 background. Both forms share the same `YOUR_FORM_ID` Formspree placeholder.

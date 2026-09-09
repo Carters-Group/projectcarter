@@ -174,9 +174,9 @@
             <div class="result-row is-key"><dt>IRR (compound)</dt><dd data-out="irr">&mdash;</dd></div>
 
             <div class="calc-cta">
-              <p class="calc-lock-note" id="lockNote">The full return is hidden. Enter your details to reveal every figure and download the one-page PDF.</p>
+              <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
               <button type="button" class="btn btn-accent btn-block" id="openLead">Download ROI summary (PDF)</button>
-              <p class="form-fineprint">Name, email and phone on the next step. Project Carter gets a copy of your figures and follows up only if you ask.</p>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
             </div>
           </dl>
         </div>
@@ -232,8 +232,12 @@
                 <label for="leadPhone">Phone</label>
                 <input type="tel" id="leadPhone" name="Phone" autocomplete="tel" required />
               </div>
+              <label class="calc-check">
+                <input type="checkbox" id="leadHelp" name="Assessment requested" value="Yes, review these figures and get back to me" />
+                <span>Can you review these figures and summarise them for me?</span>
+              </label>
               <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my ROI summary (PDF)</button>
-              <p class="form-fineprint">I'll only use your details to send this summary and to respond if you ask me to.</p>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
             </form>
 
             <div class="calc-done" id="calcDone" hidden>
@@ -302,6 +306,19 @@
     function money(n) { return money0.format(Math.round(n)); }
     function signedMoney(n) { return (n < 0 ? "-" : "") + money(Math.abs(n)); }
     function pct(n) { return n.toFixed(2) + "%"; }
+
+    /* Reveal gate: figures update live, but every digit after the first is
+       masked until the visitor leaves their details (persisted per browser). */
+    var LOCK_KEY = "pc_roi_unlocked";
+    var unlocked = false;
+    try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
+    function mask(str) {
+      var seen = false;
+      return String(str).replace(/\d/g, function (d) {
+        if (seen) return "•";
+        seen = true; return d;
+      });
+    }
 
     /* ---- core model ------------------------------------------------------ */
     function model() {
@@ -419,20 +436,24 @@
         "Loan " + (m.price > 0 ? money(m.loan) : "—") +
         "   ·   Deposit " + (m.price > 0 ? money(m.deposit) : "—");
 
-      setOut("loan", m.price > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "%)" : "—");
-      setOut("deposit", m.price > 0 ? money(m.deposit) : "—");
-      setOut("cashRequired", m.cashRequired > 0 ? money(m.cashRequired) : "—");
-      setOut("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—");
-      setOut("exitCap", m.exitCap ? pct(m.exitCap * 100) : "—");
-      setOut("saleValue", m.valid ? money(m.saleValue) : "—");
-      setOut("loanAtSale", m.valid ? money(m.loanAtSale) : "—");
-      setOut("netProceeds", m.valid ? money(m.netProceeds) : "—");
-      setOut("cashKept", m.valid ? signedMoney(m.totalKept) : "—");
-      setOut("totalProfit", m.totalProfit != null ? signedMoney(m.totalProfit) : "—");
-      setOut("totalRoi", m.totalRoi != null ? pct(m.totalRoi) : "—");
-      setOut("roiPerYear", m.roiPerYear != null ? pct(m.roiPerYear) : "—");
-      setOut("equityMultiple", m.equityMultiple != null ? m.equityMultiple.toFixed(2) + "x" : "—");
-      setOut("irr", m.irr != null ? pct(m.irr * 100) : "—");
+      /* teaser rows (input-derived) stay in full; the return is masked until unlocked */
+      function put(key, str, teaser) {
+        setOut(key, (unlocked || teaser) ? str : mask(str));
+      }
+      put("loan", m.price > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "%)" : "—", true);
+      put("deposit", m.price > 0 ? money(m.deposit) : "—", true);
+      put("cashRequired", m.cashRequired > 0 ? money(m.cashRequired) : "—", true);
+      put("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—", true);
+      put("exitCap", m.exitCap ? pct(m.exitCap * 100) : "—", true);
+      put("saleValue", m.valid ? money(m.saleValue) : "—");
+      put("loanAtSale", m.valid ? money(m.loanAtSale) : "—");
+      put("netProceeds", m.valid ? money(m.netProceeds) : "—");
+      put("cashKept", m.valid ? signedMoney(m.totalKept) : "—");
+      put("totalProfit", m.totalProfit != null ? signedMoney(m.totalProfit) : "—");
+      put("totalRoi", m.totalRoi != null ? pct(m.totalRoi) : "—");
+      put("roiPerYear", m.roiPerYear != null ? pct(m.roiPerYear) : "—");
+      put("equityMultiple", m.equityMultiple != null ? m.equityMultiple.toFixed(2) + "x" : "—");
+      put("irr", m.irr != null ? pct(m.irr * 100) : "—");
 
       var body = document.getElementById("calcScheduleBody");
       if (!m.valid || !m.rows.length) {
@@ -441,17 +462,14 @@
       }
       var html = "";
       m.rows.forEach(function (r) {
-        html += "<tr>" +
-          "<td>" + r.year + "</td>" +
-          "<td>" + money(r.rent) + "</td>" +
-          "<td>" + money(r.interest) + "</td>" +
-          "<td>" + signedMoney(r.cashAfterInterest) + "</td>" +
-          "<td>" + money(r.debtPay) + "</td>" +
-          "<td>" + signedMoney(r.kept) + "</td>" +
-          "<td>" + money(r.balance) + "</td>" +
-          "<td>" + money(r.value) + "</td>" +
-          "<td>" + money(r.equity) + "</td>" +
-          "</tr>";
+        var cells = [
+          money(r.rent), money(r.interest), signedMoney(r.cashAfterInterest),
+          money(r.debtPay), signedMoney(r.kept), money(r.balance),
+          money(r.value), money(r.equity)
+        ];
+        html += "<tr><td>" + r.year + "</td>";
+        cells.forEach(function (c) { html += "<td>" + (unlocked ? c : mask(c)) + "</td>"; });
+        html += "</tr>";
       });
       body.innerHTML = html;
     }
@@ -635,6 +653,11 @@
       saveDoc();
 
       document.getElementById("figuresField").value = figuresSummary(model());
+      var help = document.getElementById("leadHelp");
+      var subj = leadForm.querySelector('input[name="_subject"]');
+      if (subj) subj.value = (help && help.checked)
+        ? "ROI Calculator - assessment requested"
+        : "ROI Calculator request";
       fetch(leadForm.action, {
         method: "POST",
         body: new FormData(leadForm),
@@ -675,20 +698,17 @@
       if (e.target.hasAttribute("data-close")) closeModal();
     });
 
-    /* ---- reveal gate: the return updates live but stays blurred until the
-       visitor leaves their details (persisted per browser) ---------------- */
-    var LOCK_KEY = "pc_roi_unlocked";
+    /* ---- reveal gate wiring ------------------------------------------------ */
     var resultsEl = document.querySelector(".calc-results");
     var scheduleWrap = document.querySelector(".calc-schedule-wrap");
     var lockNote = document.getElementById("lockNote");
-    var unlocked = false;
-    try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
 
     function applyLock() {
       resultsEl.classList.toggle("is-locked", !unlocked);
       scheduleWrap.classList.toggle("is-locked", !unlocked);
       if (lockNote) lockNote.hidden = unlocked;
       openLead.textContent = unlocked ? "Download the PDF again" : "Download ROI summary (PDF)";
+      render();
     }
     function unlock() {
       if (unlocked) return;

@@ -1035,10 +1035,8 @@ h1, h2, h3 {
 .calc-results.is-locked .result-row:not(.is-teaser) { cursor: pointer; }
 .calc-results.is-locked .result-row:not(.is-teaser) dd,
 .calc-schedule-wrap.is-locked .calc-schedule tbody td:not(:first-child) {
-  filter: blur(6px);
-  -webkit-filter: blur(6px);
+  color: var(--muted);
   user-select: none; -webkit-user-select: none;
-  transition: filter 0.35s ease;
 }
 .calc-schedule-wrap.is-locked .calc-schedule tbody { cursor: pointer; }
 
