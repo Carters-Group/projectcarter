@@ -898,7 +898,7 @@ h1, h2, h3 {
 }
 
 /* =========================================================
-   Investment Estimate calculator  (investment-estimate.html)
+   ROI Calculator  (roi-calculator.html)
    ========================================================= */
 .calc { padding: clamp(120px, 15vw, 170px) 0 clamp(72px, 12vw, 130px); }
 .calc-intro { max-width: 640px; margin-bottom: clamp(36px, 6vw, 60px); }
@@ -911,9 +911,69 @@ h1, h2, h3 {
   gap: clamp(28px, 5vw, 64px);
   align-items: start;
 }
-.calc-inputs { display: grid; gap: 18px; }
+.calc-inputs { display: grid; gap: 30px; }
 .calc-inputs .field-hint { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
 .calc-inputs .field label span { color: var(--muted); font-weight: 500; }
+
+.calc-group { display: grid; gap: 16px; }
+.calc-subhead {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.calc-check {
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 0.95rem; color: var(--text); cursor: pointer;
+}
+.calc-check input { margin-top: 3px; flex: none; accent-color: var(--accent); }
+
+.calc-uplift {
+  display: grid; gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+/* ---- year-by-year schedule ---- */
+.calc-schedule-wrap { margin-top: clamp(40px, 6vw, 64px); }
+.calc-schedule-scroll { overflow-x: auto; margin-top: 18px; }
+.calc-schedule {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  min-width: 720px;
+}
+.calc-schedule th, .calc-schedule td {
+  padding: 11px 14px;
+  text-align: right;
+  border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+.calc-schedule th:first-child, .calc-schedule td:first-child { text-align: left; }
+.calc-schedule thead th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom-color: var(--line);
+}
+.calc-schedule tbody td { color: var(--text); }
+.calc-schedule tbody tr:hover td { background: var(--bg-2); }
+.calc-schedule-empty { text-align: center !important; color: var(--muted); padding: 22px 14px; }
+
+/* ---- assumptions ---- */
+.calc-assumptions { margin-top: clamp(40px, 6vw, 64px); max-width: 80ch; }
+.calc-assumptions ul { margin: 18px 0 0; padding-left: 20px; color: var(--muted); }
+.calc-assumptions li { margin-bottom: 10px; }
+.calc-assumptions li strong { color: var(--text); font-weight: 600; }
 
 .input-money, .input-pct { position: relative; }
 .input-money::before {

@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ROI Calculator | Project Carter</title>
+  <meta name="description" content="Model the return on a property hold: loan, acquisition costs, growing net rent, interest, debt reduction from profit and an optional value uplift. See total ROI, return per year, equity multiple and IRR, and take away a one-page PDF. A guide only, not financial advice." />
+  <meta name="theme-color" content="#0c1016" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ROI Calculator | Project Carter" />
+  <meta property="og:description" content="Model a property hold end to end: costs, rent growth, interest, debt reduction and a value uplift. Total ROI, equity multiple and IRR, plus a one-page PDF." />
+  <meta property="og:image" content="assets/og-image.svg" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER (shared) ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="roi-calculator.html">ROI Calculator</a>
+      </nav>
+      <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="calc">
+      <div class="wrap">
+        <div class="calc-intro">
+          <p class="kicker">Project Carter</p>
+          <h1>ROI Calculator</h1>
+          <p>Model a property hold from purchase to sale. Enter the price, the loan, the one-off buying costs and the net rent, then set how fast rent grows, how the loan is paid down from profit, and whether you expect a value uplift along the way. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial advice.</p>
+        </div>
+
+        <div class="calc-grid">
+          <div class="calc-inputs" id="calcInputs">
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Purchase</h2>
+
+              <div class="field">
+                <label for="price">Purchase price</label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="1,000,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="lvr">Total loan <span>(% of price)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="lvr" autocomplete="off" placeholder="65" value="65" /></div>
+                <p class="field-hint" id="loanBreakdown">Loan &mdash; &nbsp;·&nbsp; Deposit &mdash;</p>
+              </div>
+
+              <div class="field">
+                <label for="stampDuty">Stamp duty <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="40,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="valuationCost">Loan / valuation cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="valuationCost" autocomplete="off" placeholder="2,000" /></div>
+                <p class="field-hint">Bank fees and the valuation ordered for finance.</p>
+              </div>
+
+              <div class="field">
+                <label for="solicitorCost">Solicitor cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="solicitorCost" autocomplete="off" placeholder="3,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="otherCost">Other purchasing cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="5,000" /></div>
+                <p class="field-hint">Building and pest, due diligence, adviser fees.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Income &amp; holding</h2>
+
+              <div class="field">
+                <label for="rent">Year 1 net rental income <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="rent" autocomplete="off" placeholder="60,000" /></div>
+                <p class="field-hint">Rent after outgoings, before loan interest.</p>
+              </div>
+
+              <div class="field">
+                <label for="rentGrowth">Rental increase <span>(% per year)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="rentGrowth" autocomplete="off" placeholder="3" /></div>
+              </div>
+
+              <div class="field">
+                <label for="rate">Loan interest <span>(% per year)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="rate" autocomplete="off" placeholder="6.5" /></div>
+              </div>
+
+              <div class="field">
+                <label for="term">Term of ownership <span>(years)</span></label>
+                <input type="text" inputmode="numeric" id="term" autocomplete="off" placeholder="5" />
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Debt reduction</h2>
+
+              <div class="field">
+                <label for="debtReduction">% of profit used for debt reduction</label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="debtReduction" autocomplete="off" placeholder="50" /></div>
+                <p class="field-hint">Each year, this share of the cash left after interest is used to pay down the loan. The rest is cash you keep.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Value uplift</h2>
+
+              <label class="calc-check">
+                <input type="checkbox" id="upliftOn" />
+                <span>Is there a value uplift? (e.g. a reset of rent after works or re-leasing)</span>
+              </label>
+
+              <div class="calc-uplift" id="upliftFields" hidden>
+                <div class="field">
+                  <label for="upliftYear">Year</label>
+                  <input type="text" inputmode="numeric" id="upliftYear" autocomplete="off" placeholder="3" />
+                </div>
+                <div class="field">
+                  <label for="upliftRent">New base rent <span>(per year, net)</span></label>
+                  <div class="input-money"><input type="text" inputmode="numeric" id="upliftRent" autocomplete="off" placeholder="75,000" /></div>
+                </div>
+                <div class="field">
+                  <label for="upliftGrowth">Rental % increase <span>(from that year on)</span></label>
+                  <div class="input-pct"><input type="text" inputmode="decimal" id="upliftGrowth" autocomplete="off" placeholder="4" /></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <dl class="calc-results" id="calcResults" aria-live="polite">
+            <h2>Your return</h2>
+            <div class="result-row"><dt>Loan amount</dt><dd data-out="loan">&mdash;</dd></div>
+            <div class="result-row"><dt>Deposit</dt><dd data-out="deposit">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total cash required</dt><dd data-out="cashRequired">&mdash;</dd></div>
+            <div class="result-row"><dt>Entry net yield</dt><dd data-out="entryYield">&mdash;</dd></div>
+            <div class="result-row"><dt>Property value at sale</dt><dd data-out="saleValue">&mdash;</dd></div>
+            <div class="result-row"><dt>Loan balance at sale</dt><dd data-out="loanAtSale">&mdash;</dd></div>
+            <div class="result-row"><dt>Net sale proceeds</dt><dd data-out="netProceeds">&mdash;</dd></div>
+            <div class="result-row"><dt>Rental cash kept (total)</dt><dd data-out="cashKept">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total profit</dt><dd data-out="totalProfit">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total ROI</dt><dd data-out="totalRoi">&mdash;</dd></div>
+            <div class="result-row"><dt>Return per year (simple avg)</dt><dd data-out="roiPerYear">&mdash;</dd></div>
+            <div class="result-row"><dt>Equity multiple</dt><dd data-out="equityMultiple">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>IRR (compound)</dt><dd data-out="irr">&mdash;</dd></div>
+          </dl>
+        </div>
+
+        <div class="calc-schedule-wrap">
+          <h2 class="calc-subhead">Year by year</h2>
+          <div class="calc-schedule-scroll">
+            <table class="calc-schedule" id="calcSchedule">
+              <thead>
+                <tr>
+                  <th scope="col">Year</th>
+                  <th scope="col">Net rent</th>
+                  <th scope="col">Interest</th>
+                  <th scope="col">Cash after interest</th>
+                  <th scope="col">Debt reduction</th>
+                  <th scope="col">Cash kept</th>
+                  <th scope="col">Loan balance</th>
+                  <th scope="col">Property value</th>
+                  <th scope="col">Your equity</th>
+                </tr>
+              </thead>
+              <tbody id="calcScheduleBody">
+                <tr><td colspan="9" class="calc-schedule-empty">Enter a purchase price, loan interest, rent and term to see the schedule.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-lead">
+          <h2>Get this as a PDF</h2>
+          <p>Enter your details and the page builds a one-page PDF of these numbers, including the year-by-year schedule, for you to download. A copy of your figures and contact details is sent to Project Carter, so we can follow up if you'd like us to.</p>
+
+          <!-- Reuses the same Formspree form as the enquiry page. Replace
+               YOUR_FORM_ID with your Formspree id. The submit is sent in the
+               background so the visitor stays on this page with their PDF. -->
+          <form class="calc-lead-form" id="leadForm"
+                action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+            <input type="hidden" name="_subject" value="ROI Calculator request" />
+            <input type="hidden" name="Figures" id="figuresField" value="" />
+            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
+            <div class="row2">
+              <div class="field">
+                <label for="leadName">Name</label>
+                <input type="text" id="leadName" name="Name" autocomplete="name" required />
+              </div>
+              <div class="field">
+                <label for="leadPhone">Phone</label>
+                <input type="tel" id="leadPhone" name="Phone" autocomplete="tel" required />
+              </div>
+            </div>
+            <div class="field">
+              <label for="leadEmail">Email</label>
+              <input type="email" id="leadEmail" name="Email" autocomplete="email" required />
+            </div>
+            <button type="submit" class="btn btn-accent" id="leadBtn">Download my ROI summary (PDF)</button>
+            <p class="form-fineprint">I'll only use your details to send this summary and to respond if you ask me to.</p>
+          </form>
+
+          <div class="calc-done" id="calcDone" hidden>
+            <p><strong>Done.</strong> Your PDF has downloaded. If it didn't, <button type="button" class="linklike" id="redownload">download it again</button>. Project Carter has your figures and will be in touch if you asked for a follow-up.</p>
+          </div>
+        </div>
+
+        <div class="calc-assumptions">
+          <h2 class="calc-subhead">How the numbers work</h2>
+          <ul>
+            <li><strong>Loan and deposit.</strong> The loan is the percentage of purchase price you enter. The deposit is the rest.</li>
+            <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan and valuation cost, solicitor cost and other purchasing cost.</li>
+            <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
+            <li><strong>Property value</strong> is held at the entry net yield (Year 1 net rent &divide; purchase price), so value moves with net rent. A rent uplift therefore lifts the value too.</li>
+            <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
+            <li><strong>At sale</strong> (end of the term) the property is sold at its value that year, the loan is repaid, and net sale proceeds plus all rental cash kept, less the cash you put in, is the total profit.</li>
+            <li><strong>IRR</strong> is the annual compound return that makes the cash you put in and the cash you take out balance over time.</li>
+          </ul>
+          <p class="form-fineprint" style="margin-top:18px;max-width:78ch">
+            This tool gives a rough estimate from the figures you enter. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes, loan amortisation of principal beyond the debt-reduction you set, and costs specific to a deal. Value is modelled purely off net rent at a fixed yield, which will differ from a real valuation. It is not financial, tax or investment advice. Talk to Project Carter and a licensed adviser before acting on it.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="roi-calculator.html">ROI Calculator</a>
+        <a href="enquire.html">Contact</a>
+      </nav>
+    </div>
+    <div class="wrap footer-legal">
+      <p>Privacy Policy &nbsp;·&nbsp; © <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var inputs = document.getElementById("calcInputs");
+    var leadForm = document.getElementById("leadForm");
+    var upliftOn = document.getElementById("upliftOn");
+    var upliftFields = document.getElementById("upliftFields");
+    var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
+
+    function num(id) {
+      var el = document.getElementById(id);
+      if (!el) return 0;
+      var raw = (el.value || "").replace(/[^0-9.]/g, "");
+      var n = parseFloat(raw);
+      return isNaN(n) || n < 0 ? 0 : n;
+    }
+    function money(n) { return money0.format(Math.round(n)); }
+    function signedMoney(n) { return (n < 0 ? "-" : "") + money(Math.abs(n)); }
+    function pct(n) { return n.toFixed(2) + "%"; }
+
+    /* ---- core model ------------------------------------------------------ */
+    function model() {
+      var price = num("price");
+      var lvr = num("lvr");
+      var loan = price * lvr / 100;
+      var deposit = Math.max(price - loan, 0);
+      var acqCosts = num("stampDuty") + num("valuationCost") + num("solicitorCost") + num("otherCost");
+      var cashRequired = deposit + acqCosts;
+
+      var nr1 = num("rent");
+      var g = num("rentGrowth") / 100;
+      var rate = num("rate") / 100;
+      var term = Math.round(num("term"));
+      var dr = Math.min(num("debtReduction") / 100, 1);
+
+      var uplift = upliftOn.checked;
+      var uYear = Math.round(num("upliftYear"));
+      var uRent = num("upliftRent");
+      var uG = num("upliftGrowth") / 100;
+
+      var entryYield = price > 0 ? nr1 / price : null;
+
+      var rows = [];
+      var balance = loan;
+      var totalKept = 0;
+      var valid = price > 0 && nr1 > 0 && term > 0;
+
+      if (valid) {
+        for (var t = 1; t <= term; t++) {
+          var rent;
+          if (uplift && uRent > 0 && uYear >= 1 && t >= uYear) {
+            rent = uRent * Math.pow(1 + uG, t - uYear);
+          } else {
+            rent = nr1 * Math.pow(1 + g, t - 1);
+          }
+          var interest = balance * rate;
+          var cashAfterInterest = rent - interest;
+          var debtPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
+          balance -= debtPay;
+          var kept = cashAfterInterest - debtPay;
+          totalKept += kept;
+          var value = entryYield ? rent / entryYield : 0;
+          rows.push({
+            year: t, rent: rent, interest: interest,
+            cashAfterInterest: cashAfterInterest, debtPay: debtPay,
+            kept: kept, balance: balance, value: value, equity: value - balance
+          });
+        }
+      }
+
+      var last = rows.length ? rows[rows.length - 1] : null;
+      var saleValue = last ? last.value : 0;
+      var loanAtSale = last ? last.balance : 0;
+      var netProceeds = saleValue - loanAtSale;
+      var totalProfit = valid ? netProceeds + totalKept - cashRequired : null;
+      var totalRoi = (valid && cashRequired > 0) ? totalProfit / cashRequired * 100 : null;
+      var roiPerYear = (totalRoi != null && term > 0) ? totalRoi / term : null;
+      var equityMultiple = (valid && cashRequired > 0) ? (netProceeds + totalKept) / cashRequired : null;
+
+      var irrVal = null;
+      if (valid && cashRequired > 0) {
+        var cfs = [-cashRequired];
+        for (var i = 0; i < rows.length; i++) {
+          cfs.push(i === rows.length - 1 ? rows[i].kept + netProceeds : rows[i].kept);
+        }
+        irrVal = irr(cfs);
+      }
+
+      return {
+        price: price, lvr: lvr, loan: loan, deposit: deposit,
+        acqCosts: acqCosts, cashRequired: cashRequired,
+        nr1: nr1, g: g, rate: rate, term: term, dr: dr,
+        uplift: uplift, uYear: uYear, uRent: uRent, uG: uG,
+        entryYield: entryYield, rows: rows,
+        saleValue: saleValue, loanAtSale: loanAtSale, netProceeds: netProceeds,
+        totalKept: totalKept, totalProfit: totalProfit, totalRoi: totalRoi,
+        roiPerYear: roiPerYear, equityMultiple: equityMultiple, irr: irrVal,
+        valid: valid
+      };
+    }
+
+    /* IRR by bisection on the yearly cashflow vector */
+    function irr(cfs) {
+      function npv(r) {
+        var s = 0;
+        for (var t = 0; t < cfs.length; t++) s += cfs[t] / Math.pow(1 + r, t);
+        return s;
+      }
+      var lo = -0.9, hi = 10, flo = npv(lo), fhi = npv(hi);
+      if (!isFinite(flo) || !isFinite(fhi) || flo * fhi > 0) return null;
+      for (var k = 0; k < 300; k++) {
+        var mid = (lo + hi) / 2, fm = npv(mid);
+        if (Math.abs(fm) < 1e-7) return mid;
+        if (flo * fm < 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+      }
+      return (lo + hi) / 2;
+    }
+
+    /* ---- render -------------------------------------------------------- */
+    function setOut(key, val) {
+      var el = document.querySelector('[data-out="' + key + '"]');
+      if (el) el.textContent = val;
+    }
+
+    function render() {
+      var m = model();
+
+      document.getElementById("loanBreakdown").textContent =
+        "Loan " + (m.price > 0 ? money(m.loan) : "—") +
+        "   ·   Deposit " + (m.price > 0 ? money(m.deposit) : "—");
+
+      setOut("loan", m.price > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "%)" : "—");
+      setOut("deposit", m.price > 0 ? money(m.deposit) : "—");
+      setOut("cashRequired", m.cashRequired > 0 ? money(m.cashRequired) : "—");
+      setOut("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—");
+      setOut("saleValue", m.valid ? money(m.saleValue) : "—");
+      setOut("loanAtSale", m.valid ? money(m.loanAtSale) : "—");
+      setOut("netProceeds", m.valid ? money(m.netProceeds) : "—");
+      setOut("cashKept", m.valid ? signedMoney(m.totalKept) : "—");
+      setOut("totalProfit", m.totalProfit != null ? signedMoney(m.totalProfit) : "—");
+      setOut("totalRoi", m.totalRoi != null ? pct(m.totalRoi) : "—");
+      setOut("roiPerYear", m.roiPerYear != null ? pct(m.roiPerYear) : "—");
+      setOut("equityMultiple", m.equityMultiple != null ? m.equityMultiple.toFixed(2) + "x" : "—");
+      setOut("irr", m.irr != null ? pct(m.irr * 100) : "—");
+
+      var body = document.getElementById("calcScheduleBody");
+      if (!m.valid || !m.rows.length) {
+        body.innerHTML = '<tr><td colspan="9" class="calc-schedule-empty">Enter a purchase price, Year 1 net rent and a term to see the schedule.</td></tr>';
+        return;
+      }
+      var html = "";
+      m.rows.forEach(function (r) {
+        html += "<tr>" +
+          "<td>" + r.year + "</td>" +
+          "<td>" + money(r.rent) + "</td>" +
+          "<td>" + money(r.interest) + "</td>" +
+          "<td>" + signedMoney(r.cashAfterInterest) + "</td>" +
+          "<td>" + money(r.debtPay) + "</td>" +
+          "<td>" + signedMoney(r.kept) + "</td>" +
+          "<td>" + money(r.balance) + "</td>" +
+          "<td>" + money(r.value) + "</td>" +
+          "<td>" + money(r.equity) + "</td>" +
+          "</tr>";
+      });
+      body.innerHTML = html;
+    }
+
+    inputs.addEventListener("input", render);
+    upliftOn.addEventListener("change", function () {
+      upliftFields.hidden = !upliftOn.checked;
+      render();
+    });
+
+    /* Tidy money fields with thousands separators on blur */
+    ["price", "stampDuty", "valuationCost", "solicitorCost", "otherCost", "rent", "upliftRent"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("blur", function () {
+        var n = num(id);
+        el.value = n > 0 ? n.toLocaleString("en-AU") : "";
+      });
+    });
+
+    render();
+
+    /* ---- PDF --------------------------------------------------------- */
+    var lastDoc = null;
+
+    function optMoney(n) { return n > 0 ? money(n) : "Not entered"; }
+
+    function makePDF() {
+      if (!window.jspdf || !window.jspdf.jsPDF) return null;
+      var m = model();
+      var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+      var w = doc.internal.pageSize.getWidth();
+      var L = 48;
+      var y = 56;
+
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.text("PROJECT CARTER", L, y);
+      doc.setFont("helvetica", "normal");
+      doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
+      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+
+      doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+      doc.text("ROI Calculator", L, y + 44);
+
+      var name = document.getElementById("leadName").value.trim();
+      var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
+      doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
+
+      y += 92;
+      function section(title) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
+        doc.text(title, L, y); y += 7;
+        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 17;
+      }
+      function row(k, v, strong) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
+        doc.text(k, L, y);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        doc.text(String(v), w - L, y, { align: "right" });
+        y += 18;
+      }
+
+      section("What you entered");
+      row("Purchase price", money(m.price));
+      row("Total loan", money(m.loan) + "  (" + m.lvr.toFixed(0) + "% of price)");
+      row("Deposit", money(m.deposit));
+      row("Stamp duty", optMoney(num("stampDuty")));
+      row("Loan / valuation cost", optMoney(num("valuationCost")));
+      row("Solicitor cost", optMoney(num("solicitorCost")));
+      row("Other purchasing cost", optMoney(num("otherCost")));
+      row("Year 1 net rental income", money(m.nr1) + " / year");
+      row("Rental increase", (m.g * 100).toFixed(2) + "% / year");
+      row("Loan interest", (m.rate * 100).toFixed(2) + "% / year");
+      row("Term of ownership", m.term + " year" + (m.term === 1 ? "" : "s"));
+      row("Profit used for debt reduction", (m.dr * 100).toFixed(0) + "%");
+      if (m.uplift && m.uRent > 0) {
+        row("Value uplift", "Year " + m.uYear + ", new base rent " + money(m.uRent) +
+          ", then " + (m.uG * 100).toFixed(2) + "% / year");
+      } else {
+        row("Value uplift", "None");
+      }
+
+      y += 8;
+      section("Your return");
+      row("Total cash required", money(m.cashRequired));
+      row("Entry net yield", m.entryYield ? (m.entryYield * 100).toFixed(2) + "%" : "-", true);
+      row("Property value at sale", money(m.saleValue));
+      row("Loan balance at sale", money(m.loanAtSale));
+      row("Net sale proceeds", money(m.netProceeds));
+      row("Rental cash kept (total)", signedMoney(m.totalKept));
+      row("Total profit", m.totalProfit != null ? signedMoney(m.totalProfit) : "-", true);
+      row("Total ROI", m.totalRoi != null ? m.totalRoi.toFixed(2) + "%" : "-", true);
+      row("Return per year (simple avg)", m.roiPerYear != null ? m.roiPerYear.toFixed(2) + "%" : "-");
+      row("Equity multiple", m.equityMultiple != null ? m.equityMultiple.toFixed(2) + "x" : "-");
+      row("IRR (compound)", m.irr != null ? (m.irr * 100).toFixed(2) + "%" : "-", true);
+
+      if (m.rows.length) {
+        y += 10;
+        section("Year by year");
+        var cols = ["Yr", "Net rent", "Interest", "Debt cut", "Cash kept", "Loan bal.", "Value", "Equity"];
+        var cx = [L, L + 30, L + 108, L + 186, L + 258, L + 330, L + 408, L + 470];
+        doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
+        cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
+        y += 4; doc.setDrawColor(225); doc.line(L, y, w - L, y); y += 13;
+        doc.setFont("helvetica", "normal"); doc.setTextColor(30);
+        m.rows.forEach(function (r) {
+          var cells = [
+            String(r.year), money(r.rent), money(r.interest), money(r.debtPay),
+            signedMoney(r.kept), money(r.balance), money(r.value), money(r.equity)
+          ];
+          cells.forEach(function (c, i) { doc.text(c, cx[i], y); });
+          y += 15;
+        });
+      }
+
+      y += 14;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+      var disc = "This estimate is a guide only, generated from the figures entered above. Property value is modelled off net rent at a fixed entry yield and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, GST, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      return doc;
+    }
+
+    function figuresSummary(m) {
+      var lines = [
+        "Purchase price: " + money(m.price),
+        "Total loan: " + money(m.loan) + " (" + m.lvr.toFixed(0) + "%)",
+        "Deposit: " + money(m.deposit),
+        "Stamp duty: " + optMoney(num("stampDuty")),
+        "Loan / valuation cost: " + optMoney(num("valuationCost")),
+        "Solicitor cost: " + optMoney(num("solicitorCost")),
+        "Other purchasing cost: " + optMoney(num("otherCost")),
+        "Total cash required: " + money(m.cashRequired),
+        "Year 1 net rental income: " + money(m.nr1) + "/yr",
+        "Rental increase: " + (m.g * 100).toFixed(2) + "%/yr",
+        "Loan interest: " + (m.rate * 100).toFixed(2) + "%/yr",
+        "Term of ownership: " + m.term + " years",
+        "Profit used for debt reduction: " + (m.dr * 100).toFixed(0) + "%"
+      ];
+      if (m.uplift && m.uRent > 0) {
+        lines.push("Value uplift: year " + m.uYear + ", new base rent " + money(m.uRent) +
+          ", then " + (m.uG * 100).toFixed(2) + "%/yr");
+      } else {
+        lines.push("Value uplift: none");
+      }
+      lines.push("----");
+      lines.push("Entry net yield: " + (m.entryYield ? (m.entryYield * 100).toFixed(2) + "%" : "n/a"));
+      lines.push("Property value at sale: " + money(m.saleValue));
+      lines.push("Loan balance at sale: " + money(m.loanAtSale));
+      lines.push("Net sale proceeds: " + money(m.netProceeds));
+      lines.push("Rental cash kept (total): " + signedMoney(m.totalKept));
+      lines.push("Total profit: " + (m.totalProfit != null ? signedMoney(m.totalProfit) : "n/a"));
+      lines.push("Total ROI: " + (m.totalRoi != null ? m.totalRoi.toFixed(2) + "%" : "n/a"));
+      lines.push("Return per year (simple avg): " + (m.roiPerYear != null ? m.roiPerYear.toFixed(2) + "%" : "n/a"));
+      lines.push("Equity multiple: " + (m.equityMultiple != null ? m.equityMultiple.toFixed(2) + "x" : "n/a"));
+      lines.push("IRR (compound): " + (m.irr != null ? (m.irr * 100).toFixed(2) + "%" : "n/a"));
+      return lines.join("\n");
+    }
+
+    function saveDoc() {
+      if (!lastDoc) lastDoc = makePDF();
+      if (lastDoc) lastDoc.save("project-carter-roi-calculator.pdf");
+    }
+
+    leadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = document.getElementById("leadName");
+      var email = document.getElementById("leadEmail");
+      var phone = document.getElementById("leadPhone");
+      if (!name.value.trim() || !phone.value.trim() || !email.value.trim() || !email.checkValidity()) {
+        if (leadForm.reportValidity) leadForm.reportValidity();
+        return;
+      }
+
+      lastDoc = makePDF();
+      saveDoc();
+
+      document.getElementById("figuresField").value = figuresSummary(model());
+      fetch(leadForm.action, {
+        method: "POST",
+        body: new FormData(leadForm),
+        headers: { "Accept": "application/json" }
+      })["catch"](function () { /* the visitor still has their PDF */ })
+        .then(function () {
+          leadForm.hidden = true;
+          var done = document.getElementById("calcDone");
+          done.hidden = false;
+          done.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+
+    document.getElementById("redownload").addEventListener("click", saveDoc);
+  })();
+  </script>
+</body>
+</html>

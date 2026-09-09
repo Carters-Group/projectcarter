@@ -17,8 +17,8 @@ Plain static site. No build step, no framework, no dependencies.
 index.html                      home — hero, about (Trent), projects, "what I do"
 project-haig-on-the-park.html   project detail — Haig On The Park (completed)
 project-royal-terraces.html     project detail — Royal Terraces (construction commencing)
-project-city-west-villas.html   project detail — City West Villas (construction commencing soon)
-investment-estimate.html        rental-yield / cash-flow calculator, downloads a PDF, pings Formspree
+project-city-west-villas.html   project detail — City West Villas (construction commencing)
+roi-calculator.html             property-hold ROI model — costs, rent growth, interest, debt reduction, value uplift; downloads a PDF, pings Formspree
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
 styles.css                      design system + layout (home, project pages, landing, calculator)
@@ -30,17 +30,23 @@ assets/images/team/             Trent portrait
 
 Every link on the site opens in the same tab (no `target="_blank"`); visitors use
 the browser back button to return. Every page (home, project details,
-`investment-estimate.html`, `enquire.html`) carries the same fixed site header
-and footer. Top-nav order is **About, Projects, Approach, Investment Estimate**,
+`roi-calculator.html`, `enquire.html`) carries the same fixed site header
+and footer. Top-nav order is **About, Projects, Approach, ROI Calculator**,
 then the **Enquire** button; the footer nav adds a **Contact** link.
 
 `enquire.html` is the multi-step lead-capture form (no footer, no personal phone
-or email; enquiries arrive only through the form). `investment-estimate.html` is
-a client-side rental-yield / cash-flow calculator: figures update live, the
-lead form builds a one-page PDF with **jsPDF** (loaded from cdnjs) that
-downloads in the browser, and the figures + contact details are POSTed to
-Formspree in the background. Both forms share the same `YOUR_FORM_ID` Formspree
-placeholder.
+or email; enquiries arrive only through the form). `roi-calculator.html` is a
+client-side property-hold ROI model. You enter the purchase price, the loan (as a
+% of price), one-off buying costs (stamp duty, loan/valuation, solicitor, other),
+the Year 1 net rent, rental growth, interest rate, term, the share of annual
+profit used to pay down the loan, and an optional value uplift (year, new base
+rent, new growth rate). It builds a year-by-year schedule and reports total cash
+required, net sale proceeds, total profit, total ROI, return per year, equity
+multiple and IRR. Value is held at the entry net yield (Year 1 net rent ÷ price),
+so it moves with net rent. Figures update live, the lead form builds a one-page
+PDF with **jsPDF** (loaded from cdnjs) that downloads in the browser, and the
+figures + contact details are POSTed to Formspree in the background. Both forms
+share the same `YOUR_FORM_ID` Formspree placeholder.
 
 The brand wordmark is **"PROJECT CARTER"** only (no "DEVELOPMENT" sub-line).
 
@@ -77,7 +83,7 @@ Everything below is placeholder and should be replaced before the site goes publ
 
 | Item | Where |
 | --- | --- |
-| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html` → `action="https://formspree.io/f/YOUR_FORM_ID"` |
+| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html` and `roi-calculator.html` → `action="https://formspree.io/f/YOUR_FORM_ID"` |
 | Landing page headline + sub-text | `enquire.html` → between the `EDIT THIS WORDING` comments |
 | Landing background photo or video | `enquire.html` → `.landing-media` (instructions in the file + `assets/images/README.md`) |
 | Ad conversion tracking (Google Ads / Meta Pixel) | `thanks.html` → `AD CONVERSION TRACKING` comment |
