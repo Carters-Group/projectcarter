@@ -485,7 +485,7 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   overflow: hidden;
-  padding-block: clamp(48px, 9vw, 110px);
+  padding: clamp(124px, 17vw, 160px) 0 clamp(48px, 9vw, 96px);
 }
 
 /* Background media layer - swap the gradient for a real image, or drop a
@@ -895,4 +895,90 @@ h1, h2, h3 {
 @media (max-width: 620px) {
   .feature-list { columns: 1; }
   .gallery { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   Investment Estimate calculator  (investment-estimate.html)
+   ========================================================= */
+.calc { padding: clamp(120px, 15vw, 170px) 0 clamp(72px, 12vw, 130px); }
+.calc-intro { max-width: 640px; margin-bottom: clamp(36px, 6vw, 60px); }
+.calc-intro h1 { font-size: clamp(34px, 6vw, 62px); margin-bottom: 18px; }
+.calc-intro p { color: var(--muted); margin: 0; }
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: start;
+}
+.calc-inputs { display: grid; gap: 18px; }
+.calc-inputs .field-hint { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
+.calc-inputs .field label span { color: var(--muted); font-weight: 500; }
+
+.input-money, .input-pct { position: relative; }
+.input-money::before {
+  content: "$";
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: 15px; pointer-events: none;
+}
+.input-money input { padding-left: 28px; }
+.input-pct::after {
+  content: "%";
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: 15px; pointer-events: none;
+}
+
+.calc-results {
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  padding: clamp(24px, 3vw, 36px);
+  position: sticky;
+  top: 110px;
+  margin: 0;
+}
+.calc-results h2 {
+  font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase;
+  margin: 0 0 8px; color: var(--muted);
+  font-family: var(--font-body); font-weight: 600;
+}
+.result-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.95rem;
+}
+.result-row dt { color: var(--muted); margin: 0; }
+.result-row dd { margin: 0; font-weight: 600; text-align: right; }
+.result-row.is-key dt { color: var(--text); }
+.result-row.is-key dd { color: var(--accent); font-size: 1.15rem; }
+
+.calc-lead {
+  margin-top: clamp(40px, 6vw, 64px);
+  border-top: 1px solid var(--line-soft);
+  padding-top: clamp(32px, 5vw, 48px);
+}
+.calc-lead h2 { font-size: clamp(22px, 3vw, 32px); margin-bottom: 10px; }
+.calc-lead > p { color: var(--muted); margin: 0 0 24px; max-width: 56ch; }
+.calc-lead-form { display: grid; gap: 16px; max-width: 520px; }
+.calc-lead-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.calc-lead-form .btn { margin-top: 4px; }
+
+.calc-done {
+  max-width: 560px;
+  border: 1px solid rgba(95, 161, 208, 0.5);
+  background: rgba(95, 161, 208, 0.08);
+  padding: 20px 22px;
+}
+.calc-done p { margin: 0; }
+.linklike {
+  background: none; border: 0; padding: 0;
+  color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .calc-grid { grid-template-columns: 1fr; }
+  .calc-results { position: static; }
+}
+@media (max-width: 520px) {
+  .calc-lead-form .row2 { grid-template-columns: 1fr; }
 }

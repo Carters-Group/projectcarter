@@ -16,11 +16,12 @@ Plain static site. No build step, no framework, no dependencies.
 ```
 index.html                      home — hero, about (Trent), projects, "what I do"
 project-haig-on-the-park.html   project detail — Haig On The Park (completed)
-project-royal-terraces.html     project detail — Royal Terraces (in planning)
-project-city-west-villas.html   project detail — City West Villas (selling soon)
-enquire.html                    standalone ad landing page (form over a photo/video bg)
+project-royal-terraces.html     project detail — Royal Terraces (construction commencing)
+project-city-west-villas.html   project detail — City West Villas (construction commencing soon)
+investment-estimate.html        rental-yield / cash-flow calculator, downloads a PDF, pings Formspree
+enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
-styles.css                      design system + layout (home, project pages, landing)
+styles.css                      design system + layout (home, project pages, landing, calculator)
 script.js                       header scroll state, mobile nav, scroll reveals
 assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
 assets/images/team/             Trent portrait
@@ -28,11 +29,18 @@ assets/images/team/             Trent portrait
 ```
 
 Every link on the site opens in the same tab (no `target="_blank"`); visitors use
-the browser back button to return. Project detail pages carry the same
-header/footer as the home page. Every "Enquire" / "Contact" link points to
-`enquire.html`, which is a standalone multi-step lead-capture page with no site
-nav or footer. It carries no personal phone or email; enquiries arrive only
-through the form.
+the browser back button to return. Every page (home, project details,
+`investment-estimate.html`, `enquire.html`) carries the same fixed site header
+and footer. Top-nav order is **About, Projects, Approach, Investment Estimate**,
+then the **Enquire** button; the footer nav adds a **Contact** link.
+
+`enquire.html` is the multi-step lead-capture form (no footer, no personal phone
+or email; enquiries arrive only through the form). `investment-estimate.html` is
+a client-side rental-yield / cash-flow calculator: figures update live, the
+lead form builds a one-page PDF with **jsPDF** (loaded from cdnjs) that
+downloads in the browser, and the figures + contact details are POSTed to
+Formspree in the background. Both forms share the same `YOUR_FORM_ID` Formspree
+placeholder.
 
 The brand wordmark is **"PROJECT CARTER"** only (no "DEVELOPMENT" sub-line).
 

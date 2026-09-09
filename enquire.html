@@ -24,11 +24,21 @@
 <body class="landing-page">
   <a class="skip-link" href="#form">Skip to form</a>
 
-  <header class="landing-header">
-    <div class="wrap">
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
       <a class="brand" href="index.html" aria-label="Project Carter home">
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="investment-estimate.html">Investment Estimate</a>
+      </nav>
+      <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
 
@@ -196,6 +206,7 @@
     </div>
   </main>
 
+  <script src="script.js"></script>
   <script>
   (function () {
     "use strict";
