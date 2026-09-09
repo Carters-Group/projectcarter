@@ -65,13 +65,14 @@
               <div class="field">
                 <label for="address">Property address</label>
                 <input type="text" id="address" autocomplete="off" placeholder="12 Example Street, Suburb STATE 2000" />
-                <p class="field-hint">For your reference and the summary. Nothing is looked up or sent anywhere as you type.</p>
+                <p class="field-hint">Checked once, when you click out of the field, against public map data to confirm the suburb and set the state. Nothing else is sent, and nothing is stored.</p>
+                <p class="field-hint" id="addressNote" hidden></p>
               </div>
 
               <div class="field">
                 <label for="council">Council / LGA <span>(optional)</span></label>
                 <input type="text" id="council" autocomplete="off" placeholder="Example City Council" />
-                <p class="field-hint">Report requirements are set by the council's LEP and DCP, or the local planning scheme.</p>
+                <p class="field-hint">Filled from the address check where the data allows (map data, so confirm the exact name). Report requirements are set by the council's LEP and DCP, or the local planning scheme.</p>
               </div>
 
               <div class="field">
@@ -111,7 +112,7 @@
 
               <div class="field">
                 <label for="price">Land purchase price</label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="750,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="0" /></div>
               </div>
 
               <div class="field">
@@ -122,7 +123,7 @@
 
               <div class="field">
                 <label for="stampDuty">Stamp duty <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="32,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="0" /></div>
                 <div class="stamp-est" id="stampEst" hidden>
                   <label for="stampState">Estimate for a company purchase in</label>
                   <select id="stampState">
@@ -143,22 +144,22 @@
                   <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
                   <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amount with the relevant state revenue office.</p>
                 </div>
-                <p class="field-hint">The state you pick here also sets the demolition rate range further down.</p>
+                <p class="field-hint">The state also sets the demolition rates below. The address check above can fill it in for you.</p>
               </div>
 
               <div class="field">
                 <label for="legalCost">Legal / conveyancing <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="legalCost" autocomplete="off" placeholder="2,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="legalCost" autocomplete="off" placeholder="0" /></div>
               </div>
 
               <div class="field">
                 <label for="buyersAgent">Buyer's agent <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="buyersAgent" autocomplete="off" placeholder="22,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="buyersAgent" autocomplete="off" placeholder="0" /></div>
               </div>
 
               <div class="field">
                 <label for="dueDiligence">Due diligence &amp; searches <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="dueDiligence" autocomplete="off" placeholder="3,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="dueDiligence" autocomplete="off" placeholder="0" /></div>
                 <p class="field-hint">Building and pest, identification survey, title and planning searches, contamination Phase 1.</p>
               </div>
             </div>
@@ -180,7 +181,7 @@
 
               <div class="field">
                 <label for="estFee">Loan set-up &amp; fees <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="estFee" autocomplete="off" placeholder="5,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="estFee" autocomplete="off" placeholder="0" /></div>
                 <p class="field-hint">Establishment, valuation and legal fees on the facility.</p>
               </div>
 
@@ -200,8 +201,9 @@
                 <div class="input-money"><input type="text" inputmode="numeric" id="demolition" autocomplete="off" placeholder="0" /></div>
                 <div class="demo-est" id="demoEst" hidden>
                   <div class="field">
-                    <label for="demoArea">Floor area to demolish <span>(m²)</span></label>
+                    <label for="demoArea">Footprint to demolish <span>(m²)</span></label>
                     <input type="text" inputmode="numeric" id="demoArea" autocomplete="off" placeholder="125" />
+                    <p class="field-hint">Ground footprint of the buildings and hardstand being demolished, not the whole lot.</p>
                   </div>
                   <div class="field">
                     <label for="demoType">Structure type</label>
@@ -213,10 +215,10 @@
                   <div class="field">
                     <label for="demoUplift">Asbestos uplift <span>(%)</span></label>
                     <div class="input-pct"><input type="text" inputmode="decimal" id="demoUplift" autocomplete="off" placeholder="40" value="40" /></div>
-                    <p class="field-hint">Added to the range when "asbestos is likely" is ticked in Site characteristics.</p>
+                    <p class="field-hint">Added to the figure when "asbestos is likely" is ticked in Site characteristics.</p>
                   </div>
-                  <p class="field-hint" id="demoEstNote">Pick a state in the stamp duty field and enter a floor area to see an indicative range.</p>
-                  <p class="stamp-disclaimer">Indicative demolition rates only, compiled from Australian price guides. They vary widely with access, materials, service disconnections, site conditions and contractor demand, and a minimum job cost applies regardless of area. Not a quote. Asbestos, when present, is usually priced into the demolition contract; the separate "Asbestos / hazardous material removal" line is for standalone remediation.</p>
+                  <p class="field-hint" id="demoEstNote">Set a state (from the address check or the stamp duty field) and enter a footprint to see an indicative figure.</p>
+                  <p class="stamp-disclaimer">Indicative only, compiled from Australian demolition price guides. The rate per m² is higher for a small footprint and lower for a large one, since plant still has to be mobilised either way. Costs also vary with access, materials, service disconnections and contractor demand, and a minimum job cost applies. Not a quote. Asbestos, when present, is usually priced into the demolition contract; the separate "Asbestos / hazardous material removal" line is for standalone remediation.</p>
                 </div>
               </div>
               <div class="field">
@@ -247,22 +249,22 @@
 
               <div class="field">
                 <label for="architect">Architect / building designer <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="architect" autocomplete="off" placeholder="22,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="architect" autocomplete="off" placeholder="0" /></div>
                 <p class="report-flag" data-report="architect"></p>
               </div>
               <div class="field">
                 <label for="planner">Town planner (SEE / planning report) <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="planner" autocomplete="off" placeholder="10,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="planner" autocomplete="off" placeholder="0" /></div>
                 <p class="report-flag" data-report="planner"></p>
               </div>
               <div class="field">
                 <label for="surveyor">Surveyor (detail &amp; level) <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="surveyor" autocomplete="off" placeholder="10,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="surveyor" autocomplete="off" placeholder="0" /></div>
                 <p class="report-flag" data-report="surveyor"></p>
               </div>
               <div class="field">
                 <label for="civil">Civil / stormwater engineer <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="civil" autocomplete="off" placeholder="20,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="civil" autocomplete="off" placeholder="0" /></div>
                 <p class="report-flag" data-report="civil"></p>
               </div>
               <div class="field">
@@ -277,7 +279,7 @@
               </div>
               <div class="field">
                 <label for="geotech">Geotechnical engineer (soil report) <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="geotech" autocomplete="off" placeholder="6,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="geotech" autocomplete="off" placeholder="0" /></div>
                 <p class="report-flag" data-report="geotech"></p>
               </div>
               <div class="field">
@@ -390,7 +392,7 @@
 
               <div class="field">
                 <label for="councilRates">Council &amp; water rates <span>(per year)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="councilRates" autocomplete="off" placeholder="5,000" /></div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="councilRates" autocomplete="off" placeholder="0" /></div>
               </div>
               <div class="field">
                 <label for="landTax">Land tax <span>(per year)</span></label>
@@ -541,10 +543,10 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
-            <li><strong>The site.</strong> The address and council are for your reference and the summary only; nothing is looked up or sent as you type. The <strong>site characteristics</strong> you tick drive the report tags in the consultant list and the standing prompt to hold a pre-lodgement meeting. The tags are a guide, not a determination by the council.</li>
+            <li><strong>The site.</strong> The address is checked once, when you click out of the field, against public map data to confirm the suburb and set the state, which drives stamp duty and the demolition rates. The council name is filled from the same check where the data allows. Nothing else is sent, and nothing is stored. The <strong>site characteristics</strong> you tick drive the report tags in the consultant list and the standing prompt to hold a pre-lodgement meeting. The tags are a guide, not a determination by the council.</li>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of the land price you enter. The deposit is the rest, and it is cash. Leave the loan blank and the whole purchase is funded with cash.</li>
             <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It is an estimate, not the state revenue office's figure.</li>
-            <li><strong>Demolition.</strong> Click the field, and with a state chosen in stamp duty and a floor area entered it fills with the midpoint of an indicative $/m² range for that state and structure type. Ticking "asbestos is likely" adds the uplift percentage to the range. The figures are compiled from price guides, not quotes; a minimum job cost applies. Editing the field pins your own number; clearing it brings the estimate back.</li>
+            <li><strong>Demolition.</strong> Click the field, and with a state set (from the address check or the stamp duty box) and a footprint area entered it fills with an indicative figure for that state and structure type. The rate per m² runs higher for a small footprint and lower for a large one, because plant still has to be mobilised either way. Ticking "asbestos is likely" adds the uplift percentage. Figures are from price guides, not quotes, and a minimum job cost applies. Editing the field pins your own number; clearing it brings the estimate back.</li>
             <li><strong>Site, consultant and statutory costs</strong> are the one-off costs of getting the DA prepared, lodged and assessed. Enter only the lines that apply.</li>
             <li><strong>Holding costs</strong> are entered per year and charged for the DA period only, worked out as months &divide; 12. <strong>Rental income during the DA</strong>, if an existing dwelling stays leased, is netted off, so the holding line can be a credit.</li>
             <li><strong>Contingency</strong> is your percentage applied to the site, consultant, statutory and holding costs. It is not applied to the land price or stamp duty.</li>
@@ -802,21 +804,24 @@
       return name + " estimate for " + money(price) + ". Edit it if you have the exact figure.";
     }
 
-    /* ---- demolition: indicative $/m2 low-high by state, compiled from
-       Australian demolition price guides. Not quotes. A minimum job cost
-       applies regardless of area. House = detached / low-rise brick or timber;
-       Comm = commercial or multi-storey. */
+    /* ---- demolition: indicative $/m2 of footprint, compiled from Australian
+       demolition price guides. The rate glides from a small-job rate (hi) down
+       to a large-job rate (lo) as the footprint grows from DEMO_SMALL to
+       DEMO_LARGE, because plant mobilisation is a fixed cost either way.
+       House = detached / low-rise brick or timber; Comm = commercial /
+       multi-storey. Not quotes. A minimum job cost applies. */
+    var DEMO_SMALL = 80, DEMO_LARGE = 800;
     var DEMO_RATES = {
-      NSW: { house: { lo: 55, hi: 130 }, comm: { lo: 110, hi: 260 } },
-      VIC: { house: { lo: 55, hi: 125 }, comm: { lo: 110, hi: 250 } },
-      QLD: { house: { lo: 45, hi: 100 }, comm: { lo: 90, hi: 210 } },
-      WA:  { house: { lo: 45, hi: 100 }, comm: { lo: 90, hi: 210 } },
-      SA:  { house: { lo: 45, hi: 95 },  comm: { lo: 85, hi: 200 } },
-      TAS: { house: { lo: 45, hi: 95 },  comm: { lo: 85, hi: 200 } },
-      ACT: { house: { lo: 55, hi: 125 }, comm: { lo: 110, hi: 240 } },
-      NT:  { house: { lo: 55, hi: 120 }, comm: { lo: 100, hi: 230 } }
+      NSW: { house: { hi: 180, lo: 90 }, comm: { hi: 320, lo: 150 } },
+      VIC: { house: { hi: 175, lo: 88 }, comm: { hi: 310, lo: 145 } },
+      QLD: { house: { hi: 150, lo: 75 }, comm: { hi: 270, lo: 125 } },
+      WA:  { house: { hi: 150, lo: 75 }, comm: { hi: 270, lo: 125 } },
+      SA:  { house: { hi: 140, lo: 70 }, comm: { hi: 255, lo: 120 } },
+      TAS: { house: { hi: 140, lo: 70 }, comm: { hi: 255, lo: 120 } },
+      ACT: { house: { hi: 175, lo: 88 }, comm: { hi: 310, lo: 145 } },
+      NT:  { house: { hi: 165, lo: 82 }, comm: { hi: 290, lo: 135 } }
     };
-    var MIN_DEMO = { lo: 8000, hi: 14000 };
+    var DEMO_MIN = { house: 12000, comm: 25000 };
 
     function demoEstimate() {
       var st = stampState.value;
@@ -824,16 +829,18 @@
       if (!st || !DEMO_RATES[st] || area <= 0) return null;
       var t = document.getElementById("demoType").value === "comm" ? "comm" : "house";
       var r = DEMO_RATES[st][t];
-      var lo = Math.max(area * r.lo, MIN_DEMO.lo);
-      var hi = Math.max(area * r.hi, MIN_DEMO.hi);
+      var frac = Math.min(Math.max((area - DEMO_SMALL) / (DEMO_LARGE - DEMO_SMALL), 0), 1);
+      var rate = r.hi + (r.lo - r.hi) * frac;
+      var cost = Math.max(area * rate, DEMO_MIN[t]);
       var asb = checked("scAsbestos");
       var up = num("demoUplift") / 100;
-      if (asb && up > 0) { lo = lo * (1 + up); hi = hi * (1 + up); }
-      var mid = Math.round((lo + hi) / 2);
-      var note = "Indicative: " + money(lo) + " to " + money(hi) + " for " + Math.round(area) +
-        " m² in " + st + " (" + (t === "comm" ? "commercial / multi-storey" : "house / low-rise") + ")" +
-        (asb && up > 0 ? ". Includes a " + (up * 100).toFixed(0) + "% asbestos uplift." : ".");
-      return { lo: lo, hi: hi, mid: mid, note: note };
+      if (asb && up > 0) cost = cost * (1 + up);
+      cost = Math.round(cost);
+      var note = "Indicative " + money(cost) + " for " + Math.round(area) + " m² in " + st +
+        " (" + (t === "comm" ? "commercial / multi-storey" : "house / low-rise") + "), about $" +
+        Math.round(rate) + "/m². Smaller footprints carry a higher rate." +
+        (asb && up > 0 ? " Includes a " + (up * 100).toFixed(0) + "% asbestos uplift." : "");
+      return { cost: cost, rate: rate, note: note };
     }
 
     function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
@@ -864,10 +871,10 @@
 
       var demo = demoEstimate();
       if (!touched.demolition && demo) {
-        document.getElementById("demolition").value = fmtAmount(demo.mid);
+        document.getElementById("demolition").value = fmtAmount(demo.cost);
       }
       demoEstNote.textContent = demo ? demo.note
-        : "Pick a state in the stamp duty field and enter a floor area to see an indicative range.";
+        : "Set a state (from the address check or the stamp duty field) and enter a footprint to see an indicative figure.";
     }
 
     /* ---- core model ------------------------------------------------------ */
@@ -1069,6 +1076,74 @@
       });
     });
 
+    /* ---- address check: one lookup when the field loses focus ------------
+       Free, keyless OpenStreetMap geocode. Confirms the suburb, sets the
+       state (which drives stamp duty and demolition), and fills the council
+       name where the data allows. Fails soft. */
+    var addressEl = document.getElementById("address");
+    var councilEl = document.getElementById("council");
+    var addressNote = document.getElementById("addressNote");
+    var lastGeocode = "";
+    var STATE_NAMES = {
+      NSW: "New South Wales", VIC: "Victoria", QLD: "Queensland", WA: "Western Australia",
+      SA: "South Australia", TAS: "Tasmania", ACT: "Australian Capital Territory", NT: "Northern Territory"
+    };
+
+    function setAddressNote(msg) {
+      addressNote.textContent = msg || "";
+      addressNote.hidden = !msg;
+    }
+
+    function checkAddress() {
+      var q = addressEl.value.trim();
+      if (q.length < 8 || q === lastGeocode) return;
+      lastGeocode = q;
+      setAddressNote("Checking the address…");
+      var ctrl = new AbortController();
+      var to = setTimeout(function () { ctrl.abort(); }, 6000);
+      fetch("https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=au&q=" +
+            encodeURIComponent(q), { signal: ctrl.signal, headers: { "Accept": "application/json" } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          clearTimeout(to);
+          if (!data || !data.length) {
+            setAddressNote("Could not verify that address. Pick the state in the stamp duty box below.");
+            return;
+          }
+          var a = data[0].address || {};
+          var iso = a["ISO3166-2-lvl4"] || "";
+          var code = iso.indexOf("AU-") === 0 ? iso.slice(3) : "";
+          if (!code && a.state) {
+            Object.keys(STATE_NAMES).forEach(function (k) {
+              if (STATE_NAMES[k].toLowerCase() === String(a.state).toLowerCase()) code = k;
+            });
+          }
+          var place = a.suburb || a.city || a.town || a.village || a.municipality || a.county || "";
+          var lga = a.local_government_area || a.municipality || a.city || a.county || a.region || "";
+          if (code && STATE_NAMES[code]) {
+            if (stampState.value !== code) {
+              stampState.value = code;
+              touched.stampDuty = false;
+              stampEst.hidden = false;
+            }
+            recalcAutofills();
+            render();
+          }
+          if (lga && !councilEl.value.trim()) councilEl.value = lga;
+          var bits = [];
+          if (place) bits.push(place);
+          if (code) bits.push(code);
+          setAddressNote(bits.length
+            ? "Looks like " + bits.join(", ") + "." + (code ? " State set for stamp duty and demolition." : "")
+            : "Address found. Check the state in the stamp duty box.");
+        })
+        ["catch"](function () {
+          clearTimeout(to);
+          setAddressNote("Address check unavailable right now. Pick the state in the stamp duty box below.");
+        });
+    }
+    addressEl.addEventListener("blur", checkAddress);
+
     /* Tidy money fields with thousands separators on blur */
     ["price", "stampDuty", "legalCost", "buyersAgent", "dueDiligence", "estFee", "holdIncome", "pmFee"]
       .concat(SITE).concat(CONSULT).concat(STAT).concat(HOLD)
@@ -1172,7 +1247,7 @@
       row("DA timeframe", m.months + " month" + (m.months === 1 ? "" : "s"));
       groupRows(SITE, SITE_LABELS);
       var demo = demoEstimate();
-      if (demo) row("Demolition (indicative range)", money(demo.lo) + " to " + money(demo.hi));
+      if (demo) row("Demolition (indicative)", money(demo.cost) + " at ~$" + Math.round(demo.rate) + "/m2");
       row("Site costs", money(m.site), true);
       groupRows(CONSULT, CONSULT_LABELS);
       row("Consultant costs", money(m.consult), true);
@@ -1244,7 +1319,7 @@
         "----"
       ];
       var demo = demoEstimate();
-      if (demo) lines.push("Demolition indicative range: " + money(demo.lo) + " to " + money(demo.hi));
+      if (demo) lines.push("Demolition indicative: " + money(demo.cost) + " (~$" + Math.round(demo.rate) + "/m2)");
       SITE.forEach(function (id) { if (num(id) > 0) lines.push(el(SITE_LABELS[id], id)); });
       lines.push("Site costs: " + money(m.site));
       CONSULT.forEach(function (id) { if (num(id) > 0) lines.push(el(CONSULT_LABELS[id], id)); });
