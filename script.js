@@ -30,6 +30,31 @@
     });
   }
 
+  /* Calculators dropdown */
+  var dd = document.getElementById("calcDropdown");
+  if (dd) {
+    var ddToggle = document.getElementById("calcDropdownToggle");
+    var closeDd = function () {
+      dd.classList.remove("open");
+      ddToggle.setAttribute("aria-expanded", "false");
+    };
+    ddToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var open = !dd.classList.contains("open");
+      dd.classList.toggle("open", open);
+      ddToggle.setAttribute("aria-expanded", String(open));
+    });
+    dd.addEventListener("click", function (e) {
+      if (e.target.tagName === "A") closeDd();
+    });
+    document.addEventListener("click", function (e) {
+      if (!dd.contains(e.target)) closeDd();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeDd();
+    });
+  }
+
   /* Reveal on scroll */
   var reveal = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {

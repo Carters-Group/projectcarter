@@ -146,6 +146,69 @@ h1, h2, h3 {
 
 .header-cta { padding: 12px 24px; }
 
+/* ---------- Calculators dropdown ---------- */
+.nav-dropdown { position: relative; }
+.nav-dropdown-toggle {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 6px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-caret {
+  width: 9px; height: 6px; flex: none;
+  transition: transform 0.22s ease;
+}
+.nav-dropdown.open .nav-caret { transform: rotate(180deg); }
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(14, 14, 15, 0.98);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.nav-dropdown.open .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+/* invisible bridge so the cursor can cross the gap without closing */
+.nav-dropdown.open::after {
+  content: "";
+  position: absolute;
+  top: 100%; left: 0; right: 0; height: 18px;
+}
+.nav-dropdown-menu a {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 11px 12px;
+  white-space: nowrap;
+  color: var(--text);
+}
+.nav-dropdown-menu a::after { display: none; }
+.nav-dropdown-menu a:hover { background: var(--bg-3); color: var(--accent); }
+
 .nav-toggle {
   display: none;
   width: 44px; height: 44px;
@@ -455,6 +518,42 @@ h1, h2, h3 {
   .nav.open { transform: none; }
   .nav a { padding: 16px 0; border-bottom: 1px solid var(--line-soft); font-size: 15px; }
   .nav a::after { display: none; }
+
+  .nav-dropdown { width: 100%; }
+  .nav-dropdown-toggle {
+    width: 100%;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 15px;
+  }
+  .nav-dropdown-menu {
+    position: static;
+    transform: none;
+    min-width: 0;
+    background: none;
+    backdrop-filter: none;
+    border: 0;
+    padding: 0;
+    opacity: 1;
+    visibility: hidden;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+  }
+  .nav-dropdown.open .nav-dropdown-menu {
+    transform: none;
+    visibility: visible;
+    pointer-events: auto;
+    height: auto;
+    padding: 2px 0 10px;
+  }
+  .nav-dropdown.open::after { display: none; }
+  .nav-dropdown-menu a {
+    padding: 13px 0 13px 18px;
+    font-size: 15px;
+    border-bottom: 1px solid var(--line-soft);
+  }
 
   .grid-3 { grid-template-columns: 1fr; }
   .hero-scroll { display: none; }
@@ -933,6 +1032,12 @@ h1, h2, h3 {
   font-size: 0.95rem; color: var(--text); cursor: pointer;
 }
 .calc-check input { margin-top: 3px; flex: none; accent-color: var(--accent); }
+
+/* Tenant-recoverable outgoings (NOI calculator) */
+.calc-recover { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+.calc-recover input { margin-top: 2px; }
+.field.is-recovered .input-money input { text-decoration: line-through; opacity: 0.55; }
+.field.is-recovered .calc-recover { color: var(--accent); }
 
 .calc-uplift {
   display: grid; gap: 16px;

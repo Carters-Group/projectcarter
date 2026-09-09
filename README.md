@@ -19,6 +19,7 @@ project-haig-on-the-park.html   project detail — Haig On The Park (completed)
 project-royal-terraces.html     project detail — Royal Terraces (construction commencing)
 project-city-west-villas.html   project detail — City West Villas (construction commencing)
 roi-calculator.html             property-hold ROI model — costs, rent growth, interest, debt reduction, value uplift; downloads a PDF, pings Formspree
+noi-calculator.html             single-year NOI model — income lines, operating expenses (each usual outgoing has a "recovered from tenant" tick that drops it from the total), strata/body corp line, NOI, expense ratio, implied value from a cap rate; same reveal gate, PDF and Formspree ping as the ROI page
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
 styles.css                      design system + layout (home, project pages, landing, calculator)
@@ -30,9 +31,13 @@ assets/images/team/             Trent portrait
 
 Every link on the site opens in the same tab (no `target="_blank"`); visitors use
 the browser back button to return. Every page (home, project details,
-`roi-calculator.html`, `enquire.html`) carries the same fixed site header
-and footer. Top-nav order is **About, Projects, Approach, ROI Calculator**,
-then the **Enquire** button; the footer nav adds a **Contact** link.
+`roi-calculator.html`, `noi-calculator.html`, `enquire.html`) carries the same
+fixed site header and footer. Top-nav order is
+**About, Projects, Approach, Calculators**, then the **Enquire** button.
+**Calculators** is a dropdown (`.nav-dropdown`, toggled by `script.js`) with
+**Net Operating Income (NOI)** then **Return on Equity (ROI)**; on mobile it
+expands inline in the slide-down menu. The footer nav lists both calculators
+flat plus a **Contact** link.
 
 `enquire.html` is the multi-step lead-capture form (no footer, no personal phone
 or email; enquiries arrive only through the form). `roi-calculator.html` is a
@@ -113,7 +118,7 @@ Everything below is placeholder and should be replaced before the site goes publ
 
 | Item | Where |
 | --- | --- |
-| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html` and `roi-calculator.html` → `action="https://formspree.io/f/YOUR_FORM_ID"` |
+| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html`, `roi-calculator.html` and `noi-calculator.html` → `action="https://formspree.io/f/YOUR_FORM_ID"` |
 | Landing page headline + sub-text | `enquire.html` → between the `EDIT THIS WORDING` comments |
 | Landing background photo or video | `enquire.html` → `.landing-media` (instructions in the file + `assets/images/README.md`) |
 | Ad conversion tracking (Google Ads / Meta Pixel) | `thanks.html` → `AD CONVERSION TRACKING` comment |
