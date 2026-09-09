@@ -453,6 +453,21 @@
 
     function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
 
+    /* Slide the "%" suffix to sit right after the typed number, left-aligned */
+    var PCT_FIELDS = ["lvr", "rentGrowth", "rate", "debtReduction", "exitCap", "upliftGrowth"];
+    var pctCanvas = document.createElement("canvas").getContext("2d");
+    function positionPct() {
+      PCT_FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var cs = getComputedStyle(el);
+        pctCanvas.font = cs.font || (cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily);
+        var txt = el.value !== "" ? el.value : (el.placeholder || "");
+        var padLeft = parseFloat(cs.paddingLeft) || 15;
+        el.parentNode.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 3) + "px");
+      });
+    }
+
     /* Keep stamp duty filled from the price + state, unless typed over. */
     function recalcAutofills() {
       var price = num("price");
@@ -573,6 +588,7 @@
     }
 
     function render() {
+      positionPct();
       var m = model();
 
       document.getElementById("loanBreakdown").textContent =
@@ -657,6 +673,8 @@
 
     recalcAutofills();
     render();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(positionPct);
+    window.addEventListener("resize", positionPct);
 
     /* ---- PDF --------------------------------------------------------- */
     var lastDoc = null;
