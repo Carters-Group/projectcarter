@@ -1036,7 +1036,8 @@ h1, h2, h3 {
 /* Tenant-recoverable outgoings (NOI calculator) */
 .calc-recover { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
 .calc-recover input { margin-top: 2px; }
-.field.is-recovered .input-money input { text-decoration: line-through; opacity: 0.55; }
+.field.is-recovered .input-money input,
+.field.is-recovered .input-pct input { text-decoration: line-through; opacity: 0.55; }
 .field.is-recovered .calc-recover { color: var(--accent); }
 
 .calc-uplift {

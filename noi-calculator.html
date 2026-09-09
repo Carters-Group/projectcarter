@@ -82,7 +82,7 @@
 
             <div class="calc-group">
               <h2 class="calc-subhead">Operating expenses</h2>
-              <p class="field-hint">Tick "recovered from the tenant" on any outgoing the lease passes through, and it drops out of the NOI.</p>
+              <p class="field-hint">Tick "recovered from the tenant" on any outgoing the lease passes through, and it drops out of the net operating income.</p>
 
               <div class="field">
                 <label for="insurance">Insurance <span>(per year)</span></label>
@@ -104,6 +104,7 @@
                   <input type="checkbox" id="mgmtPctOn" />
                   <span>Enter as a % of gross operating income</span>
                 </label>
+                <label class="calc-check calc-recover"><input type="checkbox" id="mgmtFeeRec" /><span>Recovered from the tenant</span></label>
                 <p class="field-hint" id="mgmtHint">The agent's fee for running the building.</p>
               </div>
 
@@ -147,40 +148,39 @@
               <div class="field">
                 <label for="capRate">Cap rate <span>(optional)</span></label>
                 <div class="input-pct"><input type="text" inputmode="decimal" id="capRate" autocomplete="off" placeholder="6.0" /></div>
-                <p class="field-hint">A market capitalisation rate. NOI divided by this is an implied property value. Blank leaves the value out.</p>
+                <p class="field-hint">A market capitalisation rate. Net operating income divided by this is an implied property value. Blank leaves the value out.</p>
               </div>
             </div>
 
           </div>
 
           <dl class="calc-results" id="calcResults" aria-live="polite">
-            <h2>Your NOI</h2>
+            <h2>Your net operating income</h2>
             <div class="result-row is-teaser"><dt>Total gross operating income</dt><dd data-out="gross">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Outgoings recovered from tenant</dt><dd data-out="recovered">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Total operating expenses <span>(net of recoveries)</span></dt><dd data-out="opex">&mdash;</dd></div>
-            <div class="result-row"><dt>Operating expense ratio</dt><dd data-out="opexRatio">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Net operating income (NOI)</dt><dd data-out="noi">&mdash;</dd></div>
-            <div class="result-row"><dt>NOI margin</dt><dd data-out="noiMargin">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Net operating income</dt><dd data-out="noi">&mdash;</dd></div>
+            <div class="result-row"><dt>Net operating income as a %</dt><dd data-out="noiPct">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Cap rate</dt><dd data-out="capRateOut">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Implied property value</dt><dd data-out="impliedValue">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
-              <button type="button" class="btn btn-accent btn-block" id="openLead">Download NOI summary (PDF)</button>
+              <button type="button" class="btn btn-accent btn-block" id="openLead">Download the summary (PDF)</button>
               <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
             </div>
           </dl>
         </div>
 
-        <!-- Lead-capture modal, opened by the "Download NOI summary" button.
+        <!-- Lead-capture modal, opened by the "Download the summary" button.
              Replace YOUR_FORM_ID with your Formspree id. The submit is sent in
              the background so the visitor keeps the page and their PDF. -->
         <div class="modal" id="leadModal" hidden>
           <div class="modal-backdrop" data-close></div>
           <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
             <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
-            <h2 id="leadModalTitle">Get your NOI summary</h2>
-            <p>The page builds a one-page PDF of your income, expenses and NOI. A copy is sent to Project Carter so we can follow up if you'd like.</p>
+            <h2 id="leadModalTitle">Get your summary</h2>
+            <p>The page builds a one-page PDF of your income, expenses and net operating income. A copy is sent to Project Carter so we can follow up if you'd like.</p>
 
             <form class="calc-lead-form" id="leadForm"
                   action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
@@ -203,7 +203,7 @@
                 <input type="checkbox" id="leadHelp" name="Assessment requested" value="Yes, review these figures and get back to me" />
                 <span>Can you review these figures and summarise them for me?</span>
               </label>
-              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my NOI summary (PDF)</button>
+              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my summary (PDF)</button>
               <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
             </form>
 
@@ -218,10 +218,10 @@
           <ul>
             <li><strong>Total gross operating income</strong> is the potential rental income plus any other income (parking, signage, storage and the like). This calculator does not deduct a vacancy allowance, so it is a fully let figure.</li>
             <li><strong>Operating expenses</strong> are the costs of running the building: insurance, maintenance and repairs, property management, council and water rates, strata or body corporate levies, marketing, land tax and anything you add to the "other" line. Property management can be entered as a dollar figure or as a percentage of gross operating income.</li>
-            <li><strong>Recovered from the tenant.</strong> Tick this on any outgoing the lease passes through to the tenant and it is left out of total operating expenses, so it does not reduce the NOI. The total recovered is shown for reference. Property management is treated as the owner's cost and has no recovery option.</li>
-            <li><strong>Net operating income (NOI)</strong> is total gross operating income less total operating expenses (net of any recoveries). It excludes loan interest, income tax, depreciation and one-off capital works.</li>
-            <li><strong>Operating expense ratio</strong> is total operating expenses divided by gross operating income. <strong>NOI margin</strong> is NOI divided by gross operating income.</li>
-            <li><strong>Implied property value</strong> is NOI divided by the cap rate you enter. Leave the cap rate blank and no value is shown. A lower cap rate implies a higher value.</li>
+            <li><strong>Recovered from the tenant.</strong> Tick this on any outgoing the lease passes through to the tenant, property management included, and it is left out of total operating expenses, so it does not reduce the net operating income. The total recovered is shown for reference.</li>
+            <li><strong>Net operating income</strong> is total gross operating income less total operating expenses (net of any recoveries). It excludes loan interest, income tax, depreciation and one-off capital works.</li>
+            <li><strong>Net operating income as a %</strong> is the net operating income divided by gross operating income.</li>
+            <li><strong>Implied property value</strong> is the net operating income divided by the cap rate you enter. Leave the cap rate blank and no value is shown. A lower cap rate implies a higher value.</li>
           </ul>
         </div>
       </div>
@@ -318,12 +318,13 @@
 
       var byPct = mgmtPctOn.checked;
       var mgmtPct = num("mgmtPct");
-      var mgmt = byPct ? gross * mgmtPct / 100 : num("mgmtFee");
+      var mgmtGross = byPct ? gross * mgmtPct / 100 : num("mgmtFee");
+      var mgmtRec = recovered("mgmtFee");
 
-      var exp = {};   /* amount entered per expense line */
-      var rec = {};   /* whether that line is recovered from the tenant */
-      var opex = mgmt;
-      var recoveredTotal = 0;
+      var exp = { mgmtFee: mgmtGross };   /* amount entered per expense line */
+      var rec = { mgmtFee: mgmtRec };     /* whether that line is recovered from the tenant */
+      var opex = mgmtRec ? 0 : mgmtGross;
+      var recoveredTotal = mgmtRec ? mgmtGross : 0;
       RECOVERABLE.forEach(function (id) {
         var amt = num(id);
         exp[id] = amt;
@@ -333,8 +334,7 @@
       });
 
       var noi = gross - opex;
-      var opexRatio = gross > 0 ? opex / gross * 100 : null;
-      var noiMargin = gross > 0 ? noi / gross * 100 : null;
+      var noiPct = gross > 0 ? noi / gross * 100 : null;
 
       var capRate = num("capRate");
       var impliedValue = (capRate > 0 && noi > 0) ? noi / (capRate / 100) : null;
@@ -343,9 +343,9 @@
 
       return {
         rental: rental, other1: other1, other2: other2, gross: gross,
-        byPct: byPct, mgmtPct: mgmtPct, mgmt: mgmt,
+        byPct: byPct, mgmtPct: mgmtPct, mgmt: mgmtRec ? 0 : mgmtGross, mgmtGross: mgmtGross, mgmtRec: mgmtRec,
         exp: exp, rec: rec, recoveredTotal: recoveredTotal,
-        opex: opex, noi: noi, opexRatio: opexRatio, noiMargin: noiMargin,
+        opex: opex, noi: noi, noiPct: noiPct,
         capRate: capRate, impliedValue: impliedValue, valid: valid
       };
     }
@@ -361,9 +361,11 @@
       var m = model();
 
       /* property management hint reflects whichever mode is active */
-      if (m.byPct) {
+      if (m.mgmtRec) {
+        mgmtHint.textContent = "Recovered from the tenant, so it is left out of operating expenses.";
+      } else if (m.byPct) {
         mgmtHint.textContent = m.gross > 0
-          ? "≈ " + money(m.mgmt) + " per year at " + m.mgmtPct.toFixed(2) + "% of gross operating income."
+          ? "≈ " + money(m.mgmtGross) + " per year at " + m.mgmtPct.toFixed(2) + "% of gross operating income."
           : "A percentage of gross operating income. Enter the income above to see the amount.";
       } else {
         mgmtHint.textContent = "The agent's fee for running the building.";
@@ -375,16 +377,15 @@
       put("gross", m.valid ? money(m.gross) : "—", true);
       put("recovered", (m.valid && m.recoveredTotal > 0) ? "(" + money(m.recoveredTotal) + ")" : "—", true);
       put("opex", m.valid ? money(m.opex) : "—", true);
-      put("opexRatio", (m.valid && m.opexRatio != null) ? pct(m.opexRatio) : "—");
       put("noi", m.valid ? signedMoney(m.noi) : "—");
-      put("noiMargin", (m.valid && m.noiMargin != null) ? pct(m.noiMargin) : "—");
+      put("noiPct", (m.valid && m.noiPct != null) ? pct(m.noiPct) : "—");
       put("capRateOut", m.capRate > 0 ? pct(m.capRate) : "—", true);
       put("impliedValue", m.impliedValue != null ? money(m.impliedValue) : "—");
     }
 
     /* Dim / strike a line that's ticked as recovered from the tenant */
     function syncRecovered() {
-      RECOVERABLE.forEach(function (id) {
+      RECOVERABLE.concat("mgmtFee").forEach(function (id) {
         var el = document.getElementById(id);
         var field = el && el.closest(".field");
         if (field) field.classList.toggle("is-recovered", recovered(id));
@@ -436,7 +437,7 @@
       doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
 
       doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
-      doc.text("NOI Calculator", L, y + 44);
+      doc.text("Net Operating Income", L, y + 44);
 
       var name = document.getElementById("leadName").value.trim();
       var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
@@ -469,30 +470,30 @@
       function expRow(label, id) {
         row(label, m.rec[id] ? optMoney(m.exp[id]) + "  (recovered)" : optMoney(m.exp[id]));
       }
+      var mgmtVal = m.byPct
+        ? money(m.mgmtGross) + "  (" + m.mgmtPct.toFixed(2) + "% of gross income)"
+        : optMoney(m.mgmtGross);
       expRow("Insurance", "insurance");
       expRow("Maintenance & repairs", "maintenance");
-      row("Property management", m.byPct
-        ? money(m.mgmt) + "  (" + m.mgmtPct.toFixed(2) + "% of gross income)"
-        : optMoney(m.mgmt));
+      row("Property management", m.rec.mgmtFee ? mgmtVal + "  (recovered)" : mgmtVal);
       expRow("Council & water rates", "councilRates");
       expRow("Strata / body corporate", "strata");
       expRow("Marketing costs", "marketing");
       expRow("Land tax", "landTax");
       expRow("Other operating expense", "otherExpense");
-      if (m.recoveredTotal > 0) row("Less outgoings recovered from tenant", "(" + money(m.recoveredTotal) + ")");
-      row("Total operating expenses (net)", money(m.opex), true);
+      if (m.recoveredTotal > 0) row("Less amounts recovered from the tenant", "(" + money(m.recoveredTotal) + ")");
+      row("Total operating expenses", money(m.opex), true);
 
       y += 8;
-      section("Your NOI");
-      row("Operating expense ratio", m.opexRatio != null ? m.opexRatio.toFixed(2) + "%" : "-");
-      row("Net operating income (NOI)", signedMoney(m.noi), true);
-      row("NOI margin", m.noiMargin != null ? m.noiMargin.toFixed(2) + "%" : "-");
+      section("Your net operating income");
+      row("Net operating income", signedMoney(m.noi), true);
+      row("Net operating income as a %", m.noiPct != null ? m.noiPct.toFixed(2) + "%" : "-");
       row("Cap rate", m.capRate > 0 ? m.capRate.toFixed(2) + "%" : "-");
       row("Implied property value", m.impliedValue != null ? money(m.impliedValue) : "-", true);
 
       y += 14;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. NOI is total gross operating income less operating expenses; it does not deduct a vacancy allowance and excludes loan interest, income tax, depreciation, selling costs and one-off capital works. Outgoings marked as recovered from the tenant are excluded from operating expenses. Any implied value is NOI divided by the cap rate entered and will differ from a real valuation. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This is a guide only, worked out from the figures entered above. Net operating income is total gross operating income less operating expenses. It does not allow for vacancy, and leaves out loan interest, income tax, depreciation, selling costs and one-off capital works. Amounts marked as recovered from the tenant are left out of operating expenses. Any implied value is the net operating income divided by the cap rate entered, and will differ from a real valuation. This is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -511,19 +512,18 @@
         el("Insurance", "insurance"),
         el("Maintenance & repairs", "maintenance"),
         "Property management: " + (m.byPct
-          ? money(m.mgmt) + " (" + m.mgmtPct.toFixed(2) + "% of gross income)"
-          : optMoney(m.mgmt)),
+          ? money(m.mgmtGross) + " (" + m.mgmtPct.toFixed(2) + "% of gross income)"
+          : optMoney(m.mgmtGross)) + (m.rec.mgmtFee ? " (recovered from tenant)" : ""),
         el("Council & water rates", "councilRates"),
         el("Strata / body corporate", "strata"),
         el("Marketing costs", "marketing"),
         el("Land tax", "landTax"),
         el("Other operating expense", "otherExpense"),
-        "Outgoings recovered from tenant: " + (m.recoveredTotal > 0 ? money(m.recoveredTotal) : "none"),
-        "Total operating expenses (net): " + money(m.opex),
+        "Amounts recovered from tenant: " + (m.recoveredTotal > 0 ? money(m.recoveredTotal) : "none"),
+        "Total operating expenses: " + money(m.opex),
         "----",
-        "Operating expense ratio: " + (m.opexRatio != null ? m.opexRatio.toFixed(2) + "%" : "n/a"),
-        "Net operating income (NOI): " + signedMoney(m.noi),
-        "NOI margin: " + (m.noiMargin != null ? m.noiMargin.toFixed(2) + "%" : "n/a"),
+        "Net operating income: " + signedMoney(m.noi),
+        "Net operating income as a %: " + (m.noiPct != null ? m.noiPct.toFixed(2) + "%" : "n/a"),
         "Cap rate: " + (m.capRate > 0 ? m.capRate.toFixed(2) + "%" : "n/a"),
         "Implied property value: " + (m.impliedValue != null ? money(m.impliedValue) : "n/a")
       ];
