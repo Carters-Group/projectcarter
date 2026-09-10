@@ -524,7 +524,7 @@
         pctCanvas.font = cs.font || (cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily);
         var txt = el.value !== "" ? el.value : (el.placeholder || "");
         var padLeft = parseFloat(cs.paddingLeft) || 15;
-        el.parentNode.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 1) + "px");
+        el.parentNode.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 3) + "px");
       });
     }
 

@@ -1171,7 +1171,7 @@ h1, h2, h3 {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
   color: var(--muted); font-size: 15px; pointer-events: none;
 }
-.input-money input { padding-left: 22px; }
+.input-money input { padding-left: 28px; }
 /* % sits just after the number; --pct-x is set from the value width in JS */
 .input-pct input { text-align: left; }
 .input-pct::after {
