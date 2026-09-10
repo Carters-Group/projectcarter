@@ -310,7 +310,7 @@
               </div>
               <div class="field">
                 <label>Finance charges</label>
-                <p class="field-hint">One row per charge, since interest, line fee, establishment and other fees each sit on a different base. Enter a rate, pick what it applies to, and say whether it is one-off or per annum. Per-annum rows are charged over the construction and settlement period (months &divide; 12). The base for a per-annum interest row is the debt required; rates on the debt required or the total project cost are worked out before finance to avoid circularity.</p>
+                <p class="field-hint">One row per charge, since interest, line fee, establishment and admin fees each sit on a different base. Enter a rate, pick what it applies to, and say whether it is one-off or per annum. A <strong>per-annum rate on the debt required</strong> is treated as the interest rate (BBSY + margin, or a fixed rate) and is run through a drawdown: debt starts low, equity is spent first, and the balance builds to its peak near the end, so interest is charged on the debt actually outstanding month by month and capitalised, not on the peak for the whole period. A per-annum rate on the facility limit is a line or commitment fee, charged on the limit for the whole period. One-off rates on the facility limit or total project cost are establishment and admin fees. Rates on the debt required or total project cost are worked out before finance to avoid circularity.</p>
                 <div class="finance-rows" id="financeRows"></div>
                 <button type="button" class="btn btn-ghost btn-add" id="addFinance">Add another finance charge</button>
               </div>
@@ -339,8 +339,8 @@
               <h2 class="calc-subhead">Contingency &amp; management</h2>
               <div class="field">
                 <label for="contPct">Contingency <span>(% of costs)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="contPct" autocomplete="off" placeholder="5" value="5" /></div>
-                <p class="field-hint">Applied to the post-DA consultants, statutory fees and construction. Not to the DA total or finance. Defaults to 5%; change or clear it as needed.</p>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="contPct" autocomplete="off" placeholder="10" value="10" /></div>
+                <p class="field-hint">Applied to the post-DA consultants, statutory fees and construction. Not to the DA total or finance. Defaults to 10%; change or clear it as needed.</p>
               </div>
               <div class="field">
                 <label for="pmFee">Development management / your time <span>(optional)</span></label>
@@ -403,6 +403,7 @@
             <div class="result-row"><dt>Construction <span>(incl. margin &amp; extras)</span></dt><dd data-out="construction">&mdash;</dd></div>
             <div class="result-row"><dt>Contingency</dt><dd data-out="contingency">&mdash;</dd></div>
             <div class="result-row"><dt>Finance &amp; holding</dt><dd data-out="finance">&mdash;</dd></div>
+            <div class="result-row"><dt>of which interest <span>(drawn &amp; capitalised)</span></dt><dd data-out="drawInterest">&mdash;</dd></div>
             <div class="result-row"><dt>Development management</dt><dd data-out="pm">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Total project cost</dt><dd data-out="totalCost">&mdash;</dd></div>
             <div class="result-row"><dt>Cost per dwelling</dt><dd data-out="costPerDwelling">&mdash;</dd></div>
@@ -417,6 +418,8 @@
             <div class="result-row is-teaser"><dt>Additional cash contribution</dt><dd data-out="cashIn">&mdash;</dd></div>
             <div class="result-row"><dt>Total equity contributed</dt><dd data-out="equityTotal">&mdash;</dd></div>
             <div class="result-row"><dt>Debt required</dt><dd data-out="debtRequired">&mdash;</dd></div>
+            <div class="result-row"><dt>Average debt drawn</dt><dd data-out="avgDebt">&mdash;</dd></div>
+            <div class="result-row"><dt>Peak debt <span>(end of period)</span></dt><dd data-out="peakDebt">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Cash-on-cash return</dt><dd data-out="coc">&mdash;</dd></div>
             <div class="result-row"><dt>Profit &mdash; worst case</dt><dd data-out="worstProfit">&mdash;</dd></div>
             <div class="result-row"><dt>Profit on cost &mdash; worst case</dt><dd data-out="worstMargin">&mdash;</dd></div>
@@ -494,8 +497,8 @@
             <li><strong>Building contract.</strong> Under <strong>design &amp; construct</strong> the architect's documentation to CC, the structural and civil, hydraulic, services, facade and ESD design, the building surveyor / certifier, the construction certificate / permit fee, the long service levy, and the contract works and public liability insurance all sit inside the contract sum, so those lines are struck out and left out of your totals. Under a <strong>construct-only</strong> build every line is a developer cost and a builder's margin applies. Either way, construction is entered per dwelling type.</li>
             <li><strong>Dwelling types.</strong> One card per floor plan: how many are built to it, its floor area, the build cost and the sale price per dwelling. Each card also shows a <strong>construction-only cost per dwelling</strong> (build cost plus its share of basement and builder's margin) and a <strong>blended land + build cost per dwelling</strong>, which adds that type's share of the land and cost to DA, spread across the types by floor-area (GFA &times; count) share. The construction estimator fills each type's build cost from a 2026 rate per m² for the state, type and quality chosen (the rate includes builder preliminaries and margin). Editing any build cost pins your own numbers and switches the estimator off; clear them to bring it back.</li>
             <li><strong>Builder's margin</strong> is added on top of the dwelling and basement build costs. Leave it at 0 when the costs come from the estimator, which already includes it; use it only for bare trade costs.</li>
-            <li><strong>Contingency</strong> is your percentage applied to the post-DA consultants, the statutory fees and the construction. It defaults to 5% and can be changed or cleared. It is not applied to the DA total or to finance.</li>
-            <li><strong>Finance charges.</strong> Each row is a rate on a chosen base: the debt required, the facility limit (or the debt required if no limit is entered), the total project cost, or a flat dollar amount. Per-annum rows are charged over the construction and settlement period (months &divide; 12); one-off rows are charged once. Rates on the debt required or total project cost use the pre-finance total, so a finance charge is never levied on the finance charges themselves. <strong>Holding costs</strong> are entered per year and charged for the same period. There is no rental income during construction.</li>
+            <li><strong>Contingency</strong> is your percentage applied to the post-DA consultants, the statutory fees and the construction. It defaults to 10% and can be changed or cleared. It is not applied to the DA total or to finance.</li>
+            <li><strong>Finance charges.</strong> Each row is a rate on a chosen base: the debt required, the facility limit (or the debt required if no limit is entered), the total project cost, or a flat dollar amount. One-off rows are charged once; per-annum rows are charged over the construction and settlement period (months &divide; 12). A <strong>per-annum rate on the debt required is the interest rate</strong> (BBSY plus margin, or a fixed rate if you have one) and is run through a drawdown rather than charged flat: costs are assumed to draw on a smooth S-curve through the period, your equity is spent before any debt, and interest accrues on the balance outstanding each month and is capitalised. That is why the interest line sits well below peak debt times the rate times the term, and why the results also show the <strong>average debt drawn</strong> and the <strong>peak debt</strong> at the end. Rates on the debt required or total project cost use the pre-finance total, so a finance charge is never levied on the finance charges themselves. <strong>Holding costs</strong> are entered per year and charged for the same period. There is no rental income during construction.</li>
             <li><strong>GST.</strong> All cost inputs are entered exclusive of GST. Input tax credits on construction and consultants are claimed separately and are not shown here. Only GST on the sale is modelled, via the margin scheme or your accountant's override.</li>
             <li><strong>Gross realisation</strong> is the sum of each type's sale price times its count. <strong>Selling costs</strong> are each type's price times its selling-cost percentage, times its count. <strong>GST</strong> under the margin scheme is estimated as (gross realisation &minus; land price) &divide; 11; choose "no GST" for input-taxed stock, or enter your accountant's figure as an override. Input tax credits on construction are claimed separately and are not netted here.</li>
             <li><strong>Total project cost</strong> is the DA total plus the post-DA consultants, statutory fees, construction, contingency, finance and holding, and development management. <strong>Net sales proceeds</strong> is gross realisation less selling costs and GST. <strong>Expected profit</strong> is net sales proceeds less total project cost.</li>
@@ -819,8 +822,47 @@
       });
     }
 
+    /* Waterfall the debt over the build: costs are drawn on an S-curve, equity
+       is spent first, so debt starts low and builds to its peak near the end.
+       Interest accrues monthly on the balance actually outstanding and is
+       capitalised. Returns the total interest, plus the peak and average debt. */
+    function drawdownInterest(o) {
+      var months = Math.max(Math.round(o.months), 0);
+      var mr = (o.annualRate / 100) / 12;
+      var floor0 = Math.max(o.daTotal - o.equityTotal, 0); /* residual land debt at the start */
+      if (months < 1) {
+        var d0 = Math.max(o.daTotal + o.spread - o.equityTotal, 0);
+        return { interest: 0, peakDebt: d0, avgDebt: d0 };
+      }
+      var accInt = 0, prevPrin = floor0, peak = 0, sum = 0;
+      for (var m = 1; m <= months; m++) {
+        var x = m / months;
+        var cf = x * x * (3 - 2 * x);            /* smoothstep S-curve */
+        var cumCost = o.daTotal + o.spread * cf;
+        var prin = Math.max(cumCost - o.equityTotal, 0);
+        var intM = ((prevPrin + prin) / 2 + accInt) * mr; /* midpoint on principal, full on capitalised interest */
+        accInt += intM;
+        var bal = prin + accInt;
+        if (bal > peak) peak = bal;
+        sum += bal;
+        prevPrin = prin;
+      }
+      return { interest: accInt, peakDebt: peak, avgDebt: sum / months };
+    }
+
     function financeModel(base) {
-      var rows = [], total = 0;
+      var rows = [], total = 0, intRate = 0;
+      finIds.forEach(function (id) {
+        var basisEl = document.getElementById("f" + id + "_basis");
+        var periodEl = document.getElementById("f" + id + "_period");
+        if ((basisEl ? basisEl.value : "debt") === "debt" && (periodEl ? periodEl.value : "pa") === "pa") {
+          intRate += num("f" + id + "_rate");
+        }
+      });
+      var dd = drawdownInterest({
+        daTotal: base.daTotal, spread: base.spread, equityTotal: base.equityTotal,
+        months: base.months, annualRate: intRate
+      });
       finIds.forEach(function (id) {
         var rate = num("f" + id + "_rate");
         var basisEl = document.getElementById("f" + id + "_basis");
@@ -830,7 +872,9 @@
         var period = periodEl ? periodEl.value : "pa";
         var label = (labelEl && labelEl.value.trim()) || "Finance charge";
         var amount;
-        if (basis === "flat") {
+        if (basis === "debt" && period === "pa") {
+          amount = intRate > 0 ? dd.interest * (rate / intRate) : 0;
+        } else if (basis === "flat") {
           amount = period === "pa" ? rate * base.months / 12 : rate;
         } else {
           var b = basis === "facility" ? base.facility : (basis === "total" ? base.total : base.debt);
@@ -840,7 +884,10 @@
         total += amount;
         rows.push({ label: label, rate: rate, basis: basis, period: period, amount: amount });
       });
-      return { total: total, rows: rows };
+      return {
+        total: total, rows: rows, interestRate: intRate,
+        drawInterest: dd.interest, peakDebt: dd.peakDebt, avgDebt: dd.avgDebt
+      };
     }
 
     /* ---- consultant contract-type flags ---------------------------- */
@@ -940,12 +987,18 @@
       var equityTotal = daEquity + cashIn;
 
       /* pre-finance total: every cost except the finance charges themselves,
-         so a finance rate is never levied on the finance charges. */
-      var preFinance = daTotal + consult + stat + construction + contingency + pm + holdCosts;
+         so a finance rate is never levied on the finance charges. "spread" is
+         the part incurred progressively through the build (drawn on an S-curve);
+         the DA total is treated as incurred at the start. */
+      var spread = consult + stat + construction + contingency + pm + holdCosts;
+      var preFinance = daTotal + spread;
       var debtBase = Math.max(preFinance - equityTotal, 0);
       var facilityLimit = num("facilityLimit");
       var facilityBase = facilityLimit > 0 ? facilityLimit : debtBase;
-      var fin = financeModel({ debt: debtBase, facility: facilityBase, total: preFinance, months: months });
+      var fin = financeModel({
+        daTotal: daTotal, spread: spread, equityTotal: equityTotal,
+        debt: debtBase, facility: facilityBase, total: preFinance, months: months
+      });
       var financeCharges = fin.total;
       var netFinance = financeCharges + holdCosts;
 
@@ -994,6 +1047,8 @@
         contPct: contPct, contingency: contingency, pm: pm,
         months: months, holdCosts: holdCosts, financeCharges: financeCharges, financeRows: fin.rows,
         facilityLimit: facilityLimit, netFinance: netFinance,
+        interestRate: fin.interestRate, drawInterest: fin.drawInterest,
+        peakDebt: fin.peakDebt, avgDebt: fin.avgDebt,
         totalCost: totalCost, costPerDwelling: costPerDwelling,
         grv: grv, sellCost: sellCost, gst: gst, gstOverride: gstOverride,
         netSales: netSales, profit: profit, margin: margin, grvMargin: grvMargin, profitPerDwelling: profitPerDwelling,
@@ -1038,6 +1093,7 @@
       put("construction", m.valid ? money(m.construction) : "—");
       put("contingency", m.valid ? money(m.contingency) : "—");
       put("finance", m.valid ? money(m.netFinance) : "—");
+      put("drawInterest", m.valid ? money(m.drawInterest) : "—");
       put("pm", m.valid ? money(m.pm) : "—");
       put("totalCost", m.valid ? money(m.totalCost) : "—");
       put("costPerDwelling", (m.valid && m.costPerDwelling != null) ? money(m.costPerDwelling) : "—");
@@ -1052,6 +1108,8 @@
       put("cashIn", m.cashIn > 0 ? money(m.cashIn) : "—", true);
       put("equityTotal", m.equityTotal > 0 ? money(m.equityTotal) : "—");
       put("debtRequired", (m.valid && m.debtRequired != null) ? money(m.debtRequired) : "—");
+      put("avgDebt", m.valid ? money(m.avgDebt) : "—");
+      put("peakDebt", m.valid ? money(m.peakDebt) : "—");
       put("coc", (m.valid && m.coc != null) ? pct(m.coc) : "—");
       put("worstProfit", m.valid ? signedMoney(m.worstProfit) : "—");
       put("worstMargin", (m.valid && m.worstMargin != null) ? pct(m.worstMargin) : "—");
@@ -1135,9 +1193,9 @@
       });
 
     addType();
-    addFinance({ label: "Interest (BBSY + margin)", ratePh: "6.5", basis: "debt", period: "pa" });
+    addFinance({ label: "Interest (BBSY + margin, or fixed rate)", ratePh: "6.5", basis: "debt", period: "pa" });
     addFinance({ label: "Line & commitment fee", ratePh: "0.45", basis: "facility", period: "pa" });
-    addFinance({ label: "Establishment & legal fees", ratePh: "0", basis: "flat", period: "oneoff" });
+    addFinance({ label: "Establishment & admin fee", ratePh: "0.4", basis: "facility", period: "oneoff" });
     recalcAutofills();
     render();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(positionPct);
@@ -1170,12 +1228,18 @@
       doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
 
       y += 84;
+      var PAGE_H = doc.internal.pageSize.getHeight();
+      function ensure(space) {
+        if (y + space > PAGE_H - 52) { doc.addPage(); y = 56; }
+      }
       function section(title) {
+        ensure(34);
         doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
         doc.text(title, L, y); y += 7;
         doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 14;
       }
       function row(k, v, strong) {
+        ensure(16);
         doc.setFontSize(9.5);
         doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
         doc.text(k, L, y);
@@ -1183,10 +1247,19 @@
         doc.text(String(v), w - L, y, { align: "right" });
         y += 14;
       }
+      function bigrow(k, v) {
+        ensure(30);
+        doc.setDrawColor(150); doc.setLineWidth(1); doc.line(L, y - 3, w - L, y - 3); doc.setLineWidth(0.2);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(20);
+        doc.text(k, L, y + 13);
+        doc.text(String(v), w - L, y + 13, { align: "right" });
+        y += 32;
+      }
+      /* accounting style: a loss shows in brackets, no minus sign */
+      function acct(n) { return n < 0 ? "(" + money(Math.abs(n)) + ")" : money(n); }
 
-      section("What you entered");
+      section("Inputs & assumptions");
       row("Building contract", m.dc ? "Design & construct" : "Construct only / trade contracts");
-      row("Land + total cost to DA", money(m.daTotal));
       var r = buildRate();
       row("Construction estimator", r
         ? (document.getElementById("projectState").value || "-") + " " + (TYPE_LABELS[r.type] || r.type) +
@@ -1194,8 +1267,8 @@
         : "Not used");
       row("Contingency", m.contPct.toFixed(1) + "% on consultants + statutory + construction");
       row("Construction + settlement period", m.months + " month" + (m.months === 1 ? "" : "s"));
+      row("Interest rate (drawn debt, p.a.)", m.interestRate > 0 ? m.interestRate.toFixed(2) + "%" : "Not set");
       row("Facility limit", m.facilityLimit > 0 ? money(m.facilityLimit) : "Debt required");
-      row("Finance charges", m.financeRows.length + " row" + (m.financeRows.length === 1 ? "" : "s") + ", " + money(m.financeCharges) + " total");
       row("GST treatment", m.gstOverride > 0 ? "Your figure" : (gstMode.value === "none" ? "No GST (input-taxed)" : "Margin scheme (estimate)"));
       row("Cost inputs", "Entered exclusive of GST");
 
@@ -1210,38 +1283,59 @@
       });
 
       y += 6;
-      section("Feasibility");
+      section("Development P&L");
+      row("Gross realisation (GRV)", money(m.grv), true);
+      row("Less: selling costs", "(" + money(m.sellCost) + ")");
+      row("Less: GST" + (m.gstOverride > 0 ? " (your figure)" : (gstMode.value === "none" ? " (none)" : " (margin scheme)")), "(" + money(m.gst) + ")");
+      row("Net sales proceeds", money(m.netSales), true);
+      y += 8;
+      row("Land + cost to DA", money(m.daTotal));
       row("Post-DA consultants & certification", money(m.consult));
       row("Council & statutory", money(m.stat));
       row("Construction (incl. margin & extras)", money(m.construction));
-      row("Contingency", money(m.contingency));
-      row("Finance & holding", money(m.netFinance));
+      row("Contingency (" + m.contPct.toFixed(1) + "%)", money(m.contingency));
+      row("Interest (drawn & capitalised)", money(m.drawInterest));
+      row("Other finance charges", money(Math.max(m.financeCharges - m.drawInterest, 0)));
+      row("Holding costs", money(m.holdCosts));
       row("Development management", money(m.pm));
-      row("Total project cost", money(m.totalCost), true);
-      row("Cost per dwelling", m.costPerDwelling != null ? money(m.costPerDwelling) : "-");
-      row("Gross realisation (GRV)", money(m.grv), true);
-      row("Selling costs", money(m.sellCost));
-      row("GST" + (m.gstOverride > 0 ? " (your figure)" : (gstMode.value === "none" ? " (none)" : " (margin scheme)")), money(m.gst));
-      row("Net sales proceeds", money(m.netSales));
-      row("Expected profit", signedMoney(m.profit), true);
-      row("Profit per dwelling", m.profitPerDwelling != null ? signedMoney(m.profitPerDwelling) : "-");
+      row("Total development cost", money(m.totalCost), true);
+      bigrow(m.profit < 0 ? "EXPECTED LOSS" : "EXPECTED PROFIT", acct(m.profit));
       row("Profit on cost", m.margin != null ? m.margin.toFixed(2) + "%" : "-", true);
       row("Profit margin on GRV", m.grvMargin != null ? m.grvMargin.toFixed(2) + "%" : "-");
+      row("Profit per dwelling", m.profitPerDwelling != null ? acct(m.profitPerDwelling) : "-");
+      row("Cost per dwelling", m.costPerDwelling != null ? money(m.costPerDwelling) : "-");
+
+      y += 6;
+      section("Funding");
       row("Equity to reach DA", optMoney(m.daEquity));
       row("Additional cash contribution", optMoney(m.cashIn));
       row("Total equity contributed", optMoney(m.equityTotal), true);
       row("Debt required", m.debtRequired != null ? money(m.debtRequired) : "-");
+      row("Average debt drawn", money(m.avgDebt));
+      row("Peak debt (end of period)", money(m.peakDebt), true);
       row("Cash-on-cash return", m.coc != null ? m.coc.toFixed(2) + "%" : "-", true);
 
       y += 6;
+      section("Finance charges");
+      if (!m.financeRows.length) row("None entered", "-");
+      m.financeRows.forEach(function (fr) {
+        var basisTxt = fr.basis === "flat" ? "flat amount" : (fr.basis === "facility" ? "facility limit" : (fr.basis === "total" ? "total project cost" : "drawn debt"));
+        var desc = fr.basis === "flat"
+          ? (fr.period === "pa" ? money(fr.rate) + "/yr" : money(fr.rate) + " one-off")
+          : (fr.rate.toFixed(2) + "% of " + basisTxt + (fr.period === "pa" ? " p.a." : " one-off"));
+        row(fr.label + "  (" + desc + ")", money(fr.amount));
+      });
+      row("Total finance charges", money(m.financeCharges), true);
+
+      y += 6;
       section("Worst case: sale -" + (m.sDrop * 100).toFixed(1) + "%, costs +" + (m.cRise * 100).toFixed(1) + "%");
-      row("Combined effect on profit", signedMoney(m.combined));
-      row("Profit - worst case", signedMoney(m.worstProfit), true);
+      row("Combined effect on profit", acct(m.combined));
+      row("Profit / (loss) - worst case", acct(m.worstProfit), true);
       row("Profit on cost - worst case", m.worstMargin != null ? m.worstMargin.toFixed(2) + "%" : "-", true);
 
-      y += 12;
+      y += 12; ensure(140);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This feasibility estimate is a guide only, generated from the figures entered. All cost inputs are treated as exclusive of GST; input tax credits on construction and consultants are claimed separately and are not shown here. Under a design and construct contract the builder carries the design consultants, the certifier, the construction certificate or permit fee, the long service levy, and the contract works and public liability insurance, and those lines are excluded. Construction figures, where the estimator is used, come from published Australian quantity surveyor cost guides projected to 2026 and include builder preliminaries and margin but exclude GST, land, demolition, external infrastructure, fees and finance; a real cost plan will differ. GST under the margin scheme is estimated as (gross realisation less land price) divided by eleven and ignores input tax credits on construction; confirm your position with your accountant. The figures ignore interest-rate and sales-program changes, presale conditions, staging and anything specific to a site or funder, and this is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This feasibility estimate is a guide only, generated from the figures entered. All cost inputs are treated as exclusive of GST; input tax credits on construction and consultants are claimed separately and are not shown here. Under a design and construct contract the builder carries the design consultants, the certifier, the construction certificate or permit fee, the long service levy, and the contract works and public liability insurance, and those lines are excluded. Construction figures, where the estimator is used, come from published Australian quantity surveyor cost guides projected to 2026 and include builder preliminaries and margin but exclude GST, land, demolition, external infrastructure, fees and finance; a real cost plan will differ. Interest is run through a simple drawdown: costs are assumed to draw on a smooth S-curve through the period, equity is spent before debt, and interest accrues on the balance outstanding month by month and is capitalised, so it sits well below the peak debt times the rate times the term. The real draw profile, presale releases and funder conditions will differ. GST under the margin scheme is estimated as (gross realisation less land price) divided by eleven and ignores input tax credits on construction; confirm your position with your accountant. The figures ignore interest-rate and sales-program changes, presale conditions, staging and anything specific to a site or funder, and this is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
       return doc;
     }
@@ -1268,10 +1362,14 @@
         "Construction (incl. margin & extras): " + money(m.construction),
         "Contingency (" + m.contPct.toFixed(1) + "%): " + money(m.contingency),
         "Finance & holding: " + money(m.netFinance),
+        "  Interest rate on drawn debt (p.a.): " + (m.interestRate > 0 ? m.interestRate.toFixed(2) + "%" : "not set"),
+        "  Interest (drawn on an S-curve, equity first, capitalised): " + money(m.drawInterest),
+        "  Average debt drawn: " + money(m.avgDebt),
+        "  Peak debt (end of period): " + money(m.peakDebt),
         "  Facility limit: " + (m.facilityLimit > 0 ? money(m.facilityLimit) : "debt required"),
       ]);
       m.financeRows.forEach(function (fr) {
-        var basisTxt = fr.basis === "flat" ? "flat" : (fr.basis === "facility" ? "facility limit" : (fr.basis === "total" ? "total project cost" : "debt required"));
+        var basisTxt = fr.basis === "flat" ? "flat" : (fr.basis === "facility" ? "facility limit" : (fr.basis === "total" ? "total project cost" : "drawn debt"));
         var desc = fr.basis === "flat"
           ? (fr.period === "pa" ? money(fr.rate) + "/yr" : money(fr.rate) + " one-off")
           : (fr.rate.toFixed(2) + "% of " + basisTxt + (fr.period === "pa" ? " p.a." : " one-off"));
@@ -1295,11 +1393,13 @@
         "Additional cash contribution: " + optMoney(m.cashIn),
         "Total equity contributed: " + optMoney(m.equityTotal),
         "Debt required: " + (m.debtRequired != null ? money(m.debtRequired) : "n/a"),
+        "Average debt drawn: " + money(m.avgDebt),
+        "Peak debt (end of period): " + money(m.peakDebt),
         "Cash-on-cash return: " + (m.coc != null ? m.coc.toFixed(2) + "%" : "n/a"),
         "----",
         "Worst case (sale -" + (m.sDrop * 100).toFixed(1) + "%, costs +" + (m.cRise * 100).toFixed(1) + "%):",
-        "  Combined effect on profit: " + signedMoney(m.combined),
-        "  Profit - worst case: " + signedMoney(m.worstProfit),
+        "  Combined effect on profit: " + (m.combined < 0 ? "(" + money(Math.abs(m.combined)) + ")" : money(m.combined)),
+        "  Profit / (loss) - worst case: " + (m.worstProfit < 0 ? "(" + money(Math.abs(m.worstProfit)) + ")" : money(m.worstProfit)),
         "  Profit on cost - worst case: " + (m.worstMargin != null ? m.worstMargin.toFixed(2) + "%" : "n/a")
       ]);
       return lines.join("\n");
