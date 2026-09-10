@@ -101,6 +101,7 @@
                   <label class="calc-check"><input type="checkbox" id="scContam" /><span>Former service station, industrial use, or filled land</span></label>
                   <label class="calc-check"><input type="checkbox" id="scVegetation" /><span>Native vegetation or known biodiversity value</span></label>
                   <label class="calc-check"><input type="checkbox" id="scStormwater" /><span>Cannot drain to the street; needs on-site detention or an easement</span></label>
+                  <label class="calc-check"><input type="checkbox" id="scNoServices" /><span>No mains water or sewer connected to the block</span></label>
                   <label class="calc-check"><input type="checkbox" id="scCorner" /><span>New or altered driveway near an intersection</span></label>
                   <p class="field-hint">The consultant list below is tagged from what you tick here. It is a guide, not a determination. Always book a pre-lodgement (pre-DA) meeting with the council to confirm exactly what your DA must include, unless the outcome is already certain.</p>
                 </div>
@@ -226,10 +227,6 @@
                 <div class="input-money"><input type="text" inputmode="numeric" id="asbestos" autocomplete="off" placeholder="0" /></div>
               </div>
               <div class="field">
-                <label for="treeRemoval">Approved tree removal <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="treeRemoval" autocomplete="off" placeholder="0" /></div>
-              </div>
-              <div class="field">
                 <label for="clearing">Site clearing, fencing &amp; hoarding <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="clearing" autocomplete="off" placeholder="0" /></div>
               </div>
@@ -308,8 +305,9 @@
                 <p class="report-flag" data-report="landscape"></p>
               </div>
               <div class="field">
-                <label for="arborist">Arborist <span>(optional)</span></label>
+                <label for="arborist">Arborist / tree works <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="arborist" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Arborist report and impact assessment, plus any approved tree removal or pruning works. One line, so it is not double counted.</p>
                 <p class="report-flag" data-report="arborist"></p>
               </div>
               <div class="field">
@@ -475,6 +473,7 @@
         <div class="calc-schedule-wrap">
           <h2 class="calc-subhead">Reports for this site</h2>
           <div id="reportSummary" class="calc-assumptions">
+            <p id="serviceWarning" class="calc-warn" hidden><strong>No mains water or sewer to the block.</strong> Treat this as a major development constraint, not a line item. Getting services to the site can mean trunk main or sewer extensions, easements over other land, a pump station or an on-site wastewater system, and water authority headworks or augmentation charges that can run into six figures. It also drives the achievable yield. Get a servicing feasibility and a written connection offer from the water authority before you commit to the site.</p>
             <p><strong>Standard for most DAs:</strong> architect / design drawings, town planner (SEE), detail &amp; level survey, civil / stormwater, landscape plan, BASIX / NatHERS.</p>
             <p><strong>&#10033; Likely for this site:</strong> <span id="likelyList">tick the site characteristics above</span></p>
             <p><strong>May also be required:</strong> <span id="possibleList">&mdash;</span> Confirm the list at a council pre-lodgement meeting.</p>
@@ -548,7 +547,8 @@
             <li><strong>Loan and deposit.</strong> The loan is the percentage of the land price you enter. The deposit is the rest, and it is cash. Leave the loan blank and the whole purchase is funded with cash.</li>
             <li><strong>Total purchase costs</strong> is stamp duty plus legal / conveyancing, buyer's agent and due diligence. <strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. The filled figure is transfer duty plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's or titles registry's figure.</li>
             <li><strong>Demolition.</strong> Click the field, and with a state set (from the address check or the stamp duty box) and a footprint area entered it fills with an indicative figure for that state and structure type. The rate per m² runs higher for a small footprint and lower for a large one, because plant still has to be mobilised either way. Ticking "asbestos is likely" adds the uplift percentage. Figures are from price guides, not quotes, and a minimum job cost applies. Editing the field pins your own number; clearing it brings the estimate back.</li>
-            <li><strong>Site, consultant and statutory costs</strong> are the one-off costs of getting the DA prepared, lodged and assessed. Enter only the lines that apply.</li>
+            <li><strong>Site, consultant and statutory costs</strong> are the one-off costs of getting the DA prepared, lodged and assessed. Enter only the lines that apply. <strong>Arborist / tree works</strong> is a single line for both the report and any approved removal or pruning, so tree costs are not entered twice.</li>
+            <li><strong>No mains water or sewer.</strong> Tick this in Site characteristics if the block is not connected. It is flagged as a major constraint rather than a cost line: getting services to the site can mean main extensions, easements, a pump station or on-site wastewater, and water authority headworks charges into six figures, and it caps the yield. Get a servicing feasibility and a written connection offer before committing.</li>
             <li><strong>Holding costs</strong> are entered per year and charged for the DA period only, worked out as months &divide; 12. <strong>Rental income during the DA</strong>, if an existing dwelling stays leased, is netted off, so the holding line can be a credit.</li>
             <li><strong>Contingency</strong> is your percentage applied to the site, consultant, statutory and holding costs. It is not applied to the land price or stamp duty.</li>
             <li><strong>Interest during the DA.</strong> The land loan is drawn at settlement. If "fund the development costs from the loan" is ticked, every other cost is treated as drawn evenly across the DA period; otherwise it is cash. Interest is charged monthly on the balance outstanding and added to the loan (it compounds and is not paid in cash along the way).</li>
@@ -604,14 +604,14 @@
     var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
 
     /* cost-line groups, reused for summing, the blur formatter and the PDF */
-    var SITE = ["demolition", "asbestos", "treeRemoval", "clearing", "serviceLoc", "otherSite"];
+    var SITE = ["demolition", "asbestos", "clearing", "serviceLoc", "otherSite"];
     var CONSULT = ["architect", "planner", "surveyor", "civil", "flood", "structural", "geotech", "contamination", "certifier", "access", "traffic", "landscape", "arborist", "basix", "acoustic", "bushfire", "heritage", "waste", "qs", "ecologist", "otherConsult"];
     var STAT = ["preDA", "daFee", "advertising", "lsl", "contributions", "rezoning"];
     var HOLD = ["councilRates", "landTax", "insurances", "utilities", "maintenance", "otherHold"];
-    var SC = ["scDemo", "scAsbestos", "scHeritage", "scTrees", "scSlope", "scFlood", "scBushfire", "scAcoustic", "scContam", "scVegetation", "scStormwater", "scCorner"];
+    var SC = ["scDemo", "scAsbestos", "scHeritage", "scTrees", "scSlope", "scFlood", "scBushfire", "scAcoustic", "scContam", "scVegetation", "scStormwater", "scNoServices", "scCorner"];
 
     var SITE_LABELS = {
-      demolition: "Demolition", asbestos: "Asbestos / hazmat removal", treeRemoval: "Approved tree removal",
+      demolition: "Demolition", asbestos: "Asbestos / hazmat removal",
       clearing: "Site clearing, fencing & hoarding", serviceLoc: "Service location & potholing", otherSite: "Other site cost"
     };
     var CONSULT_LABELS = {
@@ -619,7 +619,7 @@
       civil: "Civil / stormwater engineer", flood: "Flood / overland flow assessment", structural: "Structural engineer",
       geotech: "Geotechnical engineer", contamination: "Contamination assessment (Phase 1 / 2)",
       certifier: "Building surveyor / certifier", access: "Access / DDA consultant", traffic: "Traffic & parking",
-      landscape: "Landscape architect", arborist: "Arborist", basix: "BASIX / NatHERS / ESD", acoustic: "Acoustic",
+      landscape: "Landscape architect", arborist: "Arborist / tree works", basix: "BASIX / NatHERS / ESD", acoustic: "Acoustic",
       bushfire: "Bushfire (BAL)", heritage: "Heritage", waste: "Waste management plan", qs: "Quantity surveyor",
       ecologist: "Ecologist / biodiversity", otherConsult: "Other consultant"
     };
@@ -637,7 +637,8 @@
       scSlope: "Sloping site / cut and fill / retaining", scFlood: "Flood-prone or near a watercourse",
       scBushfire: "Bushfire-prone land", scAcoustic: "Near a road, rail or venue",
       scContam: "Ex-industrial / servo / filled land", scVegetation: "Native vegetation / biodiversity",
-      scStormwater: "Cannot drain to the street", scCorner: "Driveway near an intersection"
+      scStormwater: "Cannot drain to the street", scNoServices: "No mains water or sewer to the block",
+      scCorner: "Driveway near an intersection"
     };
 
     function num(id) {
@@ -672,12 +673,12 @@
       architect: function () { return "standard"; },
       planner: function () { return "standard"; },
       surveyor: function () { return "standard"; },
-      civil: function () { return "standard"; },
+      civil: function (c) { return c.sc("scNoServices") ? "likely" : "standard"; },
       landscape: function (c) { return c.type === "commercial" ? "possible" : "standard"; },
       basix: function (c) { return (c.type === "commercial" || c.type === "subdivision") ? "possible" : "standard"; },
       flood: function (c) { return c.sc("scFlood") ? "likely" : "possible"; },
       structural: function (c) { return c.sc("scSlope") ? "likely" : "possible"; },
-      geotech: function (c) { return (c.sc("scSlope") || c.sc("scContam") || isBig(c.type)) ? "likely" : "possible"; },
+      geotech: function (c) { return (c.sc("scSlope") || c.sc("scContam") || c.sc("scNoServices") || isBig(c.type)) ? "likely" : "possible"; },
       contamination: function (c) { return c.sc("scContam") ? "likely" : "possible"; },
       certifier: function (c) { return isBig(c.type) ? "likely" : "possible"; },
       access: function (c) { return isBig(c.type) ? "likely" : "possible"; },
@@ -1029,6 +1030,7 @@
         likely.length ? likely.join(", ") : "tick the site characteristics above";
       document.getElementById("possibleList").textContent =
         possible.length ? possible.join(", ") + "." : "—";
+      document.getElementById("serviceWarning").hidden = !checked("scNoServices");
     }
 
     function render() {
@@ -1303,6 +1305,9 @@
       wrapLine("Development type", daTypeLabel());
       var ticked = SC.filter(function (id) { return checked(id); }).map(function (id) { return SC_LABELS[id]; });
       wrapLine("Site notes", ticked.length ? ticked.join("; ") : "None ticked");
+      if (checked("scNoServices")) {
+        wrapLine("Servicing", "No mains water or sewer to the block. Major constraint: extensions, easements, pump station or on-site wastewater, and headworks charges can run into six figures. Get a servicing feasibility and a written connection offer before committing.");
+      }
 
       y += 4;
       section("Land purchase");
@@ -1382,6 +1387,7 @@
         "Council / LGA: " + (document.getElementById("council").value.trim() || "not entered"),
         "Development type: " + daTypeLabel(),
         "Site notes: " + (ticked.length ? ticked.join("; ") : "none ticked"),
+        (checked("scNoServices") ? "SERVICING: no mains water or sewer to the block; major constraint, get a servicing feasibility and written connection offer before committing." : null),
         "Reports likely at lodgement: " + (likely.length ? likely.join(", ") : "standard set only"),
         "Reports possibly required: " + (possible.length ? possible.join(", ") : "none"),
         "----",
@@ -1419,7 +1425,7 @@
       lines.push("Cash (equity) required: " + money(m.equityRequired));
       lines.push("Debt at DA (loan + interest): " + money(m.debtAtDA));
       lines.push("Cost to DA as a % of land price: " + (m.costOnPrice != null ? m.costOnPrice.toFixed(2) + "%" : "n/a"));
-      return lines.join("\n");
+      return lines.filter(Boolean).join("\n");
     }
 
     function saveDoc() {

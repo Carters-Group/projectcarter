@@ -1080,6 +1080,20 @@ h1, h2, h3 {
 .report-flag.is-possible { color: var(--muted); }
 .field.is-likely > label { color: var(--accent); }
 
+/* Constraint callout (DA calculator) */
+.calc-warn {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(224, 169, 85, 0.4);
+  border-left: 3px solid #e0a955;
+  background: rgba(224, 169, 85, 0.08);
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.calc-warn[hidden] { display: none; }
+.calc-warn strong { color: #e8b96b; }
+
 /* ---- year-by-year schedule ---- */
 .calc-schedule-wrap { margin-top: clamp(40px, 6vw, 64px); }
 .calc-schedule-scroll { overflow-x: auto; margin-top: 18px; }
