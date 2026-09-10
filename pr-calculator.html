@@ -55,7 +55,7 @@
         <div class="calc-intro">
           <p class="kicker">Project Carter</p>
           <h1>Portfolio Review Calculator</h1>
-          <p>Review a property portfolio one asset at a time. For each property enter the value, the loan, the rent and the yearly holding costs, then any depreciation. The calculator works out the after-tax position and rolls every property up into a combined annual and weekly surplus or deficit, with portfolio LVR, blended yields and the rent each property would need to be neutrally geared. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial advice.</p>
+          <p>Review a property portfolio one asset at a time. For each property enter the value, the loan, the rent and the yearly running costs, then any depreciation. The calculator works out the after-tax cash flow and adds every property up into a combined yearly and weekly figure, with your equity position, loan to value, yields and the rent each property needs to break even. The numbers update live, and you can take away a one-page report. It is an estimate to help you think, not financial advice.</p>
         </div>
 
         <div class="calc-grid">
@@ -64,9 +64,9 @@
             <div class="calc-group">
               <h2 class="calc-subhead">Report</h2>
               <div class="field">
-                <label for="pcProjectName">Portfolio name or owner</label>
-                <input type="text" id="pcProjectName" autocomplete="off" placeholder="e.g. Macartney family portfolio" />
-                <p class="field-hint">Shown on the PDF and used to name the report if you save it to your account.</p>
+                <label for="pcProjectName">Portfolio name</label>
+                <input type="text" id="pcProjectName" autocomplete="off" placeholder="e.g. Johnson Family" />
+                <p class="field-hint">Shown on the PDF and used to name a saved report. Fills in from your account name once you sign in.</p>
               </div>
             </div>
 
@@ -91,25 +91,25 @@
           <dl class="calc-results" id="calcResults" aria-live="polite">
             <h2>Portfolio position</h2>
             <div class="result-row is-teaser"><dt>Properties</dt><dd data-out="count">&mdash;</dd></div>
-            <div class="result-row is-teaser"><dt>Combined property value</dt><dd data-out="value">&mdash;</dd></div>
-            <div class="result-row is-teaser"><dt>Combined debt</dt><dd data-out="debt">&mdash;</dd></div>
-            <div class="result-row is-key is-teaser"><dt>Combined equity</dt><dd data-out="equity">&mdash;</dd></div>
-            <div class="result-row is-teaser"><dt>Portfolio LVR</dt><dd data-out="lvr">&mdash;</dd></div>
-            <div class="result-row"><dt>Combined gross rent (per year)</dt><dd data-out="grossRent">&mdash;</dd></div>
-            <div class="result-row"><dt>Blended gross yield</dt><dd data-out="grossYield">&mdash;</dd></div>
-            <div class="result-row"><dt>Combined operating expenses (per year)</dt><dd data-out="expenses">&mdash;</dd></div>
-            <div class="result-row"><dt>Combined net rental income (per year)</dt><dd data-out="netRent">&mdash;</dd></div>
-            <div class="result-row"><dt>Blended net yield</dt><dd data-out="netYield">&mdash;</dd></div>
-            <div class="result-row"><dt>Combined loan interest (per year)</dt><dd data-out="interest">&mdash;</dd></div>
-            <div class="result-row"><dt>Combined pre-tax cash flow (per year)</dt><dd data-out="preTax">&mdash;</dd></div>
-            <div class="result-row"><dt>Tax benefit / (cost) before depreciation</dt><dd data-out="taxPreDepr">&mdash;</dd></div>
-            <div class="result-row"><dt>Depreciation tax credit (per year)</dt><dd data-out="deprCredit">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Combined annual surplus / (deficit)</dt><dd data-out="annual">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Combined weekly surplus / (deficit)</dt><dd data-out="weekly">&mdash;</dd></div>
-            <div class="result-row"><dt>Result vs portfolio value</dt><dd data-out="pctValue">&mdash;</dd></div>
-            <div class="result-row"><dt>Shortfall to neutral gearing (per week)</dt><dd data-out="toNeutral">&mdash;</dd></div>
-            <div class="result-row"><dt>One-off acquisition costs</dt><dd data-out="acq">&mdash;</dd></div>
-            <div class="result-row"><dt>Cash required to complete</dt><dd data-out="cash">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Portfolio value</dt><dd data-out="value">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Portfolio debt</dt><dd data-out="debt">&mdash;</dd></div>
+            <div class="result-row is-key is-teaser"><dt>Equity (net position)</dt><dd data-out="equity">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Loan to value (LVR)</dt><dd data-out="lvr">&mdash;</dd></div>
+            <div class="result-row"><dt>Rent collected (per year)</dt><dd data-out="grossRent">&mdash;</dd></div>
+            <div class="result-row"><dt>Gross yield</dt><dd data-out="grossYield">&mdash;</dd></div>
+            <div class="result-row"><dt>Running costs (per year)</dt><dd data-out="expenses">&mdash;</dd></div>
+            <div class="result-row"><dt>Net rent after costs (per year)</dt><dd data-out="netRent">&mdash;</dd></div>
+            <div class="result-row"><dt>Net yield</dt><dd data-out="netYield">&mdash;</dd></div>
+            <div class="result-row"><dt>Loan interest (per year)</dt><dd data-out="interest">&mdash;</dd></div>
+            <div class="result-row"><dt>Cash flow before tax (per year)</dt><dd data-out="preTax">&mdash;</dd></div>
+            <div class="result-row"><dt>Tax refund / (payable) on that</dt><dd data-out="taxPreDepr">&mdash;</dd></div>
+            <div class="result-row"><dt>Depreciation tax saving (per year)</dt><dd data-out="deprCredit">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>After-tax cash flow (per year)</dt><dd data-out="annual">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>After-tax cash flow (per week)</dt><dd data-out="weekly">&mdash;</dd></div>
+            <div class="result-row"><dt>As a % of portfolio value</dt><dd data-out="pctValue">&mdash;</dd></div>
+            <div class="result-row"><dt>Extra rent per week to break even</dt><dd data-out="toNeutral">&mdash;</dd></div>
+            <div class="result-row"><dt>One-off purchase costs</dt><dd data-out="acq">&mdash;</dd></div>
+            <div class="result-row"><dt>Cash needed to buy</dt><dd data-out="cash">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -131,8 +131,8 @@
                   <th scope="col">LVR</th>
                   <th scope="col">Gross yield</th>
                   <th scope="col">Net yield</th>
-                  <th scope="col">Annual +/(&minus;)</th>
-                  <th scope="col">Weekly +/(&minus;)</th>
+                  <th scope="col">After-tax / yr</th>
+                  <th scope="col">After-tax / wk</th>
                 </tr>
               </thead>
               <tbody id="calcScheduleBody">
@@ -186,15 +186,15 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
-            <li><strong>Per property.</strong> Loan is the LVR you enter times the value; equity is the rest. Interest is interest-only: loan &times; rate. Gross rent is the weekly rent &times; 52.</li>
-            <li><strong>Operating expenses</strong> are property management (a % of gross rent), the letting fee, council rates, body corporate / strata, insurance, maintenance (per week &times; 52), a vacancy allowance (weeks &times; the weekly rent), annual loan fees and sundry. Net rental income is gross rent less these.</li>
-            <li><strong>Pre-tax cash flow</strong> is net rental income less loan interest. A negative figure is the annual holding cost before tax.</li>
-            <li><strong>Tax.</strong> The property's taxable result is pre-tax cash flow less depreciation. The tax benefit or cost is that result &times; your marginal rate &mdash; a loss is refunded, a profit is taxed. Depreciation is building at cost &times; its rate (2.5% by default) plus fittings at cost &times; their rate, and each adds its own tax credit.</li>
-            <li><strong>Annual surplus / (deficit)</strong> is pre-tax cash flow plus the tax benefit and the depreciation credits. Divided by 52 it is the weekly surplus or deficit &mdash; the real out-of-pocket cost, or income, of holding that property.</li>
-            <li><strong>Neutral gearing.</strong> Each card shows the weekly rent that would bring that property's annual result to zero, holding every other figure the same.</li>
-            <li><strong>Acquisition costs</strong> are optional and only for a property you are buying: stamp duty (estimable by state), conveyancing, borrowing costs, a quantity surveyor's report and any improvements. They do not affect the holding-cost result; they feed "cash required to complete" (equity plus those costs).</li>
-            <li><strong>Stamp duty</strong> can be estimated: open the acquisition costs, pick a state and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions.</li>
-            <li><strong>Portfolio</strong> figures are the sum across every property; blended yields are combined rent &divide; combined value. This is a point-in-time review: it holds rent, rates and values flat and ignores capital growth, principal repayments, CGT and land tax.</li>
+            <li><strong>Loan and equity.</strong> The loan is the LVR you enter times the value; the equity (your net position) is the rest. Interest is interest-only, loan &times; rate, so nothing is paid off the loan.</li>
+            <li><strong>Rent collected</strong> is the weekly rent &times; 52.</li>
+            <li><strong>Running costs</strong> are property management (a % of the rent), the letting fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance (per week &times; 52), a vacancy allowance (weeks &times; the weekly rent), loan fees and sundry. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings &mdash; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
+            <li><strong>Cash flow before tax</strong> is net rent after costs, less loan interest. A figure in brackets is what the property costs you to hold each year before tax.</li>
+            <li><strong>Tax.</strong> A rental loss is refunded at the marginal tax rate you enter; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving.</li>
+            <li><strong>After-tax cash flow</strong> is cash flow before tax plus the tax refund and the depreciation tax saving. Divided by 52 it is the weekly figure &mdash; the real out-of-pocket cost, or income, of holding the property.</li>
+            <li><strong>Break-even rent.</strong> Each card shows the weekly rent that would bring that property's yearly after-tax result to zero, with everything else held the same.</li>
+            <li><strong>Buying a property.</strong> Tick "being purchased" to add one-off costs: stamp duty (estimable by state), conveyancing, borrowing costs, a quantity surveyor's report and improvements. These do not change the holding result; they feed "cash needed to buy" (your equity plus those costs).</li>
+            <li><strong>The portfolio</strong> figures add up every property; the yields are combined rent &divide; combined value. This is a point-in-time review: it holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax.</li>
           </ul>
         </div>
       </div>
@@ -391,7 +391,7 @@
         pctCanvas.font = cs.font || (cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily);
         var txt = el.value !== "" ? el.value : (el.placeholder || "");
         var padLeft = parseFloat(cs.paddingLeft) || 15;
-        wrap.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 3) + "px");
+        wrap.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 1) + "px");
       });
     }
 
@@ -429,47 +429,50 @@
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'value">Current value</label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'value" autocomplete="off" placeholder="1,800,000" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'value" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'lvr">Loan to value <span>(%)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'lvr" autocomplete="off" placeholder="65" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'lvr" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<p class="field-hint" id="' + p + 'loanHint">Loan &mdash; &nbsp;·&nbsp; Equity &mdash;</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'rate" autocomplete="off" placeholder="6.35" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'rentwk">Rent <span>(per week)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentwk" autocomplete="off" placeholder="1,650" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentwk" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<p class="field-hint" id="' + p + 'rentHint">Gross rent &mdash; &nbsp;·&nbsp; Gross yield &mdash;</p>' +
 
-        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Annual expenses</h3>' +
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Yearly running costs</h3>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="6.6" value="6.6" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="0" value="6.6" /></div></div>' +
           '<div class="field"><label for="' + p + 'letting">Letting fee <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'letting" autocomplete="off" placeholder="1,650" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="6,000" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'strata">Body corporate / strata <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'strata" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'landtax">Land tax <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'landtax" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'insurance">Insurance <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="2,250" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.</p>' +
+        '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="35" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
+          '<input type="text" inputmode="decimal" id="' + p + 'vacwks" autocomplete="off" placeholder="0" /></div>' +
         '</div>' +
         '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
-          '<input type="text" inputmode="decimal" id="' + p + 'vacwks" autocomplete="off" placeholder="1" /></div>' +
           '<div class="field"><label for="' + p + 'loanfees">Annual loan fees <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'loanfees" autocomplete="off" placeholder="0" /></div></div>' +
-        '</div>' +
-        '<div class="field">' +
-          '<label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div>' +
+          '<div class="field"><label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
 
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Depreciation <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></h3>' +
@@ -523,11 +526,11 @@
         '</div>' +
 
         '<p class="dwelling-type__calc">' +
-          '<span>Net yield <strong id="' + p + 'oNetYield">&mdash;</strong></span>' +
-          '<span>Pre-tax cash flow / yr <strong id="' + p + 'oPreTax">&mdash;</strong></span>' +
-          '<span>Annual surplus / (deficit) <strong id="' + p + 'oAnnual">&mdash;</strong></span>' +
-          '<span>Weekly surplus / (deficit) <strong id="' + p + 'oWeekly">&mdash;</strong></span>' +
-          '<span>Rent / wk for neutral gearing <strong id="' + p + 'oNeutral">&mdash;</strong></span>' +
+          '<span>Net rental yield <strong id="' + p + 'oNetYield">&mdash;</strong></span>' +
+          '<span>Cash flow before tax / yr <strong id="' + p + 'oPreTax">&mdash;</strong></span>' +
+          '<span>After-tax cash flow / yr <strong id="' + p + 'oAnnual">&mdash;</strong></span>' +
+          '<span>After-tax cash flow / wk <strong id="' + p + 'oWeekly">&mdash;</strong></span>' +
+          '<span>Rent / wk to break even <strong id="' + p + 'oNeutral">&mdash;</strong></span>' +
         '</p>' +
         '<button type="button" class="linklike dwelling-type__remove" data-remove="' + id + '">Remove this property</button>';
 
@@ -656,13 +659,14 @@
       var letting = num(p + "letting");
       var council = num(p + "council");
       var strata = num(p + "strata");
+      var landTax = num(p + "landtax");
       var insurance = num(p + "insurance");
       var maint = num(p + "maintwk") * 52;
       var vacWks = num(p + "vacwks");
       var vacancy = vacWks * rentWk;
       var loanFees = num(p + "loanfees");
       var sundry = num(p + "sundry");
-      var expenses = pm + letting + council + strata + insurance + maint + vacancy + loanFees + sundry;
+      var expenses = pm + letting + council + strata + landTax + insurance + maint + vacancy + loanFees + sundry;
 
       var netRent = grossRent - expenses;
       var netYield = value > 0 ? netRent / value : null;
@@ -681,7 +685,7 @@
       var weekly = annual / 52;
 
       /* weekly rent that brings annual result to zero, all else equal */
-      var fixed = letting + council + strata + insurance + maint + loanFees + sundry;
+      var fixed = letting + council + strata + landTax + insurance + maint + loanFees + sundry;
       var denom = 52 * (1 - pmPct) - vacWks;
       var neutralWk = denom > 0
         ? (interest + fixed - depr * taxRate / (1 - taxRate)) / denom
@@ -696,6 +700,8 @@
         id: id, label: (document.getElementById(p + "label").value || "").trim(),
         value: value, lvr: lvr, loan: loan, equity: equity, rate: rate, interest: interest,
         rentWk: rentWk, grossRent: grossRent, grossYield: grossYield,
+        pm: pm, letting: letting, council: council, strata: strata, landTax: landTax,
+        insurance: insurance, maint: maint, vacancy: vacancy, loanFees: loanFees, sundry: sundry,
         expenses: expenses, netRent: netRent, netYield: netYield, preTax: preTax,
         taxPreDepr: taxPreDepr, deprCredit: deprCredit, depr: depr,
         annual: annual, weekly: weekly, neutralWk: neutralWk,
@@ -710,12 +716,17 @@
       var T = {
         n: live.length,
         value: 0, loan: 0, equity: 0, grossRent: 0, expenses: 0, netRent: 0,
+        pm: 0, letting: 0, council: 0, strata: 0, landTax: 0, insurance: 0,
+        maint: 0, vacancy: 0, loanFees: 0, sundry: 0,
         interest: 0, preTax: 0, taxPreDepr: 0, deprCredit: 0, annual: 0, acq: 0,
         cashToComplete: 0, anyAcq: false
       };
       live.forEach(function (m) {
         T.value += m.value; T.loan += m.loan; T.equity += m.equity;
         T.grossRent += m.grossRent; T.expenses += m.expenses; T.netRent += m.netRent;
+        T.pm += m.pm; T.letting += m.letting; T.council += m.council; T.strata += m.strata;
+        T.landTax += m.landTax; T.insurance += m.insurance; T.maint += m.maint;
+        T.vacancy += m.vacancy; T.loanFees += m.loanFees; T.sundry += m.sundry;
         T.interest += m.interest; T.preTax += m.preTax; T.taxPreDepr += m.taxPreDepr;
         T.deprCredit += m.deprCredit; T.annual += m.annual;
         T.acq += m.acq; T.cashToComplete += m.cashToComplete;
@@ -784,9 +795,9 @@
       put("annual", T.valid ? signedMoney(T.annual) : "—");
       put("weekly", T.valid ? signedMoney(T.weekly) : "—");
       put("pctValue", T.pctValue != null ? pct(T.pctValue) : "—");
-      put("toNeutral", T.valid ? (T.toNeutral > 0 ? money(T.toNeutral) + " / wk" : "Neutral or positive") : "—");
-      put("acq", T.anyAcq ? money(T.acq) : "Not applicable");
-      put("cash", T.anyAcq ? money(T.cashToComplete) : "Not applicable");
+      put("toNeutral", T.valid ? (T.toNeutral > 0 ? money(T.toNeutral) + " / wk" : "Already breaks even") : "—");
+      put("acq", T.anyAcq ? money(T.acq) : "None");
+      put("cash", T.anyAcq ? money(T.cashToComplete) : "None");
 
       var body = document.getElementById("calcScheduleBody");
       if (!T.valid) {
@@ -890,34 +901,62 @@
         doc.text(String(v), w - L, y, { align: "right" });
         y += 18;
       }
+      function subrule() {
+        doc.setDrawColor(225); doc.line(w - L - 150, y - 12, w - L, y - 12);
+      }
+      function bigrow(k, v) {
+        ensure(24);
+        doc.setDrawColor(60); doc.line(L, y - 13, w - L, y - 13);
+        doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        doc.text(k, L, y);
+        doc.text(String(v), w - L, y, { align: "right" });
+        y += 20;
+      }
+      /* only print a cost line when it has a value */
+      function costRow(k, v) { if (v > 0) row("  less " + k, money(v)); }
 
-      section("Portfolio position");
+      section("Portfolio at a glance");
       row("Properties", String(T.n));
-      row("Combined property value", money(T.value));
-      row("Combined debt", money(T.loan));
-      row("Combined equity", money(T.equity), true);
-      row("Portfolio LVR", T.lvr != null ? pct(T.lvr) : "-");
-      row("Combined gross rent (per year)", money(T.grossRent));
-      row("Blended gross yield", T.grossYield != null ? pct(T.grossYield) : "-");
-      row("Combined operating expenses (per year)", money(T.expenses));
-      row("Combined net rental income (per year)", signedMoney(T.netRent));
-      row("Blended net yield", T.netYield != null ? pct(T.netYield) : "-");
-      row("Combined loan interest (per year)", money(T.interest));
-      row("Combined pre-tax cash flow (per year)", signedMoney(T.preTax));
-      row("Tax benefit / (cost) before depreciation", signedMoney(T.taxPreDepr));
-      row("Depreciation tax credit (per year)", money(T.deprCredit));
-      row("Combined annual surplus / (deficit)", bracketMoney(T.annual), true);
-      row("Combined weekly surplus / (deficit)", bracketMoney(T.weekly), true);
-      row("Result vs portfolio value", T.pctValue != null ? pct(T.pctValue) : "-");
-      row("Shortfall to neutral gearing (per week)", T.toNeutral > 0 ? money(T.toNeutral) : "Neutral or positive");
+      row("Property value", money(T.value));
+      row("Debt", money(T.loan));
+      row("Equity (net position)", money(T.equity), true);
+      row("Loan to value (LVR)", T.lvr != null ? pct(T.lvr) : "-");
+
+      y += 8;
+      section("Yearly cash flow");
+      row("Rent collected", money(T.grossRent));
+      costRow("Property management", T.pm);
+      costRow("Letting fee", T.letting);
+      costRow("Council rates", T.council);
+      costRow("Body corporate / strata", T.strata);
+      costRow("Land tax", T.landTax);
+      costRow("Insurance", T.insurance);
+      costRow("Maintenance", T.maint);
+      costRow("Vacancy allowance", T.vacancy);
+      costRow("Loan fees", T.loanFees);
+      costRow("Sundry", T.sundry);
+      subrule();
+      row("Net rent after running costs", signedMoney(T.netRent), true);
+      row("  less Loan interest", money(T.interest));
+      subrule();
+      row("Cash flow before tax", signedMoney(T.preTax), true);
+      row("  add Tax refund / (less tax payable)", signedMoney(T.taxPreDepr));
+      if (T.deprCredit > 0) row("  add Depreciation tax saving", money(T.deprCredit));
+      bigrow("AFTER-TAX CASH FLOW (PER YEAR)", bracketMoney(T.annual));
+      row("After-tax cash flow (per week)", bracketMoney(T.weekly), true);
+      row("As a % of portfolio value", T.pctValue != null ? pct(T.pctValue) : "-");
+      row("Extra rent per week to break even", T.toNeutral > 0 ? money(T.toNeutral) : "Already breaks even");
+
       if (T.anyAcq) {
-        row("One-off acquisition costs", money(T.acq));
-        row("Cash required to complete", money(T.cashToComplete), true);
+        y += 8;
+        section("If buying");
+        row("One-off purchase costs", money(T.acq));
+        row("Cash needed to buy (equity + costs)", money(T.cashToComplete), true);
       }
 
       y += 8;
       section("Property by property");
-      var cols = ["Property", "Value", "Debt", "LVR", "Gross yld", "Net yld", "Annual", "Weekly"];
+      var cols = ["Property", "Value", "Debt", "LVR", "Gross", "Net", "Cash/yr", "Cash/wk"];
       var cx = [L, L + 132, L + 210, L + 288, L + 340, L + 396, L + 452, L + 510];
       doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
       cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
@@ -946,7 +985,7 @@
 
       ensure(90);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This estimate is a guide only, generated from the figures entered above. It reviews the portfolio at a point in time: rent, outgoings and values are held flat, and loans are treated as interest-only. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure, and excludes surcharges and concessions. The tax figures apply a single marginal rate to each property's rental result and depreciation, and ignore land tax, CGT, negative-gearing rules specific to your circumstances, and the timing of any refund. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and loans are treated as interest-only (no principal paid down). The tax lines apply the one marginal rate you entered to each property's rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -959,27 +998,27 @@
       var lines = [
         (pn ? "Portfolio: " + pn : null),
         "Properties: " + T.n,
-        "Combined property value: " + money(T.value),
-        "Combined debt: " + money(T.loan),
-        "Combined equity: " + money(T.equity),
-        "Portfolio LVR: " + (T.lvr != null ? pct(T.lvr) : "n/a"),
-        "Combined gross rent: " + money(T.grossRent) + "/yr",
-        "Blended gross yield: " + (T.grossYield != null ? pct(T.grossYield) : "n/a"),
-        "Combined operating expenses: " + money(T.expenses) + "/yr",
-        "Combined net rental income: " + signedMoney(T.netRent) + "/yr",
-        "Blended net yield: " + (T.netYield != null ? pct(T.netYield) : "n/a"),
-        "Combined loan interest: " + money(T.interest) + "/yr",
-        "Combined pre-tax cash flow: " + signedMoney(T.preTax) + "/yr",
-        "Tax benefit/(cost) before depreciation: " + signedMoney(T.taxPreDepr) + "/yr",
-        "Depreciation tax credit: " + money(T.deprCredit) + "/yr",
-        "Combined annual surplus/(deficit): " + signedMoney(T.annual),
-        "Combined weekly surplus/(deficit): " + signedMoney(T.weekly),
-        "Result vs portfolio value: " + (T.pctValue != null ? pct(T.pctValue) : "n/a"),
-        "Shortfall to neutral gearing: " + (T.toNeutral > 0 ? money(T.toNeutral) + "/wk" : "neutral or positive")
+        "Portfolio value: " + money(T.value),
+        "Portfolio debt: " + money(T.loan),
+        "Equity (net position): " + money(T.equity),
+        "Loan to value (LVR): " + (T.lvr != null ? pct(T.lvr) : "n/a"),
+        "Rent collected: " + money(T.grossRent) + "/yr",
+        "Gross yield: " + (T.grossYield != null ? pct(T.grossYield) : "n/a"),
+        "Running costs: " + money(T.expenses) + "/yr (incl. land tax " + money(T.landTax) + ")",
+        "Net rent after costs: " + signedMoney(T.netRent) + "/yr",
+        "Net yield: " + (T.netYield != null ? pct(T.netYield) : "n/a"),
+        "Loan interest: " + money(T.interest) + "/yr",
+        "Cash flow before tax: " + signedMoney(T.preTax) + "/yr",
+        "Tax refund/(payable) on that: " + signedMoney(T.taxPreDepr) + "/yr",
+        "Depreciation tax saving: " + money(T.deprCredit) + "/yr",
+        "After-tax cash flow: " + signedMoney(T.annual) + "/yr",
+        "After-tax cash flow: " + signedMoney(T.weekly) + "/wk",
+        "As a % of portfolio value: " + (T.pctValue != null ? pct(T.pctValue) : "n/a"),
+        "Extra rent per week to break even: " + (T.toNeutral > 0 ? money(T.toNeutral) + "/wk" : "already breaks even")
       ];
       if (T.anyAcq) {
-        lines.push("One-off acquisition costs: " + money(T.acq));
-        lines.push("Cash required to complete: " + money(T.cashToComplete));
+        lines.push("One-off purchase costs: " + money(T.acq));
+        lines.push("Cash needed to buy: " + money(T.cashToComplete));
       }
       lines.push("----");
       m.props.forEach(function (r, i) {
@@ -1075,6 +1114,35 @@
     document.addEventListener("pc-auth-change", function (ev) {
       if (ev && ev.detail && ev.detail.isMember && !unlocked) { unlocked = true; applyLock(); }
     });
+
+    /* ---- portfolio name: fill from the signed-in account -------------------
+       Only touches the field while it is still empty and the visitor has not
+       typed in it, and never when a saved report is being opened. */
+    var nameEl = document.getElementById("pcProjectName");
+    var nameTouched = false;
+    if (nameEl) nameEl.addEventListener("input", function () { nameTouched = true; });
+
+    function accountName(u) {
+      if (!u) return "";
+      var fn = (u.full_name || "").trim();
+      if (fn) {
+        var parts = fn.split(/\s+/);
+        return parts.length > 1 ? parts[parts.length - 1] + " Family" : fn;
+      }
+      var em = (u.email || "").split("@")[0];
+      return em ? em.charAt(0).toUpperCase() + em.slice(1) : "";
+    }
+    function maybeFillName() {
+      if (!nameEl || nameTouched || nameEl.value.trim() !== "") return;
+      var hasReport = false;
+      try { hasReport = !!new URL(window.location.href).searchParams.get("report"); } catch (e) {}
+      if (hasReport) return;
+      if (!window.pcAuth || !window.pcAuth.isMember || !window.pcAuth.isMember()) return;
+      var nm = accountName(window.pcAuth.user && window.pcAuth.user());
+      if (nm) nameEl.value = nm;
+    }
+    if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(maybeFillName);
+    document.addEventListener("pc-auth-change", maybeFillName);
 
     openLead.addEventListener("click", function () {
       if (unlocked) { lastDoc = makePDF(); saveDoc(); }
