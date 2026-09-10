@@ -87,7 +87,7 @@
                   <label class="calc-check"><input type="radio" name="contract" value="dc" checked /><span>Design &amp; construct (D&amp;C) &mdash; one fixed price, the builder carries the design consultants</span></label>
                   <label class="calc-check"><input type="radio" name="contract" value="trade" /><span>Construct only / trade contracts &mdash; you carry the consultant team through documentation and construction</span></label>
                 </div>
-                <p class="calc-note" id="dcNote" hidden><strong>Under a design &amp; construct contract</strong> the builder carries and prices the structural and civil, hydraulic, mechanical / electrical / fire, facade and ESD design, along with shop drawings and as-builts. Those lines are struck out below and left out of your consultant total; they sit inside the contract sum you enter per dwelling type. You still carry the certifier, the set-out surveyor, the superintendent, the QS progress inspections, and the permits, levies and contributions.</p>
+                <p class="calc-note" id="dcNote" hidden><strong>Under a design &amp; construct contract</strong> the builder carries and prices the architect's documentation to CC, the structural and civil, hydraulic, mechanical / electrical / fire, facade and ESD design, the building surveyor / certifier, the construction certificate / permit fee, the long service levy, and the contract works and public liability insurance. Those lines are struck out below and left out of your totals; they sit inside the contract sum you enter per dwelling type. You still carry the set-out surveyor, the superintendent, the QS progress inspections, the infrastructure charges and contributions, and your own project management. Enter your own professional indemnity or latent-defects cover under "Other holding cost".</p>
               </div>
             </div>
 
@@ -175,6 +175,7 @@
               <div class="field">
                 <label for="ccFee">Construction certificate / building permit fee <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="ccFee" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-flag="ccFee"></p>
               </div>
               <div class="field">
                 <label for="infraCharges">Infrastructure charges / developer contributions (s7.11 / s7.12) <span>(optional)</span></label>
@@ -185,6 +186,7 @@
                 <label for="longServiceLevy">Long service levy <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="longServiceLevy" autocomplete="off" placeholder="0" /></div>
                 <p class="field-hint">Payable in most states on building work over a threshold, for example 0.25% of the cost of works in NSW, paid before the certificate issues.</p>
+                <p class="report-flag" data-flag="longServiceLevy"></p>
               </div>
               <div class="field">
                 <label for="bondsInspections">Council bonds, inspections &amp; compliance <span>(optional)</span></label>
@@ -252,7 +254,7 @@
 
               <div class="field">
                 <label>Dwelling types</label>
-                <p class="field-hint">One card per floor plan. Enter how many are built to that plan, its floor area, the build cost and the sale price per dwelling. Add a card for each different plan. Up to 12 types.</p>
+                <p class="field-hint">One card per floor plan. Enter how many are built to that plan, its floor area, the build cost and the sale price per dwelling. Add a card for each different plan. Up to 12 types. Each card also shows the construction-only cost per dwelling and a blended land + build cost per dwelling, where the land and cost to DA is spread across the types by floor-area share. Enter all costs exclusive of GST.</p>
                 <div class="dwelling-types" id="typeCards"></div>
                 <button type="button" class="btn btn-ghost btn-add" id="addType">Add another dwelling type</button>
               </div>
@@ -302,14 +304,15 @@
                 <p class="field-hint">From DA to the last settlement. The holding costs below are charged for this period.</p>
               </div>
               <div class="field">
-                <label for="constLoanCosts">Construction loan interest &amp; fees <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="constLoanCosts" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">Interest, line fees and establishment on the construction facility across the build. Use your funder's figure, or an estimate.</p>
+                <label for="facilityLimit">Facility limit <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="facilityLimit" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">The approved loan limit, used as the base for line and commitment fees below. Leave blank to use the debt required instead.</p>
               </div>
               <div class="field">
-                <label for="propLoanCosts">Land / residual loan holding cost <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="propLoanCosts" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">Interest on debt carried from DA through to settlements, if it is not rolled into the construction facility.</p>
+                <label>Finance charges</label>
+                <p class="field-hint">One row per charge, since interest, line fee, establishment and other fees each sit on a different base. Enter a rate, pick what it applies to, and say whether it is one-off or per annum. Per-annum rows are charged over the construction and settlement period (months &divide; 12). The base for a per-annum interest row is the debt required; rates on the debt required or the total project cost are worked out before finance to avoid circularity.</p>
+                <div class="finance-rows" id="financeRows"></div>
+                <button type="button" class="btn btn-ghost btn-add" id="addFinance">Add another finance charge</button>
               </div>
               <div class="field">
                 <label for="councilRates">Council &amp; water rates <span>(per year)</span></label>
@@ -322,6 +325,7 @@
               <div class="field">
                 <label for="insurances">Insurances (contract works, liability) <span>(per year)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="insurances" autocomplete="off" placeholder="0" /></div>
+                <p class="report-flag" data-flag="insurances"></p>
               </div>
               <div class="field">
                 <label for="otherHold">Other holding cost <span>(per year)</span></label>
@@ -335,8 +339,8 @@
               <h2 class="calc-subhead">Contingency &amp; management</h2>
               <div class="field">
                 <label for="contPct">Contingency <span>(% of costs)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="contPct" autocomplete="off" placeholder="5" /></div>
-                <p class="field-hint">Applied to the post-DA consultants, statutory fees and construction. Not to the DA total or finance.</p>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="contPct" autocomplete="off" placeholder="5" value="5" /></div>
+                <p class="field-hint">Applied to the post-DA consultants, statutory fees and construction. Not to the DA total or finance. Defaults to 5%; change or clear it as needed.</p>
               </div>
               <div class="field">
                 <label for="pmFee">Development management / your time <span>(optional)</span></label>
@@ -367,9 +371,14 @@
             <div class="calc-group">
               <h2 class="calc-subhead">Funding &amp; scenarios</h2>
               <div class="field">
-                <label for="cashIn">Your cash (equity) contribution</label>
+                <label for="daEquity">Equity invested to reach DA</label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="daEquity" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">The "Cash (equity) required" figure from the <a href="da-calculator.html">DA calculator</a>: the part of the cost to DA you funded yourself rather than with a land loan. It counts as contributed capital here.</p>
+              </div>
+              <div class="field">
+                <label for="cashIn">Additional cash (equity) contribution</label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="cashIn" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">The deposit and equity you put into the project. The rest of the total project cost is the debt required, shown in the results, and the cash-on-cash return is measured on this figure.</p>
+                <p class="field-hint">Further equity you put in from DA through to settlement, on top of the DA-stage equity above. The two together are your total contributed capital; the rest of the project cost is the debt required, and the cash-on-cash return is measured on the total.</p>
               </div>
               <div class="field">
                 <label for="whatIfSale">What if sale prices fell by <span>(%)</span></label>
@@ -404,7 +413,9 @@
             <div class="result-row"><dt>Profit per dwelling</dt><dd data-out="profitPerDwelling">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Profit on cost</dt><dd data-out="margin">&mdash;</dd></div>
             <div class="result-row"><dt>Profit margin on GRV</dt><dd data-out="grvMargin">&mdash;</dd></div>
-            <div class="result-row"><dt>Cash (equity) you put in</dt><dd data-out="cashIn">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Equity to reach DA</dt><dd data-out="daEquity">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Additional cash contribution</dt><dd data-out="cashIn">&mdash;</dd></div>
+            <div class="result-row"><dt>Total equity contributed</dt><dd data-out="equityTotal">&mdash;</dd></div>
             <div class="result-row"><dt>Debt required</dt><dd data-out="debtRequired">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Cash-on-cash return</dt><dd data-out="coc">&mdash;</dd></div>
             <div class="result-row"><dt>Profit &mdash; worst case</dt><dd data-out="worstProfit">&mdash;</dd></div>
@@ -480,14 +491,15 @@
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
             <li><strong>Cost to reach DA.</strong> Bring the "Total cost to DA" across from the <a href="da-calculator.html">DA calculator</a>. That figure already includes the land, the buying costs, the DA consultants, the council fees and the holding and interest to consent, so this page does not ask for them again. The land price is entered once more on its own, only to estimate GST under the margin scheme.</li>
-            <li><strong>Building contract.</strong> Under <strong>design &amp; construct</strong> the structural and civil, hydraulic, services, facade and ESD design sit inside the contract sum, so those consultant lines are struck out and left out of the consultant total. Under a <strong>construct-only</strong> build every consultant line is a developer cost. Either way, construction is entered per dwelling type.</li>
-            <li><strong>Dwelling types.</strong> One card per floor plan: how many are built to it, its floor area, the build cost and the sale price per dwelling. The construction estimator fills each type's build cost from a 2026 rate per m² for the state, type and quality chosen (the rate includes builder preliminaries and margin). Editing any build cost pins your own numbers and switches the estimator off; clear them to bring it back.</li>
+            <li><strong>Building contract.</strong> Under <strong>design &amp; construct</strong> the architect's documentation to CC, the structural and civil, hydraulic, services, facade and ESD design, the building surveyor / certifier, the construction certificate / permit fee, the long service levy, and the contract works and public liability insurance all sit inside the contract sum, so those lines are struck out and left out of your totals. Under a <strong>construct-only</strong> build every line is a developer cost and a builder's margin applies. Either way, construction is entered per dwelling type.</li>
+            <li><strong>Dwelling types.</strong> One card per floor plan: how many are built to it, its floor area, the build cost and the sale price per dwelling. Each card also shows a <strong>construction-only cost per dwelling</strong> (build cost plus its share of basement and builder's margin) and a <strong>blended land + build cost per dwelling</strong>, which adds that type's share of the land and cost to DA, spread across the types by floor-area (GFA &times; count) share. The construction estimator fills each type's build cost from a 2026 rate per m² for the state, type and quality chosen (the rate includes builder preliminaries and margin). Editing any build cost pins your own numbers and switches the estimator off; clear them to bring it back.</li>
             <li><strong>Builder's margin</strong> is added on top of the dwelling and basement build costs. Leave it at 0 when the costs come from the estimator, which already includes it; use it only for bare trade costs.</li>
-            <li><strong>Contingency</strong> is your percentage applied to the post-DA consultants, the statutory fees and the construction. It is not applied to the DA total or to finance.</li>
-            <li><strong>Finance &amp; holding.</strong> Enter the construction loan interest and fees, and any land-loan holding cost, as dollar figures. Holding costs are entered per year and charged for the construction and settlement period, worked out as months &divide; 12. There is no rental income during construction.</li>
+            <li><strong>Contingency</strong> is your percentage applied to the post-DA consultants, the statutory fees and the construction. It defaults to 5% and can be changed or cleared. It is not applied to the DA total or to finance.</li>
+            <li><strong>Finance charges.</strong> Each row is a rate on a chosen base: the debt required, the facility limit (or the debt required if no limit is entered), the total project cost, or a flat dollar amount. Per-annum rows are charged over the construction and settlement period (months &divide; 12); one-off rows are charged once. Rates on the debt required or total project cost use the pre-finance total, so a finance charge is never levied on the finance charges themselves. <strong>Holding costs</strong> are entered per year and charged for the same period. There is no rental income during construction.</li>
+            <li><strong>GST.</strong> All cost inputs are entered exclusive of GST. Input tax credits on construction and consultants are claimed separately and are not shown here. Only GST on the sale is modelled, via the margin scheme or your accountant's override.</li>
             <li><strong>Gross realisation</strong> is the sum of each type's sale price times its count. <strong>Selling costs</strong> are each type's price times its selling-cost percentage, times its count. <strong>GST</strong> under the margin scheme is estimated as (gross realisation &minus; land price) &divide; 11; choose "no GST" for input-taxed stock, or enter your accountant's figure as an override. Input tax credits on construction are claimed separately and are not netted here.</li>
             <li><strong>Total project cost</strong> is the DA total plus the post-DA consultants, statutory fees, construction, contingency, finance and holding, and development management. <strong>Net sales proceeds</strong> is gross realisation less selling costs and GST. <strong>Expected profit</strong> is net sales proceeds less total project cost.</li>
-            <li><strong>Profit on cost</strong> is expected profit &divide; total project cost. <strong>Profit margin on GRV</strong> is expected profit &divide; gross realisation. <strong>Debt required</strong> is total project cost less your cash contribution, and <strong>cash-on-cash return</strong> is expected profit &divide; that cash contribution.</li>
+            <li><strong>Profit on cost</strong> is expected profit &divide; total project cost. <strong>Profit margin on GRV</strong> is expected profit &divide; gross realisation. <strong>Total equity contributed</strong> is the equity invested to reach DA plus the additional cash contribution. <strong>Debt required</strong> is total project cost less that total equity, and <strong>cash-on-cash return</strong> is expected profit &divide; the total equity contributed.</li>
             <li><strong>What-if scenarios.</strong> The two levers drop every sale price by one percentage and lift the consultant and construction costs (and the contingency on them) by the other. The worst case applies both at once. This is a sensitivity check, not a forecast.</li>
             <li>This is a feasibility estimate built from the figures entered. It excludes changes in interest rates and the sales program, presales conditions, staging, tax other than GST, and anything specific to a site or a funder. It is not financial, tax or planning advice. Speak to Project Carter, your accountant and a licensed adviser before acting.</li>
           </ul>
@@ -538,10 +550,17 @@
     var touched = { build: false };
 
     var POST_CONSULT = ["archDoc", "structEng", "hydraulic", "mechElec", "facade", "landscapeDoc", "esd", "acoustic2", "geotechCiv", "certifier", "surveyorSet", "superintendent", "qs2", "otherConsult2"];
-    var DC_BUILDER = { structEng: 1, hydraulic: 1, mechElec: 1, facade: 1, landscapeDoc: 1, esd: 1, acoustic2: 1, geotechCiv: 1 };
+    /* Lines the builder carries and prices inside the D&C contract sum. */
+    var DC_CARRIED = {
+      archDoc: 1, structEng: 1, hydraulic: 1, mechElec: 1, facade: 1, landscapeDoc: 1, esd: 1,
+      acoustic2: 1, geotechCiv: 1, certifier: 1, ccFee: 1, longServiceLevy: 1, insurances: 1
+    };
+    /* Fields that show a "carried by the builder" flag under D&C. */
+    var DC_FLAG_IDS = POST_CONSULT.concat(["ccFee", "longServiceLevy", "insurances"]);
     var POST_STAT = ["ccFee", "infraCharges", "longServiceLevy", "bondsInspections", "certTitles", "otherStat"];
     var EXTRAS = ["solar", "landscapingCon", "buildingExtras", "marketing", "sellingLegals"];
     var HOLD = ["councilRates", "landTax", "insurances", "otherHold"];
+    var MAXF = 8;
 
     var CONSULT_LABELS = {
       archDoc: "Architect / documentation to CC", structEng: "Structural & civil engineering",
@@ -693,6 +712,10 @@
           '<div class="field"><label for="t' + id + '_sellpct">Selling cost <span>(% of price)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" id="t' + id + '_sellpct" autocomplete="off" placeholder="2" value="2" /></div></div>' +
         '</div>' +
+        '<p class="dwelling-type__calc">' +
+          '<span>Construction only / dwelling <strong id="t' + id + '_cOnly">&mdash;</strong></span>' +
+          '<span>Blended land + build / dwelling <strong id="t' + id + '_blended">&mdash;</strong></span>' +
+        '</p>' +
         '<button type="button" class="linklike dwelling-type__remove" data-remove="' + id + '">Remove this type</button>';
       typeCards.appendChild(card);
       attachMoneyBlur(card.querySelector("#t" + id + "_build"), "t" + id + "_build");
@@ -732,18 +755,106 @@
       });
     }
 
+    /* ---- finance-charge rows -------------------------------------- */
+    var finRows = document.getElementById("financeRows");
+    var finSeq = 0;
+    var finIds = [];
+
+    function addFinance(prefill) {
+      if (finIds.length >= MAXF) return;
+      finSeq += 1;
+      var id = finSeq;
+      finIds.push(id);
+      var p = prefill || {};
+      var row = document.createElement("div");
+      row.className = "calc-uplift finance-row";
+      row.setAttribute("data-fin", id);
+      row.innerHTML =
+        '<div class="field-row">' +
+          '<div class="field"><label for="f' + id + '_label">Charge</label>' +
+          '<input type="text" id="f' + id + '_label" autocomplete="off" placeholder="Interest (BBSY + margin)" /></div>' +
+          '<div class="field"><label for="f' + id + '_rate">Rate</label>' +
+          '<div class="input-pct" data-rate-wrap="' + id + '"><input type="text" inputmode="decimal" id="f' + id + '_rate" autocomplete="off" placeholder="' + (p.ratePh || "0") + '" /></div></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="f' + id + '_basis">Applies to</label>' +
+          '<select id="f' + id + '_basis">' +
+            '<option value="debt">Debt required</option>' +
+            '<option value="facility">Facility limit</option>' +
+            '<option value="total">Total project cost</option>' +
+            '<option value="flat">Flat amount ($)</option>' +
+          '</select></div>' +
+          '<div class="field"><label for="f' + id + '_period">Frequency</label>' +
+          '<select id="f' + id + '_period">' +
+            '<option value="pa">Per annum</option>' +
+            '<option value="oneoff">One-off</option>' +
+          '</select></div>' +
+        '</div>' +
+        '<button type="button" class="linklike finance-row__remove" data-fremove="' + id + '">Remove this charge</button>';
+      finRows.appendChild(row);
+      if (p.label != null) row.querySelector("#f" + id + "_label").value = p.label;
+      if (p.basis) row.querySelector("#f" + id + "_basis").value = p.basis;
+      if (p.period) row.querySelector("#f" + id + "_period").value = p.period;
+    }
+
+    function removeFinance(id) {
+      var row = finRows.querySelector('[data-fin="' + id + '"]');
+      if (row) row.parentNode.removeChild(row);
+      finIds = finIds.filter(function (x) { return x !== id; });
+    }
+
+    function renderFinanceRows() {
+      finIds.forEach(function (id) {
+        var basisEl = document.getElementById("f" + id + "_basis");
+        var wrap = document.querySelector('[data-rate-wrap="' + id + '"]');
+        if (!basisEl || !wrap) return;
+        var flat = basisEl.value === "flat";
+        wrap.classList.toggle("input-money", flat);
+        wrap.classList.toggle("input-pct", !flat);
+      });
+      var add = document.getElementById("addFinance");
+      if (add) add.hidden = finIds.length >= MAXF;
+      Array.prototype.forEach.call(document.querySelectorAll(".finance-row__remove"), function (b) {
+        b.hidden = finIds.length <= 1;
+      });
+    }
+
+    function financeModel(base) {
+      var rows = [], total = 0;
+      finIds.forEach(function (id) {
+        var rate = num("f" + id + "_rate");
+        var basisEl = document.getElementById("f" + id + "_basis");
+        var periodEl = document.getElementById("f" + id + "_period");
+        var labelEl = document.getElementById("f" + id + "_label");
+        var basis = basisEl ? basisEl.value : "debt";
+        var period = periodEl ? periodEl.value : "pa";
+        var label = (labelEl && labelEl.value.trim()) || "Finance charge";
+        var amount;
+        if (basis === "flat") {
+          amount = period === "pa" ? rate * base.months / 12 : rate;
+        } else {
+          var b = basis === "facility" ? base.facility : (basis === "total" ? base.total : base.debt);
+          amount = b * (rate / 100);
+          if (period === "pa") amount *= base.months / 12;
+        }
+        total += amount;
+        rows.push({ label: label, rate: rate, basis: basis, period: period, amount: amount });
+      });
+      return { total: total, rows: rows };
+    }
+
     /* ---- consultant contract-type flags ---------------------------- */
     function renderFlags() {
       var dc = contractMode() === "dc";
-      POST_CONSULT.forEach(function (id) {
+      DC_FLAG_IDS.forEach(function (id) {
         var flag = document.querySelector('.report-flag[data-flag="' + id + '"]');
         var el = document.getElementById(id);
         var field = el && el.closest(".field");
-        var carried = dc && DC_BUILDER[id];
-        if (el) el.disabled = !!carried;
-        if (field) field.classList.toggle("is-included", !!carried);
+        var carried = !!(dc && DC_CARRIED[id]);
+        if (el) el.disabled = carried;
+        if (field) field.classList.toggle("is-included", carried);
         if (flag) {
-          flag.textContent = carried ? "Included in the D&C contract sum." : "Developer cost.";
+          flag.textContent = carried ? "Carried by the builder under D&C." : "Developer cost.";
           flag.className = "report-flag " + (carried ? "is-included" : "is-standard");
         }
       });
@@ -779,15 +890,35 @@
 
       var consult = 0;
       POST_CONSULT.forEach(function (id) {
-        if (dc && DC_BUILDER[id]) return;
+        if (dc && DC_CARRIED[id]) return;
         consult += num(id);
       });
-      var stat = sumIds(POST_STAT);
+      var stat = 0;
+      POST_STAT.forEach(function (id) {
+        if (dc && DC_CARRIED[id]) return;
+        stat += num(id);
+      });
 
       var basement = num("basementCost");
-      var marginAmt = (buildCore + basement) * num("builderMargin") / 100;
+      var mPct = num("builderMargin");
+      var marginAmt = (buildCore + basement) * mPct / 100;
       var extras = sumIds(EXTRAS);
       var construction = buildCore + basement + marginAmt + extras;
+
+      /* per-dwelling construction-only and blended land + build.
+         The land and cost to DA is spread across the types by GFA x count share. */
+      var gfaWeight = 0;
+      types.forEach(function (t) { gfaWeight += t.count * t.gfa; });
+      types.forEach(function (t) {
+        var share = t.count > 0
+          ? (gfaWeight > 0 ? (t.count * t.gfa) / gfaWeight : t.count / (n || 1))
+          : 0;
+        var basementPerDwelling = t.count > 0 ? (basement * share) / t.count : 0;
+        t.share = share;
+        t.constructionOnly = (t.build + basementPerDwelling) * (1 + mPct / 100);
+        t.landLoadPerDwelling = t.count > 0 ? (daTotal * share) / t.count : 0;
+        t.blended = t.constructionOnly + t.landLoadPerDwelling;
+      });
 
       var contPct = num("contPct");
       var contBase = consult + stat + construction;
@@ -797,11 +928,28 @@
 
       var months = Math.max(Math.round(num("projectMonths")), 0);
       var yearFrac = months / 12;
-      var holdCosts = sumIds(HOLD) * yearFrac;
-      var loanCosts = num("constLoanCosts") + num("propLoanCosts");
-      var netFinance = loanCosts + holdCosts;
+      var holdBase = 0;
+      HOLD.forEach(function (id) {
+        if (dc && DC_CARRIED[id]) return;
+        holdBase += num(id);
+      });
+      var holdCosts = holdBase * yearFrac;
 
-      var totalCost = daTotal + consult + stat + construction + contingency + pm + netFinance;
+      var daEquity = num("daEquity");
+      var cashIn = num("cashIn");
+      var equityTotal = daEquity + cashIn;
+
+      /* pre-finance total: every cost except the finance charges themselves,
+         so a finance rate is never levied on the finance charges. */
+      var preFinance = daTotal + consult + stat + construction + contingency + pm + holdCosts;
+      var debtBase = Math.max(preFinance - equityTotal, 0);
+      var facilityLimit = num("facilityLimit");
+      var facilityBase = facilityLimit > 0 ? facilityLimit : debtBase;
+      var fin = financeModel({ debt: debtBase, facility: facilityBase, total: preFinance, months: months });
+      var financeCharges = fin.total;
+      var netFinance = financeCharges + holdCosts;
+
+      var totalCost = preFinance + financeCharges;
       var costPerDwelling = n > 0 ? totalCost / n : null;
 
       var gstOverride = num("gstOverride");
@@ -816,9 +964,8 @@
       var grvMargin = grv > 0 ? profit / grv * 100 : null;
       var profitPerDwelling = n > 0 ? profit / n : null;
 
-      var cashIn = num("cashIn");
-      var debtRequired = cashIn > 0 ? Math.max(totalCost - cashIn, 0) : null;
-      var coc = cashIn > 0 ? profit / cashIn * 100 : null;
+      var debtRequired = equityTotal > 0 ? Math.max(totalCost - equityTotal, 0) : null;
+      var coc = equityTotal > 0 ? profit / equityTotal * 100 : null;
 
       /* ---- what-if ---- */
       var sDrop = num("whatIfSale") / 100;
@@ -845,11 +992,12 @@
         consult: consult, stat: stat, buildCore: buildCore, basement: basement, marginAmt: marginAmt,
         extras: extras, construction: construction,
         contPct: contPct, contingency: contingency, pm: pm,
-        months: months, holdCosts: holdCosts, loanCosts: loanCosts, netFinance: netFinance,
+        months: months, holdCosts: holdCosts, financeCharges: financeCharges, financeRows: fin.rows,
+        facilityLimit: facilityLimit, netFinance: netFinance,
         totalCost: totalCost, costPerDwelling: costPerDwelling,
         grv: grv, sellCost: sellCost, gst: gst, gstOverride: gstOverride,
         netSales: netSales, profit: profit, margin: margin, grvMargin: grvMargin, profitPerDwelling: profitPerDwelling,
-        cashIn: cashIn, debtRequired: debtRequired, coc: coc,
+        cashIn: cashIn, daEquity: daEquity, equityTotal: equityTotal, debtRequired: debtRequired, coc: coc,
         sDrop: sDrop, cRise: cRise, newGrv: newGrv, saleEffect: saleEffect, costEffect: costEffect,
         costRise: costRise, combined: combined, worstProfit: worstProfit, worstMargin: worstMargin,
         valid: valid
@@ -865,6 +1013,7 @@
     function render() {
       updateRemoveButtons();
       renderFlags();
+      renderFinanceRows();
       positionPct();
 
       var dc = contractMode() === "dc";
@@ -899,11 +1048,21 @@
       put("profitPerDwelling", (m.valid && m.profitPerDwelling != null) ? signedMoney(m.profitPerDwelling) : "—");
       put("margin", (m.valid && m.margin != null) ? pct(m.margin) : "—");
       put("grvMargin", (m.valid && m.grvMargin != null) ? pct(m.grvMargin) : "—");
+      put("daEquity", m.daEquity > 0 ? money(m.daEquity) : "—", true);
       put("cashIn", m.cashIn > 0 ? money(m.cashIn) : "—", true);
+      put("equityTotal", m.equityTotal > 0 ? money(m.equityTotal) : "—");
       put("debtRequired", (m.valid && m.debtRequired != null) ? money(m.debtRequired) : "—");
       put("coc", (m.valid && m.coc != null) ? pct(m.coc) : "—");
       put("worstProfit", m.valid ? signedMoney(m.worstProfit) : "—");
       put("worstMargin", (m.valid && m.worstMargin != null) ? pct(m.worstMargin) : "—");
+
+      m.types.forEach(function (t) {
+        var show = t.count > 0 && (t.build > 0 || t.gfa > 0);
+        var co = document.getElementById("t" + t.id + "_cOnly");
+        var bl = document.getElementById("t" + t.id + "_blended");
+        if (co) co.textContent = show ? (unlocked ? money(t.constructionOnly) : mask(money(t.constructionOnly))) : "—";
+        if (bl) bl.textContent = show ? (unlocked ? money(t.blended) : mask(money(t.blended))) : "—";
+      });
 
       var body = document.getElementById("calcScheduleBody");
       if (!m.valid) {
@@ -956,8 +1115,19 @@
       render();
     });
 
+    document.getElementById("addFinance").addEventListener("click", function () {
+      addFinance();
+      render();
+    });
+    finRows.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-fremove]");
+      if (!b) return;
+      removeFinance(parseInt(b.getAttribute("data-fremove"), 10));
+      render();
+    });
+
     /* Tidy static money fields with thousands separators on blur */
-    ["daTotal", "landValue", "basementCost", "constLoanCosts", "propLoanCosts", "pmFee", "gstOverride", "cashIn"]
+    ["daTotal", "landValue", "basementCost", "facilityLimit", "daEquity", "pmFee", "gstOverride", "cashIn"]
       .concat(POST_CONSULT).concat(POST_STAT).concat(EXTRAS).concat(HOLD)
       .forEach(function (id) {
         var el = document.getElementById(id);
@@ -965,6 +1135,9 @@
       });
 
     addType();
+    addFinance({ label: "Interest (BBSY + margin)", ratePh: "6.5", basis: "debt", period: "pa" });
+    addFinance({ label: "Line & commitment fee", ratePh: "0.45", basis: "facility", period: "pa" });
+    addFinance({ label: "Establishment & legal fees", ratePh: "0", basis: "flat", period: "oneoff" });
     recalcAutofills();
     render();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(positionPct);
@@ -1021,7 +1194,10 @@
         : "Not used");
       row("Contingency", m.contPct.toFixed(1) + "% on consultants + statutory + construction");
       row("Construction + settlement period", m.months + " month" + (m.months === 1 ? "" : "s"));
+      row("Facility limit", m.facilityLimit > 0 ? money(m.facilityLimit) : "Debt required");
+      row("Finance charges", m.financeRows.length + " row" + (m.financeRows.length === 1 ? "" : "s") + ", " + money(m.financeCharges) + " total");
       row("GST treatment", m.gstOverride > 0 ? "Your figure" : (gstMode.value === "none" ? "No GST (input-taxed)" : "Margin scheme (estimate)"));
+      row("Cost inputs", "Entered exclusive of GST");
 
       y += 6;
       section("Dwelling types (" + m.n + " dwelling" + (m.n === 1 ? "" : "s") + ")");
@@ -1029,6 +1205,8 @@
         var lbl = t.label || ("Type " + String.fromCharCode(65 + i));
         row(t.count + " x " + lbl + (t.gfa > 0 ? " (" + Math.round(t.gfa) + " m2)" : ""),
           "build " + money(t.build) + "  /  sale " + money(t.price));
+        row("   construction only / blended land + build per dwelling",
+          money(t.constructionOnly) + "  /  " + money(t.blended));
       });
 
       y += 6;
@@ -1049,7 +1227,9 @@
       row("Profit per dwelling", m.profitPerDwelling != null ? signedMoney(m.profitPerDwelling) : "-");
       row("Profit on cost", m.margin != null ? m.margin.toFixed(2) + "%" : "-", true);
       row("Profit margin on GRV", m.grvMargin != null ? m.grvMargin.toFixed(2) + "%" : "-");
-      row("Cash (equity) you put in", optMoney(m.cashIn));
+      row("Equity to reach DA", optMoney(m.daEquity));
+      row("Additional cash contribution", optMoney(m.cashIn));
+      row("Total equity contributed", optMoney(m.equityTotal), true);
       row("Debt required", m.debtRequired != null ? money(m.debtRequired) : "-");
       row("Cash-on-cash return", m.coc != null ? m.coc.toFixed(2) + "%" : "-", true);
 
@@ -1061,7 +1241,7 @@
 
       y += 12;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This feasibility estimate is a guide only, generated from the figures entered. Construction figures, where the estimator is used, come from published Australian quantity surveyor cost guides projected to 2026 and include builder preliminaries and margin but exclude GST, land, demolition, external infrastructure, fees and finance; a real cost plan will differ. GST under the margin scheme is estimated as (gross realisation less land price) divided by eleven and ignores input tax credits on construction; confirm your position with your accountant. The figures ignore interest-rate and sales-program changes, presale conditions, staging and anything specific to a site or funder, and this is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This feasibility estimate is a guide only, generated from the figures entered. All cost inputs are treated as exclusive of GST; input tax credits on construction and consultants are claimed separately and are not shown here. Under a design and construct contract the builder carries the design consultants, the certifier, the construction certificate or permit fee, the long service levy, and the contract works and public liability insurance, and those lines are excluded. Construction figures, where the estimator is used, come from published Australian quantity surveyor cost guides projected to 2026 and include builder preliminaries and margin but exclude GST, land, demolition, external infrastructure, fees and finance; a real cost plan will differ. GST under the margin scheme is estimated as (gross realisation less land price) divided by eleven and ignores input tax credits on construction; confirm your position with your accountant. The figures ignore interest-rate and sales-program changes, presale conditions, staging and anything specific to a site or funder, and this is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
       return doc;
     }
@@ -1069,6 +1249,7 @@
     function figuresSummary(m) {
       var lines = [
         "Building contract: " + (m.dc ? "Design & construct" : "Construct only"),
+        "All cost inputs entered exclusive of GST.",
         "Land + total cost to DA: " + money(m.daTotal),
         "Land purchase price (for GST): " + optMoney(m.landValue),
         "Dwellings: " + m.n
@@ -1077,6 +1258,8 @@
         var lbl = t.label || ("Type " + String.fromCharCode(65 + i));
         lines.push("  " + t.count + " x " + lbl + (t.gfa > 0 ? " (" + Math.round(t.gfa) + " m2)" : "") +
           ": build " + money(t.build) + " / sale " + money(t.price) + " / selling " + t.sellPct + "%");
+        lines.push("      construction only/dwelling " + money(t.constructionOnly) +
+          " / blended land+build/dwelling " + money(t.blended));
       });
       lines = lines.concat([
         "----",
@@ -1085,6 +1268,17 @@
         "Construction (incl. margin & extras): " + money(m.construction),
         "Contingency (" + m.contPct.toFixed(1) + "%): " + money(m.contingency),
         "Finance & holding: " + money(m.netFinance),
+        "  Facility limit: " + (m.facilityLimit > 0 ? money(m.facilityLimit) : "debt required"),
+      ]);
+      m.financeRows.forEach(function (fr) {
+        var basisTxt = fr.basis === "flat" ? "flat" : (fr.basis === "facility" ? "facility limit" : (fr.basis === "total" ? "total project cost" : "debt required"));
+        var desc = fr.basis === "flat"
+          ? (fr.period === "pa" ? money(fr.rate) + "/yr" : money(fr.rate) + " one-off")
+          : (fr.rate.toFixed(2) + "% of " + basisTxt + (fr.period === "pa" ? " p.a." : " one-off"));
+        lines.push("  " + fr.label + " (" + desc + "): " + money(fr.amount));
+      });
+      lines = lines.concat([
+        "  Total finance charges: " + money(m.financeCharges),
         "Development management: " + money(m.pm),
         "Total project cost: " + money(m.totalCost),
         "Cost per dwelling: " + (m.costPerDwelling != null ? money(m.costPerDwelling) : "n/a"),
@@ -1097,7 +1291,9 @@
         "Profit per dwelling: " + (m.profitPerDwelling != null ? signedMoney(m.profitPerDwelling) : "n/a"),
         "Profit on cost: " + (m.margin != null ? m.margin.toFixed(2) + "%" : "n/a"),
         "Profit margin on GRV: " + (m.grvMargin != null ? m.grvMargin.toFixed(2) + "%" : "n/a"),
-        "Cash (equity) you put in: " + optMoney(m.cashIn),
+        "Equity to reach DA: " + optMoney(m.daEquity),
+        "Additional cash contribution: " + optMoney(m.cashIn),
+        "Total equity contributed: " + optMoney(m.equityTotal),
         "Debt required: " + (m.debtRequired != null ? money(m.debtRequired) : "n/a"),
         "Cash-on-cash return: " + (m.coc != null ? m.coc.toFixed(2) + "%" : "n/a"),
         "----",

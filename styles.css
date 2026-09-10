@@ -1108,12 +1108,22 @@ h1, h2, h3 {
 .calc-note[hidden] { display: none; }
 .calc-note strong { color: var(--accent); }
 
-/* GRV calculator: dwelling-type cards */
-.dwelling-types { display: grid; gap: 16px; }
-.dwelling-type { gap: 14px; }
-.dwelling-type .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.dwelling-type__remove { justify-self: start; }
-@media (max-width: 560px) { .dwelling-type .field-row { grid-template-columns: 1fr; } }
+/* GRV calculator: dwelling-type cards + finance-charge rows */
+.dwelling-types, .finance-rows { display: grid; gap: 16px; }
+.dwelling-type, .finance-row { gap: 14px; }
+.dwelling-type .field-row, .finance-row .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dwelling-type__remove, .finance-row__remove { justify-self: start; }
+@media (max-width: 560px) {
+  .dwelling-type .field-row, .finance-row .field-row { grid-template-columns: 1fr; }
+}
+.finance-row select { width: 100%; }
+.dwelling-type__calc {
+  margin: 2px 0 0;
+  display: grid; gap: 4px;
+  font-size: 12px; color: var(--muted);
+  padding-top: 10px; border-top: 1px solid var(--line-soft);
+}
+.dwelling-type__calc strong { color: var(--accent); font-weight: 600; margin-left: 4px; }
 
 /* GRV calculator: line items folded into a D&C contract sum */
 .field.is-included .input-money input { text-decoration: line-through; opacity: 0.5; }
