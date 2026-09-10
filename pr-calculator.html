@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio Review Calculator | Project Carter</title>
+  <meta name="description" content="Review a property portfolio one asset at a time: value, loan, rent and holding costs, then the after-tax and depreciation position. See the combined weekly surplus or deficit, portfolio LVR, blended yields and the rent needed for neutral gearing, and take away a one-page PDF. A guide only, not financial advice." />
+  <meta name="theme-color" content="#0c1016" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Portfolio Review Calculator | Project Carter" />
+  <meta property="og:description" content="Add each property's value, loan, rent and costs and see the combined after-tax weekly surplus or deficit, portfolio LVR and blended yields, plus a one-page PDF." />
+  <meta property="og:image" content="assets/og-image.svg" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-pc-calc="pr">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER (shared) ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <div class="nav-dropdown" id="calcDropdown">
+          <button type="button" class="nav-dropdown-toggle" id="calcDropdownToggle" aria-expanded="false" aria-controls="calcDropdownMenu">Calculators<svg class="nav-caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-dropdown-menu" id="calcDropdownMenu" role="menu">
+            <a href="noi-calculator.html" role="menuitem">Net Operating Income (NOI)</a>
+            <a href="roi-calculator.html" role="menuitem">Return on Equity (ROI)</a>
+            <a href="da-calculator.html" role="menuitem">Development Site (DA)</a>
+            <a href="grv-calculator.html" role="menuitem">Gross Realisation Value (GRV)</a>
+            <a href="pr-calculator.html" role="menuitem">Portfolio Review (PR)</a>
+          </div>
+        </div>
+      </nav>
+      <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="calc">
+      <div class="wrap">
+        <div class="calc-intro">
+          <p class="kicker">Project Carter</p>
+          <h1>Portfolio Review Calculator</h1>
+          <p>Review a property portfolio one asset at a time. For each property enter the value, the loan, the rent and the yearly holding costs, then any depreciation. The calculator works out the after-tax position and rolls every property up into a combined annual and weekly surplus or deficit, with portfolio LVR, blended yields and the rent each property would need to be neutrally geared. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial advice.</p>
+        </div>
+
+        <div class="calc-grid">
+          <div class="calc-inputs" id="calcInputs">
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Report</h2>
+              <div class="field">
+                <label for="pcProjectName">Portfolio name or owner</label>
+                <input type="text" id="pcProjectName" autocomplete="off" placeholder="e.g. Macartney family portfolio" />
+                <p class="field-hint">Shown on the PDF and used to name the report if you save it to your account.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Your position</h2>
+              <div class="field">
+                <label for="taxRate">Marginal tax rate <span>(% &mdash; applied across the portfolio)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="37" value="37" /></div>
+                <p class="field-hint">The rate at which a rental loss is refunded, or a rental profit is taxed. Use the top rate that applies to the entity or person that holds the properties.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Properties</h2>
+              <p class="field-hint" style="margin-top:0">Add one card per property. Each card shows that property's own after-tax weekly position; the panel on the right combines them.</p>
+              <div class="dwelling-types" id="propertyCards"></div>
+              <button type="button" class="btn btn-ghost btn-add" id="addProperty">Add another property</button>
+            </div>
+
+          </div>
+
+          <dl class="calc-results" id="calcResults" aria-live="polite">
+            <h2>Portfolio position</h2>
+            <div class="result-row is-teaser"><dt>Properties</dt><dd data-out="count">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Combined property value</dt><dd data-out="value">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Combined debt</dt><dd data-out="debt">&mdash;</dd></div>
+            <div class="result-row is-key is-teaser"><dt>Combined equity</dt><dd data-out="equity">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Portfolio LVR</dt><dd data-out="lvr">&mdash;</dd></div>
+            <div class="result-row"><dt>Combined gross rent (per year)</dt><dd data-out="grossRent">&mdash;</dd></div>
+            <div class="result-row"><dt>Blended gross yield</dt><dd data-out="grossYield">&mdash;</dd></div>
+            <div class="result-row"><dt>Combined operating expenses (per year)</dt><dd data-out="expenses">&mdash;</dd></div>
+            <div class="result-row"><dt>Combined net rental income (per year)</dt><dd data-out="netRent">&mdash;</dd></div>
+            <div class="result-row"><dt>Blended net yield</dt><dd data-out="netYield">&mdash;</dd></div>
+            <div class="result-row"><dt>Combined loan interest (per year)</dt><dd data-out="interest">&mdash;</dd></div>
+            <div class="result-row"><dt>Combined pre-tax cash flow (per year)</dt><dd data-out="preTax">&mdash;</dd></div>
+            <div class="result-row"><dt>Tax benefit / (cost) before depreciation</dt><dd data-out="taxPreDepr">&mdash;</dd></div>
+            <div class="result-row"><dt>Depreciation tax credit (per year)</dt><dd data-out="deprCredit">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Combined annual surplus / (deficit)</dt><dd data-out="annual">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Combined weekly surplus / (deficit)</dt><dd data-out="weekly">&mdash;</dd></div>
+            <div class="result-row"><dt>Result vs portfolio value</dt><dd data-out="pctValue">&mdash;</dd></div>
+            <div class="result-row"><dt>Shortfall to neutral gearing (per week)</dt><dd data-out="toNeutral">&mdash;</dd></div>
+            <div class="result-row"><dt>One-off acquisition costs</dt><dd data-out="acq">&mdash;</dd></div>
+            <div class="result-row"><dt>Cash required to complete</dt><dd data-out="cash">&mdash;</dd></div>
+
+            <div class="calc-cta">
+              <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
+              <button type="button" class="btn btn-accent btn-block" id="openLead">Download portfolio review (PDF)</button>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
+            </div>
+          </dl>
+        </div>
+
+        <div class="calc-schedule-wrap">
+          <h2 class="calc-subhead">Property by property</h2>
+          <div class="calc-schedule-scroll">
+            <table class="calc-schedule" id="calcSchedule">
+              <thead>
+                <tr>
+                  <th scope="col">Property</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Debt</th>
+                  <th scope="col">LVR</th>
+                  <th scope="col">Gross yield</th>
+                  <th scope="col">Net yield</th>
+                  <th scope="col">Annual +/(&minus;)</th>
+                  <th scope="col">Weekly +/(&minus;)</th>
+                </tr>
+              </thead>
+              <tbody id="calcScheduleBody">
+                <tr><td colspan="8" class="calc-schedule-empty">Enter a property value and weekly rent to see the breakdown.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Lead-capture modal, opened by the "Download portfolio review" button.
+             Replace YOUR_FORM_ID with your Formspree id. The submit is sent in
+             the background so the visitor keeps the page and their PDF. -->
+        <div class="modal" id="leadModal" hidden>
+          <div class="modal-backdrop" data-close></div>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+            <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
+            <h2 id="leadModalTitle">Get your portfolio review</h2>
+            <p>The page builds a one-page PDF of your portfolio position and each property. A copy is sent to Project Carter so we can follow up if you'd like.</p>
+
+            <form class="calc-lead-form" id="leadForm"
+                  action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+              <input type="hidden" name="_subject" value="Portfolio Review Calculator request" />
+              <input type="hidden" name="Figures" id="figuresField" value="" />
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
+              <div class="field">
+                <label for="leadName">Name</label>
+                <input type="text" id="leadName" name="Name" autocomplete="name" required />
+              </div>
+              <div class="field">
+                <label for="leadEmail">Email</label>
+                <input type="email" id="leadEmail" name="Email" autocomplete="email" required />
+              </div>
+              <div class="field">
+                <label for="leadPhone">Phone</label>
+                <input type="tel" id="leadPhone" name="Phone" autocomplete="tel" required />
+              </div>
+              <label class="calc-check">
+                <input type="checkbox" id="leadHelp" name="Assessment requested" value="Yes, review these figures and get back to me" />
+                <span>Can you review this portfolio and summarise it for me?</span>
+              </label>
+              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my portfolio review (PDF)</button>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
+            </form>
+
+            <div class="calc-done" id="calcDone" hidden>
+              <p><strong>Done.</strong> Your PDF has downloaded. If it didn't, <button type="button" class="linklike" id="redownload">download it again</button>. Project Carter has your figures and will be in touch if you asked for a follow-up.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-assumptions">
+          <h2 class="calc-subhead">How the numbers work</h2>
+          <ul>
+            <li><strong>Per property.</strong> Loan is the LVR you enter times the value; equity is the rest. Interest is interest-only: loan &times; rate. Gross rent is the weekly rent &times; 52.</li>
+            <li><strong>Operating expenses</strong> are property management (a % of gross rent), the letting fee, council rates, body corporate / strata, insurance, maintenance (per week &times; 52), a vacancy allowance (weeks &times; the weekly rent), annual loan fees and sundry. Net rental income is gross rent less these.</li>
+            <li><strong>Pre-tax cash flow</strong> is net rental income less loan interest. A negative figure is the annual holding cost before tax.</li>
+            <li><strong>Tax.</strong> The property's taxable result is pre-tax cash flow less depreciation. The tax benefit or cost is that result &times; your marginal rate &mdash; a loss is refunded, a profit is taxed. Depreciation is building at cost &times; its rate (2.5% by default) plus fittings at cost &times; their rate, and each adds its own tax credit.</li>
+            <li><strong>Annual surplus / (deficit)</strong> is pre-tax cash flow plus the tax benefit and the depreciation credits. Divided by 52 it is the weekly surplus or deficit &mdash; the real out-of-pocket cost, or income, of holding that property.</li>
+            <li><strong>Neutral gearing.</strong> Each card shows the weekly rent that would bring that property's annual result to zero, holding every other figure the same.</li>
+            <li><strong>Acquisition costs</strong> are optional and only for a property you are buying: stamp duty (estimable by state), conveyancing, borrowing costs, a quantity surveyor's report and any improvements. They do not affect the holding-cost result; they feed "cash required to complete" (equity plus those costs).</li>
+            <li><strong>Stamp duty</strong> can be estimated: open the acquisition costs, pick a state and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions.</li>
+            <li><strong>Portfolio</strong> figures are the sum across every property; blended yields are combined rent &divide; combined value. This is a point-in-time review: it holds rent, rates and values flat and ignores capital growth, principal repayments, CGT and land tax.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="noi-calculator.html">NOI Calculator</a>
+        <a href="roi-calculator.html">ROI Calculator</a>
+        <a href="da-calculator.html">DA Calculator</a>
+        <a href="grv-calculator.html">GRV Calculator</a>
+        <a href="pr-calculator.html">PR Calculator</a>
+        <a href="account.html">Account</a>
+        <a href="enquire.html">Contact</a>
+      </nav>
+    </div>
+    <div class="wrap footer-legal">
+      <p>Privacy Policy &nbsp;·&nbsp; © <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="pc-auth.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var inputs = document.getElementById("calcInputs");
+    var leadForm = document.getElementById("leadForm");
+    var propertyCards = document.getElementById("propertyCards");
+    var MAXP = 15;
+    var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
+
+    function num(id) {
+      var el = document.getElementById(id);
+      if (!el) return 0;
+      var raw = (el.value || "").replace(/[^0-9.]/g, "");
+      var n = parseFloat(raw);
+      return isNaN(n) || n < 0 ? 0 : n;
+    }
+    function money(n) { return money0.format(Math.round(n)); }
+    function signedMoney(n) { return (n < 0 ? "-" : "") + money(Math.abs(n)); }
+    function bracketMoney(n) { return n < 0 ? "(" + money(Math.abs(n)) + ")" : money(n); }
+    function pct(n) { return n.toFixed(2) + "%"; }
+    function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
+
+    /* Reveal gate: figures update live, but every digit after the first is
+       masked until the visitor leaves their details (persisted per browser). */
+    var LOCK_KEY = "pc_pr_unlocked";
+    var unlocked = false;
+    try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
+    if (window.pcMember) unlocked = true;
+    function mask(str) {
+      var seen = false;
+      return String(str).replace(/\d/g, function (d) {
+        if (seen) return "•";
+        seen = true; return d;
+      });
+    }
+
+    /* ---- stamp duty: general (non-concessional) transfer duty by state ----
+       Company / investor purchases get no first-home or owner-occupier
+       concession, so these are the standard scales. Published 2024-25 rates;
+       thresholds in several states index yearly. Estimate only. Shared with
+       the ROI and DA calculators. */
+    function bracketDuty(v, rows) {
+      for (var i = 0; i < rows.length; i++) {
+        if (v <= rows[i].up) return rows[i].base + (v - rows[i].over) * rows[i].rate;
+      }
+      return null;
+    }
+    var STAMP = {
+      NSW: [
+        { up: 17000, over: 0, base: 0, rate: 0.0125 },
+        { up: 37000, over: 17000, base: 212, rate: 0.015 },
+        { up: 99000, over: 37000, base: 512, rate: 0.0175 },
+        { up: 372000, over: 99000, base: 1597, rate: 0.035 },
+        { up: 1240000, over: 372000, base: 11152, rate: 0.045 },
+        { up: 3721000, over: 1240000, base: 50212, rate: 0.055 },
+        { up: Infinity, over: 3721000, base: 186668, rate: 0.07 }
+      ],
+      VIC: [
+        { up: 25000, over: 0, base: 0, rate: 0.014 },
+        { up: 130000, over: 25000, base: 350, rate: 0.024 },
+        { up: 960000, over: 130000, base: 2870, rate: 0.06 },
+        { up: 2000000, over: 0, base: 0, rate: 0.055 },
+        { up: Infinity, over: 2000000, base: 110000, rate: 0.065 }
+      ],
+      QLD: [
+        { up: 5000, over: 0, base: 0, rate: 0 },
+        { up: 75000, over: 5000, base: 0, rate: 0.015 },
+        { up: 540000, over: 75000, base: 1050, rate: 0.035 },
+        { up: 1000000, over: 540000, base: 17325, rate: 0.045 },
+        { up: Infinity, over: 1000000, base: 38025, rate: 0.0575 }
+      ],
+      WA: [
+        { up: 120000, over: 0, base: 0, rate: 0.019 },
+        { up: 150000, over: 120000, base: 2280, rate: 0.0285 },
+        { up: 360000, over: 150000, base: 3135, rate: 0.038 },
+        { up: 725000, over: 360000, base: 11115, rate: 0.0475 },
+        { up: Infinity, over: 725000, base: 28453, rate: 0.0515 }
+      ],
+      SA: [
+        { up: 12000, over: 0, base: 0, rate: 0.01 },
+        { up: 30000, over: 12000, base: 120, rate: 0.02 },
+        { up: 50000, over: 30000, base: 480, rate: 0.03 },
+        { up: 100000, over: 50000, base: 1080, rate: 0.035 },
+        { up: 200000, over: 100000, base: 2830, rate: 0.04 },
+        { up: 250000, over: 200000, base: 6830, rate: 0.0425 },
+        { up: 300000, over: 250000, base: 8955, rate: 0.0475 },
+        { up: 500000, over: 300000, base: 11330, rate: 0.05 },
+        { up: Infinity, over: 500000, base: 21330, rate: 0.055 }
+      ],
+      TAS: [
+        { up: 3000, over: 0, base: 50, rate: 0 },
+        { up: 25000, over: 3000, base: 50, rate: 0.0175 },
+        { up: 75000, over: 25000, base: 435, rate: 0.0225 },
+        { up: 200000, over: 75000, base: 1560, rate: 0.035 },
+        { up: 375000, over: 200000, base: 5935, rate: 0.04 },
+        { up: 725000, over: 375000, base: 12935, rate: 0.0425 },
+        { up: Infinity, over: 725000, base: 27810, rate: 0.045 }
+      ],
+      ACT: [
+        { up: 200000, over: 0, base: 0, rate: 0.006 },
+        { up: 300000, over: 200000, base: 1200, rate: 0.022 },
+        { up: 500000, over: 300000, base: 3400, rate: 0.034 },
+        { up: 750000, over: 500000, base: 10200, rate: 0.0432 },
+        { up: 1000000, over: 750000, base: 21000, rate: 0.059 },
+        { up: 1455000, over: 1000000, base: 35750, rate: 0.064 },
+        { up: Infinity, over: 0, base: 0, rate: 0.0454 }
+      ]
+    };
+    /* ACT abolishes commercial duty up to this dutiable value (from 1 July 2026) */
+    var ACT_COMM_THRESHOLD = 2100000;
+
+    var REGO = {
+      NSW: { mortgage: 180, transfer: function () { return 180; } },
+      VIC: { mortgage: 121, transfer: function (p) { return Math.min(3600, 92 + p * 0.00234); } },
+      QLD: { mortgage: 231, transfer: function (p) {
+               return 231 + (p > 180000 ? Math.ceil((p - 180000) / 10000) * 43 : 0); } },
+      WA:  { mortgage: 178, transfer: function (p) {
+               return 178 + (p > 85000 ? Math.ceil((p - 85000) / 100000) * 178 : 0); } },
+      SA:  { mortgage: 190, transfer: function (p) {
+               var b = [[5000, 190], [20000, 205], [40000, 260], [50000, 315], [100000, 475],
+                        [200000, 830], [250000, 1010], [300000, 1190], [500000, 1720],
+                        [1000000, 3945]];
+               for (var i = 0; i < b.length; i++) { if (p <= b[i][0]) return b[i][1]; }
+               return 6930; } },
+      TAS: { mortgage: 155, transfer: function () { return 233; } },
+      ACT: { mortgage: 174, transfer: function () { return 465; } },
+      NT:  { mortgage: 166, transfer: function () { return 166; } }
+    };
+    function regoFees(state, price, hasLoan) {
+      var r = REGO[state];
+      if (!r || !price || price <= 0) return { transfer: 0, mortgage: 0, total: 0 };
+      var t = Math.round(r.transfer(price));
+      var m = hasLoan ? r.mortgage : 0;
+      return { transfer: t, mortgage: m, total: t + m };
+    }
+    function stampEstimate(state, price, commercial) {
+      if (!state || !price || price <= 0) return null;
+      if (commercial && state === "SA") return 0;
+      if (commercial && state === "ACT") return price <= ACT_COMM_THRESHOLD ? 0 : price * 0.05;
+      if (state === "NT") {
+        if (price <= 525000) { var V = price / 1000; return 0.06571441 * V * V + 15 * V; }
+        if (price <= 3000000) return price * 0.0495;
+        if (price <= 5000000) return price * 0.0575;
+        return price * 0.0595;
+      }
+      var rows = STAMP[state];
+      if (!rows) return null;
+      var d = bracketDuty(price, rows);
+      return d == null ? null : Math.max(d, 0);
+    }
+
+    /* ---- pct-suffix positioning (works for any .input-pct, incl. cards) --- */
+    var pctCanvas = document.createElement("canvas").getContext("2d");
+    function positionPct() {
+      Array.prototype.forEach.call(document.querySelectorAll("#calcInputs .input-pct"), function (wrap) {
+        var el = wrap.querySelector("input");
+        if (!el) return;
+        var cs = getComputedStyle(el);
+        pctCanvas.font = cs.font || (cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily);
+        var txt = el.value !== "" ? el.value : (el.placeholder || "");
+        var padLeft = parseFloat(cs.paddingLeft) || 15;
+        wrap.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 3) + "px");
+      });
+    }
+
+    function attachMoneyBlur(el) {
+      if (!el) return;
+      el.addEventListener("blur", function () {
+        var raw = (el.value || "").replace(/[^0-9.]/g, "");
+        var n = parseFloat(raw);
+        el.value = (!isNaN(n) && n > 0) ? n.toLocaleString("en-AU")
+          : (parseFloat(raw) === 0 ? "0" : "");
+      });
+    }
+
+    /* ---- property cards -------------------------------------------------- */
+    var propSeq = 0;
+    var propIds = [];
+    var touchedStamp = {};
+
+    function letter(i) { return String.fromCharCode(65 + (i % 26)); }
+
+    function addProperty(prefill) {
+      if (propIds.length >= MAXP) return;
+      propSeq += 1;
+      var id = propSeq;
+      propIds.push(id);
+      var idx = propIds.length;
+      var p = "p" + id + "_";
+      var card = document.createElement("div");
+      card.className = "calc-uplift dwelling-type";
+      card.setAttribute("data-prop", id);
+      card.innerHTML =
+        '<div class="field">' +
+          '<label for="' + p + 'label">Property ' + idx + ' &mdash; name or address</label>' +
+          '<input type="text" id="' + p + 'label" autocomplete="off" placeholder="Property ' + letter(idx - 1) + '" />' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'value">Current value</label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'value" autocomplete="off" placeholder="1,800,000" /></div></div>' +
+          '<div class="field"><label for="' + p + 'lvr">Loan to value <span>(%)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'lvr" autocomplete="off" placeholder="65" /></div></div>' +
+        '</div>' +
+        '<p class="field-hint" id="' + p + 'loanHint">Loan &mdash; &nbsp;·&nbsp; Equity &mdash;</p>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'rate" autocomplete="off" placeholder="6.35" /></div></div>' +
+          '<div class="field"><label for="' + p + 'rentwk">Rent <span>(per week)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentwk" autocomplete="off" placeholder="1,650" /></div></div>' +
+        '</div>' +
+        '<p class="field-hint" id="' + p + 'rentHint">Gross rent &mdash; &nbsp;·&nbsp; Gross yield &mdash;</p>' +
+
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Annual expenses</h3>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="6.6" value="6.6" /></div></div>' +
+          '<div class="field"><label for="' + p + 'letting">Letting fee <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'letting" autocomplete="off" placeholder="1,650" /></div></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="6,000" /></div></div>' +
+          '<div class="field"><label for="' + p + 'strata">Body corporate / strata <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'strata" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'insurance">Insurance <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="2,250" /></div></div>' +
+          '<div class="field"><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="35" /></div></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
+          '<input type="text" inputmode="decimal" id="' + p + 'vacwks" autocomplete="off" placeholder="1" /></div>' +
+          '<div class="field"><label for="' + p + 'loanfees">Annual loan fees <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'loanfees" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div>' +
+        '</div>' +
+
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Depreciation <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></h3>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'deprbuild">Building at cost</label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'deprbuild" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'deprbuildpct">Building rate <span>(% per year)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'deprbuildpct" autocomplete="off" placeholder="2.5" value="2.5" /></div></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'deprfit">Fittings at cost</label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'deprfit" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'deprfitpct">Fittings rate <span>(% per year)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'deprfitpct" autocomplete="off" placeholder="10" value="10" /></div></div>' +
+        '</div>' +
+
+        '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
+          '<span>This property is being purchased &mdash; include one-off acquisition costs</span></label>' +
+        '<div class="calc-uplift" id="' + p + 'acqFields" hidden>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'stamp">Stamp duty + registration</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'stamp" autocomplete="off" placeholder="0" /></div></div>' +
+            '<div class="field"><label for="' + p + 'stampState">Estimate for</label>' +
+            '<select id="' + p + 'stampState">' +
+              '<option value="">No estimate</option>' +
+              '<option value="NSW">New South Wales</option>' +
+              '<option value="VIC">Victoria</option>' +
+              '<option value="QLD">Queensland</option>' +
+              '<option value="WA">Western Australia</option>' +
+              '<option value="SA">South Australia</option>' +
+              '<option value="TAS">Tasmania</option>' +
+              '<option value="ACT">Australian Capital Territory</option>' +
+              '<option value="NT">Northern Territory</option>' +
+            '</select></div>' +
+          '</div>' +
+          '<label class="calc-check"><input type="checkbox" id="' + p + 'stampComm" />' +
+            '<span>Commercial / non-residential property</span></label>' +
+          '<p class="field-hint" id="' + p + 'stampNote">Pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.</p>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'convey">Conveyancing</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'convey" autocomplete="off" placeholder="0" /></div></div>' +
+            '<div class="field"><label for="' + p + 'borrow">Borrowing costs</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'borrow" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'qs">Quantity surveyor’s report</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
+            '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<p class="dwelling-type__calc">' +
+          '<span>Net yield <strong id="' + p + 'oNetYield">&mdash;</strong></span>' +
+          '<span>Pre-tax cash flow / yr <strong id="' + p + 'oPreTax">&mdash;</strong></span>' +
+          '<span>Annual surplus / (deficit) <strong id="' + p + 'oAnnual">&mdash;</strong></span>' +
+          '<span>Weekly surplus / (deficit) <strong id="' + p + 'oWeekly">&mdash;</strong></span>' +
+          '<span>Rent / wk for neutral gearing <strong id="' + p + 'oNeutral">&mdash;</strong></span>' +
+        '</p>' +
+        '<button type="button" class="linklike dwelling-type__remove" data-remove="' + id + '">Remove this property</button>';
+
+      propertyCards.appendChild(card);
+
+      Array.prototype.forEach.call(card.querySelectorAll(".input-money input"), function (el) {
+        attachMoneyBlur(el);
+      });
+      card.querySelector("#" + p + "acqOn").addEventListener("change", function () {
+        card.querySelector("#" + p + "acqFields").hidden = !this.checked;
+        render();
+      });
+      card.querySelector("#" + p + "stamp").addEventListener("input", function () {
+        touchedStamp[id] = this.value.trim() !== "";
+      });
+      card.querySelector("#" + p + "stampState").addEventListener("change", function () {
+        touchedStamp[id] = false;
+        recalcCardStamp(id);
+        render();
+      });
+      card.querySelector("#" + p + "stampComm").addEventListener("change", function () {
+        touchedStamp[id] = false;
+        recalcCardStamp(id);
+        render();
+      });
+      card.querySelector("#" + p + "value").addEventListener("input", function () {
+        recalcCardStamp(id);
+      });
+      card.querySelector("#" + p + "lvr").addEventListener("input", function () {
+        recalcCardStamp(id);
+      });
+
+      if (prefill) {
+        if (prefill.label != null) card.querySelector("#" + p + "label").value = prefill.label;
+        if (prefill.value != null) card.querySelector("#" + p + "value").value = prefill.value;
+        if (prefill.lvr != null) card.querySelector("#" + p + "lvr").value = prefill.lvr;
+      }
+      updateRemoveButtons();
+    }
+
+    function removeProperty(id) {
+      if (propIds.length <= 1) return;
+      var card = propertyCards.querySelector('[data-prop="' + id + '"]');
+      if (card) card.parentNode.removeChild(card);
+      propIds = propIds.filter(function (x) { return x !== id; });
+      delete touchedStamp[id];
+      renumber();
+      updateRemoveButtons();
+      render();
+    }
+
+    function renumber() {
+      Array.prototype.forEach.call(propertyCards.querySelectorAll("[data-prop]"), function (card, i) {
+        var id = card.getAttribute("data-prop");
+        var lab = card.querySelector("#p" + id + "_label");
+        if (lab) {
+          var l = card.querySelector('label[for="p' + id + '_label"]');
+          if (l) l.innerHTML = "Property " + (i + 1) + " &mdash; name or address";
+          if (!lab.value) lab.placeholder = "Property " + letter(i);
+        }
+      });
+    }
+
+    function updateRemoveButtons() {
+      var only = propIds.length <= 1;
+      Array.prototype.forEach.call(propertyCards.querySelectorAll(".dwelling-type__remove"), function (b) {
+        b.hidden = only;
+      });
+      document.getElementById("addProperty").hidden = propIds.length >= MAXP;
+    }
+
+    function recalcCardStamp(id) {
+      var p = "p" + id + "_";
+      var st = document.getElementById(p + "stampState");
+      var stampEl = document.getElementById(p + "stamp");
+      var noteEl = document.getElementById(p + "stampNote");
+      if (!st || !stampEl) return;
+      var state = st.value;
+      var comm = document.getElementById(p + "stampComm").checked;
+      var price = num(p + "value");
+      var est = state ? stampEstimate(state, price, comm) : null;
+      var fees = regoFees(state, price, num(p + "lvr") > 0);
+      if (!touchedStamp[id] && state) {
+        if (est == null) stampEl.value = "";
+        else {
+          var total = est + fees.total;
+          stampEl.value = total === 0 ? "0" : fmtAmount(total);
+        }
+      }
+      if (noteEl) {
+        if (!state) {
+          noteEl.textContent = "Pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.";
+        } else if (!price) {
+          noteEl.textContent = "Enter the property value and this fills with a " + state + " estimate.";
+        } else if (comm && state === "SA") {
+          noteEl.textContent = "No duty. SA abolished stamp duty on qualifying non-residential property from 1 July 2018.";
+        } else if (comm && state === "ACT" && price <= ACT_COMM_THRESHOLD) {
+          noteEl.textContent = "No duty. ACT commercial property up to $2,100,000 is exempt (from 1 July 2026).";
+        } else {
+          var note = state + (comm ? " commercial" : "") + " estimate for " + money(price) + ".";
+          if (est != null && fees.total > 0) {
+            note += " Includes " + money(fees.transfer) + " transfer registration" +
+              (fees.mortgage ? " and " + money(fees.mortgage) + " mortgage registration" : "") + ".";
+          }
+          note += " Edit it if you have the exact figure.";
+          noteEl.textContent = note;
+        }
+      }
+    }
+
+    /* ---- per-property model ------------------------------------------- */
+    function modelProp(id) {
+      var p = "p" + id + "_";
+      var value = num(p + "value");
+      var lvr = num(p + "lvr");
+      var loan = value * lvr / 100;
+      var equity = Math.max(value - loan, 0);
+      var rate = num(p + "rate") / 100;
+      var interest = loan * rate;
+      var rentWk = num(p + "rentwk");
+      var grossRent = rentWk * 52;
+      var grossYield = value > 0 ? grossRent / value : null;
+
+      var pmPct = num(p + "pmpct") / 100;
+      var pm = grossRent * pmPct;
+      var letting = num(p + "letting");
+      var council = num(p + "council");
+      var strata = num(p + "strata");
+      var insurance = num(p + "insurance");
+      var maint = num(p + "maintwk") * 52;
+      var vacWks = num(p + "vacwks");
+      var vacancy = vacWks * rentWk;
+      var loanFees = num(p + "loanfees");
+      var sundry = num(p + "sundry");
+      var expenses = pm + letting + council + strata + insurance + maint + vacancy + loanFees + sundry;
+
+      var netRent = grossRent - expenses;
+      var netYield = value > 0 ? netRent / value : null;
+      var preTax = netRent - interest;
+
+      var taxRate = Math.min(num("taxRate") / 100, 0.99);
+      var deprBuild = num(p + "deprbuild") * num(p + "deprbuildpct") / 100;
+      var deprFit = num(p + "deprfit") * num(p + "deprfitpct") / 100;
+      var depr = deprBuild + deprFit;
+
+      /* the sheet's two-step tax treatment: refund the pre-depreciation loss
+         (or tax the profit), then add the depreciation credits on top */
+      var taxPreDepr = -preTax * taxRate;          /* +ve = refund, -ve = tax payable */
+      var deprCredit = depr * taxRate;
+      var annual = preTax + taxPreDepr + deprCredit;
+      var weekly = annual / 52;
+
+      /* weekly rent that brings annual result to zero, all else equal */
+      var fixed = letting + council + strata + insurance + maint + loanFees + sundry;
+      var denom = 52 * (1 - pmPct) - vacWks;
+      var neutralWk = denom > 0
+        ? (interest + fixed - depr * taxRate / (1 - taxRate)) / denom
+        : null;
+
+      var acqOn = document.getElementById(p + "acqOn").checked;
+      var acq = acqOn
+        ? num(p + "stamp") + num(p + "convey") + num(p + "borrow") + num(p + "qs") + num(p + "improve")
+        : 0;
+
+      return {
+        id: id, label: (document.getElementById(p + "label").value || "").trim(),
+        value: value, lvr: lvr, loan: loan, equity: equity, rate: rate, interest: interest,
+        rentWk: rentWk, grossRent: grossRent, grossYield: grossYield,
+        expenses: expenses, netRent: netRent, netYield: netYield, preTax: preTax,
+        taxPreDepr: taxPreDepr, deprCredit: deprCredit, depr: depr,
+        annual: annual, weekly: weekly, neutralWk: neutralWk,
+        acqOn: acqOn, acq: acq, cashToComplete: equity + acq,
+        valid: value > 0 && rentWk > 0
+      };
+    }
+
+    function model() {
+      var props = propIds.map(modelProp);
+      var live = props.filter(function (x) { return x.valid; });
+      var T = {
+        n: live.length,
+        value: 0, loan: 0, equity: 0, grossRent: 0, expenses: 0, netRent: 0,
+        interest: 0, preTax: 0, taxPreDepr: 0, deprCredit: 0, annual: 0, acq: 0,
+        cashToComplete: 0, anyAcq: false
+      };
+      live.forEach(function (m) {
+        T.value += m.value; T.loan += m.loan; T.equity += m.equity;
+        T.grossRent += m.grossRent; T.expenses += m.expenses; T.netRent += m.netRent;
+        T.interest += m.interest; T.preTax += m.preTax; T.taxPreDepr += m.taxPreDepr;
+        T.deprCredit += m.deprCredit; T.annual += m.annual;
+        T.acq += m.acq; T.cashToComplete += m.cashToComplete;
+        if (m.acqOn) T.anyAcq = true;
+      });
+      T.weekly = T.annual / 52;
+      T.lvr = T.value > 0 ? T.loan / T.value * 100 : null;
+      T.grossYield = T.value > 0 ? T.grossRent / T.value * 100 : null;
+      T.netYield = T.value > 0 ? T.netRent / T.value * 100 : null;
+      T.pctValue = T.value > 0 ? T.annual / T.value * 100 : null;
+      T.toNeutral = T.weekly < 0 ? -T.weekly : 0;
+      T.valid = live.length > 0;
+      return { props: props, live: live, T: T };
+    }
+
+    /* ---- render ----------------------------------------------------------- */
+    function setOut(key, val) {
+      var el = document.querySelector('[data-out="' + key + '"]');
+      if (el) el.textContent = val;
+    }
+
+    function render() {
+      positionPct();
+      var m = model();
+      var T = m.T;
+
+      /* per-card hints + derived figures */
+      m.props.forEach(function (r) {
+        var p = "p" + r.id + "_";
+        var lh = document.getElementById(p + "loanHint");
+        if (lh) lh.textContent = "Loan " + (r.value > 0 ? money(r.loan) : "—") +
+          "   ·   Equity " + (r.value > 0 ? money(r.equity) : "—");
+        var rh = document.getElementById(p + "rentHint");
+        if (rh) rh.textContent = "Gross rent " + (r.grossRent > 0 ? money(r.grossRent) + " / yr" : "—") +
+          "   ·   Gross yield " + (r.grossYield ? pct(r.grossYield * 100) : "—");
+
+        function putCard(sfx, str) {
+          var el = document.getElementById(p + sfx);
+          if (el) el.textContent = unlocked ? str : mask(str);
+        }
+        putCard("oNetYield", r.valid && r.netYield != null ? pct(r.netYield * 100) : "—");
+        putCard("oPreTax", r.valid ? signedMoney(r.preTax) : "—");
+        putCard("oAnnual", r.valid ? signedMoney(r.annual) : "—");
+        putCard("oWeekly", r.valid ? signedMoney(r.weekly) : "—");
+        putCard("oNeutral", r.valid && r.neutralWk != null && isFinite(r.neutralWk)
+          ? money(r.neutralWk) + " / wk" : "—");
+      });
+
+      function put(key, str, teaser) {
+        setOut(key, (unlocked || teaser) ? str : mask(str));
+      }
+      put("count", String(T.n), true);
+      put("value", T.value > 0 ? money(T.value) : "—", true);
+      put("debt", T.loan > 0 ? money(T.loan) : "—", true);
+      put("equity", T.value > 0 ? money(T.equity) : "—", true);
+      put("lvr", T.lvr != null ? pct(T.lvr) : "—", true);
+      put("grossRent", T.valid ? money(T.grossRent) : "—");
+      put("grossYield", T.grossYield != null ? pct(T.grossYield) : "—");
+      put("expenses", T.valid ? money(T.expenses) : "—");
+      put("netRent", T.valid ? signedMoney(T.netRent) : "—");
+      put("netYield", T.netYield != null ? pct(T.netYield) : "—");
+      put("interest", T.valid ? money(T.interest) : "—");
+      put("preTax", T.valid ? signedMoney(T.preTax) : "—");
+      put("taxPreDepr", T.valid ? signedMoney(T.taxPreDepr) : "—");
+      put("deprCredit", T.valid ? money(T.deprCredit) : "—");
+      put("annual", T.valid ? signedMoney(T.annual) : "—");
+      put("weekly", T.valid ? signedMoney(T.weekly) : "—");
+      put("pctValue", T.pctValue != null ? pct(T.pctValue) : "—");
+      put("toNeutral", T.valid ? (T.toNeutral > 0 ? money(T.toNeutral) + " / wk" : "Neutral or positive") : "—");
+      put("acq", T.anyAcq ? money(T.acq) : "Not applicable");
+      put("cash", T.anyAcq ? money(T.cashToComplete) : "Not applicable");
+
+      var body = document.getElementById("calcScheduleBody");
+      if (!T.valid) {
+        body.innerHTML = '<tr><td colspan="8" class="calc-schedule-empty">Enter a property value and weekly rent to see the breakdown.</td></tr>';
+        return;
+      }
+      var html = "";
+      m.props.forEach(function (r, i) {
+        if (!r.valid) return;
+        var cells = [
+          money(r.value), money(r.loan), pct(r.lvr),
+          r.grossYield != null ? pct(r.grossYield * 100) : "—",
+          r.netYield != null ? pct(r.netYield * 100) : "—",
+          signedMoney(r.annual), signedMoney(r.weekly)
+        ];
+        html += "<tr><td>" + (r.label || ("Property " + (i + 1))) + "</td>";
+        cells.forEach(function (c) { html += "<td>" + (unlocked ? c : mask(c)) + "</td>"; });
+        html += "</tr>";
+      });
+      html += '<tr><td><strong>Portfolio</strong></td>' +
+        '<td>' + cell(money(T.value)) + '</td>' +
+        '<td>' + cell(money(T.loan)) + '</td>' +
+        '<td>' + cell(T.lvr != null ? pct(T.lvr) : "—") + '</td>' +
+        '<td>' + cell(T.grossYield != null ? pct(T.grossYield) : "—") + '</td>' +
+        '<td>' + cell(T.netYield != null ? pct(T.netYield) : "—") + '</td>' +
+        '<td>' + cell(signedMoney(T.annual)) + '</td>' +
+        '<td>' + cell(signedMoney(T.weekly)) + '</td></tr>';
+      body.innerHTML = html;
+    }
+    function cell(c) { return unlocked ? "<strong>" + c + "</strong>" : "<strong>" + mask(c) + "</strong>"; }
+
+    inputs.addEventListener("input", render);
+
+    propertyCards.addEventListener("click", function (e) {
+      var b = e.target.closest(".dwelling-type__remove");
+      if (!b) return;
+      removeProperty(parseInt(b.getAttribute("data-remove"), 10));
+    });
+    document.getElementById("addProperty").addEventListener("click", function () {
+      addProperty();
+      render();
+    });
+
+    addProperty();
+    render();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(positionPct);
+    window.addEventListener("resize", positionPct);
+
+    /* ---- PDF --------------------------------------------------------- */
+    var lastDoc = null;
+
+    function makePDF() {
+      if (!window.jspdf || !window.jspdf.jsPDF) return null;
+      var m = model();
+      var T = m.T;
+      var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+      var w = doc.internal.pageSize.getWidth();
+      var h = doc.internal.pageSize.getHeight();
+      var L = 48;
+      var y = 56;
+
+      function ensure(space) {
+        if (y + (space || 0) <= h - 60) return;
+        doc.addPage();
+        y = 56;
+      }
+
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.text("PROJECT CARTER", L, y);
+      doc.setFont("helvetica", "normal");
+      doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
+      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+
+      doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+      doc.text("Portfolio Review", L, y + 44);
+
+      var name = document.getElementById("leadName").value.trim();
+      var pcProject = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
+      var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
+      doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
+      if (pcProject) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(40);
+        doc.text(pcProject, L, y + 78);
+        y += 17;
+      }
+
+      y += 92;
+      function section(title) {
+        ensure(40);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
+        doc.text(title, L, y); y += 7;
+        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 17;
+      }
+      function row(k, v, strong) {
+        ensure(20);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
+        doc.text(k, L, y);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        doc.text(String(v), w - L, y, { align: "right" });
+        y += 18;
+      }
+
+      section("Portfolio position");
+      row("Properties", String(T.n));
+      row("Combined property value", money(T.value));
+      row("Combined debt", money(T.loan));
+      row("Combined equity", money(T.equity), true);
+      row("Portfolio LVR", T.lvr != null ? pct(T.lvr) : "-");
+      row("Combined gross rent (per year)", money(T.grossRent));
+      row("Blended gross yield", T.grossYield != null ? pct(T.grossYield) : "-");
+      row("Combined operating expenses (per year)", money(T.expenses));
+      row("Combined net rental income (per year)", signedMoney(T.netRent));
+      row("Blended net yield", T.netYield != null ? pct(T.netYield) : "-");
+      row("Combined loan interest (per year)", money(T.interest));
+      row("Combined pre-tax cash flow (per year)", signedMoney(T.preTax));
+      row("Tax benefit / (cost) before depreciation", signedMoney(T.taxPreDepr));
+      row("Depreciation tax credit (per year)", money(T.deprCredit));
+      row("Combined annual surplus / (deficit)", bracketMoney(T.annual), true);
+      row("Combined weekly surplus / (deficit)", bracketMoney(T.weekly), true);
+      row("Result vs portfolio value", T.pctValue != null ? pct(T.pctValue) : "-");
+      row("Shortfall to neutral gearing (per week)", T.toNeutral > 0 ? money(T.toNeutral) : "Neutral or positive");
+      if (T.anyAcq) {
+        row("One-off acquisition costs", money(T.acq));
+        row("Cash required to complete", money(T.cashToComplete), true);
+      }
+
+      y += 8;
+      section("Property by property");
+      var cols = ["Property", "Value", "Debt", "LVR", "Gross yld", "Net yld", "Annual", "Weekly"];
+      var cx = [L, L + 132, L + 210, L + 288, L + 340, L + 396, L + 452, L + 510];
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
+      cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
+      y += 4; doc.setDrawColor(225); doc.line(L, y, w - L, y); y += 13;
+      doc.setFont("helvetica", "normal"); doc.setTextColor(30);
+      m.props.forEach(function (r, i) {
+        if (!r.valid) return;
+        ensure(16);
+        var cells = [
+          (r.label || ("Property " + (i + 1))).slice(0, 22),
+          money(r.value), money(r.loan), pct(r.lvr),
+          r.grossYield != null ? pct(r.grossYield * 100) : "-",
+          r.netYield != null ? pct(r.netYield * 100) : "-",
+          bracketMoney(r.annual), bracketMoney(r.weekly)
+        ];
+        cells.forEach(function (c, j) { doc.text(String(c), cx[j], y); });
+        y += 15;
+      });
+      ensure(16);
+      doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+      var tcells = ["Portfolio", money(T.value), money(T.loan), T.lvr != null ? pct(T.lvr) : "-",
+        T.grossYield != null ? pct(T.grossYield) : "-", T.netYield != null ? pct(T.netYield) : "-",
+        bracketMoney(T.annual), bracketMoney(T.weekly)];
+      tcells.forEach(function (c, j) { doc.text(String(c), cx[j], y); });
+      y += 20;
+
+      ensure(90);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+      var disc = "This estimate is a guide only, generated from the figures entered above. It reviews the portfolio at a point in time: rent, outgoings and values are held flat, and loans are treated as interest-only. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure, and excludes surcharges and concessions. The tax figures apply a single marginal rate to each property's rental result and depreciation, and ignore land tax, CGT, negative-gearing rules specific to your circumstances, and the timing of any refund. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      return doc;
+    }
+
+    function figuresSummary() {
+      var m = model();
+      var T = m.T;
+      var pn = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
+      var lines = [
+        (pn ? "Portfolio: " + pn : null),
+        "Properties: " + T.n,
+        "Combined property value: " + money(T.value),
+        "Combined debt: " + money(T.loan),
+        "Combined equity: " + money(T.equity),
+        "Portfolio LVR: " + (T.lvr != null ? pct(T.lvr) : "n/a"),
+        "Combined gross rent: " + money(T.grossRent) + "/yr",
+        "Blended gross yield: " + (T.grossYield != null ? pct(T.grossYield) : "n/a"),
+        "Combined operating expenses: " + money(T.expenses) + "/yr",
+        "Combined net rental income: " + signedMoney(T.netRent) + "/yr",
+        "Blended net yield: " + (T.netYield != null ? pct(T.netYield) : "n/a"),
+        "Combined loan interest: " + money(T.interest) + "/yr",
+        "Combined pre-tax cash flow: " + signedMoney(T.preTax) + "/yr",
+        "Tax benefit/(cost) before depreciation: " + signedMoney(T.taxPreDepr) + "/yr",
+        "Depreciation tax credit: " + money(T.deprCredit) + "/yr",
+        "Combined annual surplus/(deficit): " + signedMoney(T.annual),
+        "Combined weekly surplus/(deficit): " + signedMoney(T.weekly),
+        "Result vs portfolio value: " + (T.pctValue != null ? pct(T.pctValue) : "n/a"),
+        "Shortfall to neutral gearing: " + (T.toNeutral > 0 ? money(T.toNeutral) + "/wk" : "neutral or positive")
+      ];
+      if (T.anyAcq) {
+        lines.push("One-off acquisition costs: " + money(T.acq));
+        lines.push("Cash required to complete: " + money(T.cashToComplete));
+      }
+      lines.push("----");
+      m.props.forEach(function (r, i) {
+        if (!r.valid) return;
+        lines.push((r.label || ("Property " + (i + 1))) + ": value " + money(r.value) +
+          ", debt " + money(r.loan) + " (" + pct(r.lvr) + "), rent " + money(r.rentWk) + "/wk, " +
+          "net yield " + (r.netYield != null ? pct(r.netYield * 100) : "n/a") + ", " +
+          "weekly " + signedMoney(r.weekly) + ", neutral rent " +
+          (r.neutralWk != null && isFinite(r.neutralWk) ? money(r.neutralWk) + "/wk" : "n/a"));
+      });
+      return lines.filter(Boolean).join("\n");
+    }
+
+    function saveDoc() {
+      if (!lastDoc) lastDoc = makePDF();
+      if (lastDoc) lastDoc.save("project-carter-portfolio-review.pdf");
+    }
+
+    leadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var nameEl = document.getElementById("leadName");
+      var email = document.getElementById("leadEmail");
+      var phone = document.getElementById("leadPhone");
+      if (!nameEl.value.trim() || !phone.value.trim() || !email.value.trim() || !email.checkValidity()) {
+        if (leadForm.reportValidity) leadForm.reportValidity();
+        return;
+      }
+      lastDoc = makePDF();
+      saveDoc();
+      document.getElementById("figuresField").value = figuresSummary();
+      var help = document.getElementById("leadHelp");
+      var subj = leadForm.querySelector('input[name="_subject"]');
+      if (subj) subj.value = (help && help.checked)
+        ? "Portfolio Review Calculator - assessment requested"
+        : "Portfolio Review Calculator request";
+      fetch(leadForm.action, {
+        method: "POST",
+        body: new FormData(leadForm),
+        headers: { "Accept": "application/json" }
+      })["catch"](function () { /* the visitor still has their PDF */ })
+        .then(function () {
+          unlock();
+          leadForm.hidden = true;
+          var done = document.getElementById("calcDone");
+          done.hidden = false;
+          done.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+
+    document.getElementById("redownload").addEventListener("click", saveDoc);
+
+    /* ---- lead-capture modal --------------------------------------------- */
+    var openLead = document.getElementById("openLead");
+    var leadModal = document.getElementById("leadModal");
+    function onModalKey(e) { if (e.key === "Escape") closeModal(); }
+    function openModal() {
+      leadModal.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      document.addEventListener("keydown", onModalKey);
+      var first = document.getElementById("leadName");
+      if (first) first.focus();
+    }
+    function closeModal() {
+      leadModal.hidden = true;
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("keydown", onModalKey);
+      openLead.focus();
+    }
+    leadModal.addEventListener("click", function (e) {
+      if (e.target.hasAttribute("data-close")) closeModal();
+    });
+
+    /* ---- reveal gate wiring ------------------------------------------------ */
+    var resultsEl = document.querySelector(".calc-results");
+    var scheduleWrap = document.querySelector(".calc-schedule-wrap");
+    var lockNote = document.getElementById("lockNote");
+
+    function applyLock() {
+      resultsEl.classList.toggle("is-locked", !unlocked);
+      scheduleWrap.classList.toggle("is-locked", !unlocked);
+      if (lockNote) lockNote.hidden = unlocked;
+      openLead.textContent = unlocked ? "Download the PDF again" : "Download portfolio review (PDF)";
+      render();
+    }
+    function unlock() {
+      if (unlocked) return;
+      unlocked = true;
+      try { window.localStorage.setItem(LOCK_KEY, "1"); } catch (e) {}
+      applyLock();
+    }
+    applyLock();
+
+    document.addEventListener("pc-auth-change", function (ev) {
+      if (ev && ev.detail && ev.detail.isMember && !unlocked) { unlocked = true; applyLock(); }
+    });
+
+    openLead.addEventListener("click", function () {
+      if (unlocked) { lastDoc = makePDF(); saveDoc(); }
+      else openModal();
+    });
+    resultsEl.addEventListener("click", function (e) {
+      if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
+    });
+    scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+  })();
+  </script>
+  <script src="pc-report.js"></script>
+</body>
+</html>

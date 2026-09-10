@@ -1,5 +1,5 @@
 /* =========================================================================
-   Project Carter - "save this report" wiring, shared by all four calculators
+   Project Carter - "save this report" wiring, shared by all five calculators
    -------------------------------------------------------------------------
    Load order on each calculator page:
 
@@ -10,7 +10,7 @@
      <script src="pc-auth.js"></script>
      <script src="pc-report.js"></script>
 
-   The page must carry <body data-pc-calc="noi|roi|da|grv">.
+   The page must carry <body data-pc-calc="noi|roi|da|grv|pr">.
 
    What this does, entirely from the DOM (no reach into the calculator IIFE):
      - wires the "Project name or address" field (#pcProjectName, or #address
@@ -26,7 +26,7 @@
   var CALC = (document.body.getAttribute("data-pc-calc") || "").toLowerCase();
   if (!CALC) return;
 
-  var CALC_LABEL = { noi: "NOI", roi: "ROI", da: "DA", grv: "GRV" }[CALC] || CALC.toUpperCase();
+  var CALC_LABEL = { noi: "NOI", roi: "ROI", da: "DA", grv: "GRV", pr: "PR" }[CALC] || CALC.toUpperCase();
   var inputsRoot = document.getElementById("calcInputs");
   if (!inputsRoot) return;
 
@@ -59,6 +59,22 @@
       if (el.type === "checkbox" || el.type === "radio") data.fields[el.id] = !!el.checked;
       else data.fields[el.id] = el.value;
     });
+    if (CALC === "pr") {
+      data.dyn.props = Array.prototype.map.call(
+        document.querySelectorAll("#propertyCards [data-prop]"),
+        function (card) {
+          var out = {};
+          Array.prototype.forEach.call(
+            card.querySelectorAll("input[id], select[id]"),
+            function (el) {
+              var key = el.id.replace(/^p\d+_/, "");
+              out[key] = (el.type === "checkbox" || el.type === "radio") ? !!el.checked : el.value;
+            }
+          );
+          return out;
+        }
+      );
+    }
     if (CALC === "grv") {
       data.dyn.types = Array.prototype.map.call(
         document.querySelectorAll("#typeCards [data-type]"),
@@ -117,6 +133,23 @@
 
   function restore(data) {
     if (!data || !data.fields) return;
+
+    if (CALC === "pr" && data.dyn && data.dyn.props && data.dyn.props.length) {
+      matchRowCount("addProperty", "#propertyCards [data-prop]", ".dwelling-type__remove", data.dyn.props.length);
+      document.querySelectorAll("#propertyCards [data-prop]").forEach(function (card, i) {
+        var p = data.dyn.props[i]; if (!p) return;
+        var id = card.getAttribute("data-prop");
+        /* checkboxes first - the acquisition-costs toggle reveals other fields */
+        Object.keys(p).forEach(function (key) {
+          var el = card.querySelector("#p" + id + "_" + key);
+          if (el && (el.type === "checkbox" || el.type === "radio")) setField(el, p[key]);
+        });
+        Object.keys(p).forEach(function (key) {
+          var el = card.querySelector("#p" + id + "_" + key);
+          if (el && el.type !== "checkbox" && el.type !== "radio") setField(el, p[key]);
+        });
+      });
+    }
 
     if (CALC === "grv" && data.dyn) {
       if (data.dyn.types && data.dyn.types.length) {

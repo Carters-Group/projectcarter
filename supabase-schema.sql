@@ -60,7 +60,7 @@ create policy "profiles - update own"
 create table if not exists public.reports (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid        not null references auth.users (id) on delete cascade,
-  calculator  text        not null check (calculator in ('noi', 'roi', 'da', 'grv')),
+  calculator  text        not null check (calculator in ('noi', 'roi', 'da', 'grv', 'pr')),
   title       text        not null default 'Untitled report',
   inputs      jsonb       not null default '{}'::jsonb,
   created_at  timestamptz not null default now(),
@@ -69,6 +69,12 @@ create table if not exists public.reports (
 
 create index if not exists reports_user_idx
   on public.reports (user_id, calculator, updated_at desc);
+
+-- Widen the allowed calculator list on a table that already exists (re-run safe).
+alter table public.reports drop constraint if exists reports_calculator_check;
+alter table public.reports
+  add constraint reports_calculator_check
+  check (calculator in ('noi', 'roi', 'da', 'grv', 'pr'));
 
 alter table public.reports enable row level security;
 
