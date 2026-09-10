@@ -191,6 +191,7 @@
             <li><strong>Running costs</strong> are property management (a % of the rent), the letting fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance (per week &times; 52), a vacancy allowance (weeks &times; the weekly rent), loan fees and sundry. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings &mdash; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
             <li><strong>Cash flow before tax</strong> is net rent after costs, less loan interest. A figure in brackets is what the property costs you to hold each year before tax.</li>
             <li><strong>Tax.</strong> A rental loss is refunded at the marginal tax rate you enter; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving.</li>
+            <li><strong>Post-Budget negative gearing.</strong> Tick &ldquo;bought after the 2026 Federal Budget&rdquo; on a property and a rental loss on it is quarantined: it no longer offsets your salary or other income, so it earns no refund in the year. The loss carries forward against future rental profit from that property or the gain on its sale. Rental profits are still taxed, and depreciation only reduces a profit. Properties held before the Budget keep the current treatment. This is a modelling assumption, not tax advice.</li>
             <li><strong>After-tax cash flow</strong> is cash flow before tax plus the tax refund and the depreciation tax saving. Divided by 52 it is the weekly figure &mdash; the real out-of-pocket cost, or income, of holding the property.</li>
             <li><strong>Break-even rent.</strong> Each card shows the weekly rent that would bring that property's yearly after-tax result to zero, with everything else held the same.</li>
             <li><strong>Buying a property.</strong> Tick "being purchased" to add one-off costs: stamp duty (estimable by state), conveyancing, borrowing costs, a quantity surveyor's report and improvements. These do not change the holding result; they feed "cash needed to buy" (your equity plus those costs).</li>
@@ -474,6 +475,7 @@
           '<div class="field"><label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
+        '<p class="field-hint">Sundry covers the small holding costs not listed above &mdash; smoke alarm and safety checks, gardening and lawns, pest control, cleaning between tenants, bank and statement fees, postage and minor compliance. A rough yearly allowance is fine.</p>' +
 
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Depreciation <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></h3>' +
         '<div class="field-row">' +
@@ -488,6 +490,11 @@
           '<div class="field"><label for="' + p + 'deprfitpct">Fittings rate <span>(% per year)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'deprfitpct" autocomplete="off" placeholder="10" value="10" /></div></div>' +
         '</div>' +
+
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Tax treatment</h3>' +
+        '<label class="calc-check"><input type="checkbox" id="' + p + 'ngNew" />' +
+          '<span>Bought after the 2026 Federal Budget &mdash; post-Budget negative gearing rules apply</span></label>' +
+        '<p class="field-hint">From the 2026 Federal Budget, a rental loss on a property bought after Budget night can no longer be offset against salary or other income. Tick this and any loss on this property is quarantined: no tax refund in the year, and the loss carries forward against future rental profit from this property or the gain on sale. Rental profits are still taxed. Properties held before the Budget are unaffected. A modelling assumption, not tax advice.</p>' +
 
         '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
           '<span>This property is being purchased &mdash; include one-off acquisition costs</span></label>' +
@@ -543,6 +550,7 @@
         card.querySelector("#" + p + "acqFields").hidden = !this.checked;
         render();
       });
+      card.querySelector("#" + p + "ngNew").addEventListener("change", render);
       card.querySelector("#" + p + "stamp").addEventListener("input", function () {
         touchedStamp[id] = this.value.trim() !== "";
       });
@@ -677,18 +685,34 @@
       var deprFit = num(p + "deprfit") * num(p + "deprfitpct") / 100;
       var depr = deprBuild + deprFit;
 
+      /* Post-Budget negative gearing: a rental loss on a property bought after
+         the 2026 Budget is quarantined - it no longer offsets other income, so
+         it earns no refund in the year and carries forward instead. */
+      var ngNew = document.getElementById(p + "ngNew").checked;
+
       /* the sheet's two-step tax treatment: refund the pre-depreciation loss
          (or tax the profit), then add the depreciation credits on top */
-      var taxPreDepr = -preTax * taxRate;          /* +ve = refund, -ve = tax payable */
-      var deprCredit = depr * taxRate;
+      var taxPreDepr, deprCredit;
+      if (ngNew) {
+        taxPreDepr = preTax >= 0 ? -preTax * taxRate : 0;
+        /* depreciation only reduces a rental profit; any excess is quarantined */
+        deprCredit = Math.max(0, Math.min(depr, Math.max(preTax, 0))) * taxRate;
+      } else {
+        taxPreDepr = -preTax * taxRate;             /* +ve = refund, -ve = tax payable */
+        deprCredit = depr * taxRate;
+      }
       var annual = preTax + taxPreDepr + deprCredit;
       var weekly = annual / 52;
 
-      /* weekly rent that brings annual result to zero, all else equal */
+      /* weekly rent that brings annual result to zero, all else equal. Under
+         quarantine a loss earns no tax help, so break-even is simply where the
+         pre-tax cash flow reaches zero. */
       var fixed = letting + council + strata + landTax + insurance + maint + loanFees + sundry;
       var denom = 52 * (1 - pmPct) - vacWks;
       var neutralWk = denom > 0
-        ? (interest + fixed - depr * taxRate / (1 - taxRate)) / denom
+        ? (ngNew
+            ? (interest + fixed) / denom
+            : (interest + fixed - depr * taxRate / (1 - taxRate)) / denom)
         : null;
 
       var acqOn = document.getElementById(p + "acqOn").checked;
@@ -703,7 +727,7 @@
         pm: pm, letting: letting, council: council, strata: strata, landTax: landTax,
         insurance: insurance, maint: maint, vacancy: vacancy, loanFees: loanFees, sundry: sundry,
         expenses: expenses, netRent: netRent, netYield: netYield, preTax: preTax,
-        taxPreDepr: taxPreDepr, deprCredit: deprCredit, depr: depr,
+        taxPreDepr: taxPreDepr, deprCredit: deprCredit, depr: depr, ngNew: ngNew,
         annual: annual, weekly: weekly, neutralWk: neutralWk,
         acqOn: acqOn, acq: acq, cashToComplete: equity + acq,
         valid: value > 0 && rentWk > 0
@@ -719,7 +743,7 @@
         pm: 0, letting: 0, council: 0, strata: 0, landTax: 0, insurance: 0,
         maint: 0, vacancy: 0, loanFees: 0, sundry: 0,
         interest: 0, preTax: 0, taxPreDepr: 0, deprCredit: 0, annual: 0, acq: 0,
-        cashToComplete: 0, anyAcq: false
+        cashToComplete: 0, anyAcq: false, anyNG: false
       };
       live.forEach(function (m) {
         T.value += m.value; T.loan += m.loan; T.equity += m.equity;
@@ -731,6 +755,7 @@
         T.deprCredit += m.deprCredit; T.annual += m.annual;
         T.acq += m.acq; T.cashToComplete += m.cashToComplete;
         if (m.acqOn) T.anyAcq = true;
+        if (m.ngNew) T.anyNG = true;
       });
       T.weekly = T.annual / 52;
       T.lvr = T.value > 0 ? T.loan / T.value * 100 : null;
@@ -942,6 +967,12 @@
       row("Cash flow before tax", signedMoney(T.preTax), true);
       row("  add Tax refund / (less tax payable)", signedMoney(T.taxPreDepr));
       if (T.deprCredit > 0) row("  add Depreciation tax saving", money(T.deprCredit));
+      if (T.anyNG) {
+        ensure(26);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+        doc.text(doc.splitTextToSize("One or more properties are marked as bought after the 2026 Budget: a rental loss on those is quarantined, so it earns no refund in the year and carries forward against future rental profit or the gain on sale.", w - 2 * L), L, y);
+        y += 22;
+      }
       bigrow("AFTER-TAX CASH FLOW (PER YEAR)", bracketMoney(T.annual));
       row("After-tax cash flow (per week)", bracketMoney(T.weekly), true);
       row("As a % of portfolio value", T.pctValue != null ? pct(T.pctValue) : "-");
@@ -1023,7 +1054,7 @@
       lines.push("----");
       m.props.forEach(function (r, i) {
         if (!r.valid) return;
-        lines.push((r.label || ("Property " + (i + 1))) + ": value " + money(r.value) +
+        lines.push((r.label || ("Property " + (i + 1))) + (r.ngNew ? " [post-Budget NG]" : "") + ": value " + money(r.value) +
           ", debt " + money(r.loan) + " (" + pct(r.lvr) + "), rent " + money(r.rentWk) + "/wk, " +
           "net yield " + (r.netYield != null ? pct(r.netYield * 100) : "n/a") + ", " +
           "weekly " + signedMoney(r.weekly) + ", neutral rent " +
