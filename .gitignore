@@ -1,3 +1,6 @@
+# Local dev helper (not part of the site)
+serve.ps1
+
 # OS / editor
 .DS_Store
 Thumbs.db
