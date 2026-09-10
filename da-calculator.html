@@ -473,7 +473,7 @@
         <div class="calc-schedule-wrap">
           <h2 class="calc-subhead">Reports for this site</h2>
           <div id="reportSummary" class="calc-assumptions">
-            <p id="serviceWarning" class="calc-warn" hidden><strong>No mains water or sewer to the block.</strong> Treat this as a major development constraint, not a line item. Getting services to the site can mean trunk main or sewer extensions, easements over other land, a pump station or an on-site wastewater system, and water authority headworks or augmentation charges that can run into six figures. It also drives the achievable yield. Get a servicing feasibility and a written connection offer from the water authority before you commit to the site.</p>
+            <p id="serviceWarning" class="calc-warn" hidden><strong>You have marked this site as having no mains water or sewer to the block.</strong> If that was ticked by mistake, clear it in Site characteristics above. If it is right, treat it as a major development constraint, not a line item: getting services to the site can mean trunk main or sewer extensions, easements over other land, a pump station or an on-site wastewater system, and water authority headworks or augmentation charges that can run into six figures, and it drives the achievable yield. Get a servicing feasibility and a written connection offer from the water authority before you commit to the site.</p>
             <p><strong>Standard for most DAs:</strong> architect / design drawings, town planner (SEE), detail &amp; level survey, civil / stormwater, landscape plan, BASIX / NatHERS.</p>
             <p><strong>&#10033; Likely for this site:</strong> <span id="likelyList">tick the site characteristics above</span></p>
             <p><strong>May also be required:</strong> <span id="possibleList">&mdash;</span> Confirm the list at a council pre-lodgement meeting.</p>
@@ -1306,7 +1306,7 @@
       var ticked = SC.filter(function (id) { return checked(id); }).map(function (id) { return SC_LABELS[id]; });
       wrapLine("Site notes", ticked.length ? ticked.join("; ") : "None ticked");
       if (checked("scNoServices")) {
-        wrapLine("Servicing", "No mains water or sewer to the block. Major constraint: extensions, easements, pump station or on-site wastewater, and headworks charges can run into six figures. Get a servicing feasibility and a written connection offer before committing.");
+        wrapLine("Servicing", "Marked as no mains water or sewer to the block. If correct, this is a major constraint: extensions, easements, pump station or on-site wastewater, and headworks charges can run into six figures. Get a servicing feasibility and a written connection offer before committing.");
       }
 
       y += 4;
@@ -1387,7 +1387,7 @@
         "Council / LGA: " + (document.getElementById("council").value.trim() || "not entered"),
         "Development type: " + daTypeLabel(),
         "Site notes: " + (ticked.length ? ticked.join("; ") : "none ticked"),
-        (checked("scNoServices") ? "SERVICING: no mains water or sewer to the block; major constraint, get a servicing feasibility and written connection offer before committing." : null),
+        (checked("scNoServices") ? "SERVICING: marked as no mains water or sewer to the block; if correct, a major constraint, get a servicing feasibility and written connection offer before committing." : null),
         "Reports likely at lodgement: " + (likely.length ? likely.join(", ") : "standard set only"),
         "Reports possibly required: " + (possible.length ? possible.join(", ") : "none"),
         "----",
