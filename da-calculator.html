@@ -367,16 +367,7 @@
               <div class="field">
                 <label for="advertising">Advertising / notification fee <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="advertising" autocomplete="off" placeholder="0" /></div>
-              </div>
-              <div class="field">
-                <label for="lsl">Long service levy <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="lsl" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">Payable in some states on works over a threshold, for example 0.25% in NSW.</p>
-              </div>
-              <div class="field">
-                <label for="contributions">Developer contributions (s7.11 / s7.12) <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="contributions" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">Often payable later, at construction certificate. Include here if you want them in the total.</p>
+                <p class="field-hint">Infrastructure charges and the long service levy sit in the <a href="grv-calculator.html">GRV calculator</a>, since they are usually paid at or after construction certificate.</p>
               </div>
               <div class="field">
                 <label for="rezoning">Rezoning / planning proposal cost <span>(optional)</span></label>
@@ -608,7 +599,7 @@
     /* cost-line groups, reused for summing, the blur formatter and the PDF */
     var SITE = ["demolition", "asbestos", "clearing", "serviceLoc", "otherSite"];
     var CONSULT = ["architect", "planner", "surveyor", "civil", "flood", "structural", "geotech", "contamination", "certifier", "access", "traffic", "landscape", "arborist", "basix", "acoustic", "bushfire", "heritage", "waste", "qs", "ecologist", "otherConsult"];
-    var STAT = ["preDA", "daFee", "advertising", "lsl", "contributions", "rezoning"];
+    var STAT = ["preDA", "daFee", "advertising", "rezoning"];
     var HOLD = ["councilRates", "landTax", "insurances", "utilities", "maintenance", "otherHold"];
     var SC = ["scDemo", "scAsbestos", "scHeritage", "scTrees", "scSlope", "scFlood", "scBushfire", "scAcoustic", "scContam", "scVegetation", "scStormwater", "scNoServices", "scCorner"];
 
@@ -627,7 +618,7 @@
     };
     var STAT_LABELS = {
       preDA: "Pre-DA meeting fee", daFee: "DA lodgement fee", advertising: "Advertising / notification fee",
-      lsl: "Long service levy", contributions: "Developer contributions (s7.11 / s7.12)", rezoning: "Rezoning / planning proposal"
+      rezoning: "Rezoning / planning proposal"
     };
     var HOLD_LABELS = {
       councilRates: "Council & water rates", landTax: "Land tax", insurances: "Insurances",

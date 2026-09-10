@@ -1094,6 +1094,32 @@ h1, h2, h3 {
 .calc-warn[hidden] { display: none; }
 .calc-warn strong { color: #e8b96b; }
 
+/* Neutral info note (GRV calculator: D&C inclusions) */
+.calc-note {
+  margin: 4px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.calc-note[hidden] { display: none; }
+.calc-note strong { color: var(--accent); }
+
+/* GRV calculator: dwelling-type cards */
+.dwelling-types { display: grid; gap: 16px; }
+.dwelling-type { gap: 14px; }
+.dwelling-type .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dwelling-type__remove { justify-self: start; }
+@media (max-width: 560px) { .dwelling-type .field-row { grid-template-columns: 1fr; } }
+
+/* GRV calculator: line items folded into a D&C contract sum */
+.field.is-included .input-money input { text-decoration: line-through; opacity: 0.5; }
+.field.is-included > label { opacity: 0.6; }
+.report-flag.is-included { color: var(--muted); font-style: italic; }
+
 /* ---- year-by-year schedule ---- */
 .calc-schedule-wrap { margin-top: clamp(40px, 6vw, 64px); }
 .calc-schedule-scroll { overflow-x: auto; margin-top: 18px; }
