@@ -24,7 +24,11 @@ da-calculator.html              "Development Site (DA)" — cost to take a block
 grv-calculator.html             "GRV Calculator" — development feasibility from DA to settled sales. Picks up from the DA calculator with a single "Land + total cost to DA" figure (plus, separately, the land price for GST) rather than re-entering that build-up. A **building-contract toggle** (Design & Construct vs Construct only / trade contracts): under D&C the builder-carried lines (`DC_CARRIED`: architect docs to CC, structural & civil, hydraulic, MEP & fire, facade, landscape doc, ESD, acoustic, geotech & civil cert, **building surveyor / certifier**, **CC / building permit fee**, **long service levy**, and **contract works & public liability insurance**) are **disabled, struck through** (`.field.is-included`), flagged "Carried by the builder under D&C." (`DC_FLAG_IDS`) and excluded from the consultant / statutory / holding totals; a `.calc-note` under the toggle lists them and points the developer's own PI / latent-defects cover at "Other holding cost". The rest read "Developer cost." Under construct-only every line is a developer cost and a builder's-margin % applies. **Dwelling types**: repeatable cards (`#typeCards`, "Add another dwelling type", up to 12), each with a label, count ("how many"), GFA, build cost, sale price and selling-cost % (default 2). Totals roll up as Σ(count × …). Each card also shows two derived per-dwelling figures: **construction only / dwelling** (build + its GFA-share of basement, × builder's margin) and **blended land + build / dwelling** (that plus its share of the land + cost to DA, spread across types by GFA × count share). All cost inputs are entered **ex-GST** (stated on the page, PDF and assumptions; input tax credits not modelled). A **2026 construction cost estimator** (`BUILD_RATES` per building type × quality, `STATE_LOADING` per state, `BASEMENT_RATE`) sets a $/m² GFA rate from state + building type (single dwellings / townhouses & villas / low-rise / mid-rise / high-rise apartments) + quality (basic / medium / high) and fills each type's build cost from its GFA, plus a basement line from the basement area; a single `touched.build` flag stops auto-fill once any build figure is edited. **Builder's margin** % is added on top of the dwelling + basement build (note: leave at 0 when using the estimator, whose rate already includes prelims & margin). Post-DA consultant lines, post-DA council/statutory lines (CC/permit fee, **infrastructure charges / s7.11 / s7.12**, **long service levy** — both moved here from the DA page — bonds & inspections, plan registration/titles, other), construction extras (solar, landscaping, building extras, marketing, sales legals), **contingency % (defaults to 10, `value="10"`, editable)** on consultants + statutory + construction, development-management allowance. **Finance charges** are a repeatable list (`#financeRows`, `addFinance`/`financeModel`, up to `MAXF` = 8, seeded with interest / line fee / establishment-and-admin-fee rows): each row is a rate + a basis (`debt` = debt required, `facility` = facility limit or debt required if `#facilityLimit` blank, `total` = total project cost, `flat` = $ amount — the `.input-pct`/`.input-money` affix on `[data-rate-wrap]` toggles with the basis) + a frequency (`pa` pro-rated × months/12, or `oneoff`). A **`debt` + `pa` row is the interest rate** (BBSY + margin, or fixed) and is run through `drawdownInterest()` instead of charged flat: costs draw on a smoothstep S-curve over the months, equity is spent before debt (`daTotal` treated as incurred at the start), and interest accrues monthly on the outstanding balance and capitalises. Results also expose **average debt drawn** and **peak debt** (end of period). Rates on `debt`/`total` use the **pre-finance total** so finance is never levied on finance. Plus per-year holding line items (council rates / land tax / insurances / other × months/12); **no holding income** (site is under construction). GST: margin-scheme estimate `(GRV − land price) / 11`, a "no GST (input-taxed)" option, and a manual override; input tax credits on construction not modelled. **Funding**: two equity inputs — **equity invested to reach DA** (`#daEquity`, brought across from the DA calculator's "cash equity required") and an **additional cash contribution** (`#cashIn`) — sum to **total equity contributed**; results show **Debt required** (= total project cost − total equity) and **cash-on-cash return** (= profit ÷ total equity). Outputs also include cost per dwelling, profit per dwelling, total project cost, net sales proceeds, expected profit, **profit on cost**, profit margin on GRV, and a two-lever **what-if** (sale prices −X%, consultant + construction costs +Y%, plus the combined worst case) feeding "Profit — worst case" and "Profit on cost — worst case" rows and a what-if table. Same reveal gate (`pc_grv_unlocked`) and Formspree ping as the other three; the jsPDF is a **P&L-style report** (Inputs & assumptions, Dwelling types, Development P&L with a bracketed `EXPECTED PROFIT / (LOSS)` bottom line, Funding, Finance charges, Worst case) that flows onto a second A4 page via an `ensure()` page-break guard, with losses shown in accounting brackets.
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
-styles.css                      design system + layout (home, project pages, landing, calculator)
+account.html                    sign in / sign up (magic link) + "My saved reports" dashboard
+pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/delete report), auth status bar, subscription gate (canSave, always true for now)
+pc-report.js                    shared per-calculator wiring - "Project name or address" field, "Save report" button, ?report=<id> rehydration
+supabase-schema.sql             one-time SQL for the Supabase project: profiles + reports tables, row-level security, subscription_status column
+styles.css                      design system + layout (home, project pages, landing, calculator, account)
 script.js                       header scroll state, mobile nav, scroll reveals
 assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
 assets/images/team/             Trent portrait
@@ -98,6 +102,48 @@ background. Both forms share the same `YOUR_FORM_ID` Formspree placeholder.
 
 The brand wordmark is **"PROJECT CARTER"** only (no "DEVELOPMENT" sub-line).
 
+## Accounts and saved reports (Supabase)
+
+Every calculator now has a **"Project name or address"** field at the top of the
+inputs (on `da-calculator.html` the existing address field doubles as it). It
+prints on the PDF header, goes into the Formspree email, and is used as the
+title when a report is saved.
+
+Signed-in visitors get the calculators **unmasked** - the full figures update
+live, no download needed - and a **"Save report"** button next to the download
+button. A saved report stores the **input values only** (as JSON); opening it
+from `account.html`, or via `<calculator>.html?report=<id>`, rehydrates the
+calculator and it recomputes. Anonymous visitors are unchanged: masked figures
+behind the Formspree lead modal.
+
+Sign-in is **passwordless magic link**. Sign-up collects name + phone + email
+and still pings Formspree once, so every new account also lands in your inbox as
+a lead.
+
+Everything is **free**. `profiles.subscription_status` (defaults to `'free'`)
+and the `pc_can_save()` SQL function are the hooks for a future paywall - today
+`pc_can_save()` always returns true. Wiring Stripe later is a contained change
+(flip the column, tighten that one function and the `reports` INSERT policy).
+
+### One-time setup
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the Supabase **SQL editor**, run `supabase-schema.sql` (safe to re-run).
+3. **Settings - API**: copy the **Project URL** and the **anon / public** key
+   into the two placeholders at the top of `pc-auth.js`
+   (`PC_SUPABASE_URL`, `PC_SUPABASE_ANON_KEY`). Both are safe to commit - the
+   anon key grants nothing without a signed-in user, because row-level security
+   scopes every row to its owner.
+4. **Authentication - URL Configuration**: set the **Site URL** to your deployed
+   origin and add it (plus `http://localhost:PORT` for local work) to
+   **Redirect URLs**, so the magic link returns to `.../account.html`.
+5. Optional: **Authentication - Providers - Email** - turn **"Confirm email"**
+   off, since the magic link already proves the address.
+
+Until step 3 is done the account UI stays dormant: the status bar and Save
+button are hidden and `account.html` shows a "not switched on yet" note. The
+calculators work exactly as before.
+
 ## Run locally
 
 Just open `index.html` in a browser, or serve the folder:
@@ -131,7 +177,8 @@ Everything below is placeholder and should be replaced before the site goes publ
 
 | Item | Where |
 | --- | --- |
-| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html`, `roi-calculator.html`, `noi-calculator.html`, `da-calculator.html` and `grv-calculator.html` → `action="https://formspree.io/f/YOUR_FORM_ID"` |
+| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html`, `roi-calculator.html`, `noi-calculator.html`, `da-calculator.html`, `grv-calculator.html` and `pc-auth.js` → replace `YOUR_FORM_ID` |
+| **Supabase project URL + anon key** (accounts + saved reports) | `pc-auth.js` → `PC_SUPABASE_URL`, `PC_SUPABASE_ANON_KEY` (see "Accounts and saved reports") |
 | Landing page headline + sub-text | `enquire.html` → between the `EDIT THIS WORDING` comments |
 | Landing background photo or video | `enquire.html` → `.landing-media` (instructions in the file + `assets/images/README.md`) |
 | Ad conversion tracking (Google Ads / Meta Pixel) | `thanks.html` → `AD CONVERSION TRACKING` comment |

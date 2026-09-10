@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body data-pc-calc="da">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- ============ HEADER (shared) ============ -->
@@ -64,9 +64,9 @@
               <h2 class="calc-subhead">The site</h2>
 
               <div class="field">
-                <label for="address">Property address</label>
+                <label for="address">Project name or address</label>
                 <input type="text" id="address" autocomplete="off" placeholder="12 Example Street, Suburb STATE 2000" />
-                <p class="field-hint">Checked once, when you click out of the field, against public map data to confirm the suburb and set the state. Nothing else is sent, and nothing is stored.</p>
+                <p class="field-hint">An address is checked once, when you click out of the field, against public map data to confirm the suburb and set the state. Nothing else is sent, and nothing is stored. A plain project name is fine too. This also names the report if you save it to your account.</p>
                 <p class="field-hint" id="addressNote" hidden></p>
               </div>
 
@@ -566,6 +566,7 @@
         <a href="roi-calculator.html">ROI Calculator</a>
         <a href="da-calculator.html">DA Calculator</a>
         <a href="grv-calculator.html">GRV Calculator</a>
+        <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
       </nav>
     </div>
@@ -576,6 +577,8 @@
 
   <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="pc-auth.js"></script>
   <script>
   (function () {
     "use strict";
@@ -652,6 +655,7 @@
     var LOCK_KEY = "pc_da_unlocked";
     var unlocked = false;
     try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
+    if (window.pcMember) unlocked = true;
     function mask(str) {
       var seen = false;
       return String(str).replace(/\d/g, function (d) {
@@ -1505,6 +1509,10 @@
     }
     applyLock();
 
+    document.addEventListener("pc-auth-change", function (ev) {
+      if (ev && ev.detail && ev.detail.isMember && !unlocked) { unlocked = true; applyLock(); }
+    });
+
     openLead.addEventListener("click", function () {
       if (unlocked) { lastDoc = makePDF(); saveDoc(); }
       else openModal();
@@ -1517,5 +1525,6 @@
     });
   })();
   </script>
+  <script src="pc-report.js"></script>
 </body>
 </html>

@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body data-pc-calc="noi">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- ============ HEADER (shared) ============ -->
@@ -59,6 +59,15 @@
 
         <div class="calc-grid">
           <div class="calc-inputs" id="calcInputs">
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Report</h2>
+              <div class="field">
+                <label for="pcProjectName">Project name or address</label>
+                <input type="text" id="pcProjectName" autocomplete="off" placeholder="e.g. 12 Example Street, Suburb" />
+                <p class="field-hint">Shown on the PDF and used to name the report if you save it to your account.</p>
+              </div>
+            </div>
 
             <div class="calc-group">
               <h2 class="calc-subhead">Purchase</h2>
@@ -255,6 +264,7 @@
         <a href="roi-calculator.html">ROI Calculator</a>
         <a href="da-calculator.html">DA Calculator</a>
         <a href="grv-calculator.html">GRV Calculator</a>
+        <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
       </nav>
     </div>
@@ -265,6 +275,8 @@
 
   <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="pc-auth.js"></script>
   <script>
   (function () {
     "use strict";
@@ -293,6 +305,7 @@
     var LOCK_KEY = "pc_noi_unlocked";
     var unlocked = false;
     try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
+    if (window.pcMember) unlocked = true;
     function mask(str) {
       var seen = false;
       return String(str).replace(/\d/g, function (d) {
@@ -462,6 +475,12 @@
       var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
       doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
       doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
+      var pcProject = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
+      if (pcProject) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(40);
+        doc.text(pcProject, L, y + 78);
+        y += 17;
+      }
 
       y += 92;
       function section(title) {
@@ -524,7 +543,9 @@
       function el(label, id) {
         return label + ": " + optMoney(m.exp[id]) + (m.rec[id] ? " (recovered from tenant)" : "");
       }
+      var pn = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
       var lines = [
+        (pn ? "Project: " + pn : null),
         "Purchase price: " + optMoney(m.price),
         "Potential rental income: " + money(m.rental) + "/yr",
         "Other income: " + optMoney(m.other1),
@@ -550,7 +571,7 @@
         "Cap rate: " + (m.capRate > 0 ? m.capRate.toFixed(2) + "%" : "n/a"),
         "Implied property value: " + (m.impliedValue != null ? money(m.impliedValue) : "n/a")
       ];
-      return lines.join("\n");
+      return lines.filter(Boolean).join("\n");
     }
 
     function saveDoc() {
@@ -635,6 +656,10 @@
     }
     applyLock();
 
+    document.addEventListener("pc-auth-change", function (ev) {
+      if (ev && ev.detail && ev.detail.isMember && !unlocked) { unlocked = true; applyLock(); }
+    });
+
     openLead.addEventListener("click", function () {
       if (unlocked) { lastDoc = makePDF(); saveDoc(); }
       else openModal();
@@ -644,5 +669,6 @@
     });
   })();
   </script>
+  <script src="pc-report.js"></script>
 </body>
 </html>

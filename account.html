@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account | Project Carter</title>
+  <meta name="description" content="Sign in to Project Carter to save your calculator figures and open them again later." />
+  <meta name="theme-color" content="#0c1016" />
+  <meta name="robots" content="noindex" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER (shared) ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <div class="nav-dropdown" id="calcDropdown">
+          <button type="button" class="nav-dropdown-toggle" id="calcDropdownToggle" aria-expanded="false" aria-controls="calcDropdownMenu">Calculators<svg class="nav-caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-dropdown-menu" id="calcDropdownMenu" role="menu">
+            <a href="noi-calculator.html" role="menuitem">Net Operating Income (NOI)</a>
+            <a href="roi-calculator.html" role="menuitem">Return on Equity (ROI)</a>
+            <a href="da-calculator.html" role="menuitem">Development Site (DA)</a>
+            <a href="grv-calculator.html" role="menuitem">Gross Realisation Value (GRV)</a>
+          </div>
+        </div>
+      </nav>
+      <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="calc">
+      <div class="wrap narrow">
+        <div class="calc-intro">
+          <p class="kicker">Project Carter</p>
+          <h1>Your account</h1>
+          <p>Save the figures from any calculator and open them again later on any device. It is free. Sign in with a one-time link sent to your email, no password to remember.</p>
+        </div>
+
+        <!-- not configured -->
+        <div class="card acct-card" id="acctUnconfigured" hidden>
+          <p><strong>Accounts are not switched on yet.</strong> Once the Supabase keys are added to <code>pc-auth.js</code>, sign-in and saved reports work here.</p>
+        </div>
+
+        <p class="acct-msg is-ok" id="acctFromNote" hidden></p>
+
+        <!-- signed out -->
+        <div class="card acct-card" id="acctSignedOut" hidden>
+          <h2 class="calc-subhead">Sign in or create an account</h2>
+          <form id="magicForm" novalidate>
+            <div class="field">
+              <label for="acctName">Name</label>
+              <input type="text" id="acctName" autocomplete="name" placeholder="Your name" />
+              <p class="field-hint">Only needed the first time you sign in.</p>
+            </div>
+            <div class="field">
+              <label for="acctPhone">Phone</label>
+              <input type="tel" id="acctPhone" autocomplete="tel" placeholder="0400 000 000" />
+            </div>
+            <div class="field">
+              <label for="acctEmail">Email</label>
+              <input type="email" id="acctEmail" autocomplete="email" required placeholder="you@example.com" />
+            </div>
+            <button type="submit" class="btn btn-accent btn-block" id="magicBtn">Email me a sign-in link</button>
+            <p class="form-fineprint">We use your details only to run your account and follow up if you have asked us to.</p>
+          </form>
+          <p class="acct-msg" id="magicMsg" role="status" hidden></p>
+        </div>
+
+        <!-- signed in -->
+        <div id="acctSignedIn" hidden>
+          <div class="card acct-card">
+            <div class="acct-whoami">
+              <div>
+                <p class="acct-eyebrow">Signed in as</p>
+                <p class="acct-email" id="acctWhoEmail">&mdash;</p>
+              </div>
+              <button type="button" class="btn btn-ghost" id="signOutBtn">Sign out</button>
+            </div>
+          </div>
+
+          <div class="card acct-card">
+            <h2 class="calc-subhead">My saved reports</h2>
+            <p class="acct-msg" id="reportsMsg" hidden></p>
+            <div id="reportsList" class="acct-reports"></div>
+            <p class="acct-empty" id="reportsEmpty" hidden>
+              No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
+            </p>
+            <p class="acct-calc-links">
+              New report:
+              <a href="noi-calculator.html">NOI</a> ·
+              <a href="roi-calculator.html">ROI</a> ·
+              <a href="da-calculator.html">DA</a> ·
+              <a href="grv-calculator.html">GRV</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="noi-calculator.html">NOI Calculator</a>
+        <a href="roi-calculator.html">ROI Calculator</a>
+        <a href="da-calculator.html">DA Calculator</a>
+        <a href="grv-calculator.html">GRV Calculator</a>
+        <a href="enquire.html">Contact</a>
+      </nav>
+    </div>
+    <div class="wrap footer-legal">
+      <p>Privacy Policy &nbsp;·&nbsp; © <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="pc-auth.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var CALC_NAMES = { noi: "NOI Calculator", roi: "ROI Calculator", da: "DA Calculator", grv: "GRV Calculator" };
+    var CALC_PAGES = {
+      noi: "noi-calculator.html", roi: "roi-calculator.html",
+      da: "da-calculator.html", grv: "grv-calculator.html"
+    };
+
+    var elUnconfigured = document.getElementById("acctUnconfigured");
+    var elSignedOut    = document.getElementById("acctSignedOut");
+    var elSignedIn     = document.getElementById("acctSignedIn");
+    var magicForm      = document.getElementById("magicForm");
+    var magicMsg       = document.getElementById("magicMsg");
+    var magicBtn       = document.getElementById("magicBtn");
+    var reportsList    = document.getElementById("reportsList");
+    var reportsEmpty   = document.getElementById("reportsEmpty");
+    var reportsMsg     = document.getElementById("reportsMsg");
+
+    function show(el) { el.hidden = false; }
+    function hide(el) { el.hidden = true; }
+
+    function fmtDate(s) {
+      try {
+        return new Date(s).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+      } catch (e) { return ""; }
+    }
+
+    function setMsg(node, text, kind) {
+      node.textContent = text || "";
+      node.hidden = !text;
+      node.className = "acct-msg" + (kind ? " is-" + kind : "");
+    }
+
+    /* strip the magic-link hash once supabase-js has consumed it */
+    function tidyUrl() {
+      if (window.location.hash && /access_token|error_description/.test(window.location.hash)) {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    }
+
+    function renderReports(rows) {
+      reportsList.innerHTML = "";
+      if (!rows || !rows.length) { show(reportsEmpty); return; }
+      hide(reportsEmpty);
+
+      var groups = {};
+      rows.forEach(function (r) { (groups[r.calculator] = groups[r.calculator] || []).push(r); });
+
+      ["noi", "roi", "da", "grv"].forEach(function (calc) {
+        if (!groups[calc]) return;
+        var h = document.createElement("h3");
+        h.className = "acct-group-head";
+        h.textContent = CALC_NAMES[calc];
+        reportsList.appendChild(h);
+
+        groups[calc].forEach(function (r) {
+          var row = document.createElement("div");
+          row.className = "acct-report";
+          row.setAttribute("data-id", r.id);
+          row.innerHTML =
+            '<div class="acct-report__main">' +
+              '<a class="acct-report__title" href="' + CALC_PAGES[calc] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
+              '<span class="acct-report__date">Updated ' + fmtDate(r.updated_at) + '</span>' +
+            '</div>' +
+            '<div class="acct-report__actions">' +
+              '<button type="button" class="linklike" data-act="rename">Rename</button>' +
+              '<button type="button" class="linklike" data-act="delete">Delete</button>' +
+            '</div>';
+          row.querySelector(".acct-report__title").textContent = r.title || "Untitled report";
+
+          row.querySelector('[data-act="rename"]').addEventListener("click", function () {
+            var next = window.prompt("Rename this report", r.title || "");
+            if (next == null) return;
+            next = next.trim();
+            if (!next || next === r.title) return;
+            window.pcAuth.renameReport(r.id, next).then(function (res) {
+              if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
+              r.title = next;
+              row.querySelector(".acct-report__title").textContent = next;
+            });
+          });
+
+          row.querySelector('[data-act="delete"]').addEventListener("click", function () {
+            if (!window.confirm("Delete “" + (r.title || "Untitled report") + "”? This cannot be undone.")) return;
+            window.pcAuth.deleteReport(r.id).then(function (res) {
+              if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
+              load();
+            });
+          });
+
+          reportsList.appendChild(row);
+        });
+      });
+    }
+
+    var CALC_PAGE_SET = { "noi-calculator.html":1, "roi-calculator.html":1, "da-calculator.html":1, "grv-calculator.html":1 };
+    function fromParam() {
+      try {
+        var f = new URL(window.location.href).searchParams.get("from");
+        return f && CALC_PAGE_SET[f] ? f : null;
+      } catch (e) { return null; }
+    }
+
+    function load() {
+      var u = window.pcAuth.user();
+      var from = fromParam();
+      var fromNote = document.getElementById("acctFromNote");
+      if (from && u) {
+        fromNote.innerHTML = 'Signed in. <a href="' + from + '">Back to your calculator</a> to save the figures you were working on.';
+        fromNote.hidden = false;
+      } else if (from) {
+        fromNote.textContent = "Sign in below, then head back to your calculator to save your figures.";
+        fromNote.hidden = false;
+      } else {
+        fromNote.hidden = true;
+      }
+      if (!window.pcAuth.configured) {
+        show(elUnconfigured); hide(elSignedOut); hide(elSignedIn); return;
+      }
+      hide(elUnconfigured);
+      if (u) {
+        hide(elSignedOut); show(elSignedIn);
+        document.getElementById("acctWhoEmail").textContent = u.email;
+        setMsg(reportsMsg, "");
+        window.pcAuth.listReports().then(function (res) {
+          if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
+          renderReports(res.data);
+        });
+      } else {
+        show(elSignedOut); hide(elSignedIn);
+      }
+    }
+
+    magicForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = document.getElementById("acctEmail").value.trim();
+      var name  = document.getElementById("acctName").value.trim();
+      var phone = document.getElementById("acctPhone").value.trim();
+      if (!email || !/.+@.+\..+/.test(email)) {
+        setMsg(magicMsg, "Enter a valid email address.", "error");
+        return;
+      }
+      magicBtn.disabled = true;
+      setMsg(magicMsg, "Sending your link…");
+      window.pcAuth.signInWithMagicLink(email, {
+        full_name: name, phone: phone,
+        redirectTo: window.location.origin + window.location.pathname
+      }).then(function (res) {
+        magicBtn.disabled = false;
+        if (res && res.error) { setMsg(magicMsg, res.error.message, "error"); return; }
+        setMsg(magicMsg, "Check your inbox for " + email + " and click the link to finish signing in. You can close this tab.", "ok");
+      });
+    });
+
+    document.getElementById("signOutBtn").addEventListener("click", function () {
+      window.pcAuth.signOut().then(load);
+    });
+
+    document.addEventListener("pc-auth-change", function () { tidyUrl(); load(); });
+    window.pcAuth.ready.then(function () { tidyUrl(); load(); });
+  })();
+  </script>
+</body>
+</html>

@@ -1267,3 +1267,79 @@ h1, h2, h3 {
   .calc-grid { grid-template-columns: 1fr; }
   .calc-results { position: static; }
 }
+
+/* =========================================================
+   Accounts - auth bar, save button, account page
+   ========================================================= */
+
+.pc-auth-bar {
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.pc-auth-bar__inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding-top: 8px; padding-bottom: 8px;
+}
+.pc-auth-bar__who { color: var(--muted); }
+.pc-auth-bar__who strong { color: var(--text); font-weight: 600; }
+.pc-auth-bar__links { display: flex; align-items: center; gap: 16px; white-space: nowrap; }
+.pc-auth-bar__links a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.pc-auth-bar__links a:hover { text-decoration: underline; }
+
+@media (max-width: 620px) {
+  .pc-auth-bar__inner { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
+/* Save-report button sits in .calc-cta above the download button */
+.pc-save-btn { margin: 0; }
+.pc-save-msg {
+  margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted);
+}
+.pc-save-msg.is-ok    { color: var(--accent-2); }
+.pc-save-msg.is-error { color: #e2938c; }
+
+/* ---- account.html ---- */
+.acct-card { padding: clamp(22px, 3vw, 34px); margin-bottom: 20px; }
+.acct-card + .acct-card { margin-top: 0; }
+.acct-card h2 { margin-bottom: 16px; }
+.acct-card form { display: grid; gap: 16px; }
+.acct-card .field { display: grid; gap: 6px; }
+.acct-card input {
+  width: 100%; padding: 12px 14px;
+  background: var(--bg-3); border: 1px solid var(--line); color: var(--text);
+  font: inherit; border-radius: 2px;
+}
+.acct-card input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.acct-msg { margin: 14px 0 0; font-size: 13.5px; line-height: 1.6; }
+.acct-msg.is-ok    { color: var(--accent-2); }
+.acct-msg.is-error { color: #e2938c; }
+
+.acct-whoami { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.acct-eyebrow {
+  margin: 0; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+}
+.acct-email { margin: 4px 0 0; font-size: 18px; font-weight: 600; word-break: break-all; }
+
+.acct-reports { display: grid; gap: 2px; }
+.acct-group-head {
+  font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.04em;
+  font-size: 15px; color: var(--muted); margin: 18px 0 8px;
+}
+.acct-group-head:first-child { margin-top: 0; }
+.acct-report {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--line-soft);
+}
+.acct-report__main { display: grid; gap: 2px; min-width: 0; }
+.acct-report__title { color: var(--text); font-weight: 600; text-decoration: none; }
+.acct-report__title:hover { color: var(--accent); text-decoration: underline; }
+.acct-report__date { font-size: 12px; color: var(--muted); }
+.acct-report__actions { display: flex; gap: 14px; white-space: nowrap; }
+.acct-report__actions .linklike { font-size: 13px; }
+
+.acct-empty { color: var(--muted); font-size: 14px; }
+.acct-calc-links { margin-top: 18px; font-size: 14px; color: var(--muted); }
+.acct-calc-links a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.acct-calc-links a:hover { text-decoration: underline; }
