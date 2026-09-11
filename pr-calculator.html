@@ -208,10 +208,10 @@
             <li><strong>Loan and equity.</strong> The loan is the LVR you enter times the value; the equity (your net position) is the rest. Interest is interest-only, loan &times; rate, so nothing is paid off the loan.</li>
             <li><strong>Rent collected</strong> is the weekly rent &times; 52 for a residential property, or the gross annual rent you enter for a commercial one.</li>
             <li><strong>Running costs</strong> are property management (a % of the rent), the letting / leasing fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance, a vacancy allowance, loan fees and sundry. Residential maintenance is per week &times; 52 and vacancy is weeks &times; the weekly rent; commercial maintenance is annual and vacancy is months &divide; 12 &times; the gross rent. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings &mdash; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
-            <li><strong>Commercial properties</strong> add a lease basis and the usual building outgoings &mdash; water &amp; sewer rates, fire &amp; essential services, air-conditioning / HVAC, cleaning &amp; security, and an outgoings audit / admin allowance. Each recoverable line has a &ldquo;recovered from the tenant&rdquo; tick: ticked, that outgoing drops out of your running costs. Choosing <strong>net lease</strong> ticks the usual recoverable set, <strong>gross lease</strong> clears them, and <strong>partial / mixed</strong> leaves them as you set them. Property management is recoverable on many net leases; land tax often is not on retail leases even when net, so check before ticking it.</li>
+            <li><strong>Commercial properties</strong> add a lease basis and the usual building outgoings &mdash; water &amp; sewer rates, fire &amp; essential services, air-conditioning / HVAC, cleaning &amp; security, and an outgoings audit / admin allowance. Each recoverable line has a &ldquo;recovered from the tenant&rdquo; tick: ticked, that outgoing drops out of your running costs. Choosing <strong>net lease</strong> ticks the usual recoverable set, <strong>gross lease</strong> clears them, and <strong>partial / mixed</strong> leaves them as you set them. <strong>Land tax is never auto-ticked</strong> under any lease basis &mdash; many retail leases can't pass it through to the tenant even on a net lease, so tick it yourself only if this lease does.</li>
             <li><strong>Cash flow before tax</strong> is net rent after costs, less loan interest. A figure in brackets is what the property costs you to hold each year before tax.</li>
             <li><strong>Tax.</strong> A rental loss is refunded at the marginal tax rate you enter; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving.</li>
-            <li><strong>Post-Budget negative gearing.</strong> Tick &ldquo;bought after the 2026 Federal Budget&rdquo; on a property and a rental loss on it is quarantined: it no longer offsets your salary or other income, so it earns no refund in the year. The loss carries forward against future rental profit from that property or the gain on its sale. Rental profits are still taxed, and depreciation only reduces a profit. Properties held before the Budget keep the current treatment. This is a modelling assumption, not tax advice.</li>
+            <li><strong>Post-Budget negative gearing.</strong> Tick &ldquo;bought after the 2026 Federal Budget&rdquo; on a residential property and a rental loss on it is quarantined: it no longer offsets your salary or other income, so it earns no refund in the year. The loss carries forward against future rental profit from that property or the gain on its sale. Rental profits are still taxed, and depreciation only reduces a profit. Properties held before the Budget keep the current treatment. This change applies to residential property only &mdash; the Budget did not change negative gearing for commercial property, so this option is not shown on commercial cards. This is a modelling assumption, not tax advice.</li>
             <li><strong>After-tax cash flow</strong> is cash flow before tax plus the tax refund and the depreciation tax saving. Divided by 52 it is the weekly figure &mdash; the real out-of-pocket cost, or income, of holding the property.</li>
             <li><strong>Break-even rent.</strong> Each card shows the rent that would bring that property's yearly after-tax result to zero, with everything else held the same &mdash; per week for residential, per year for commercial.</li>
             <li><strong>Residential vs commercial.</strong> The comparison table and the schedule subtotals split the portfolio by type so you can see each side's value, yield and after-tax position on its own, then combined.</li>
@@ -464,13 +464,15 @@
     }
 
     /* net lease -> tick the standard recoverable set; gross -> clear;
-       partial / mixed -> leave whatever the user has set */
+       partial / mixed -> leave whatever the user has set. Land tax is never
+       auto-ticked either way - many retail leases can't pass it through even
+       on a net lease, so it's left to the user to decide. */
     function autoRecovers(id) {
       var p = "p" + id + "_";
       var leaseEl = document.getElementById(p + "lease");
       if (!leaseEl || leaseEl.value === "partial") return;
       var on = leaseEl.value === "net";
-      NET_DEFAULT.concat(["landtax"]).forEach(function (k) {
+      NET_DEFAULT.forEach(function (k) {
         var cb = document.getElementById(p + k + "Rec");
         if (cb) cb.checked = on;
       });
@@ -526,7 +528,7 @@
         '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="0" value="6.6" /></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
           recoverTick(p, "pm") + '</div>' +
           '<div class="field"><label for="' + p + 'letting">Letting / leasing fee <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div></div>' +
@@ -599,10 +601,12 @@
           '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'deprfitpct" autocomplete="off" placeholder="10" value="10" /></div></div>' +
         '</div>' +
 
+        '<div data-res-only>' +
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Tax treatment</h3>' +
         '<label class="calc-check"><input type="checkbox" id="' + p + 'ngNew" />' +
           '<span>Bought after the 2026 Federal Budget &mdash; post-Budget negative gearing rules apply</span></label>' +
-        '<p class="field-hint">From the 2026 Federal Budget, a rental loss on a property bought after Budget night can no longer be offset against salary or other income. Tick this and any loss on this property is quarantined: no tax refund in the year, and the loss carries forward against future rental profit from this property or the gain on sale. Rental profits are still taxed. Properties held before the Budget are unaffected. A modelling assumption, not tax advice.</p>' +
+        '<p class="field-hint">From the 2026 Federal Budget, a rental loss on a property bought after Budget night can no longer be offset against salary or other income. Tick this and any loss on this property is quarantined: no tax refund in the year, and the loss carries forward against future rental profit from this property or the gain on sale. Rental profits are still taxed. Properties held before the Budget are unaffected. This change applies to residential property only &mdash; commercial negative gearing is unaffected. A modelling assumption, not tax advice.</p>' +
+        '</div>' +
 
         '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
           '<span>This property is being purchased &mdash; include one-off acquisition costs</span></label>' +
@@ -633,11 +637,12 @@
             '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'borrow" autocomplete="off" placeholder="0" /></div></div>' +
           '</div>' +
           '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'qs">Quantity surveyor’s report</label>' +
+            '<div class="field"><label for="' + p + 'qs">Other <span>(one-off, lump sum)</span></label>' +
             '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
             '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
             '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
           '</div>' +
+          '<p class="field-hint">Add any other one-off purchase costs here as a single lump sum &mdash; BA / planning fees, building or pest reports, quantity surveyor&rsquo;s report, or other specialist consultants, if required.</p>' +
         '</div>' +
 
         '<p class="dwelling-type__calc">' +
@@ -838,7 +843,7 @@
       /* Post-Budget negative gearing: a rental loss on a property bought after
          the 2026 Budget is quarantined - it no longer offsets other income, so
          it earns no refund in the year and carries forward instead. */
-      var ngNew = document.getElementById(p + "ngNew").checked;
+      var ngNew = !isCom && document.getElementById(p + "ngNew").checked;
 
       /* the sheet's two-step tax treatment: refund the pre-depreciation loss
          (or tax the profit), then add the depreciation credits on top */
