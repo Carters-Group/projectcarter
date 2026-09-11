@@ -460,7 +460,23 @@
       var nw = document.getElementById(p + "neutralWrap");
       if (nw && nw.firstChild) nw.firstChild.nodeValue = isCom
         ? "Gross rent / yr to break even " : "Rent / wk to break even ";
+      if (isCom) {
+        var lu = document.getElementById(p + "lettingUnit");
+        if (lu) lu.value = "amount";
+      }
+      syncLettingUnit(id);
       if (fromUser && isCom) autoRecovers(id);
+    }
+
+    /* letting fee can be a flat $ amount or a number of weeks of rent
+       (residential only - commercial is always a flat amount) */
+    function syncLettingUnit(id) {
+      var p = "p" + id + "_";
+      var unitEl = document.getElementById(p + "lettingUnit");
+      var wrap = document.getElementById(p + "lettingWrap");
+      if (!wrap) return;
+      var weeks = !!unitEl && unitEl.value === "weeks";
+      wrap.classList.toggle("input-money", !weeks);
     }
 
     /* net lease -> tick the standard recoverable set; gross -> clear;
@@ -530,9 +546,14 @@
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
           recoverTick(p, "pm") + '</div>' +
-          '<div class="field"><label for="' + p + 'letting">Letting / leasing fee <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'letting">Letting / leasing fee</label>' +
+          '<div class="input-money" id="' + p + 'lettingWrap"><input type="text" inputmode="decimal" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div>' +
+          '<select id="' + p + 'lettingUnit" data-res-only>' +
+            '<option value="amount">$ amount</option>' +
+            '<option value="weeks">Weeks of rent</option>' +
+          '</select></div>' +
         '</div>' +
+        '<p class="field-hint" data-res-only>Letting fee is commonly quoted as a number of weeks of rent (often 1&ndash;2 weeks) rather than a dollar figure &mdash; pick whichever you have.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div>' +
@@ -545,11 +566,11 @@
           '<div class="field"><label for="' + p + 'landtax">Land tax <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'landtax" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "landtax") + '</div>' +
-          '<div class="field"><label for="' + p + 'insurance">Insurance <span>(per year)</span></label>' +
+          '<div class="field"><label for="' + p + 'insurance">Landlord insurance <span>(or building, per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "insurance") + '</div>' +
         '</div>' +
-        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.<span data-com-only hidden> Many retail leases cannot pass land tax to the tenant even on a net lease &mdash; leave its tick off if so.</span></p>' +
+        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.<span data-com-only hidden> Many retail leases cannot pass land tax to the tenant even on a net lease &mdash; leave its tick off if so.</span> If a body corporate or strata scheme covers this property, building insurance is usually already included in the body corporate fee &mdash; enter landlord/other insurance (contents, loss of rent, liability) here instead. With no body corporate, include building insurance too.</p>' +
         '<div class="field-row">' +
           '<div class="field" data-res-only><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="0" /></div></div>' +
@@ -557,7 +578,7 @@
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintyr" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "maint") + '</div>' +
           '<div class="field" data-res-only><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
-          '<input type="text" inputmode="decimal" id="' + p + 'vacwks" autocomplete="off" placeholder="0" /></div>' +
+          '<input type="text" inputmode="decimal" id="' + p + 'vacwks" autocomplete="off" placeholder="1" value="1" /></div>' +
           '<div class="field" data-com-only hidden><label for="' + p + 'vacmths">Vacancy allowance <span>(months of the year)</span></label>' +
           '<input type="text" inputmode="decimal" id="' + p + 'vacmths" autocomplete="off" placeholder="0" /></div>' +
         '</div>' +
@@ -658,6 +679,10 @@
 
       Array.prototype.forEach.call(card.querySelectorAll(".input-money input"), function (el) {
         attachMoneyBlur(el);
+      });
+      card.querySelector("#" + p + "lettingUnit").addEventListener("change", function () {
+        syncLettingUnit(id);
+        render();
       });
       card.querySelector("#" + p + "acqOn").addEventListener("change", function () {
         card.querySelector("#" + p + "acqFields").hidden = !this.checked;
@@ -801,7 +826,8 @@
 
       var pmPct = num(p + "pmpct") / 100;
       var pm = grossRent * pmPct;
-      var letting = num(p + "letting");
+      var lettingUnit = isCom ? "amount" : (((document.getElementById(p + "lettingUnit") || {}).value) || "amount");
+      var letting = lettingUnit === "weeks" ? num(p + "letting") * rentWk : num(p + "letting");
       var council = num(p + "council");
       var water = isCom ? num(p + "water") : 0;
       var strata = num(p + "strata");
