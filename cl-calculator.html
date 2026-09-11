@@ -104,14 +104,70 @@
               </div>
             </div>
 
+            <div class="calc-group">
+              <h2 class="calc-subhead">Purchase costs</h2>
+              <p class="field-hint" id="costsGroupHint">Costs of the purchase itself, on top of the deposit. All optional.</p>
+
+              <div class="field">
+                <label for="stampDuty">Stamp duty <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="92,000" /></div>
+                <div class="stamp-est" id="stampEst" hidden>
+                  <label for="stampState">Estimate for a company purchase in</label>
+                  <select id="stampState">
+                    <option value="">Select state or territory</option>
+                    <option value="NSW">New South Wales</option>
+                    <option value="VIC">Victoria</option>
+                    <option value="QLD">Queensland</option>
+                    <option value="WA">Western Australia</option>
+                    <option value="SA">South Australia</option>
+                    <option value="TAS">Tasmania</option>
+                    <option value="ACT">Australian Capital Territory</option>
+                    <option value="NT">Northern Territory</option>
+                  </select>
+                  <label class="calc-check">
+                    <input type="checkbox" id="stampCommercial" checked />
+                    <span>Commercial / non-residential property</span>
+                  </label>
+                  <p class="field-hint" id="stampEstNote">Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
+                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. The filled figure also adds the land-titles-office fees to register the transfer, and the mortgage where a loan is entered; the seller pays to discharge their own mortgage, so that is not included. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amounts with the relevant state revenue office and titles registry.</p>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="valuationCost">Loan / valuation cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="valuationCost" autocomplete="off" placeholder="4,000" /></div>
+                <p class="field-hint">Bank fees and the valuation ordered for finance.</p>
+              </div>
+
+              <div class="field">
+                <label for="legalCost">Legal cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="legalCost" autocomplete="off" placeholder="5,000" /></div>
+              </div>
+
+              <div class="field">
+                <label for="buildingInspection">Building / technical due diligence <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="buildingInspection" autocomplete="off" placeholder="2,500" /></div>
+                <p class="field-hint">Building and pest, plant and equipment, or any specialist condition report.</p>
+              </div>
+
+              <div class="field">
+                <label for="otherCost">Other purchasing cost <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="10,000" /></div>
+                <p class="field-hint">Due diligence, buyer's agent and adviser fees, and anything else.</p>
+              </div>
+            </div>
+
           </div>
 
           <dl class="calc-results" id="calcResults" aria-live="polite">
             <h2>Your deposit / equity position</h2>
             <div class="result-row is-teaser"><dt>Loan type</dt><dd data-out="loanTypeOut">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt id="priceRowLabel">Purchase price</dt><dd data-out="priceOut">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Purchase costs <span>(est.)</span></dt><dd data-out="purchaseCosts">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Min deposit / equity &ndash; major banks</dt><dd data-out="majorDeposit">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Min deposit / equity &ndash; tier 2 / non-bank</dt><dd data-out="tier2Deposit">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total cash required &ndash; major banks</dt><dd data-out="majorCash">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total cash required &ndash; tier 2 / non-bank</dt><dd data-out="tier2Cash">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full lender comparison and one-page PDF below.</p>
@@ -196,6 +252,7 @@
             <li><strong>Lease doc / low doc investment</strong> is serviced by the property's own lease &mdash; no trading income is required in the entity. Available through a limited number of majors as well as tier 2 lenders; the lease itself needs to support the debt.</li>
             <li><strong>Build to Rent (BTR)</strong> uses the total development cost as the base for lending rather than a purchase price. Lenders only recognise part of the projected rental income toward covering debt costs &mdash; the rental cover check below uses a 75% recognition of gross rent as a rough guide.</li>
             <li><strong>Build to sell</strong> (development / construction for sale) also lends against total development cost. Major banks typically want a level of qualifying presales in place before funding; tier 2 / non-bank lenders are more likely to fund with less presale cover, priced according to the deposit or equity contributed.</li>
+            <li><strong>Purchase costs</strong> are on top of the deposit: stamp duty, loan / valuation costs, legal fees, building or technical due diligence and any other purchasing cost you enter. <strong>Total cash required</strong> is the deposit / equity for that tier plus these purchase costs &mdash; a fuller picture of what you need to have available, not just the deposit. Focusing the stamp duty field opens an estimator that fills from your state's general transfer duty rates for the price or total development cost entered (commercial ticked by default); edit the figure directly if you know the exact amount.</li>
             <li>All loan-to-value ratios, deposit percentages and rate ranges shown are indicative starting points based on typical market settings as at the time of writing. Every lender, deal and security is different &mdash; treat these as a planning guide, not a quote or approval.</li>
           </ul>
         </div>
@@ -251,6 +308,163 @@
     function money(n) { return money0.format(Math.round(n)); }
     function pct(n) { return n.toFixed(0) + "%"; }
     function rateRange(r) { return r ? r[0].toFixed(2) + "% – " + r[1].toFixed(2) + "% p.a." : "—"; }
+
+    /* ---- shared stamp duty estimator (same as ROI / DA / PR) -------------- */
+    function bracketDuty(v, rows) {
+      for (var i = 0; i < rows.length; i++) {
+        if (v <= rows[i].up) return rows[i].base + (v - rows[i].over) * rows[i].rate;
+      }
+      return null;
+    }
+    var STAMP = {
+      NSW: [
+        { up: 17000, over: 0, base: 0, rate: 0.0125 },
+        { up: 37000, over: 17000, base: 212, rate: 0.015 },
+        { up: 99000, over: 37000, base: 512, rate: 0.0175 },
+        { up: 372000, over: 99000, base: 1597, rate: 0.035 },
+        { up: 1240000, over: 372000, base: 11152, rate: 0.045 },
+        { up: 3721000, over: 1240000, base: 50212, rate: 0.055 },
+        { up: Infinity, over: 3721000, base: 186668, rate: 0.07 }
+      ],
+      VIC: [
+        { up: 25000, over: 0, base: 0, rate: 0.014 },
+        { up: 130000, over: 25000, base: 350, rate: 0.024 },
+        { up: 960000, over: 130000, base: 2870, rate: 0.06 },
+        { up: 2000000, over: 0, base: 0, rate: 0.055 },
+        { up: Infinity, over: 2000000, base: 110000, rate: 0.065 }
+      ],
+      QLD: [
+        { up: 5000, over: 0, base: 0, rate: 0 },
+        { up: 75000, over: 5000, base: 0, rate: 0.015 },
+        { up: 540000, over: 75000, base: 1050, rate: 0.035 },
+        { up: 1000000, over: 540000, base: 17325, rate: 0.045 },
+        { up: Infinity, over: 1000000, base: 38025, rate: 0.0575 }
+      ],
+      WA: [
+        { up: 120000, over: 0, base: 0, rate: 0.019 },
+        { up: 150000, over: 120000, base: 2280, rate: 0.0285 },
+        { up: 360000, over: 150000, base: 3135, rate: 0.038 },
+        { up: 725000, over: 360000, base: 11115, rate: 0.0475 },
+        { up: Infinity, over: 725000, base: 28453, rate: 0.0515 }
+      ],
+      SA: [
+        { up: 12000, over: 0, base: 0, rate: 0.01 },
+        { up: 30000, over: 12000, base: 120, rate: 0.02 },
+        { up: 50000, over: 30000, base: 480, rate: 0.03 },
+        { up: 100000, over: 50000, base: 1080, rate: 0.035 },
+        { up: 200000, over: 100000, base: 2830, rate: 0.04 },
+        { up: 250000, over: 200000, base: 6830, rate: 0.0425 },
+        { up: 300000, over: 250000, base: 8955, rate: 0.0475 },
+        { up: 500000, over: 300000, base: 11330, rate: 0.05 },
+        { up: Infinity, over: 500000, base: 21330, rate: 0.055 }
+      ],
+      TAS: [
+        { up: 3000, over: 0, base: 50, rate: 0 },
+        { up: 25000, over: 3000, base: 50, rate: 0.0175 },
+        { up: 75000, over: 25000, base: 435, rate: 0.0225 },
+        { up: 200000, over: 75000, base: 1560, rate: 0.035 },
+        { up: 375000, over: 200000, base: 5935, rate: 0.04 },
+        { up: 725000, over: 375000, base: 12935, rate: 0.0425 },
+        { up: Infinity, over: 725000, base: 27810, rate: 0.045 }
+      ],
+      ACT: [
+        { up: 200000, over: 0, base: 0, rate: 0.006 },
+        { up: 300000, over: 200000, base: 1200, rate: 0.022 },
+        { up: 500000, over: 300000, base: 3400, rate: 0.034 },
+        { up: 750000, over: 500000, base: 10200, rate: 0.0432 },
+        { up: 1000000, over: 750000, base: 21000, rate: 0.059 },
+        { up: 1455000, over: 1000000, base: 35750, rate: 0.064 },
+        { up: Infinity, over: 0, base: 0, rate: 0.0454 }
+      ]
+    };
+    /* ACT abolishes commercial duty up to this dutiable value (from 1 July 2026) */
+    var ACT_COMM_THRESHOLD = 2100000;
+
+    var REGO = {
+      NSW: { mortgage: 180, transfer: function () { return 180; } },
+      VIC: { mortgage: 121, transfer: function (p) { return Math.min(3600, 92 + p * 0.00234); } },
+      QLD: { mortgage: 231, transfer: function (p) {
+               return 231 + (p > 180000 ? Math.ceil((p - 180000) / 10000) * 43 : 0); } },
+      WA:  { mortgage: 178, transfer: function (p) {
+               return 178 + (p > 85000 ? Math.ceil((p - 85000) / 100000) * 178 : 0); } },
+      SA:  { mortgage: 190, transfer: function (p) {
+               var b = [[5000, 190], [20000, 205], [40000, 260], [50000, 315], [100000, 475],
+                        [200000, 830], [250000, 1010], [300000, 1190], [500000, 1720],
+                        [1000000, 3945]];
+               for (var i = 0; i < b.length; i++) { if (p <= b[i][0]) return b[i][1]; }
+               return 6930; } },
+      TAS: { mortgage: 155, transfer: function () { return 233; } },
+      ACT: { mortgage: 174, transfer: function () { return 465; } },
+      NT:  { mortgage: 166, transfer: function () { return 166; } }
+    };
+
+    function regoFees(state, price, hasLoan) {
+      var r = REGO[state];
+      if (!r || !price || price <= 0) return { transfer: 0, mortgage: 0, total: 0 };
+      var t = Math.round(r.transfer(price));
+      var m = hasLoan ? r.mortgage : 0;
+      return { transfer: t, mortgage: m, total: t + m };
+    }
+
+    function stampEstimate(state, price, commercial) {
+      if (!state || !price || price <= 0) return null;
+      if (commercial && state === "SA") return 0;
+      if (commercial && state === "ACT") return price <= ACT_COMM_THRESHOLD ? 0 : price * 0.05;
+      if (state === "NT") {
+        if (price <= 525000) { var V = price / 1000; return 0.06571441 * V * V + 15 * V; }
+        if (price <= 3000000) return price * 0.0495;
+        if (price <= 5000000) return price * 0.0575;
+        return price * 0.0595;
+      }
+      var rows = STAMP[state];
+      if (!rows) return null;
+      var d = bracketDuty(price, rows);
+      return d == null ? null : Math.max(d, 0);
+    }
+
+    function stampNote(state, price, commercial) {
+      if (!state) return "Pick a state and the field fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.";
+      var name = stampState.options[stampState.selectedIndex].text;
+      if (!price) return "Enter a price or total development cost and this fills with a " + state + " estimate.";
+      if (commercial && state === "SA") return "No duty. SA abolished stamp duty on qualifying non-residential property from 1 July 2018.";
+      if (commercial && state === "ACT" && price <= ACT_COMM_THRESHOLD) return "No duty. ACT commercial property up to $2,100,000 is exempt (from 1 July 2026).";
+      if (commercial && state === "ACT") return "ACT commercial over $2,100,000: flat $5.00 per $100 of the whole value.";
+      if (commercial && state === "VIC") return name + " estimate for " + money(price) + ". VIC commercial / industrial pays duty on the first sale after 1 July 2024, then an annual tax; later transfers are exempt.";
+      return name + " estimate for " + money(price) + ". Edit it if you have the exact figure.";
+    }
+
+    function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
+
+    var stampDutyEl = document.getElementById("stampDuty");
+    var stampEst = document.getElementById("stampEst");
+    var stampState = document.getElementById("stampState");
+    var stampCommercial = document.getElementById("stampCommercial");
+    var stampEstNote = document.getElementById("stampEstNote");
+    var touched = { stampDuty: false };
+
+    /* Keep stamp duty filled from the price + state, unless typed over. The
+       filled figure is transfer duty plus the title-office registration fees
+       (transfer, and mortgage registration when there is a loan). */
+    function recalcAutofills() {
+      var price = num("price");
+      var state = stampState.value;
+      var est = state ? stampEstimate(state, price, stampCommercial.checked) : null;
+      var fees = regoFees(state, price, true);
+      if (!touched.stampDuty && state) {
+        if (est == null) {
+          stampDutyEl.value = "";
+        } else {
+          var total = est + fees.total;
+          stampDutyEl.value = total === 0 ? "0" : fmtAmount(total);
+        }
+      }
+      var note = stampNote(state, price, stampCommercial.checked);
+      if (est != null && price > 0 && fees.total > 0) {
+        note += " Includes " + money(fees.transfer) + " transfer registration" +
+          (fees.mortgage ? " and " + money(fees.mortgage) + " mortgage registration" : "") + ".";
+      }
+      stampEstNote.textContent = note;
+    }
 
     /* Reveal gate: figures update live, but the answer figures are masked
        until the visitor leaves their details (persisted per browser). */
@@ -338,6 +552,10 @@
       var tier2 = tierFigures(type.tier2, price);
       var valid = price > 0;
 
+      var purchaseCosts = num("stampDuty") + num("valuationCost") + num("legalCost") + num("buildingInspection") + num("otherCost");
+      if (major.available) major.cash = major.deposit + purchaseCosts;
+      if (tier2.available) tier2.cash = tier2.deposit + purchaseCosts;
+
       var rentalCover = null;
       if (type.rentalCover && tier2.available) {
         var rental = num("btrRental");
@@ -353,7 +571,7 @@
         }
       }
 
-      return { typeKey: typeKey, type: type, price: price, major: major, tier2: tier2, valid: valid, rentalCover: rentalCover };
+      return { typeKey: typeKey, type: type, price: price, major: major, tier2: tier2, valid: valid, purchaseCosts: purchaseCosts, rentalCover: rentalCover };
     }
 
     /* ---- render -------------------------------------------------------- */
@@ -383,8 +601,11 @@
       }
       put("loanTypeOut", type.label, true);
       put("priceOut", m.valid ? money(m.price) : "—", true);
+      put("purchaseCosts", m.valid ? money(m.purchaseCosts) : "—", true);
       put("majorDeposit", (m.valid && m.major.available) ? pct(m.major.depositPct) + " (" + money(m.major.deposit) + ")" : (m.valid ? "n/a" : "—"));
       put("tier2Deposit", (m.valid && m.tier2.available) ? pct(m.tier2.depositPct) + " (" + money(m.tier2.deposit) + ")" : (m.valid ? "n/a" : "—"));
+      put("majorCash", (m.valid && m.major.available) ? money(m.major.cash) : (m.valid ? "n/a" : "—"));
+      put("tier2Cash", (m.valid && m.tier2.available) ? money(m.tier2.cash) : (m.valid ? "n/a" : "—"));
 
       var body = document.getElementById("calcScheduleBody");
       if (!m.valid) {
@@ -394,6 +615,8 @@
           ["Max lend (loan-to-value ratio)", m.major.available ? pct(m.major.lvr) : "n/a", m.tier2.available ? pct(m.tier2.lvr) : "n/a"],
           ["Min deposit / equity", m.major.available ? pct(m.major.depositPct) : "n/a", m.tier2.available ? pct(m.tier2.depositPct) : "n/a"],
           ["Min deposit / equity, $", m.major.available ? money(m.major.deposit) : "n/a", m.tier2.available ? money(m.tier2.deposit) : "n/a"],
+          ["Purchase costs (est.)", money(m.purchaseCosts), money(m.purchaseCosts)],
+          ["Total cash required", m.major.available ? money(m.major.cash) : "n/a", m.tier2.available ? money(m.tier2.cash) : "n/a"],
           ["Indicative loan amount", m.major.available ? money(m.major.loan) : "n/a", m.tier2.available ? money(m.tier2.loan) : "n/a"],
           ["Indicative rate range", m.major.available ? rateRange(m.major.rate) : "n/a", m.tier2.available ? rateRange(m.tier2.rate) : "n/a"],
           ["What to expect", m.major.note, m.tier2.note]
@@ -422,10 +645,28 @@
     }
 
     inputs.addEventListener("input", render);
-    inputs.addEventListener("change", render);
+    inputs.addEventListener("change", function () { recalcAutofills(); render(); });
+
+    /* Stamp duty estimator wiring */
+    stampDutyEl.addEventListener("focus", function () { stampEst.hidden = false; });
+    stampDutyEl.addEventListener("input", function () {
+      touched.stampDuty = stampDutyEl.value.trim() !== "";
+    });
+    stampState.addEventListener("change", function () {
+      if (stampState.value) stampEst.hidden = false;
+      touched.stampDuty = false;
+      recalcAutofills();
+      render();
+    });
+    stampCommercial.addEventListener("change", function () {
+      touched.stampDuty = false;
+      recalcAutofills();
+      render();
+    });
+    document.getElementById("price").addEventListener("input", recalcAutofills);
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "btrRental"].forEach(function (id) {
+    ["price", "btrRental", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -435,6 +676,7 @@
       });
     });
 
+    recalcAutofills();
     render();
 
     /* ---- PDF --------------------------------------------------------- */
@@ -487,12 +729,14 @@
       section("The deal");
       row("Loan type", m.type.label, true);
       row(m.type.unit, money(m.price), true);
+      row("Purchase costs (est.)", money(m.purchaseCosts));
 
       y += 8;
       section("Major banks");
       if (m.major.available) {
         row("Max lend (LVR)", pct(m.major.lvr));
         row("Min deposit / equity", pct(m.major.depositPct) + "  (" + money(m.major.deposit) + ")", true);
+        row("Total cash required", money(m.major.cash), true);
         row("Indicative loan amount", money(m.major.loan));
         row("Indicative rate range", rateRange(m.major.rate));
         row("What to expect", m.major.note);
@@ -505,6 +749,7 @@
       if (m.tier2.available) {
         row("Max lend (LVR)", pct(m.tier2.lvr));
         row("Min deposit / equity", pct(m.tier2.depositPct) + "  (" + money(m.tier2.deposit) + ")", true);
+        row("Total cash required", money(m.tier2.cash), true);
         row("Indicative loan amount", money(m.tier2.loan));
         row("Indicative rate range", rateRange(m.tier2.rate));
         row("What to expect", m.tier2.note);
@@ -535,12 +780,13 @@
         (pn ? "Project: " + pn : null),
         "Loan type: " + m.type.label,
         m.type.unit + ": " + money(m.price),
+        "Purchase costs (est.): " + money(m.purchaseCosts),
         "----",
         "Major banks: " + (m.major.available
-          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate)
+          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), total cash " + money(m.major.cash) + ", loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate)
           : m.major.note),
         "Tier 2 / non-bank: " + (m.tier2.available
-          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate)
+          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), total cash " + money(m.tier2.cash) + ", loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate)
           : m.tier2.note)
       ];
       if (m.rentalCover) {
