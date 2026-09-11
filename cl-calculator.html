@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Commercial Lending Calculator | Project Carter</title>
+  <meta name="description" content="Work out the deposit or equity position for commercial lending: owner-occupied, investment, SMSF, lease doc, build to rent and build to sell, compared across major banks and tier 2 / non-bank lenders. Take away a one-page PDF. A guide only, not financial or credit advice." />
+  <meta name="theme-color" content="#0c1016" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Commercial Lending Calculator | Project Carter" />
+  <meta property="og:description" content="Deposit and equity position for commercial lending by loan type, compared across major banks and tier 2 / non-bank lenders." />
+  <meta property="og:image" content="assets/og-image.svg" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-pc-calc="cl">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER (shared) ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <div class="nav-dropdown" id="calcDropdown">
+          <button type="button" class="nav-dropdown-toggle" id="calcDropdownToggle" aria-expanded="false" aria-controls="calcDropdownMenu">Calculators<svg class="nav-caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-dropdown-menu" id="calcDropdownMenu" role="menu">
+            <a href="noi-calculator.html" role="menuitem">Net Operating Income (NOI)</a>
+            <a href="roi-calculator.html" role="menuitem">Return on Equity (ROI)</a>
+            <a href="da-calculator.html" role="menuitem">Development Site (DA)</a>
+            <a href="grv-calculator.html" role="menuitem">Gross Realisation Value (GRV)</a>
+            <a href="pr-calculator.html" role="menuitem">Portfolio Review (PR)</a>
+            <a href="cl-calculator.html" role="menuitem">Commercial Lending (CL)</a>
+          </div>
+        </div>
+      </nav>
+      <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="calc">
+      <div class="wrap">
+        <div class="calc-intro">
+          <p class="kicker">Project Carter</p>
+          <h1>Commercial Lending Calculator</h1>
+          <p>Work out where you stand on deposit or equity for a commercial purchase, before income and serviceability come into it. Pick the loan type that matches your situation and see the minimum deposit banks typically expect, compared across major banks and tier 2 / non-bank lenders. This shows your likely equity position, not a borrowing capacity or credit decision &mdash; that comes later through a registered brokerage.</p>
+        </div>
+
+        <div class="calc-grid">
+          <div class="calc-inputs" id="calcInputs">
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Report</h2>
+              <div class="field">
+                <label for="pcProjectName">Project name or address</label>
+                <input type="text" id="pcProjectName" autocomplete="off" placeholder="e.g. 12 Example Street, Suburb" />
+                <p class="field-hint">Shown on the PDF and used to name the report if you save it to your account.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">The deal</h2>
+
+              <div class="field">
+                <label for="loanType">Loan type</label>
+                <select id="loanType">
+                  <option value="ownerocc">Owner-occupied commercial (business premises)</option>
+                  <option value="investment">Commercial investment (leased to a tenant)</option>
+                  <option value="smsf">SMSF commercial property (incl. business real property rent-back)</option>
+                  <option value="leasedoc">Lease doc / low doc investment</option>
+                  <option value="btr">Build to Rent (BTR)</option>
+                  <option value="bts">Build to sell (development / construction)</option>
+                </select>
+                <p class="field-hint" id="loanTypeHint">Business buying or refinancing the premises it trades from.</p>
+              </div>
+
+              <div class="field">
+                <label for="price" id="priceLabel">Purchase price</label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="2,000,000" /></div>
+                <p class="field-hint" id="priceHint">Use $2,000,000 if you just want to see how the numbers work.</p>
+              </div>
+
+              <div class="field" id="btrRentalField" hidden>
+                <label for="btrRental">Expected gross rental income <span>(per year)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="btrRental" autocomplete="off" placeholder="130,000" /></div>
+                <p class="field-hint">Lenders typically only recognise part of this for debt cover &mdash; see the rental cover check below. Optional.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <dl class="calc-results" id="calcResults" aria-live="polite">
+            <h2>Your deposit / equity position</h2>
+            <div class="result-row is-teaser"><dt>Loan type</dt><dd data-out="loanTypeOut">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt id="priceRowLabel">Purchase price</dt><dd data-out="priceOut">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Min deposit / equity &ndash; major banks</dt><dd data-out="majorDeposit">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Min deposit / equity &ndash; tier 2 / non-bank</dt><dd data-out="tier2Deposit">&mdash;</dd></div>
+
+            <div class="calc-cta">
+              <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full lender comparison and one-page PDF below.</p>
+              <button type="button" class="btn btn-accent btn-block" id="openLead">Download the summary (PDF)</button>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
+            </div>
+          </dl>
+        </div>
+
+        <div class="calc-schedule-wrap">
+          <h2 class="calc-subhead">Major banks vs tier 2 / non-bank</h2>
+          <div class="calc-schedule-scroll">
+            <table class="calc-schedule" id="calcSchedule">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Major banks</th>
+                  <th>Tier 2 / non-bank</th>
+                </tr>
+              </thead>
+              <tbody id="calcScheduleBody">
+                <tr><td colspan="3" class="calc-schedule-empty">Choose a loan type and enter a price to see the comparison.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="calc-note" id="rentalCoverNote" hidden>
+          <p><strong>Rental cover check (BTR)</strong> &mdash; <span id="rentalCoverText"></span></p>
+        </div>
+
+        <!-- Lead-capture modal, opened by the "Download the summary" button.
+             Replace YOUR_FORM_ID with your Formspree id. The submit is sent in
+             the background so the visitor keeps the page and their PDF. -->
+        <div class="modal" id="leadModal" hidden>
+          <div class="modal-backdrop" data-close></div>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+            <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
+            <h2 id="leadModalTitle">Get your summary</h2>
+            <p>The page builds a one-page PDF comparing your minimum deposit across major banks and tier 2 / non-bank lenders. A copy is sent to Project Carter so we can follow up if you'd like.</p>
+
+            <form class="calc-lead-form" id="leadForm"
+                  action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+              <input type="hidden" name="_subject" value="Commercial Lending Calculator request" />
+              <input type="hidden" name="Figures" id="figuresField" value="" />
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
+              <div class="field">
+                <label for="leadName">Name</label>
+                <input type="text" id="leadName" name="Name" autocomplete="name" required />
+              </div>
+              <div class="field">
+                <label for="leadEmail">Email</label>
+                <input type="email" id="leadEmail" name="Email" autocomplete="email" required />
+              </div>
+              <div class="field">
+                <label for="leadPhone">Phone</label>
+                <input type="tel" id="leadPhone" name="Phone" autocomplete="tel" required />
+              </div>
+              <label class="calc-check">
+                <input type="checkbox" id="leadHelp" name="Assessment requested" value="Yes, review these figures and get back to me" />
+                <span>Can you review these figures and talk me through my options?</span>
+              </label>
+              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my summary (PDF)</button>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
+            </form>
+
+            <div class="calc-done" id="calcDone" hidden>
+              <p><strong>Done.</strong> Your PDF has downloaded. If it didn't, <button type="button" class="linklike" id="redownload">download it again</button>. Project Carter has your figures and will be in touch if you asked for a follow-up.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-assumptions">
+          <h2 class="calc-subhead">How the numbers work</h2>
+          <ul>
+            <li><strong>This is a deposit / equity guide, not a borrowing capacity or credit assessment.</strong> It shows the minimum deposit or equity a lender in each tier typically expects for the loan type you pick, given the price or total development cost you enter. What you can actually borrow depends on income, serviceability, credit history and the specific security &mdash; that assessment happens with a registered brokerage.</li>
+            <li><strong>Major banks</strong> are the big four and other large deposit-taking banks. They generally offer the sharpest rates for the lowest-risk, most straightforward deals, and are the most conservative on leverage and documentation.</li>
+            <li><strong>Tier 2 / non-bank lenders</strong> covers second-tier banks, credit unions, private and specialist commercial lenders. They typically lend at a higher loan-to-value ratio (a smaller deposit) and are more flexible on documentation and credit, for a higher interest rate.</li>
+            <li><strong>Owner-occupied commercial</strong> is a business buying or refinancing the premises it trades from. This is the lowest-risk category for lenders and generally attracts the highest leverage and sharpest rates.</li>
+            <li><strong>Commercial investment</strong> is a property leased to a tenant, assessed mainly on the strength of the lease and tenant covenant rather than the owner's own trade.</li>
+            <li><strong>SMSF commercial property</strong> is bought through a limited recourse borrowing arrangement (LRBA) inside a self-managed super fund, including a business buying its own premises back into its members' SMSF (a "rent-back"). Most major banks have stepped back from this market, so it is largely written by specialist SMSF / LRBA lenders.</li>
+            <li><strong>Lease doc / low doc investment</strong> is serviced mainly by the property's own lease rather than the borrower's financials. Lower deposit requirements from the majors generally aren't available; this is tier 2 / non-bank territory.</li>
+            <li><strong>Build to Rent (BTR)</strong> uses the total development cost as the base for lending rather than a purchase price. Lenders only recognise part of the projected rental income toward covering debt costs &mdash; the rental cover check below uses a 75% recognition of gross rent as a rough guide.</li>
+            <li><strong>Build to sell</strong> (development / construction for sale) also lends against total development cost. Major banks typically want a level of qualifying presales in place before funding; tier 2 / non-bank lenders are more likely to fund with less presale cover, priced according to the deposit or equity contributed.</li>
+            <li>All loan-to-value ratios, deposit percentages and rate ranges shown are indicative starting points based on typical market settings as at the time of writing. Every lender, deal and security is different &mdash; treat these as a planning guide, not a quote or approval.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html#about">About</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="noi-calculator.html">NOI Calculator</a>
+        <a href="roi-calculator.html">ROI Calculator</a>
+        <a href="da-calculator.html">DA Calculator</a>
+        <a href="grv-calculator.html">GRV Calculator</a>
+        <a href="pr-calculator.html">PR Calculator</a>
+        <a href="cl-calculator.html">CL Calculator</a>
+        <a href="account.html">Account</a>
+        <a href="enquire.html">Contact</a>
+      </nav>
+    </div>
+    <div class="wrap footer-legal">
+      <p>Privacy Policy &nbsp;·&nbsp; © <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="pc-auth.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var inputs = document.getElementById("calcInputs");
+    var leadForm = document.getElementById("leadForm");
+    var loanTypeEl = document.getElementById("loanType");
+    var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
+
+    function num(id) {
+      var el = document.getElementById(id);
+      if (!el) return 0;
+      var raw = (el.value || "").replace(/[^0-9.]/g, "");
+      var n = parseFloat(raw);
+      return isNaN(n) || n < 0 ? 0 : n;
+    }
+    function money(n) { return money0.format(Math.round(n)); }
+    function pct(n) { return n.toFixed(0) + "%"; }
+    function rateRange(r) { return r ? r[0].toFixed(2) + "% – " + r[1].toFixed(2) + "% p.a." : "—"; }
+
+    /* Reveal gate: figures update live, but the answer figures are masked
+       until the visitor leaves their details (persisted per browser). */
+    var LOCK_KEY = "pc_cl_unlocked";
+    var unlocked = false;
+    try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1"; } catch (e) {}
+    if (window.pcMember) unlocked = true;
+    function mask(str) {
+      var seen = false;
+      return String(str).replace(/\d/g, function (d) {
+        if (seen) return "•";
+        seen = true; return d;
+      });
+    }
+
+    /* ---- loan type rules --------------------------------------------------
+       Indicative loan-to-value ratios and rate bands by lender tier. These are
+       starting points for planning a deposit / equity position, not a quote. */
+    var LOAN_TYPES = {
+      ownerocc: {
+        label: "Owner-occupied commercial",
+        unit: "Purchase price",
+        hint: "Business buying or refinancing the premises it trades from.",
+        major: { lvr: 70, rate: [6.05, 7.50], note: "Full financials expected; up to ~75% LVR possible with a strong trading history and low-risk security." },
+        tier2: { lvr: 75, rate: [7.50, 9.50], note: "Faster, more flexible credit assessment for the extra leverage." }
+      },
+      investment: {
+        label: "Commercial investment (leased)",
+        unit: "Purchase price",
+        hint: "Property leased to a tenant, bought as an investment.",
+        major: { lvr: 65, rate: [7.00, 8.50], note: "Assessed mainly on the strength of the lease and tenant covenant." },
+        tier2: { lvr: 75, rate: [8.00, 10.50], note: "Higher leverage available for strong tenants and longer lease terms." }
+      },
+      smsf: {
+        label: "SMSF commercial property (LRBA)",
+        unit: "Purchase price",
+        hint: "Bought inside a self-managed super fund via a limited recourse borrowing arrangement, including a business rent-back to its own SMSF.",
+        major: { lvr: 65, rate: [7.50, 9.00], note: "Most major banks have exited SMSF lending — limited, case-by-case appetite where offered." },
+        tier2: { lvr: 75, rate: [8.00, 10.50], note: "Specialist SMSF / LRBA lenders are the primary market for this loan type." }
+      },
+      leasedoc: {
+        label: "Lease doc / low doc investment",
+        unit: "Purchase price",
+        hint: "Serviced mainly by the property's own lease, with minimal financials.",
+        major: { lvr: null, rate: null, note: "Majors generally require full financials — not typically written as lease doc." },
+        tier2: { lvr: 65, rate: [8.50, 12.00], note: "Serviced primarily by the lease itself, with minimal financials required." }
+      },
+      btr: {
+        label: "Build to Rent (BTR)",
+        unit: "Total development cost (TDC)",
+        hint: "Lending is based on total development cost, not a purchase price.",
+        major: { lvr: 65, rate: [7.50, 9.00], note: "Deal-by-deal appetite, usually for larger, institutional-grade schemes." },
+        tier2: { lvr: 65, rate: [8.50, 11.00], note: "Rental income (recognised at ~75%) needs to cover debt costs." },
+        rentalCover: 0.75
+      },
+      bts: {
+        label: "Build to sell (development / construction)",
+        unit: "Total development cost (TDC)",
+        hint: "Lending is based on total development cost, not a purchase price.",
+        major: { lvr: 70, rate: [7.50, 9.50], note: "Presales are typically required to support the debt." },
+        tier2: { lvr: 70, rate: [8.50, 12.00], note: "Rate varies with the deposit / equity contributed; presale pressure is usually lower." }
+      }
+    };
+
+    /* ---- core model ------------------------------------------------------ */
+    function tierFigures(tier, price) {
+      if (tier.lvr == null) return { available: false, note: tier.note };
+      var depositPct = 100 - tier.lvr;
+      return {
+        available: true,
+        lvr: tier.lvr,
+        depositPct: depositPct,
+        deposit: price * depositPct / 100,
+        loan: price * tier.lvr / 100,
+        rate: tier.rate,
+        note: tier.note
+      };
+    }
+
+    function model() {
+      var typeKey = loanTypeEl.value;
+      var type = LOAN_TYPES[typeKey] || LOAN_TYPES.ownerocc;
+      var price = num("price");
+      var major = tierFigures(type.major, price);
+      var tier2 = tierFigures(type.tier2, price);
+      var valid = price > 0;
+
+      var rentalCover = null;
+      if (type.rentalCover && tier2.available) {
+        var rental = num("btrRental");
+        if (rental > 0) {
+          var midRate = (type.tier2.rate[0] + type.tier2.rate[1]) / 2;
+          var recognised = rental * type.rentalCover;
+          var debtCost = tier2.loan * midRate / 100;
+          rentalCover = {
+            rental: rental, recognisedPct: type.rentalCover, recognised: recognised,
+            rate: midRate, debtCost: debtCost, ratio: debtCost > 0 ? recognised / debtCost : null,
+            covers: recognised >= debtCost
+          };
+        }
+      }
+
+      return { typeKey: typeKey, type: type, price: price, major: major, tier2: tier2, valid: valid, rentalCover: rentalCover };
+    }
+
+    /* ---- render -------------------------------------------------------- */
+    function setOut(key, val) {
+      var el = document.querySelector('[data-out="' + key + '"]');
+      if (el) el.textContent = val;
+    }
+
+    function tierCellText(t) {
+      return t.available ? pct(t.depositPct) + "  (" + money(t.deposit) + ")" : "n/a";
+    }
+
+    function render() {
+      var m = model();
+      var type = m.type;
+
+      document.getElementById("loanTypeHint").textContent = type.hint;
+      document.getElementById("priceLabel").textContent = type.unit;
+      document.getElementById("priceRowLabel").textContent = type.unit;
+      document.getElementById("priceHint").textContent = type.unit === "Purchase price"
+        ? "Use $2,000,000 if you just want to see how the numbers work."
+        : "Total development cost, not just the land or purchase price. Use $2,000,000 if you just want to see how the numbers work.";
+      document.getElementById("btrRentalField").hidden = m.typeKey !== "btr";
+
+      function put(key, str, teaser) {
+        setOut(key, (unlocked || teaser) ? str : mask(str));
+      }
+      put("loanTypeOut", type.label, true);
+      put("priceOut", m.valid ? money(m.price) : "—", true);
+      put("majorDeposit", (m.valid && m.major.available) ? pct(m.major.depositPct) + " (" + money(m.major.deposit) + ")" : (m.valid ? "n/a" : "—"));
+      put("tier2Deposit", (m.valid && m.tier2.available) ? pct(m.tier2.depositPct) + " (" + money(m.tier2.deposit) + ")" : (m.valid ? "n/a" : "—"));
+
+      var body = document.getElementById("calcScheduleBody");
+      if (!m.valid) {
+        body.innerHTML = '<tr><td colspan="3" class="calc-schedule-empty">Choose a loan type and enter a price to see the comparison.</td></tr>';
+      } else {
+        var rows = [
+          ["Max lend (loan-to-value ratio)", m.major.available ? pct(m.major.lvr) : "n/a", m.tier2.available ? pct(m.tier2.lvr) : "n/a"],
+          ["Min deposit / equity", m.major.available ? pct(m.major.depositPct) : "n/a", m.tier2.available ? pct(m.tier2.depositPct) : "n/a"],
+          ["Min deposit / equity, $", m.major.available ? money(m.major.deposit) : "n/a", m.tier2.available ? money(m.tier2.deposit) : "n/a"],
+          ["Indicative loan amount", m.major.available ? money(m.major.loan) : "n/a", m.tier2.available ? money(m.tier2.loan) : "n/a"],
+          ["Indicative rate range", m.major.available ? rateRange(m.major.rate) : "n/a", m.tier2.available ? rateRange(m.tier2.rate) : "n/a"],
+          ["What to expect", m.major.note, m.tier2.note]
+        ];
+        var html = "";
+        rows.forEach(function (r) {
+          html += "<tr><td>" + r[0] + "</td>";
+          html += "<td>" + (unlocked ? r[1] : mask(r[1])) + "</td>";
+          html += "<td>" + (unlocked ? r[2] : mask(r[2])) + "</td></tr>";
+        });
+        body.innerHTML = html;
+      }
+
+      var noteEl = document.getElementById("rentalCoverNote");
+      var noteText = document.getElementById("rentalCoverText");
+      if (m.rentalCover) {
+        noteEl.hidden = false;
+        if (unlocked) {
+          noteText.textContent = "Recognised rental income of " + money(m.rentalCover.recognised) + " (" + (m.rentalCover.recognisedPct * 100).toFixed(0) + "% of " + money(m.rentalCover.rental) + ") against an indicative interest-only cost of " + money(m.rentalCover.debtCost) + " on the tier 2 loan amount at ~" + m.rentalCover.rate.toFixed(2) + "% p.a. " + (m.rentalCover.covers ? "Recognised income covers this debt cost" : "Recognised income falls short of this debt cost") + " (cover ratio " + (m.rentalCover.ratio != null ? m.rentalCover.ratio.toFixed(2) + "x" : "n/a") + "). Indicative only — actual serviceability is assessed by the lender.";
+        } else {
+          noteText.textContent = "Unlock the full comparison below to see the rental cover check for this scenario.";
+        }
+      } else {
+        noteEl.hidden = true;
+      }
+    }
+
+    inputs.addEventListener("input", render);
+    inputs.addEventListener("change", render);
+
+    /* Tidy money fields with thousands separators on blur */
+    ["price", "btrRental"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("blur", function () {
+        var raw = (el.value || "").replace(/[^0-9.]/g, "");
+        var n = num(id);
+        el.value = n > 0 ? n.toLocaleString("en-AU") : (parseFloat(raw) === 0 ? "0" : "");
+      });
+    });
+
+    render();
+
+    /* ---- PDF --------------------------------------------------------- */
+    var lastDoc = null;
+
+    function makePDF() {
+      if (!window.jspdf || !window.jspdf.jsPDF) return null;
+      var m = model();
+      var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+      var w = doc.internal.pageSize.getWidth();
+      var L = 48;
+      var y = 56;
+
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.text("PROJECT CARTER", L, y);
+      doc.setFont("helvetica", "normal");
+      doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
+      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+
+      doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+      doc.text("Commercial Lending", L, y + 44);
+
+      var name = document.getElementById("leadName").value.trim();
+      var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
+      doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
+      var pcProject = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
+      if (pcProject) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(40);
+        doc.text(pcProject, L, y + 78);
+        y += 17;
+      }
+
+      y += 92;
+      function section(title) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
+        doc.text(title, L, y); y += 7;
+        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 17;
+      }
+      function row(k, v, strong) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
+        doc.text(k, L, y);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        var lines = doc.splitTextToSize(String(v), w - 2 * L - 190);
+        doc.text(lines, w - L, y, { align: "right" });
+        y += 16 * lines.length + 2;
+      }
+
+      section("The deal");
+      row("Loan type", m.type.label, true);
+      row(m.type.unit, money(m.price), true);
+
+      y += 8;
+      section("Major banks");
+      if (m.major.available) {
+        row("Max lend (LVR)", pct(m.major.lvr));
+        row("Min deposit / equity", pct(m.major.depositPct) + "  (" + money(m.major.deposit) + ")", true);
+        row("Indicative loan amount", money(m.major.loan));
+        row("Indicative rate range", rateRange(m.major.rate));
+        row("What to expect", m.major.note);
+      } else {
+        row("Availability", m.major.note);
+      }
+
+      y += 8;
+      section("Tier 2 / non-bank");
+      if (m.tier2.available) {
+        row("Max lend (LVR)", pct(m.tier2.lvr));
+        row("Min deposit / equity", pct(m.tier2.depositPct) + "  (" + money(m.tier2.deposit) + ")", true);
+        row("Indicative loan amount", money(m.tier2.loan));
+        row("Indicative rate range", rateRange(m.tier2.rate));
+        row("What to expect", m.tier2.note);
+      } else {
+        row("Availability", m.tier2.note);
+      }
+
+      if (m.rentalCover) {
+        y += 8;
+        section("Rental cover check (BTR)");
+        row("Expected gross rental income", money(m.rentalCover.rental));
+        row("Recognised for debt cover (~" + (m.rentalCover.recognisedPct * 100).toFixed(0) + "%)", money(m.rentalCover.recognised));
+        row("Indicative interest-only cost (~" + m.rentalCover.rate.toFixed(2) + "% p.a.)", money(m.rentalCover.debtCost));
+        row("Cover ratio", (m.rentalCover.ratio != null ? m.rentalCover.ratio.toFixed(2) + "x" : "n/a") + "  (" + (m.rentalCover.covers ? "covers debt cost" : "falls short") + ")", true);
+      }
+
+      y += 14;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+      var disc = "This is a deposit / equity planning guide only, not a borrowing capacity estimate, credit decision or loan offer. Loan-to-value ratios, deposit percentages and rate ranges are indicative starting points based on typical market settings and the loan type selected, and will vary by lender, deal and security. The rental cover check for build to rent is a rough guide only and does not reflect a lender's actual serviceability assessment. Speak to Project Carter and a registered brokerage before acting.";
+      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      return doc;
+    }
+
+    function figuresSummary(m) {
+      var pn = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
+      var lines = [
+        (pn ? "Project: " + pn : null),
+        "Loan type: " + m.type.label,
+        m.type.unit + ": " + money(m.price),
+        "----",
+        "Major banks: " + (m.major.available
+          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate)
+          : m.major.note),
+        "Tier 2 / non-bank: " + (m.tier2.available
+          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate)
+          : m.tier2.note)
+      ];
+      if (m.rentalCover) {
+        lines.push("----");
+        lines.push("BTR rental cover: recognised " + money(m.rentalCover.recognised) + " vs indicative debt cost " + money(m.rentalCover.debtCost) + " (" + (m.rentalCover.ratio != null ? m.rentalCover.ratio.toFixed(2) + "x" : "n/a") + ")");
+      }
+      return lines.filter(Boolean).join("\n");
+    }
+
+    function saveDoc() {
+      if (!lastDoc) lastDoc = makePDF();
+      if (lastDoc) lastDoc.save("project-carter-commercial-lending-calculator.pdf");
+    }
+
+    leadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = document.getElementById("leadName");
+      var email = document.getElementById("leadEmail");
+      var phone = document.getElementById("leadPhone");
+      if (!name.value.trim() || !phone.value.trim() || !email.value.trim() || !email.checkValidity()) {
+        if (leadForm.reportValidity) leadForm.reportValidity();
+        return;
+      }
+
+      lastDoc = makePDF();
+      saveDoc();
+
+      document.getElementById("figuresField").value = figuresSummary(model());
+      var help = document.getElementById("leadHelp");
+      var subj = leadForm.querySelector('input[name="_subject"]');
+      if (subj) subj.value = (help && help.checked)
+        ? "Commercial Lending Calculator - assessment requested"
+        : "Commercial Lending Calculator request";
+      fetch(leadForm.action, {
+        method: "POST",
+        body: new FormData(leadForm),
+        headers: { "Accept": "application/json" }
+      })["catch"](function () { /* the visitor still has their PDF */ })
+        .then(function () {
+          unlock();
+          leadForm.hidden = true;
+          var done = document.getElementById("calcDone");
+          done.hidden = false;
+          done.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+
+    document.getElementById("redownload").addEventListener("click", saveDoc);
+
+    /* ---- lead-capture modal --------------------------------------------- */
+    var openLead = document.getElementById("openLead");
+    var leadModal = document.getElementById("leadModal");
+
+    function onModalKey(e) { if (e.key === "Escape") closeModal(); }
+
+    function openModal() {
+      leadModal.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      document.addEventListener("keydown", onModalKey);
+      var first = document.getElementById("leadName");
+      if (first) first.focus();
+    }
+    function closeModal() {
+      leadModal.hidden = true;
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("keydown", onModalKey);
+      openLead.focus();
+    }
+
+    leadModal.addEventListener("click", function (e) {
+      if (e.target.hasAttribute("data-close")) closeModal();
+    });
+
+    /* ---- reveal gate wiring ------------------------------------------------ */
+    var resultsEl = document.querySelector(".calc-results");
+    var scheduleWrap = document.querySelector(".calc-schedule-wrap");
+    var lockNote = document.getElementById("lockNote");
+
+    function applyLock() {
+      resultsEl.classList.toggle("is-locked", !unlocked);
+      scheduleWrap.classList.toggle("is-locked", !unlocked);
+      if (lockNote) lockNote.hidden = unlocked;
+      openLead.textContent = unlocked ? "Download the PDF again" : "Download lending summary (PDF)";
+      render();
+    }
+    function unlock() {
+      if (unlocked) return;
+      unlocked = true;
+      try { window.localStorage.setItem(LOCK_KEY, "1"); } catch (e) {}
+      applyLock();
+    }
+    applyLock();
+
+    document.addEventListener("pc-auth-change", function (ev) {
+      if (ev && ev.detail && ev.detail.isMember && !unlocked) { unlocked = true; applyLock(); }
+    });
+
+    openLead.addEventListener("click", function () {
+      if (unlocked) { lastDoc = makePDF(); saveDoc(); }
+      else openModal();
+    });
+    resultsEl.addEventListener("click", function (e) {
+      if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
+    });
+    scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+  })();
+  </script>
+  <script src="pc-report.js"></script>
+</body>
+</html>

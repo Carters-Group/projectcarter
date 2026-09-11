@@ -10,7 +10,7 @@
      <script src="pc-auth.js"></script>
      <script src="pc-report.js"></script>
 
-   The page must carry <body data-pc-calc="noi|roi|da|grv|pr">.
+   The page must carry <body data-pc-calc="noi|roi|da|grv|pr|cl">.
 
    What this does, entirely from the DOM (no reach into the calculator IIFE):
      - wires the "Project name or address" field (#pcProjectName, or #address
@@ -26,7 +26,7 @@
   var CALC = (document.body.getAttribute("data-pc-calc") || "").toLowerCase();
   if (!CALC) return;
 
-  var CALC_LABEL = { noi: "NOI", roi: "ROI", da: "DA", grv: "GRV", pr: "PR" }[CALC] || CALC.toUpperCase();
+  var CALC_LABEL = { noi: "NOI", roi: "ROI", da: "DA", grv: "GRV", pr: "PR", cl: "CL" }[CALC] || CALC.toUpperCase();
   var inputsRoot = document.getElementById("calcInputs");
   if (!inputsRoot) return;
 
