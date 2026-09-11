@@ -27,10 +27,10 @@ grv-calculator.html             "GRV Calculator" — development feasibility fro
 pr-calculator.html              "Portfolio Review (PR)" — a multi-property, single-year after-tax cash-flow / gearing review, ported from the client's spreadsheet. A portfolio-level marginal tax rate, then repeatable **property cards** (`#propertyCards`, "Add another property", up to 15, at least 1): each has a name, value, LVR % (loan + equity shown), interest rate (interest-only), rent $/week (gross rent + gross yield shown), a "Yearly running costs" block (property management % of rent, letting fee $, council rates, body corporate / strata, land tax $, insurance, maintenance $/week, vacancy allowance in weeks × the weekly rent, annual loan fees, sundry), an optional depreciation block (building at cost × rate, default 2.5%; fittings at cost × rate, default 10%) and an optional "this property is being purchased" toggle that reveals one-off acquisition costs (stamp duty with the shared state estimator — `STAMP`/`REGO`/`stampEstimate`/`regoFees`, per-card state select + commercial tick — plus conveyancing, borrowing costs, an "Other" one-off lump sum for anything else — BA/planning fees, building or pest reports, a QS report, other specialist consultants — and improvements). Each card shows its own net yield, pre-tax cash flow, annual & weekly surplus/(deficit) and the weekly rent needed for neutral gearing (`neutralWk`, solved holding all else equal). Per property: net rent = gross rent − expenses; pre-tax cash flow = net rent − interest; then, matching the spreadsheet's two steps, tax benefit/(cost) before depreciation = −(pre-tax cash flow) × rate (a loss is refunded, a profit taxed) and the depreciation tax credit = depreciation × rate; annual surplus = pre-tax cash flow + that tax benefit + the depreciation credit; weekly = ÷ 52. The `#calcResults` panel sums every property: combined value / debt / equity / portfolio LVR (teaser rows, always shown), blended gross & net yields, combined operating expenses, net rental income, loan interest, pre-tax cash flow, tax benefit, depreciation credit, **combined annual and weekly surplus/(deficit)** (the headline), result vs portfolio value, shortfall to neutral gearing $/week, and — only when a card has acquisition costs — total acquisition costs and cash required to complete. A "Property by property" table under the panel mirrors the schedule on the other pages with a Portfolio total row. Same reveal gate (`pc_pr_unlocked`) and Formspree ping as the other calculators; the one-page jsPDF is laid out as a **plain-English P&L** (Portfolio at a glance, then a Yearly cash flow block: rent collected less each running-cost line that has a value, a subtotal rule to net rent, less interest to cash flow before tax, plus the tax refund and depreciation saving, then a ruled `AFTER-TAX CASH FLOW (PER YEAR)` bold line, the weekly figure, % of value and break-even rent; an "If buying" section only when a card has purchase costs; then the per-property table and disclaimer), with an `ensure()` page-break guard. The **"Portfolio name"** field prefills from the signed-in account (`<surname> Family`, or the full name / email local-part) while it is still empty and untouched and no `?report=` is being opened. Input placeholders are all `0` except the genuine conventions kept as real values (depreciation 2.5% / 10%, tax rate 37%); property management is a grey `4.4` placeholder hint only, not an auto-filled value, since PM fees vary too much to default. A **net lease** auto-ticks the usual recoverable outgoings but never auto-ticks **land tax** — many retail leases can't pass land tax through even on a net lease, so that tick is always left to the user. The **post-Budget negative-gearing tick is residential-only** (hidden on commercial cards and forced off in the model for commercial), since the 2026 Budget change didn't touch commercial negative gearing. Tax rate is capped at 99% to keep the break-even-rent solve finite. The `$` / `%` input affixes were tightened site-wide (`styles.css` `padding-left: 22px`; the `--pct-x` JS offset `+ 3` → `+ 1` in all five calculators).
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
-account.html                    sign in / sign up (magic link) + "My saved reports" dashboard
-pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/delete report), auth status bar, subscription gate (canSave, always true for now)
+account.html                    sign in / sign up (magic link) + a "Your portfolio" overview card + a "Recently updated" activity feed + "My saved reports" dashboard + an editable name/phone details form
+pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/rename/delete/duplicate report, get/set/clear master report, update profile), auth status bar, subscription gate (canSave, always true for now)
 pc-report.js                    shared per-calculator wiring - "Project name or address" field, "Save report" button, ?report=<id> rehydration
-supabase-schema.sql             one-time SQL for the Supabase project: profiles + reports tables, row-level security, subscription_status column
+supabase-schema.sql             one-time SQL for the Supabase project: profiles + reports tables, row-level security, subscription_status column, one-master-portfolio-per-user constraint
 styles.css                      design system + layout (home, project pages, landing, calculator, account)
 script.js                       header scroll state, mobile nav, scroll reveals
 assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
@@ -123,7 +123,29 @@ behind the Formspree lead modal.
 
 Sign-in is **passwordless magic link**. Sign-up collects name + phone + email
 and still pings Formspree once, so every new account also lands in your inbox as
-a lead.
+a lead. Signed-in visitors can update their name and phone any time from a
+"Your details" form on `account.html`.
+
+### Master portfolio
+
+One saved **Portfolio Review (PR)** report per account can be flagged as the
+visitor's **master portfolio** (`reports.is_master`, enforced to at most one per
+user by a partial unique index in `supabase-schema.sql`). `account.html` shows
+it as a headline "Your portfolio" card above the report list — property count,
+combined value/equity/debt, portfolio LVR and after-tax cash flow per year/week,
+all read straight from that report's `summary` snapshot — with a link back into
+the PR calculator and a control to pick a different saved PR report as master.
+A "Make this my portfolio" action sits next to every saved PR report in the
+list below for the same purpose. This is the one designated **starting point**:
+saving or updating any other calculator's report (or a non-master PR report)
+never touches it — the only way it changes is opening it directly, editing it,
+and pressing Save, or explicitly designating a different report as master.
+Other calculators can still **pull a figure** from it (see below), which copies
+a number across once rather than linking to it live. `account.html` also lists
+the 5 most recently updated reports across every calculator ("Recently
+updated"), and every saved report can be **duplicated** ("Save as new" via the
+report list's Duplicate action) to branch a scenario without touching the
+original.
 
 Everything is **free**. `profiles.subscription_status` (defaults to `'free'`)
 and the `pc_can_save()` SQL function are the hooks for a future paywall - today

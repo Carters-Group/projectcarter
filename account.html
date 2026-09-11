@@ -29,6 +29,7 @@
         <a href="index.html#projects">Projects</a>
         <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
+        <a href="account.html">Login</a>
         <a href="enquire.html" class="btn btn-accent nav-cta-mobile">Contact</a>
       </nav>
       <a href="enquire.html" class="btn btn-accent header-cta">Contact</a>
@@ -89,6 +90,38 @@
             </div>
           </div>
 
+          <div class="card acct-card" id="acctPortfolioCard">
+            <h2 class="calc-subhead">Your portfolio</h2>
+            <p class="acct-msg" id="portfolioMsg" hidden></p>
+
+            <div id="portfolioSet" hidden>
+              <p class="acct-eyebrow" id="portfolioEyebrow">Master portfolio</p>
+              <p class="acct-email" id="portfolioTitle">&mdash;</p>
+              <div class="acct-overview" id="portfolioStats"></div>
+              <p class="acct-report__date" id="portfolioUpdated"></p>
+              <p class="acct-calc-links">
+                <a id="portfolioOpenLink" href="pr-calculator.html">Open in Portfolio Review</a>
+                &nbsp;&middot;&nbsp;
+                <button type="button" class="linklike" id="portfolioChangeBtn">Choose a different report</button>
+              </p>
+            </div>
+
+            <div id="portfolioUnset" hidden>
+              <p class="acct-empty" id="portfolioUnsetMsg">
+                Set one of your Portfolio Review reports as your master portfolio and its combined figures
+                will show here &mdash; other calculators can pull a figure from it, but saving them never
+                changes it back.
+              </p>
+              <div id="portfolioChooser"></div>
+            </div>
+          </div>
+
+          <div class="card acct-card" id="acctActivityCard">
+            <h2 class="calc-subhead">Recently updated</h2>
+            <div id="activityList" class="acct-reports"></div>
+            <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
+          </div>
+
           <div class="card acct-card">
             <h2 class="calc-subhead">My saved reports</h2>
             <p class="acct-msg" id="reportsMsg" hidden></p>
@@ -101,8 +134,26 @@
               <a href="noi-calculator.html">NOI</a> ·
               <a href="roi-calculator.html">ROI</a> ·
               <a href="da-calculator.html">DA</a> ·
-              <a href="grv-calculator.html">GRV</a>
+              <a href="grv-calculator.html">GRV</a> ·
+              <a href="pr-calculator.html">PR</a> ·
+              <a href="cl-calculator.html">CL</a>
             </p>
+          </div>
+
+          <div class="card acct-card">
+            <h2 class="calc-subhead">Your details</h2>
+            <form id="profileForm">
+              <div class="field">
+                <label for="profName">Name</label>
+                <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
+              </div>
+              <div class="field">
+                <label for="profPhone">Phone</label>
+                <input type="tel" id="profPhone" autocomplete="tel" placeholder="0400 000 000" />
+              </div>
+              <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
+            </form>
+            <p class="acct-msg" id="profMsg" hidden></p>
           </div>
         </div>
       </div>
@@ -135,11 +186,16 @@
   (function () {
     "use strict";
 
-    var CALC_NAMES = { noi: "NOI Calculator", roi: "ROI Calculator", da: "DA Calculator", grv: "GRV Calculator" };
+    var CALC_NAMES = {
+      noi: "NOI Calculator", roi: "ROI Calculator", da: "DA Calculator",
+      grv: "GRV Calculator", pr: "Portfolio Review", cl: "CL Calculator"
+    };
     var CALC_PAGES = {
       noi: "noi-calculator.html", roi: "roi-calculator.html",
-      da: "da-calculator.html", grv: "grv-calculator.html"
+      da: "da-calculator.html", grv: "grv-calculator.html",
+      pr: "pr-calculator.html", cl: "cl-calculator.html"
     };
+    var CALC_ORDER = ["noi", "roi", "da", "grv", "pr", "cl"];
 
     var elUnconfigured = document.getElementById("acctUnconfigured");
     var elSignedOut    = document.getElementById("acctSignedOut");
@@ -158,6 +214,20 @@
       try {
         return new Date(s).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
       } catch (e) { return ""; }
+    }
+
+    function fmtMoney(n) {
+      if (n == null || !isFinite(n)) return "—";
+      return "$" + Math.round(n).toLocaleString("en-AU");
+    }
+    function fmtSignedMoney(n) {
+      if (n == null || !isFinite(n)) return "—";
+      var v = Math.round(n);
+      return (v < 0 ? "-$" : "$") + Math.abs(v).toLocaleString("en-AU");
+    }
+    function fmtPct(n) {
+      if (n == null || !isFinite(n)) return "—";
+      return n.toFixed(1) + "%";
     }
 
     function setMsg(node, text, kind) {
@@ -181,7 +251,7 @@
       var groups = {};
       rows.forEach(function (r) { (groups[r.calculator] = groups[r.calculator] || []).push(r); });
 
-      ["noi", "roi", "da", "grv"].forEach(function (calc) {
+      CALC_ORDER.forEach(function (calc) {
         if (!groups[calc]) return;
         var h = document.createElement("h3");
         h.className = "acct-group-head";
@@ -192,12 +262,18 @@
           var row = document.createElement("div");
           row.className = "acct-report";
           row.setAttribute("data-id", r.id);
+          var masterBtn = calc === "pr"
+            ? '<button type="button" class="linklike" data-act="master">' + (r.is_master ? "Your portfolio ★" : "Make this my portfolio") + '</button>'
+            : "";
           row.innerHTML =
             '<div class="acct-report__main">' +
               '<a class="acct-report__title" href="' + CALC_PAGES[calc] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
+              (r.is_master ? '<span class="acct-badge">Master portfolio</span>' : "") +
               '<span class="acct-report__date">Updated ' + fmtDate(r.updated_at) + '</span>' +
             '</div>' +
             '<div class="acct-report__actions">' +
+              masterBtn +
+              '<button type="button" class="linklike" data-act="duplicate">Duplicate</button>' +
               '<button type="button" class="linklike" data-act="rename">Rename</button>' +
               '<button type="button" class="linklike" data-act="delete">Delete</button>' +
             '</div>';
@@ -223,9 +299,140 @@
             });
           });
 
+          row.querySelector('[data-act="duplicate"]').addEventListener("click", function () {
+            setMsg(reportsMsg, "Duplicating…");
+            window.pcAuth.saveReport({
+              calculator: calc,
+              title: "Copy of " + (r.title || "Untitled report"),
+              inputs: r.inputs || {},
+              summary: r.summary || {}
+            }).then(function (res) {
+              if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
+              setMsg(reportsMsg, "");
+              load();
+            });
+          });
+
+          var masterEl = row.querySelector('[data-act="master"]');
+          if (masterEl) {
+            masterEl.addEventListener("click", function () {
+              if (r.is_master) return;
+              setMsg(reportsMsg, "Setting your portfolio…");
+              window.pcAuth.setMasterReport(r.id).then(function (res) {
+                if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
+                setMsg(reportsMsg, "");
+                load();
+              });
+            });
+          }
+
           reportsList.appendChild(row);
         });
       });
+    }
+
+    function renderActivity(rows) {
+      var list = document.getElementById("activityList");
+      var empty = document.getElementById("activityEmpty");
+      list.innerHTML = "";
+      if (!rows || !rows.length) { show(empty); return; }
+      hide(empty);
+      rows.slice(0, 5).forEach(function (r) {
+        var row = document.createElement("div");
+        row.className = "acct-report";
+        row.innerHTML =
+          '<div class="acct-report__main">' +
+            '<a class="acct-report__title" href="' + CALC_PAGES[r.calculator] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
+            '<span class="acct-report__date">' + (CALC_NAMES[r.calculator] || r.calculator) + ' &middot; updated ' + fmtDate(r.updated_at) + '</span>' +
+          '</div>';
+        row.querySelector(".acct-report__title").textContent = r.title || "Untitled report";
+        list.appendChild(row);
+      });
+    }
+
+    function renderPortfolio(rows) {
+      var setEl = document.getElementById("portfolioSet");
+      var unsetEl = document.getElementById("portfolioUnset");
+      var master = (rows || []).filter(function (r) { return r.calculator === "pr" && r.is_master; })[0];
+
+      if (master) {
+        show(setEl); hide(unsetEl);
+        document.getElementById("portfolioTitle").textContent = master.title || "Untitled report";
+        document.getElementById("portfolioUpdated").textContent = "Updated " + fmtDate(master.updated_at);
+        document.getElementById("portfolioOpenLink").href = "pr-calculator.html?report=" + encodeURIComponent(master.id);
+
+        var s = master.summary || {};
+        var stats = [
+          ["Properties", s.propertyCount != null ? String(s.propertyCount) : "—"],
+          ["Combined value", fmtMoney(s.portfolioValue)],
+          ["Combined equity", fmtMoney(s.portfolioEquity)],
+          ["Combined debt", fmtMoney(s.portfolioDebt)],
+          ["Portfolio LVR", fmtPct(s.portfolioLvr)],
+          ["After-tax cash flow / yr", fmtSignedMoney(s.annualSurplus)],
+          ["After-tax cash flow / wk", fmtSignedMoney(s.weeklySurplus)]
+        ];
+        var statsEl = document.getElementById("portfolioStats");
+        statsEl.innerHTML = "";
+        stats.forEach(function (pair) {
+          var d = document.createElement("div");
+          d.className = "acct-overview__stat";
+          d.innerHTML = '<dt>' + pair[0] + '</dt><dd>' + pair[1] + '</dd>';
+          statsEl.appendChild(d);
+        });
+
+        document.getElementById("portfolioChangeBtn").onclick = function () { renderPortfolioChooser(rows, true); };
+      } else {
+        hide(setEl); show(unsetEl);
+        renderPortfolioChooser(rows, false);
+      }
+    }
+
+    function renderPortfolioChooser(rows, isChange) {
+      var chooser = document.getElementById("portfolioChooser");
+      var unsetMsg = document.getElementById("portfolioUnsetMsg");
+      var prReports = (rows || []).filter(function (r) { return r.calculator === "pr"; });
+
+      if (isChange) { show(document.getElementById("portfolioUnset")); hide(document.getElementById("portfolioSet")); }
+
+      if (!prReports.length) {
+        unsetMsg.innerHTML = 'Start a <a href="pr-calculator.html">Portfolio Review</a> and save it to build your portfolio overview here.';
+        chooser.innerHTML = "";
+        return;
+      }
+      unsetMsg.textContent = "Choose which saved Portfolio Review is your master portfolio:";
+      chooser.innerHTML = "";
+      var sel = document.createElement("select");
+      sel.className = "pc-pull__select";
+      var opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = "Choose a saved Portfolio Review…";
+      sel.appendChild(opt0);
+      prReports.forEach(function (r) {
+        var o = document.createElement("option");
+        o.value = r.id;
+        o.textContent = (r.title || "Untitled report") + " (updated " + fmtDate(r.updated_at) + ")";
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", function () {
+        if (!sel.value) return;
+        setMsg(document.getElementById("portfolioMsg"), "Setting your portfolio…");
+        window.pcAuth.setMasterReport(sel.value).then(function (res) {
+          if (res.error) { setMsg(document.getElementById("portfolioMsg"), res.error.message, "error"); return; }
+          setMsg(document.getElementById("portfolioMsg"), "");
+          load();
+        });
+      });
+      chooser.appendChild(sel);
+
+      if (isChange) {
+        var cancel = document.createElement("button");
+        cancel.type = "button";
+        cancel.className = "linklike";
+        cancel.textContent = "Cancel";
+        cancel.style.marginLeft = "12px";
+        cancel.addEventListener("click", function () { load(); });
+        chooser.appendChild(cancel);
+      }
     }
 
     var CALC_PAGE_SET = { "noi-calculator.html":1, "roi-calculator.html":1, "da-calculator.html":1, "grv-calculator.html":1 };
@@ -256,15 +463,36 @@
       if (u) {
         hide(elSignedOut); show(elSignedIn);
         document.getElementById("acctWhoEmail").textContent = u.email;
+        document.getElementById("profName").value = u.full_name || "";
+        document.getElementById("profPhone").value = u.phone || "";
         setMsg(reportsMsg, "");
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
           renderReports(res.data);
+          renderActivity(res.data);
+          renderPortfolio(res.data);
         });
       } else {
         show(elSignedOut); hide(elSignedIn);
       }
     }
+
+    var profileForm = document.getElementById("profileForm");
+    var profMsg = document.getElementById("profMsg");
+    profileForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var btn = document.getElementById("profSaveBtn");
+      btn.disabled = true;
+      setMsg(profMsg, "Saving…");
+      window.pcAuth.updateProfile({
+        full_name: document.getElementById("profName").value,
+        phone: document.getElementById("profPhone").value
+      }).then(function (res) {
+        btn.disabled = false;
+        if (res.error) { setMsg(profMsg, res.error.message, "error"); return; }
+        setMsg(profMsg, "Saved.", "ok");
+      });
+    });
 
     magicForm.addEventListener("submit", function (e) {
       e.preventDefault();

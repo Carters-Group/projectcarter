@@ -83,6 +83,18 @@ alter table public.reports
 -- re-running this calculator's model. Added on a table that already exists.
 alter table public.reports add column if not exists summary jsonb not null default '{}'::jsonb;
 
+-- One saved report per user can be flagged as their master portfolio (in
+-- practice a Portfolio Review). account.html reads it to build the
+-- portfolio-overview card; every other calculator only ever reads a
+-- one-time figure out of it (pc-report.js "pull a figure"), it never writes
+-- back. The partial unique index enforces "at most one master per user" at
+-- the database level; the client unsets the old master before setting a new
+-- one (see pcAuth.setMasterReport).
+alter table public.reports add column if not exists is_master boolean not null default false;
+
+create unique index if not exists reports_one_master_per_user
+  on public.reports (user_id) where is_master;
+
 alter table public.reports enable row level security;
 
 drop policy if exists "reports - read own"   on public.reports;

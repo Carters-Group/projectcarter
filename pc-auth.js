@@ -235,6 +235,20 @@
       return loadProfile().then(function (p) { return { data: p, error: p ? null : { message: "No profile" } }; });
     },
 
+    updateProfile: function (fields) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      var row = {};
+      if (fields.full_name !== undefined) row.full_name = (fields.full_name || "").trim().slice(0, 200) || null;
+      if (fields.phone !== undefined) row.phone = (fields.phone || "").trim().slice(0, 40) || null;
+      return client.from("profiles").update(row).eq("id", currentUser.id)
+        .select("id,email,full_name,phone,subscription_status").maybeSingle()
+        .then(function (res) {
+          if (!res.error && res.data) currentProfile = res.data;
+          return { data: res.data, error: res.error };
+        });
+    },
+
     signInWithMagicLink: function (email, opts) {
       if (!CONFIGURED) return Promise.resolve({ error: { message: "Accounts are not set up yet." } });
       opts = opts || {};
@@ -288,7 +302,7 @@
     listReports: function (calculator) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
-      var q = client.from("reports").select("id,calculator,title,inputs,summary,created_at,updated_at")
+      var q = client.from("reports").select("id,calculator,title,inputs,summary,is_master,created_at,updated_at")
         .eq("user_id", currentUser.id).order("updated_at", { ascending: false });
       if (calculator) q = q.eq("calculator", calculator);
       return q.then(function (res) { return { data: res.data || [], error: res.error }; });
@@ -297,9 +311,41 @@
     getReport: function (id) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
-      return client.from("reports").select("id,calculator,title,inputs,summary,created_at,updated_at")
+      return client.from("reports").select("id,calculator,title,inputs,summary,is_master,created_at,updated_at")
         .eq("id", id).eq("user_id", currentUser.id).maybeSingle()
         .then(function (res) { return { data: res.data, error: res.error }; });
+    },
+
+    /* the signed-in visitor's master portfolio (in practice their master
+       Portfolio Review report), or null if none is set yet */
+    getMasterReport: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.from("reports").select("id,calculator,title,inputs,summary,is_master,created_at,updated_at")
+        .eq("user_id", currentUser.id).eq("is_master", true).maybeSingle()
+        .then(function (res) { return { data: res.data, error: res.error }; });
+    },
+
+    /* mark one saved report as the master portfolio, unsetting any previous
+       one first (at most one per account - also enforced in the database) */
+    setMasterReport: function (id) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.from("reports").update({ is_master: false })
+        .eq("user_id", currentUser.id).eq("is_master", true)
+        .then(function () {
+          return client.from("reports").update({ is_master: true })
+            .eq("id", id).eq("user_id", currentUser.id)
+            .then(function (res) { return { error: res.error }; });
+        });
+    },
+
+    clearMasterReport: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.from("reports").update({ is_master: false })
+        .eq("user_id", currentUser.id).eq("is_master", true)
+        .then(function (res) { return { error: res.error }; });
     },
 
     renameReport: function (id, title) {
