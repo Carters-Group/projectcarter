@@ -496,14 +496,14 @@
         unit: "Purchase price",
         hint: "Business buying or refinancing the premises it trades from.",
         major: { lvr: 80, rate: [7.25, 8.00], note: "Provided income comfortably services the debt and liabilities are limited." },
-        tier2: { lvr: 80, rate: [7.50, 9.50], note: "Same standard as the majors — income servicing the debt and limited liabilities." }
+        tier2: { lvr: 80, rate: [7.50, 9.50], note: "Same standard as the majors: income servicing the debt and limited liabilities." }
       },
       investment: {
         label: "Commercial investment (leased)",
         unit: "Purchase price",
         hint: "Property leased to a tenant, bought as an investment.",
-        major: { lvr: 80, rate: [7.25, 8.00], note: "Same standard as owner-occupied — income (incl. the lease) servicing the debt and limited liabilities." },
-        tier2: { lvr: 80, rate: [8.00, 10.50], note: "Same standard as the majors — income servicing the debt and limited liabilities." }
+        major: { lvr: 80, rate: [7.25, 8.00], note: "Same standard as owner-occupied: income (incl. the lease) servicing the debt and limited liabilities." },
+        tier2: { lvr: 80, rate: [8.00, 10.50], note: "Same standard as the majors: income servicing the debt and limited liabilities." }
       },
       smsf: {
         label: "SMSF commercial property (LRBA)",
@@ -649,7 +649,7 @@
       if (m.rentalCover) {
         noteEl.hidden = false;
         if (unlocked) {
-          noteText.textContent = "Recognised rental income of " + money(m.rentalCover.recognised) + " (" + (m.rentalCover.recognisedPct * 100).toFixed(0) + "% of " + money(m.rentalCover.rental) + ") against an indicative interest-only cost of " + money(m.rentalCover.debtCost) + " on the tier 2 loan amount at ~" + m.rentalCover.rate.toFixed(2) + "% p.a. " + (m.rentalCover.covers ? "Recognised income covers this debt cost" : "Recognised income falls short of this debt cost") + " (cover ratio " + (m.rentalCover.ratio != null ? m.rentalCover.ratio.toFixed(2) + "x" : "n/a") + "). Indicative only — actual serviceability is assessed by the lender.";
+          noteText.textContent = "Recognised rental income of " + money(m.rentalCover.recognised) + " (" + (m.rentalCover.recognisedPct * 100).toFixed(0) + "% of " + money(m.rentalCover.rental) + ") against an indicative interest-only cost of " + money(m.rentalCover.debtCost) + " on the tier 2 loan amount at ~" + m.rentalCover.rate.toFixed(2) + "% p.a. " + (m.rentalCover.covers ? "Recognised income covers this debt cost" : "Recognised income falls short of this debt cost") + " (cover ratio " + (m.rentalCover.ratio != null ? m.rentalCover.ratio.toFixed(2) + "x" : "n/a") + "). Indicative only; actual serviceability is assessed by the lender.";
         } else {
           noteText.textContent = "Unlock the full comparison below to see the rental cover check for this scenario.";
         }
