@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141a24"/>
+      <stop offset="1" stop-color="#0c1016"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="rgba(180,205,232,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect width="800" height="600" fill="url(#grid)"/>
+
+  <!-- construction & development feasibility: a crane over a rising building -->
+  <g stroke="#5fa1d0" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none" opacity="0.92">
+    <rect x="330" y="330" width="60" height="120"/>
+    <rect x="400" y="290" width="60" height="160"/>
+    <rect x="470" y="350" width="50" height="100"/>
+    <line x1="310" y1="460" x2="540" y2="460"/>
+    <line x1="330" y1="200" x2="330" y2="460"/>
+    <line x1="330" y1="210" x2="470" y2="230"/>
+    <line x1="330" y1="230" x2="300" y2="235"/>
+    <line x1="440" y1="230" x2="440" y2="280"/>
+  </g>
+  <g fill="#5fa1d0" opacity="0.85">
+    <circle cx="440" cy="280" r="6"/>
+  </g>
+</svg>

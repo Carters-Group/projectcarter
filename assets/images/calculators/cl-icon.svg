@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141a24"/>
+      <stop offset="1" stop-color="#0c1016"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="rgba(180,205,232,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect width="800" height="600" fill="url(#grid)"/>
+
+  <!-- lending: a simple bank facade -->
+  <g stroke="#5fa1d0" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none" opacity="0.92">
+    <path d="M280 320 L400 250 L520 320"/>
+    <line x1="270" y1="320" x2="530" y2="320"/>
+    <line x1="270" y1="450" x2="530" y2="450"/>
+    <line x1="300" y1="320" x2="300" y2="450"/>
+    <line x1="350" y1="320" x2="350" y2="450"/>
+    <line x1="400" y1="320" x2="400" y2="450"/>
+    <line x1="450" y1="320" x2="450" y2="450"/>
+    <line x1="500" y1="320" x2="500" y2="450"/>
+    <line x1="260" y1="465" x2="540" y2="465"/>
+  </g>
+  <text x="565" y="255" font-family="Inter, sans-serif" font-size="54" font-weight="600" fill="#5fa1d0" opacity="0.85">%</text>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141a24"/>
+      <stop offset="1" stop-color="#0c1016"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="rgba(180,205,232,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect width="800" height="600" fill="url(#grid)"/>
+
+  <!-- return on equity: rising trend line with an arrowhead -->
+  <g stroke="#5fa1d0" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none" opacity="0.92">
+    <line x1="260" y1="440" x2="260" y2="220"/>
+    <line x1="260" y1="440" x2="540" y2="440"/>
+    <polyline points="290,400 350,350 410,375 470,290 530,240"/>
+    <polyline points="490,240 530,240 530,280"/>
+  </g>
+  <g fill="#5fa1d0" opacity="0.85">
+    <circle cx="290" cy="400" r="7"/>
+    <circle cx="350" cy="350" r="7"/>
+    <circle cx="410" cy="375" r="7"/>
+    <circle cx="470" cy="290" r="7"/>
+  </g>
+</svg>
