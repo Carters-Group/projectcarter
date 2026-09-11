@@ -267,7 +267,7 @@
     }
 
     function pull(row) {
-      var val = row.summary[opts.summaryKey];
+      var val = Math.max(0, row.summary[opts.summaryKey]);
       setField(field, Math.round(val).toLocaleString("en-AU"));
       box.innerHTML = "";
       var note = document.createElement("p");
