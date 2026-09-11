@@ -234,9 +234,11 @@ h1, h2, h3 {
 }
 .hero-media {
   position: absolute; inset: 0;
-  /* 6 Royal Street streetscape sits behind the hero words, under a dark scrim */
+  /* 6 Royal Street streetscape sits behind the hero words, under a dark scrim
+     that reaches full opacity at the very bottom so the section below blends
+     in rather than the photo appearing to cut off. */
   background:
-    linear-gradient(180deg, rgba(12, 16, 22, 0.52) 0%, rgba(12, 16, 22, 0.58) 42%, rgba(12, 16, 22, 0.9) 100%),
+    linear-gradient(180deg, rgba(12, 16, 22, 0.52) 0%, rgba(12, 16, 22, 0.58) 42%, rgba(12, 16, 22, 0.9) 88%, var(--bg) 100%),
     radial-gradient(1200px 700px at 78% 12%, rgba(95, 161, 208, 0.16), transparent 60%),
     url("assets/images/projects/royal-terraces/rt-01.jpg") center / cover no-repeat,
     linear-gradient(180deg, #10151d 0%, #0c1016 55%, #090c11 100%);
@@ -290,7 +292,6 @@ h1, h2, h3 {
 .section-head h2 { font-size: clamp(34px, 6vw, 62px); margin-bottom: 18px; }
 .section-head p { color: var(--muted); margin: 0; }
 
-.intro { border-top: 1px solid var(--line-soft); }
 .intro-head {
   font-size: clamp(28px, 4.6vw, 52px);
   margin: 0;
@@ -872,7 +873,7 @@ h1, h2, h3 {
 .project-hero-media::after {
   content: "";
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(14,14,15,0.6) 0%, rgba(14,14,15,0.32) 26%, rgba(14,14,15,0.5) 62%, rgba(14,14,15,0.94) 100%);
+  background: linear-gradient(180deg, rgba(12,16,22,0.6) 0%, rgba(12,16,22,0.32) 26%, rgba(12,16,22,0.55) 60%, var(--bg) 100%);
 }
 .project-hero-inner {
   position: relative;
@@ -897,7 +898,7 @@ h1, h2, h3 {
   font-size: 1.05rem;
 }
 
-.project-body { padding-block: clamp(56px, 9vw, 110px); border-top: 1px solid var(--line-soft); }
+.project-body { padding-block: clamp(56px, 9vw, 110px); }
 .project-layout {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
