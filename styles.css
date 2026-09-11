@@ -145,6 +145,7 @@ h1, h2, h3 {
 .nav a:hover::after { width: 100%; }
 
 .header-cta { padding: 12px 24px; }
+.nav-cta-mobile { display: none; }
 
 /* ---------- Calculators dropdown ---------- */
 .nav-dropdown { position: relative; }
@@ -521,6 +522,13 @@ h1, h2, h3 {
   .nav.open { transform: none; }
   .nav a { padding: 16px 0; border-bottom: 1px solid var(--line-soft); font-size: 15px; }
   .nav a::after { display: none; }
+
+  .nav-cta-mobile {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    text-align: center;
+  }
 
   .nav-dropdown { width: 100%; }
   .nav-dropdown-toggle {
