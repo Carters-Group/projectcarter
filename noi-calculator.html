@@ -31,17 +31,7 @@
         <a href="index.html#about">About</a>
         <a href="index.html#projects">Projects</a>
         <a href="index.html#approach">Approach</a>
-        <div class="nav-dropdown" id="calcDropdown">
-          <button type="button" class="nav-dropdown-toggle" id="calcDropdownToggle" aria-expanded="false" aria-controls="calcDropdownMenu">Calculators<svg class="nav-caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="nav-dropdown-menu" id="calcDropdownMenu" role="menu">
-            <a href="noi-calculator.html" role="menuitem">Net Operating Income (NOI)</a>
-            <a href="roi-calculator.html" role="menuitem">Return on Equity (ROI)</a>
-            <a href="da-calculator.html" role="menuitem">Development Site (DA)</a>
-            <a href="grv-calculator.html" role="menuitem">Gross Realisation Value (GRV)</a>
-            <a href="pr-calculator.html" role="menuitem">Portfolio Review (PR)</a>
-            <a href="cl-calculator.html" role="menuitem">Commercial Lending (CL)</a>
-          </div>
-        </div>
+        <a href="calculators.html">Calculators</a>
       </nav>
       <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
@@ -56,7 +46,7 @@
         <div class="calc-intro">
           <p class="kicker">Project Carter</p>
           <h1>NOI Calculator</h1>
-          <p>Work out the net operating income on a commercial property. Enter an optional purchase price, the potential rental income and any other income, then the operating expenses the owner carries. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial advice.</p>
+          <p>Work out the net operating income on a commercial property. Enter an optional property price, the potential rental income and any other income, then the operating expenses the owner carries. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial advice.</p>
         </div>
 
         <div class="calc-grid">
@@ -72,12 +62,18 @@
             </div>
 
             <div class="calc-group">
-              <h2 class="calc-subhead">Purchase</h2>
+              <h2 class="calc-subhead">Property</h2>
 
               <div class="field">
-                <label for="price">Purchase price <span>(optional)</span></label>
+                <label for="price">Property price <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="1,200,000" /></div>
-                <p class="field-hint">Enter this to see the net operating income as a percentage of the price paid.</p>
+                <p class="field-hint">Enter this to see the net operating income as a percentage of the price paid, and to work out usable equity below.</p>
+              </div>
+
+              <div class="field">
+                <label for="existingLoan">Existing loan against this property <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="existingLoan" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Leave blank if the property is unencumbered or you're assessing a fresh purchase.</p>
               </div>
             </div>
 
@@ -184,9 +180,10 @@
             <div class="result-row is-teaser"><dt>Total operating expenses <span>(net of recoveries)</span></dt><dd data-out="opex">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Net operating income</dt><dd data-out="noi">&mdash;</dd></div>
             <div class="result-row"><dt>Net operating income as a %</dt><dd data-out="noiPct">&mdash;</dd></div>
-            <div class="result-row"><dt>As a % of purchase price</dt><dd data-out="noiOnPrice">&mdash;</dd></div>
+            <div class="result-row"><dt>As a % of property price</dt><dd data-out="noiOnPrice">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Cap rate</dt><dd data-out="capRateOut">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Implied property value</dt><dd data-out="impliedValue">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Usable equity <span>(up to 70% LVR)</span></dt><dd data-out="usableEquity70">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -244,8 +241,9 @@
             <li><strong>Operating expenses</strong> are the costs of running the building: insurance, maintenance and repairs, property management, council and water rates, strata or body corporate levies, marketing, land tax and anything you add to the "other" line. Property management can be entered as a dollar figure or as a percentage of gross operating income.</li>
             <li><strong>Recovered from the tenant.</strong> Tick this on any outgoing the lease passes through to the tenant, property management included, and it is left out of total operating expenses, so it does not reduce the net operating income. The total recovered is shown for reference.</li>
             <li><strong>Net operating income</strong> is total gross operating income less total operating expenses (net of any recoveries). It excludes loan interest, income tax, depreciation and one-off capital works.</li>
-            <li><strong>Net operating income as a %</strong> is the net operating income divided by gross operating income. <strong>As a % of purchase price</strong> is the net operating income divided by the purchase price you enter, the going-in yield on the price paid.</li>
+            <li><strong>Net operating income as a %</strong> is the net operating income divided by gross operating income. <strong>As a % of property price</strong> is the net operating income divided by the property price you enter, the going-in yield on the price paid.</li>
             <li><strong>Implied property value</strong> is the net operating income divided by the cap rate you enter. Leave the cap rate blank and no value is shown. A lower cap rate implies a higher value.</li>
+            <li><strong>Usable equity (up to 70% LVR)</strong> is 70% of the property price (or the implied value, if you haven't entered a price) less any existing loan against the property. It's a guide to how much you could look to release or use as a deposit elsewhere, not a lending decision.</li>
           </ul>
         </div>
       </div>
@@ -262,12 +260,7 @@
         <a href="index.html#about">About</a>
         <a href="index.html#projects">Projects</a>
         <a href="index.html#approach">Approach</a>
-        <a href="noi-calculator.html">NOI Calculator</a>
-        <a href="roi-calculator.html">ROI Calculator</a>
-        <a href="da-calculator.html">DA Calculator</a>
-        <a href="grv-calculator.html">GRV Calculator</a>
-        <a href="pr-calculator.html">PR Calculator</a>
-        <a href="cl-calculator.html">CL Calculator</a>
+        <a href="calculators.html">Calculators</a>
         <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
       </nav>
@@ -373,6 +366,10 @@
       var capRate = num("capRate");
       var impliedValue = (capRate > 0 && noi > 0) ? noi / (capRate / 100) : null;
 
+      var existingLoan = num("existingLoan");
+      var equityValue = price > 0 ? price : (impliedValue || 0);
+      var usableEquity70 = equityValue > 0 ? Math.max(0, equityValue * 0.70 - existingLoan) : null;
+
       var valid = gross > 0;
 
       return {
@@ -381,7 +378,8 @@
         byPct: byPct, mgmtPct: mgmtPct, mgmt: mgmtRec ? 0 : mgmtGross, mgmtGross: mgmtGross, mgmtRec: mgmtRec,
         exp: exp, rec: rec, recoveredTotal: recoveredTotal,
         opex: opex, noi: noi, noiPct: noiPct, noiOnPrice: noiOnPrice,
-        capRate: capRate, impliedValue: impliedValue, valid: valid
+        capRate: capRate, impliedValue: impliedValue,
+        existingLoan: existingLoan, equityValue: equityValue, usableEquity70: usableEquity70, valid: valid
       };
     }
 
@@ -417,6 +415,7 @@
       put("noiOnPrice", (m.valid && m.noiOnPrice != null) ? pct(m.noiOnPrice) : "—");
       put("capRateOut", m.capRate > 0 ? pct(m.capRate) : "—", true);
       put("impliedValue", m.impliedValue != null ? money(m.impliedValue) : "—");
+      put("usableEquity70", m.usableEquity70 != null ? money(m.usableEquity70) : "—");
     }
 
     /* Dim / strike a line that's ticked as recovered from the tenant */
@@ -438,7 +437,7 @@
     });
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "rental", "otherIncome1", "otherIncome2", "insurance", "maintenance", "mgmtFee", "councilRates", "strata", "marketing", "landTax", "otherExpense"].forEach(function (id) {
+    ["price", "existingLoan", "rental", "otherIncome1", "otherIncome2", "insurance", "maintenance", "mgmtFee", "councilRates", "strata", "marketing", "landTax", "otherExpense"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -502,7 +501,7 @@
       }
 
       section("Income");
-      if (m.price > 0) row("Purchase price", money(m.price));
+      if (m.price > 0) row("Property price", money(m.price));
       row("Potential rental income", money(m.rental) + " / year");
       row("Other income", optMoney(m.other1));
       row("Other income, additional", optMoney(m.other2));
@@ -531,13 +530,15 @@
       section("Your net operating income");
       row("Net operating income", signedMoney(m.noi), true);
       row("Net operating income as a %", m.noiPct != null ? m.noiPct.toFixed(2) + "%" : "-");
-      row("As a % of purchase price", m.noiOnPrice != null ? m.noiOnPrice.toFixed(2) + "%" : "-");
+      row("As a % of property price", m.noiOnPrice != null ? m.noiOnPrice.toFixed(2) + "%" : "-");
       row("Cap rate", m.capRate > 0 ? m.capRate.toFixed(2) + "%" : "-");
       row("Implied property value", m.impliedValue != null ? money(m.impliedValue) : "-", true);
+      if (m.existingLoan > 0) row("Existing loan against this property", money(m.existingLoan));
+      row("Usable equity (up to 70% LVR)", m.usableEquity70 != null ? money(m.usableEquity70) : "-", true);
 
       y += 14;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This is a guide only, worked out from the figures entered above. Net operating income is total gross operating income less operating expenses. It does not allow for vacancy, and leaves out loan interest, income tax, depreciation, selling costs and one-off capital works. Amounts marked as recovered from the tenant are left out of operating expenses. Any implied value is the net operating income divided by the cap rate entered, and will differ from a real valuation. This is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This is a guide only, worked out from the figures entered above. Net operating income is total gross operating income less operating expenses. It does not allow for vacancy, and leaves out loan interest, income tax, depreciation, selling costs and one-off capital works. Amounts marked as recovered from the tenant are left out of operating expenses. Any implied value is the net operating income divided by the cap rate entered, and will differ from a real valuation. Usable equity is an indicative 70% LVR guide only and is not a loan or serviceability assessment. This is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -550,7 +551,7 @@
       var pn = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
       var lines = [
         (pn ? "Project: " + pn : null),
-        "Purchase price: " + optMoney(m.price),
+        "Property price: " + optMoney(m.price),
         "Potential rental income: " + money(m.rental) + "/yr",
         "Other income: " + optMoney(m.other1),
         "Other income, additional: " + optMoney(m.other2),
@@ -571,9 +572,11 @@
         "----",
         "Net operating income: " + signedMoney(m.noi),
         "Net operating income as a %: " + (m.noiPct != null ? m.noiPct.toFixed(2) + "%" : "n/a"),
-        "As a % of purchase price: " + (m.noiOnPrice != null ? m.noiOnPrice.toFixed(2) + "%" : "n/a"),
+        "As a % of property price: " + (m.noiOnPrice != null ? m.noiOnPrice.toFixed(2) + "%" : "n/a"),
         "Cap rate: " + (m.capRate > 0 ? m.capRate.toFixed(2) + "%" : "n/a"),
-        "Implied property value: " + (m.impliedValue != null ? money(m.impliedValue) : "n/a")
+        "Implied property value: " + (m.impliedValue != null ? money(m.impliedValue) : "n/a"),
+        (m.existingLoan > 0 ? "Existing loan against this property: " + money(m.existingLoan) : null),
+        "Usable equity (up to 70% LVR): " + (m.usableEquity70 != null ? money(m.usableEquity70) : "n/a")
       ];
       return lines.filter(Boolean).join("\n");
     }
@@ -677,8 +680,10 @@
        without re-running this page's model. See pc-report.js. */
     window.pcCalcSummary = function () {
       var m = model();
-      if (m.impliedValue == null) return {};
-      return { impliedValue: Math.round(m.impliedValue) };
+      var out = {};
+      if (m.impliedValue != null) out.impliedValue = Math.round(m.impliedValue);
+      if (m.usableEquity70 != null) out.usableEquity70 = Math.round(m.usableEquity70);
+      return out;
     };
   })();
   </script>

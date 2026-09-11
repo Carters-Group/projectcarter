@@ -1,5 +1,5 @@
 # Minimal static file server for local preview (no Node/Python needed).
-$port = 8000
+$port = if ($env:PORT) { [int]$env:PORT } else { 4173 }
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $root
 
@@ -24,8 +24,14 @@ while ($listener.IsListening) {
     if ([string]::IsNullOrEmpty($rel)) { $rel = "index.html" }
     $path = Join-Path $root $rel
     if (Test-Path $path -PathType Container) { $path = Join-Path $path "index.html" }
+    $fullPath = [System.IO.Path]::GetFullPath($path)
+    $fullRoot = [System.IO.Path]::GetFullPath($root)
     Write-Host ("{0} {1} -> {2}" -f $req.HttpMethod, $req.Url.AbsolutePath, $rel)
-    if (Test-Path $path -PathType Leaf) {
+    if (-not $fullPath.StartsWith($fullRoot, [StringComparison]::OrdinalIgnoreCase)) {
+      $res.StatusCode = 403
+      $b = [System.Text.Encoding]::UTF8.GetBytes("403 Forbidden")
+      $res.OutputStream.Write($b, 0, $b.Length)
+    } elseif (Test-Path $fullPath -PathType Leaf) {
       $bytes = [System.IO.File]::ReadAllBytes($path)
       $ext = [System.IO.Path]::GetExtension($path).ToLower()
       if ($mime.ContainsKey($ext)) { $res.ContentType = $mime[$ext] }

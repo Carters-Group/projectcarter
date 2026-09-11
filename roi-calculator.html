@@ -31,17 +31,7 @@
         <a href="index.html#about">About</a>
         <a href="index.html#projects">Projects</a>
         <a href="index.html#approach">Approach</a>
-        <div class="nav-dropdown" id="calcDropdown">
-          <button type="button" class="nav-dropdown-toggle" id="calcDropdownToggle" aria-expanded="false" aria-controls="calcDropdownMenu">Calculators<svg class="nav-caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <div class="nav-dropdown-menu" id="calcDropdownMenu" role="menu">
-            <a href="noi-calculator.html" role="menuitem">Net Operating Income (NOI)</a>
-            <a href="roi-calculator.html" role="menuitem">Return on Equity (ROI)</a>
-            <a href="da-calculator.html" role="menuitem">Development Site (DA)</a>
-            <a href="grv-calculator.html" role="menuitem">Gross Realisation Value (GRV)</a>
-            <a href="pr-calculator.html" role="menuitem">Portfolio Review (PR)</a>
-            <a href="cl-calculator.html" role="menuitem">Commercial Lending (CL)</a>
-          </div>
-        </div>
+        <a href="calculators.html">Calculators</a>
       </nav>
       <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
@@ -326,12 +316,7 @@
         <a href="index.html#about">About</a>
         <a href="index.html#projects">Projects</a>
         <a href="index.html#approach">Approach</a>
-        <a href="noi-calculator.html">NOI Calculator</a>
-        <a href="roi-calculator.html">ROI Calculator</a>
-        <a href="da-calculator.html">DA Calculator</a>
-        <a href="grv-calculator.html">GRV Calculator</a>
-        <a href="pr-calculator.html">PR Calculator</a>
-        <a href="cl-calculator.html">CL Calculator</a>
+        <a href="calculators.html">Calculators</a>
         <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
       </nav>
@@ -1023,6 +1008,7 @@
   <script>
     window.PC_PULLERS = [
       { fieldId: "fundsAvailable", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
+      { fieldId: "fundsAvailable", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
       { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" }
     ];
   </script>
