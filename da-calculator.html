@@ -194,6 +194,12 @@
                 <span>Fund the development costs from the loan too</span>
               </label>
               <p class="field-hint">On: every cost other than the land deposit is treated as drawn from the loan across the DA period, and interest builds on it. Off: those costs are cash.</p>
+
+              <div class="field">
+                <label for="fundsAvailable">Funds you have available <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="fundsAvailable" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Cash or equity you can put toward this, e.g. released from another property. Compared against the cash required below.</p>
+              </div>
             </div>
 
             <div class="calc-group">
@@ -453,6 +459,8 @@
             <div class="result-row is-key"><dt>Total cost to DA</dt><dd data-out="totalCostToDA">&mdash;</dd></div>
             <div class="result-row"><dt>Cost to reach DA, excluding land</dt><dd data-out="costExclLand">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Cash (equity) required</dt><dd data-out="equityRequired">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Funds available</dt><dd data-out="fundsAvailableOut">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Shortfall / surplus</dt><dd data-out="shortfall">&mdash;</dd></div>
             <div class="result-row"><dt>Debt at DA <span>(loan + interest)</span></dt><dd data-out="debtAtDA">&mdash;</dd></div>
             <div class="result-row"><dt>Cost to DA as a % of land price</dt><dd data-out="costOnPrice">&mdash;</dd></div>
 
@@ -990,6 +998,8 @@
       var costOnPrice = price > 0 ? costExclLand / price * 100 : null;
 
       var valid = price > 0;
+      var fundsAvailable = num("fundsAvailable");
+      var shortfall = valid ? fundsAvailable - equityRequired : null;
 
       return {
         price: price, lvr: lvr, loan: loan, deposit: deposit,
@@ -1001,7 +1011,8 @@
         devCosts: devCosts, rate: rate, costsInLoan: costsInLoan,
         rows: rows, interestDA: interestDA, debtAtDA: debtAtDA,
         totalCostToDA: totalCostToDA, costExclLand: costExclLand,
-        equityRequired: equityRequired, costOnPrice: costOnPrice, valid: valid
+        equityRequired: equityRequired, costOnPrice: costOnPrice,
+        fundsAvailable: fundsAvailable, shortfall: shortfall, valid: valid
       };
     }
 
@@ -1066,6 +1077,8 @@
       put("totalCostToDA", m.valid ? money(m.totalCostToDA) : "—");
       put("costExclLand", m.valid ? money(m.costExclLand) : "—");
       put("equityRequired", m.valid ? money(m.equityRequired) : "—");
+      put("fundsAvailableOut", m.valid && m.fundsAvailable > 0 ? money(m.fundsAvailable) : "—", true);
+      put("shortfall", (m.valid && m.fundsAvailable > 0) ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
       put("debtAtDA", m.valid ? money(m.debtAtDA) : "—");
       put("costOnPrice", (m.valid && m.costOnPrice != null) ? pct(m.costOnPrice) : "—");
 
@@ -1226,7 +1239,7 @@
     addressEl.addEventListener("blur", checkAddress);
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "stampDuty", "legalCost", "buyersAgent", "dueDiligence", "estFee", "holdIncome", "pmFee"]
+    ["price", "stampDuty", "legalCost", "buyersAgent", "dueDiligence", "estFee", "holdIncome", "pmFee", "fundsAvailable"]
       .concat(SITE).concat(CONSULT).concat(STAT).concat(HOLD)
       .forEach(function (id) {
         var el = document.getElementById(id);
@@ -1527,7 +1540,24 @@
     scheduleWrap.addEventListener("click", function (e) {
       if (!unlocked && !e.target.closest("#reportSummary")) openModal();
     });
+
+    /* Small labelled snapshot of this DA cost, saved alongside the report so
+       other calculators can pull a figure across (e.g. GRV's daEquity)
+       without re-running this page's model. See pc-report.js. */
+    window.pcCalcSummary = function () {
+      var m = model();
+      if (!m.valid) return {};
+      return {
+        cashEquityRequired: Math.round(m.equityRequired),
+        totalCostToDA: Math.round(m.totalCostToDA)
+      };
+    };
   })();
+  </script>
+  <script>
+    window.PC_PULLERS = [
+      { fieldId: "fundsAvailable", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" }
+    ];
   </script>
   <script src="pc-report.js"></script>
 </body>

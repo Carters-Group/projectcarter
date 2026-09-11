@@ -1523,6 +1523,12 @@
     scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
   })();
   </script>
+  <script>
+    window.PC_PULLERS = [
+      { fieldId: "daEquity", sourceCalc: "da", summaryKey: "cashEquityRequired", label: "Pull from a saved DA report" },
+      { fieldId: "cashIn", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" }
+    ];
+  </script>
   <script src="pc-report.js"></script>
 </body>
 </html>

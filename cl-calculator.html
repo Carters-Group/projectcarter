@@ -155,6 +155,12 @@
                 <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="10,000" /></div>
                 <p class="field-hint">Due diligence, buyer's agent and adviser fees, and anything else.</p>
               </div>
+
+              <div class="field">
+                <label for="fundsAvailable">Funds you have available <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="fundsAvailable" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Cash or equity you can put toward this, e.g. released from another property. Compared against the total cash required for each lender tier below.</p>
+              </div>
             </div>
 
           </div>
@@ -164,6 +170,7 @@
             <div class="result-row is-teaser"><dt>Loan type</dt><dd data-out="loanTypeOut">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt id="priceRowLabel">Purchase price</dt><dd data-out="priceOut">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Purchase costs <span>(est.)</span></dt><dd data-out="purchaseCosts">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Funds available</dt><dd data-out="fundsAvailableOut">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Min deposit / equity &ndash; major banks</dt><dd data-out="majorDeposit">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Min deposit / equity &ndash; tier 2 / non-bank</dt><dd data-out="tier2Deposit">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Total cash required &ndash; major banks</dt><dd data-out="majorCash">&mdash;</dd></div>
@@ -306,6 +313,7 @@
       return isNaN(n) || n < 0 ? 0 : n;
     }
     function money(n) { return money0.format(Math.round(n)); }
+    function signedMoney(n) { return (n < 0 ? "-" : "") + money(Math.abs(n)); }
     function pct(n) { return n.toFixed(0) + "%"; }
     function rateRange(r) { return r ? r[0].toFixed(2) + "% – " + r[1].toFixed(2) + "% p.a." : "—"; }
 
@@ -553,8 +561,9 @@
       var valid = price > 0;
 
       var purchaseCosts = num("stampDuty") + num("valuationCost") + num("legalCost") + num("buildingInspection") + num("otherCost");
-      if (major.available) major.cash = major.deposit + purchaseCosts;
-      if (tier2.available) tier2.cash = tier2.deposit + purchaseCosts;
+      var fundsAvailable = num("fundsAvailable");
+      if (major.available) { major.cash = major.deposit + purchaseCosts; major.shortfall = fundsAvailable - major.cash; }
+      if (tier2.available) { tier2.cash = tier2.deposit + purchaseCosts; tier2.shortfall = fundsAvailable - tier2.cash; }
 
       var rentalCover = null;
       if (type.rentalCover && tier2.available) {
@@ -571,7 +580,7 @@
         }
       }
 
-      return { typeKey: typeKey, type: type, price: price, major: major, tier2: tier2, valid: valid, purchaseCosts: purchaseCosts, rentalCover: rentalCover };
+      return { typeKey: typeKey, type: type, price: price, major: major, tier2: tier2, valid: valid, purchaseCosts: purchaseCosts, fundsAvailable: fundsAvailable, rentalCover: rentalCover };
     }
 
     /* ---- render -------------------------------------------------------- */
@@ -602,6 +611,7 @@
       put("loanTypeOut", type.label, true);
       put("priceOut", m.valid ? money(m.price) : "—", true);
       put("purchaseCosts", m.valid ? money(m.purchaseCosts) : "—", true);
+      put("fundsAvailableOut", m.valid && m.fundsAvailable > 0 ? money(m.fundsAvailable) : "—", true);
       put("majorDeposit", (m.valid && m.major.available) ? pct(m.major.depositPct) + " (" + money(m.major.deposit) + ")" : (m.valid ? "n/a" : "—"));
       put("tier2Deposit", (m.valid && m.tier2.available) ? pct(m.tier2.depositPct) + " (" + money(m.tier2.deposit) + ")" : (m.valid ? "n/a" : "—"));
       put("majorCash", (m.valid && m.major.available) ? money(m.major.cash) : (m.valid ? "n/a" : "—"));
@@ -611,12 +621,17 @@
       if (!m.valid) {
         body.innerHTML = '<tr><td colspan="3" class="calc-schedule-empty">Choose a loan type and enter a price to see the comparison.</td></tr>';
       } else {
+        function shortfallText(t) {
+          if (!t.available || !(m.fundsAvailable > 0)) return "n/a";
+          return signedMoney(t.shortfall) + (t.shortfall >= 0 ? " surplus" : " short");
+        }
         var rows = [
           ["Max lend (loan-to-value ratio)", m.major.available ? pct(m.major.lvr) : "n/a", m.tier2.available ? pct(m.tier2.lvr) : "n/a"],
           ["Min deposit / equity", m.major.available ? pct(m.major.depositPct) : "n/a", m.tier2.available ? pct(m.tier2.depositPct) : "n/a"],
           ["Min deposit / equity, $", m.major.available ? money(m.major.deposit) : "n/a", m.tier2.available ? money(m.tier2.deposit) : "n/a"],
           ["Purchase costs (est.)", money(m.purchaseCosts), money(m.purchaseCosts)],
           ["Total cash required", m.major.available ? money(m.major.cash) : "n/a", m.tier2.available ? money(m.tier2.cash) : "n/a"],
+          ["Shortfall / surplus", shortfallText(m.major), shortfallText(m.tier2)],
           ["Indicative loan amount", m.major.available ? money(m.major.loan) : "n/a", m.tier2.available ? money(m.tier2.loan) : "n/a"],
           ["Indicative rate range", m.major.available ? rateRange(m.major.rate) : "n/a", m.tier2.available ? rateRange(m.tier2.rate) : "n/a"],
           ["What to expect", m.major.note, m.tier2.note]
@@ -666,7 +681,7 @@
     document.getElementById("price").addEventListener("input", recalcAutofills);
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "btrRental", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost"].forEach(function (id) {
+    ["price", "btrRental", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "fundsAvailable"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -730,6 +745,7 @@
       row("Loan type", m.type.label, true);
       row(m.type.unit, money(m.price), true);
       row("Purchase costs (est.)", money(m.purchaseCosts));
+      if (m.fundsAvailable > 0) row("Funds available", money(m.fundsAvailable));
 
       y += 8;
       section("Major banks");
@@ -737,6 +753,7 @@
         row("Max lend (LVR)", pct(m.major.lvr));
         row("Min deposit / equity", pct(m.major.depositPct) + "  (" + money(m.major.deposit) + ")", true);
         row("Total cash required", money(m.major.cash), true);
+        if (m.fundsAvailable > 0) row("Shortfall / surplus", signedMoney(m.major.shortfall) + (m.major.shortfall >= 0 ? " surplus" : " short"), true);
         row("Indicative loan amount", money(m.major.loan));
         row("Indicative rate range", rateRange(m.major.rate));
         row("What to expect", m.major.note);
@@ -750,6 +767,7 @@
         row("Max lend (LVR)", pct(m.tier2.lvr));
         row("Min deposit / equity", pct(m.tier2.depositPct) + "  (" + money(m.tier2.deposit) + ")", true);
         row("Total cash required", money(m.tier2.cash), true);
+        if (m.fundsAvailable > 0) row("Shortfall / surplus", signedMoney(m.tier2.shortfall) + (m.tier2.shortfall >= 0 ? " surplus" : " short"), true);
         row("Indicative loan amount", money(m.tier2.loan));
         row("Indicative rate range", rateRange(m.tier2.rate));
         row("What to expect", m.tier2.note);
@@ -781,12 +799,13 @@
         "Loan type: " + m.type.label,
         m.type.unit + ": " + money(m.price),
         "Purchase costs (est.): " + money(m.purchaseCosts),
+        (m.fundsAvailable > 0 ? "Funds available: " + money(m.fundsAvailable) : null),
         "----",
         "Major banks: " + (m.major.available
-          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), total cash " + money(m.major.cash) + ", loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate)
+          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), total cash " + money(m.major.cash) + ", loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate) + (m.fundsAvailable > 0 ? ", " + (m.major.shortfall >= 0 ? "surplus " : "short ") + signedMoney(m.major.shortfall) : "")
           : m.major.note),
         "Tier 2 / non-bank: " + (m.tier2.available
-          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), total cash " + money(m.tier2.cash) + ", loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate)
+          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), total cash " + money(m.tier2.cash) + ", loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate) + (m.fundsAvailable > 0 ? ", " + (m.tier2.shortfall >= 0 ? "surplus " : "short ") + signedMoney(m.tier2.shortfall) : "")
           : m.tier2.note)
       ];
       if (m.rentalCover) {
@@ -893,6 +912,12 @@
     });
     scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
   })();
+  </script>
+  <script>
+    window.PC_PULLERS = [
+      { fieldId: "fundsAvailable", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
+      { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" }
+    ];
   </script>
   <script src="pc-report.js"></script>
 </body>

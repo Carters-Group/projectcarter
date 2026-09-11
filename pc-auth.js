@@ -276,10 +276,11 @@
         user_id: currentUser.id,
         calculator: report.calculator,
         title: (report.title || "Untitled report").slice(0, 200),
-        inputs: report.inputs || {}
+        inputs: report.inputs || {},
+        summary: report.summary || {}
       };
       var q = report.id
-        ? client.from("reports").update({ title: row.title, inputs: row.inputs }).eq("id", report.id).eq("user_id", currentUser.id).select().maybeSingle()
+        ? client.from("reports").update({ title: row.title, inputs: row.inputs, summary: row.summary }).eq("id", report.id).eq("user_id", currentUser.id).select().maybeSingle()
         : client.from("reports").insert(row).select().maybeSingle();
       return q.then(function (res) { return { data: res.data, error: res.error }; });
     },
@@ -287,7 +288,7 @@
     listReports: function (calculator) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
-      var q = client.from("reports").select("id,calculator,title,inputs,created_at,updated_at")
+      var q = client.from("reports").select("id,calculator,title,inputs,summary,created_at,updated_at")
         .eq("user_id", currentUser.id).order("updated_at", { ascending: false });
       if (calculator) q = q.eq("calculator", calculator);
       return q.then(function (res) { return { data: res.data || [], error: res.error }; });
@@ -296,7 +297,7 @@
     getReport: function (id) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
-      return client.from("reports").select("id,calculator,title,inputs,created_at,updated_at")
+      return client.from("reports").select("id,calculator,title,inputs,summary,created_at,updated_at")
         .eq("id", id).eq("user_id", currentUser.id).maybeSingle()
         .then(function (res) { return { data: res.data, error: res.error }; });
     },

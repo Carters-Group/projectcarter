@@ -63,6 +63,7 @@ create table if not exists public.reports (
   calculator  text        not null check (calculator in ('noi', 'roi', 'da', 'grv', 'pr', 'cl')),
   title       text        not null default 'Untitled report',
   inputs      jsonb       not null default '{}'::jsonb,
+  summary     jsonb       not null default '{}'::jsonb,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
@@ -75,6 +76,12 @@ alter table public.reports drop constraint if exists reports_calculator_check;
 alter table public.reports
   add constraint reports_calculator_check
   check (calculator in ('noi', 'roi', 'da', 'grv', 'pr', 'cl'));
+
+-- Small labelled snapshot of a report's key computed outputs (e.g. a
+-- Portfolio Review's usable equity, a DA's cash equity required), stored
+-- alongside its inputs so OTHER calculators can pull a figure across without
+-- re-running this calculator's model. Added on a table that already exists.
+alter table public.reports add column if not exists summary jsonb not null default '{}'::jsonb;
 
 alter table public.reports enable row level security;
 

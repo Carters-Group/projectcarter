@@ -1302,6 +1302,14 @@ h1, h2, h3 {
 .pc-save-msg.is-ok    { color: var(--accent-2); }
 .pc-save-msg.is-error { color: #e2938c; }
 
+/* Pull-a-figure-from-another-saved-report widget (pc-report.js addPuller),
+   sits inside the target field, under its own hint */
+.pc-pull { margin-top: 6px; font-size: 12px; line-height: 1.5; }
+.pc-pull[hidden] { display: none; }
+.pc-pull__btn { color: var(--accent); font-weight: 600; }
+.pc-pull__select { width: 100%; margin-top: 2px; font-size: 12.5px; padding: 8px 10px; }
+.pc-pull__note { margin: 0 0 4px; color: var(--muted); }
+
 /* ---- account.html ---- */
 .acct-card { padding: clamp(22px, 3vw, 34px); margin-bottom: 20px; }
 .acct-card + .acct-card { margin-top: 0; }

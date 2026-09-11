@@ -132,6 +132,12 @@
                 <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="10,000" /></div>
                 <p class="field-hint">Due diligence, buyer's agent and adviser fees, and anything else.</p>
               </div>
+
+              <div class="field">
+                <label for="fundsAvailable">Funds you have available <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="fundsAvailable" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Cash or equity you can put toward this, e.g. released from another property. Compared against the total cash required, does not change the return figures above.</p>
+              </div>
             </div>
 
             <div class="calc-group">
@@ -206,6 +212,8 @@
             <div class="result-row is-teaser"><dt>Loan amount</dt><dd data-out="loan">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Deposit</dt><dd data-out="deposit">&mdash;</dd></div>
             <div class="result-row is-key is-teaser"><dt>Total cash required</dt><dd data-out="cashRequired">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Funds available</dt><dd data-out="fundsAvailableOut">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Shortfall / surplus</dt><dd data-out="shortfall">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Entry net yield</dt><dd data-out="entryYield">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Exit cap rate on sale</dt><dd data-out="exitCap">&mdash;</dd></div>
             <div class="result-row"><dt>Property value at sale</dt><dd data-out="saleValue">&mdash;</dd></div>
@@ -627,9 +635,13 @@
         irrVal = irr(cfs);
       }
 
+      var fundsAvailable = num("fundsAvailable");
+      var shortfall = valid ? fundsAvailable - cashRequired : null;
+
       return {
         price: price, lvr: lvr, loan: loan, deposit: deposit,
         acqCosts: acqCosts, cashRequired: cashRequired,
+        fundsAvailable: fundsAvailable, shortfall: shortfall,
         nr1: nr1, g: g, rate: rate, term: term, dr: dr,
         uplift: uplift, uYear: uYear, uRent: uRent, uG: uG,
         entryYield: entryYield, exitCap: exitCap, rows: rows,
@@ -678,6 +690,8 @@
       put("loan", m.price > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "%)" : "—", true);
       put("deposit", m.price > 0 ? money(m.deposit) : "—", true);
       put("cashRequired", m.cashRequired > 0 ? money(m.cashRequired) : "—", true);
+      put("fundsAvailableOut", m.fundsAvailable > 0 ? money(m.fundsAvailable) : "—", true);
+      put("shortfall", (m.valid && m.fundsAvailable > 0) ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
       put("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—", true);
       put("exitCap", m.exitCap ? pct(m.exitCap * 100) : "—", true);
       put("saleValue", m.valid ? money(m.saleValue) : "—");
@@ -738,7 +752,7 @@
     document.getElementById("lvr").addEventListener("input", recalcAutofills);
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "rent", "upliftRent"].forEach(function (id) {
+    ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "fundsAvailable", "rent", "upliftRent"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -1005,6 +1019,12 @@
     });
     scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
   })();
+  </script>
+  <script>
+    window.PC_PULLERS = [
+      { fieldId: "fundsAvailable", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
+      { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" }
+    ];
   </script>
   <script src="pc-report.js"></script>
 </body>

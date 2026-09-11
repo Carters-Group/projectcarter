@@ -196,8 +196,105 @@
     if (first) fire(first, ["input", "change"]);
   }
 
+  /* ---- pull a figure from another saved report ---------------------------
+     A field on this calculator can offer to pull a number straight from one
+     of the signed-in visitor's OTHER saved reports (e.g. usable equity from
+     a saved Portfolio Review), instead of re-running that calculator's model
+     here. Reads the small `summary` snapshot each calculator writes onto its
+     own saved report at save time (see onSave below); this page never needs
+     to know how that number was worked out. Pulling copies a plain editable
+     number into the field - it is a one-time snapshot, not a live link; a
+     "choose a different report" control lets the visitor re-pull later. */
+  var SOURCE_LABEL = { noi: "NOI", roi: "ROI", da: "Development Site (DA)", grv: "GRV", pr: "Portfolio Review", cl: "Commercial Lending" };
+
+  function addPuller(opts) {
+    var field = document.getElementById(opts.fieldId);
+    if (!field) return;
+    var host = field.closest(".field") || field.parentNode;
+    if (!host) return;
+
+    var box = document.createElement("div");
+    box.className = "pc-pull";
+    box.hidden = true;
+    host.appendChild(box);
+
+    var sourceLabel = SOURCE_LABEL[opts.sourceCalc] || opts.sourceCalc.toUpperCase();
+
+    function renderIdle() {
+      box.innerHTML = "";
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "linklike pc-pull__btn";
+      btn.textContent = opts.label || ("Pull from a saved " + sourceLabel + " report");
+      btn.addEventListener("click", loadList);
+      box.appendChild(btn);
+    }
+
+    function loadList() {
+      box.textContent = "Loading your saved reports…";
+      window.pcAuth.listReports(opts.sourceCalc).then(function (res) {
+        if (res.error) { box.textContent = res.error.message || "Could not load saved reports."; return; }
+        var rows = (res.data || []).filter(function (r) {
+          return r.summary && r.summary[opts.summaryKey] != null;
+        });
+        if (!rows.length) {
+          box.textContent = "No saved " + sourceLabel + " report has this figure yet.";
+          return;
+        }
+        renderPicker(rows);
+      });
+    }
+
+    function renderPicker(rows) {
+      box.innerHTML = "";
+      var sel = document.createElement("select");
+      sel.className = "pc-pull__select";
+      var opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = "Choose a saved " + sourceLabel + " report…";
+      sel.appendChild(opt0);
+      rows.forEach(function (r) {
+        var o = document.createElement("option");
+        o.value = r.id;
+        o.textContent = (r.title || "Untitled report") + " (" + new Date(r.updated_at).toLocaleDateString("en-AU") + ")";
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", function () {
+        var row = rows.filter(function (r) { return r.id === sel.value; })[0];
+        if (row) pull(row);
+      });
+      box.appendChild(sel);
+    }
+
+    function pull(row) {
+      var val = row.summary[opts.summaryKey];
+      setField(field, Math.round(val).toLocaleString("en-AU"));
+      box.innerHTML = "";
+      var note = document.createElement("p");
+      note.className = "pc-pull__note";
+      note.textContent = "Pulled from “" + (row.title || "Untitled report") + "” (" +
+        new Date(row.updated_at).toLocaleDateString("en-AU") + "). Still yours to edit.";
+      var again = document.createElement("button");
+      again.type = "button";
+      again.className = "linklike";
+      again.textContent = "Choose a different report";
+      again.addEventListener("click", loadList);
+      box.appendChild(note);
+      box.appendChild(again);
+    }
+
+    function sync() {
+      var show = !!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember());
+      box.hidden = !show;
+      if (show && !box.firstChild) renderIdle();
+    }
+    document.addEventListener("pc-auth-change", sync);
+    if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
+  }
+
   window.pcReport = { calc: CALC, serialize: serialize, restore: restore,
-                      currentId: function () { return loadedReportId; } };
+                      currentId: function () { return loadedReportId; },
+                      addPuller: addPuller };
 
   /* ---- Save button ------------------------------------------------------ */
   var cta = document.querySelector(".calc-cta");
@@ -258,8 +355,10 @@
     saveBtn.disabled = true;
     msg("Saving…");
     var title = projectName() || loadedTitle || defaultTitle();
+    var summary = {};
+    try { if (window.pcCalcSummary) summary = window.pcCalcSummary() || {}; } catch (e) {}
     window.pcAuth.saveReport({
-      calculator: CALC, title: title, inputs: serialize(), id: loadedReportId || undefined
+      calculator: CALC, title: title, inputs: serialize(), summary: summary, id: loadedReportId || undefined
     }).then(function (res) {
       saveBtn.disabled = false;
       if (res.error) { msg(res.error.message || "Could not save.", "error"); return; }
@@ -321,6 +420,11 @@
 
   function start() {
     buildSaveUi();
+    /* Pages declare window.PC_PULLERS = [{fieldId, sourceCalc, summaryKey, label}, ...]
+       in their own inline script, BEFORE this file loads, since pc-report.js
+       loads last. Wired up here once, rather than each page calling
+       addPuller itself (which would run before window.pcReport exists). */
+    (window.PC_PULLERS || []).forEach(addPuller);
     if (window.pcAuth && window.pcAuth.ready) {
       window.pcAuth.ready.then(function () { syncUi(); hydrate(); restoreDraft(); });
     }

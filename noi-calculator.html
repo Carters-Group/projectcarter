@@ -671,6 +671,15 @@
     resultsEl.addEventListener("click", function (e) {
       if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
     });
+
+    /* Small labelled snapshot, saved alongside the report so other
+       calculators can pull a figure across (e.g. a starting purchase price)
+       without re-running this page's model. See pc-report.js. */
+    window.pcCalcSummary = function () {
+      var m = model();
+      if (m.impliedValue == null) return {};
+      return { impliedValue: Math.round(m.impliedValue) };
+    };
   })();
   </script>
   <script src="pc-report.js"></script>
