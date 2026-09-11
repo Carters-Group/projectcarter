@@ -55,7 +55,7 @@
         <div class="calc-intro">
           <p class="kicker">Project Carter</p>
           <h1>Portfolio Review Calculator</h1>
-          <p>Review a property portfolio one asset at a time. For each property enter the value, the loan, the rent and the yearly running costs, then any depreciation. The calculator works out the after-tax cash flow and adds every property up into a combined yearly and weekly figure, with your equity position, loan to value, yields and the rent each property needs to break even. The numbers update live, and you can take away a one-page report. It is an estimate to help you think, not financial advice.</p>
+          <p>Review a property portfolio one asset at a time, residential and commercial together. For each property set the type, then enter the value, the loan, the rent and the yearly running costs, and any depreciation. Commercial properties add a lease basis (net or gross) and the usual building outgoings, with a tick on each one the lease passes through to the tenant. The calculator works out the after-tax cash flow, adds every property into a combined figure, and shows residential against commercial side by side. The numbers update live, and you can take away a one-page report. It is an estimate to help you think, not financial advice.</p>
         </div>
 
         <div class="calc-grid">
@@ -97,7 +97,8 @@
             <div class="result-row is-teaser"><dt>Loan to value (LVR)</dt><dd data-out="lvr">&mdash;</dd></div>
             <div class="result-row"><dt>Rent collected (per year)</dt><dd data-out="grossRent">&mdash;</dd></div>
             <div class="result-row"><dt>Gross yield</dt><dd data-out="grossYield">&mdash;</dd></div>
-            <div class="result-row"><dt>Running costs (per year)</dt><dd data-out="expenses">&mdash;</dd></div>
+            <div class="result-row"><dt>Outgoings recovered from tenant <span>(commercial)</span></dt><dd data-out="recovered">&mdash;</dd></div>
+            <div class="result-row"><dt>Running costs, net of recoveries (per year)</dt><dd data-out="expenses">&mdash;</dd></div>
             <div class="result-row"><dt>Net rent after costs (per year)</dt><dd data-out="netRent">&mdash;</dd></div>
             <div class="result-row"><dt>Net yield</dt><dd data-out="netYield">&mdash;</dd></div>
             <div class="result-row"><dt>Loan interest (per year)</dt><dd data-out="interest">&mdash;</dd></div>
@@ -119,6 +120,23 @@
           </dl>
         </div>
 
+        <div class="calc-schedule-wrap" id="segWrap" hidden>
+          <h2 class="calc-subhead">Residential vs commercial</h2>
+          <div class="calc-schedule-scroll">
+            <table class="calc-schedule" id="segTable">
+              <thead>
+                <tr>
+                  <th scope="col">&nbsp;</th>
+                  <th scope="col">Residential</th>
+                  <th scope="col">Commercial</th>
+                  <th scope="col">Whole portfolio</th>
+                </tr>
+              </thead>
+              <tbody id="segBody"></tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="calc-schedule-wrap">
           <h2 class="calc-subhead">Property by property</h2>
           <div class="calc-schedule-scroll">
@@ -126,6 +144,7 @@
               <thead>
                 <tr>
                   <th scope="col">Property</th>
+                  <th scope="col">Type</th>
                   <th scope="col">Value</th>
                   <th scope="col">Debt</th>
                   <th scope="col">LVR</th>
@@ -136,7 +155,7 @@
                 </tr>
               </thead>
               <tbody id="calcScheduleBody">
-                <tr><td colspan="8" class="calc-schedule-empty">Enter a property value and weekly rent to see the breakdown.</td></tr>
+                <tr><td colspan="9" class="calc-schedule-empty">Enter a property value and rent to see the breakdown.</td></tr>
               </tbody>
             </table>
           </div>
@@ -187,13 +206,15 @@
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
             <li><strong>Loan and equity.</strong> The loan is the LVR you enter times the value; the equity (your net position) is the rest. Interest is interest-only, loan &times; rate, so nothing is paid off the loan.</li>
-            <li><strong>Rent collected</strong> is the weekly rent &times; 52.</li>
-            <li><strong>Running costs</strong> are property management (a % of the rent), the letting fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance (per week &times; 52), a vacancy allowance (weeks &times; the weekly rent), loan fees and sundry. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings &mdash; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
+            <li><strong>Rent collected</strong> is the weekly rent &times; 52 for a residential property, or the gross annual rent you enter for a commercial one.</li>
+            <li><strong>Running costs</strong> are property management (a % of the rent), the letting / leasing fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance, a vacancy allowance, loan fees and sundry. Residential maintenance is per week &times; 52 and vacancy is weeks &times; the weekly rent; commercial maintenance is annual and vacancy is months &divide; 12 &times; the gross rent. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings &mdash; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
+            <li><strong>Commercial properties</strong> add a lease basis and the usual building outgoings &mdash; water &amp; sewer rates, fire &amp; essential services, air-conditioning / HVAC, cleaning &amp; security, and an outgoings audit / admin allowance. Each recoverable line has a &ldquo;recovered from the tenant&rdquo; tick: ticked, that outgoing drops out of your running costs. Choosing <strong>net lease</strong> ticks the usual recoverable set, <strong>gross lease</strong> clears them, and <strong>partial / mixed</strong> leaves them as you set them. Property management is recoverable on many net leases; land tax often is not on retail leases even when net, so check before ticking it.</li>
             <li><strong>Cash flow before tax</strong> is net rent after costs, less loan interest. A figure in brackets is what the property costs you to hold each year before tax.</li>
             <li><strong>Tax.</strong> A rental loss is refunded at the marginal tax rate you enter; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving.</li>
             <li><strong>Post-Budget negative gearing.</strong> Tick &ldquo;bought after the 2026 Federal Budget&rdquo; on a property and a rental loss on it is quarantined: it no longer offsets your salary or other income, so it earns no refund in the year. The loss carries forward against future rental profit from that property or the gain on its sale. Rental profits are still taxed, and depreciation only reduces a profit. Properties held before the Budget keep the current treatment. This is a modelling assumption, not tax advice.</li>
             <li><strong>After-tax cash flow</strong> is cash flow before tax plus the tax refund and the depreciation tax saving. Divided by 52 it is the weekly figure &mdash; the real out-of-pocket cost, or income, of holding the property.</li>
-            <li><strong>Break-even rent.</strong> Each card shows the weekly rent that would bring that property's yearly after-tax result to zero, with everything else held the same.</li>
+            <li><strong>Break-even rent.</strong> Each card shows the rent that would bring that property's yearly after-tax result to zero, with everything else held the same &mdash; per week for residential, per year for commercial.</li>
+            <li><strong>Residential vs commercial.</strong> The comparison table and the schedule subtotals split the portfolio by type so you can see each side's value, yield and after-tax position on its own, then combined.</li>
             <li><strong>Buying a property.</strong> Tick "being purchased" to add one-off costs: stamp duty (estimable by state), conveyancing, borrowing costs, a quantity surveyor's report and improvements. These do not change the holding result; they feed "cash needed to buy" (your equity plus those costs).</li>
             <li><strong>The portfolio</strong> figures add up every property; the yields are combined rent &divide; combined value. This is a point-in-time review: it holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax.</li>
           </ul>
@@ -413,6 +434,48 @@
 
     function letter(i) { return String.fromCharCode(65 + (i % 26)); }
 
+    /* outgoing lines a commercial lease can pass through to the tenant */
+    var RECOVER_KEYS = ["pm", "council", "water", "strata", "landtax", "insurance",
+                        "maint", "fire", "hvac", "clean", "ogadmin"];
+    /* what a plain net lease recovers by default (land tax handled separately) */
+    var NET_DEFAULT = ["pm", "council", "water", "strata", "insurance",
+                       "maint", "fire", "hvac", "clean", "ogadmin"];
+
+    function recoverTick(p, key) {
+      return '<label class="calc-check calc-recover" data-com-only hidden>' +
+        '<input type="checkbox" id="' + p + key + 'Rec" />' +
+        '<span>Recovered from the tenant</span></label>';
+    }
+
+    /* show/hide the residential-only and commercial-only bits of a card */
+    function applyType(id, fromUser) {
+      var p = "p" + id + "_";
+      var typeEl = document.getElementById(p + "ptype");
+      if (!typeEl) return;
+      var isCom = typeEl.value === "com";
+      var card = propertyCards.querySelector('[data-prop="' + id + '"]');
+      if (!card) return;
+      Array.prototype.forEach.call(card.querySelectorAll("[data-com-only]"), function (el) { el.hidden = !isCom; });
+      Array.prototype.forEach.call(card.querySelectorAll("[data-res-only]"), function (el) { el.hidden = isCom; });
+      var nw = document.getElementById(p + "neutralWrap");
+      if (nw && nw.firstChild) nw.firstChild.nodeValue = isCom
+        ? "Gross rent / yr to break even " : "Rent / wk to break even ";
+      if (fromUser && isCom) autoRecovers(id);
+    }
+
+    /* net lease -> tick the standard recoverable set; gross -> clear;
+       partial / mixed -> leave whatever the user has set */
+    function autoRecovers(id) {
+      var p = "p" + id + "_";
+      var leaseEl = document.getElementById(p + "lease");
+      if (!leaseEl || leaseEl.value === "partial") return;
+      var on = leaseEl.value === "net";
+      NET_DEFAULT.concat(["landtax"]).forEach(function (k) {
+        var cb = document.getElementById(p + k + "Rec");
+        if (cb) cb.checked = on;
+      });
+    }
+
     function addProperty(prefill) {
       if (propIds.length >= MAXP) return;
       propSeq += 1;
@@ -429,6 +492,20 @@
           '<input type="text" id="' + p + 'label" autocomplete="off" placeholder="Property ' + letter(idx - 1) + '" />' +
         '</div>' +
         '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'ptype">Property type</label>' +
+          '<select id="' + p + 'ptype">' +
+            '<option value="res">Residential</option>' +
+            '<option value="com">Commercial</option>' +
+          '</select></div>' +
+          '<div class="field" data-com-only hidden><label for="' + p + 'lease">Lease basis</label>' +
+          '<select id="' + p + 'lease">' +
+            '<option value="net">Net lease &mdash; tenant pays outgoings</option>' +
+            '<option value="gross">Gross lease &mdash; landlord pays outgoings</option>' +
+            '<option value="partial">Partial / mixed</option>' +
+          '</select></div>' +
+        '</div>' +
+        '<p class="field-hint" data-com-only hidden>Under a net lease the tenant reimburses the building outgoings, so they drop out of your running costs. Under a gross lease you carry them. The ticks below set which outgoings pass through; choosing a lease basis sets the usual ones, then adjust.</p>' +
+        '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'value">Current value</label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'value" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'lvr">Loan to value <span>(%)</span></label>' +
@@ -438,36 +515,66 @@
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
-          '<div class="field"><label for="' + p + 'rentwk">Rent <span>(per week)</span></label>' +
+          '<div class="field" data-res-only><label for="' + p + 'rentwk">Rent <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentwk" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field" data-com-only hidden><label for="' + p + 'rentyr">Gross rent <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentyr" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<p class="field-hint" id="' + p + 'rentHint">Gross rent &mdash; &nbsp;·&nbsp; Gross yield &mdash;</p>' +
 
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Yearly running costs</h3>' +
+        '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="0" value="6.6" /></div></div>' +
-          '<div class="field"><label for="' + p + 'letting">Letting fee <span>(per year)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="0" value="6.6" /></div>' +
+          recoverTick(p, "pm") + '</div>' +
+          '<div class="field"><label for="' + p + 'letting">Letting / leasing fee <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "council") + '</div>' +
           '<div class="field"><label for="' + p + 'strata">Body corporate / strata <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'strata" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'strata" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "strata") + '</div>' +
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'landtax">Land tax <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'landtax" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'landtax" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "landtax") + '</div>' +
           '<div class="field"><label for="' + p + 'insurance">Insurance <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "insurance") + '</div>' +
         '</div>' +
-        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.</p>' +
+        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.<span data-com-only hidden> Many retail leases cannot pass land tax to the tenant even on a net lease &mdash; leave its tick off if so.</span></p>' +
         '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
+          '<div class="field" data-res-only><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="0" /></div></div>' +
-          '<div class="field"><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
+          '<div class="field" data-com-only hidden><label for="' + p + 'maintyr">Repairs &amp; maintenance <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintyr" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "maint") + '</div>' +
+          '<div class="field" data-res-only><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
           '<input type="text" inputmode="decimal" id="' + p + 'vacwks" autocomplete="off" placeholder="0" /></div>' +
+          '<div class="field" data-com-only hidden><label for="' + p + 'vacmths">Vacancy allowance <span>(months of the year)</span></label>' +
+          '<input type="text" inputmode="decimal" id="' + p + 'vacmths" autocomplete="off" placeholder="0" /></div>' +
+        '</div>' +
+        '<div data-com-only hidden>' +
+          '<div class="field"><label for="' + p + 'water">Water &amp; sewer rates <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'water" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "water") + '</div>' +
+          '<div class="field"><label for="' + p + 'fire">Fire &amp; essential services <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'fire" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "fire") + '</div>' +
+          '<div class="field"><label for="' + p + 'hvac">Air-conditioning / HVAC maintenance <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'hvac" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "hvac") + '</div>' +
+          '<div class="field"><label for="' + p + 'clean">Cleaning, security &amp; pest <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'clean" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "clean") + '</div>' +
+          '<div class="field"><label for="' + p + 'ogadmin">Outgoings audit &amp; admin <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'ogadmin" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "ogadmin") + '</div>' +
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'loanfees">Annual loan fees <span>(per year)</span></label>' +
@@ -475,7 +582,8 @@
           '<div class="field"><label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
-        '<p class="field-hint">Sundry covers the small holding costs not listed above &mdash; smoke alarm and safety checks, gardening and lawns, pest control, cleaning between tenants, bank and statement fees, postage and minor compliance. A rough yearly allowance is fine.</p>' +
+        '<p class="field-hint"><span data-res-only>Sundry covers the small holding costs not listed above &mdash; smoke alarm and safety checks, gardening and lawns, pest control, cleaning between tenants, bank and statement fees, postage and minor compliance.</span>' +
+          '<span data-com-only hidden>Sundry covers anything not itemised above &mdash; bank and statement fees, statutory registrations, minor compliance and consultants.</span> A rough yearly allowance is fine.</p>' +
 
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Depreciation <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></h3>' +
         '<div class="field-row">' +
@@ -537,7 +645,7 @@
           '<span>Cash flow before tax / yr <strong id="' + p + 'oPreTax">&mdash;</strong></span>' +
           '<span>After-tax cash flow / yr <strong id="' + p + 'oAnnual">&mdash;</strong></span>' +
           '<span>After-tax cash flow / wk <strong id="' + p + 'oWeekly">&mdash;</strong></span>' +
-          '<span>Rent / wk to break even <strong id="' + p + 'oNeutral">&mdash;</strong></span>' +
+          '<span id="' + p + 'neutralWrap">Rent / wk to break even <strong id="' + p + 'oNeutral">&mdash;</strong></span>' +
         '</p>' +
         '<button type="button" class="linklike dwelling-type__remove" data-remove="' + id + '">Remove this property</button>';
 
@@ -551,6 +659,18 @@
         render();
       });
       card.querySelector("#" + p + "ngNew").addEventListener("change", render);
+      card.querySelector("#" + p + "ptype").addEventListener("change", function (e) {
+        applyType(id, e.isTrusted);
+        positionPct();
+        render();
+      });
+      card.querySelector("#" + p + "lease").addEventListener("change", function (e) {
+        if (e.isTrusted) autoRecovers(id);
+        render();
+      });
+      Array.prototype.forEach.call(card.querySelectorAll(".calc-recover input"), function (cb) {
+        cb.addEventListener("change", render);
+      });
       card.querySelector("#" + p + "stamp").addEventListener("input", function () {
         touchedStamp[id] = this.value.trim() !== "";
       });
@@ -576,6 +696,7 @@
         if (prefill.value != null) card.querySelector("#" + p + "value").value = prefill.value;
         if (prefill.lvr != null) card.querySelector("#" + p + "lvr").value = prefill.lvr;
       }
+      applyType(id, false);
       updateRemoveButtons();
     }
 
@@ -652,29 +773,58 @@
     /* ---- per-property model ------------------------------------------- */
     function modelProp(id) {
       var p = "p" + id + "_";
+      var isCom = ((document.getElementById(p + "ptype") || {}).value) === "com";
+      var lease = isCom ? (((document.getElementById(p + "lease") || {}).value) || "net") : "";
+
       var value = num(p + "value");
       var lvr = num(p + "lvr");
       var loan = value * lvr / 100;
       var equity = Math.max(value - loan, 0);
       var rate = num(p + "rate") / 100;
       var interest = loan * rate;
+
       var rentWk = num(p + "rentwk");
-      var grossRent = rentWk * 52;
+      var grossRent = isCom ? num(p + "rentyr") : rentWk * 52;
       var grossYield = value > 0 ? grossRent / value : null;
+
+      /* is a commercial outgoing recovered from the tenant? */
+      function rec(key) {
+        if (!isCom) return false;
+        var cb = document.getElementById(p + key + "Rec");
+        return !!(cb && cb.checked);
+      }
 
       var pmPct = num(p + "pmpct") / 100;
       var pm = grossRent * pmPct;
       var letting = num(p + "letting");
       var council = num(p + "council");
+      var water = isCom ? num(p + "water") : 0;
       var strata = num(p + "strata");
       var landTax = num(p + "landtax");
       var insurance = num(p + "insurance");
-      var maint = num(p + "maintwk") * 52;
-      var vacWks = num(p + "vacwks");
-      var vacancy = vacWks * rentWk;
+      var maint = isCom ? num(p + "maintyr") : num(p + "maintwk") * 52;
+      var fire = isCom ? num(p + "fire") : 0;
+      var hvac = isCom ? num(p + "hvac") : 0;
+      var clean = isCom ? num(p + "clean") : 0;
+      var ogadmin = isCom ? num(p + "ogadmin") : 0;
       var loanFees = num(p + "loanfees");
       var sundry = num(p + "sundry");
-      var expenses = pm + letting + council + strata + landTax + insurance + maint + vacancy + loanFees + sundry;
+
+      var vacMths = isCom ? num(p + "vacmths") : 0;
+      var vacWks = isCom ? 0 : num(p + "vacwks");
+      var vacancy = isCom ? grossRent * (vacMths / 12) : vacWks * rentWk;
+
+      /* outgoings the tenant reimburses under the lease */
+      var recoverable = { pm: pm, council: council, water: water, strata: strata,
+        landtax: landTax, insurance: insurance, maint: maint, fire: fire,
+        hvac: hvac, clean: clean, ogadmin: ogadmin };
+      var recovered = 0;
+      Object.keys(recoverable).forEach(function (k) { if (rec(k)) recovered += recoverable[k]; });
+
+      var opexGross = pm + letting + council + water + strata + landTax + insurance +
+        maint + fire + hvac + clean + ogadmin + loanFees + sundry;
+      var opexNet = opexGross - recovered;                 /* what the landlord carries */
+      var expenses = opexNet + vacancy;                    /* "running costs", net of recoveries */
 
       var netRent = grossRent - expenses;
       var netYield = value > 0 ? netRent / value : null;
@@ -704,16 +854,33 @@
       var annual = preTax + taxPreDepr + deprCredit;
       var weekly = annual / 52;
 
-      /* weekly rent that brings annual result to zero, all else equal. Under
-         quarantine a loss earns no tax help, so break-even is simply where the
-         pre-tax cash flow reaches zero. */
-      var fixed = letting + council + strata + landTax + insurance + maint + loanFees + sundry;
-      var denom = 52 * (1 - pmPct) - vacWks;
-      var neutralWk = denom > 0
-        ? (ngNew
+      /* rent that brings the annual result to zero, all else equal. Under
+         quarantine a loss earns no tax help, so break-even is where the
+         pre-tax cash flow reaches zero.
+         res: solve weekly rent.  com: solve annual gross rent. */
+      var neutralWk = null, neutralYr = null;
+      if (isCom) {
+        var pmFactor = rec("pm") ? 0 : 1;
+        var k = 1 - (vacMths / 12) - pmPct * pmFactor;
+        var fixedNet = letting + loanFees + sundry;
+        ["council", "water", "strata", "landtax", "insurance", "maint",
+         "fire", "hvac", "clean", "ogadmin"].forEach(function (key) {
+          if (!rec(key)) fixedNet += recoverable[key];
+        });
+        if (k > 0) {
+          neutralYr = ngNew
+            ? (fixedNet + interest) / k
+            : (fixedNet + interest - depr * taxRate / (1 - taxRate)) / k;
+        }
+      } else {
+        var fixed = letting + council + strata + landTax + insurance + maint + loanFees + sundry;
+        var denom = 52 * (1 - pmPct) - vacWks;
+        if (denom > 0) {
+          neutralWk = ngNew
             ? (interest + fixed) / denom
-            : (interest + fixed - depr * taxRate / (1 - taxRate)) / denom)
-        : null;
+            : (interest + fixed - depr * taxRate / (1 - taxRate)) / denom;
+        }
+      }
 
       var acqOn = document.getElementById(p + "acqOn").checked;
       var acq = acqOn
@@ -722,49 +889,65 @@
 
       return {
         id: id, label: (document.getElementById(p + "label").value || "").trim(),
+        isCom: isCom, lease: lease,
         value: value, lvr: lvr, loan: loan, equity: equity, rate: rate, interest: interest,
         rentWk: rentWk, grossRent: grossRent, grossYield: grossYield,
-        pm: pm, letting: letting, council: council, strata: strata, landTax: landTax,
-        insurance: insurance, maint: maint, vacancy: vacancy, loanFees: loanFees, sundry: sundry,
+        pm: pm, letting: letting, council: council, water: water, strata: strata, landTax: landTax,
+        insurance: insurance, maint: maint, fire: fire, hvac: hvac, clean: clean, ogadmin: ogadmin,
+        vacancy: vacancy, loanFees: loanFees, sundry: sundry, recovered: recovered,
         expenses: expenses, netRent: netRent, netYield: netYield, preTax: preTax,
         taxPreDepr: taxPreDepr, deprCredit: deprCredit, depr: depr, ngNew: ngNew,
-        annual: annual, weekly: weekly, neutralWk: neutralWk,
+        annual: annual, weekly: weekly, neutralWk: neutralWk, neutralYr: neutralYr,
         acqOn: acqOn, acq: acq, cashToComplete: equity + acq,
-        valid: value > 0 && rentWk > 0
+        valid: value > 0 && grossRent > 0
       };
+    }
+
+    function seg() {
+      return { n: 0, value: 0, loan: 0, equity: 0, grossRent: 0, expenses: 0, netRent: 0,
+        pm: 0, letting: 0, council: 0, water: 0, strata: 0, landTax: 0, insurance: 0,
+        maint: 0, fire: 0, hvac: 0, clean: 0, ogadmin: 0, vacancy: 0, loanFees: 0, sundry: 0,
+        recovered: 0, interest: 0, preTax: 0, taxPreDepr: 0, deprCredit: 0, annual: 0,
+        acq: 0, cashToComplete: 0, anyAcq: false, anyNG: false };
+    }
+    function addTo(S, m) {
+      S.n += 1;
+      S.value += m.value; S.loan += m.loan; S.equity += m.equity;
+      S.grossRent += m.grossRent; S.expenses += m.expenses; S.netRent += m.netRent;
+      S.pm += m.pm; S.letting += m.letting; S.council += m.council; S.water += m.water;
+      S.strata += m.strata; S.landTax += m.landTax; S.insurance += m.insurance;
+      S.maint += m.maint; S.fire += m.fire; S.hvac += m.hvac; S.clean += m.clean;
+      S.ogadmin += m.ogadmin; S.vacancy += m.vacancy; S.loanFees += m.loanFees;
+      S.sundry += m.sundry; S.recovered += (m.recovered || 0);
+      S.interest += m.interest; S.preTax += m.preTax; S.taxPreDepr += m.taxPreDepr;
+      S.deprCredit += m.deprCredit; S.annual += m.annual;
+      S.acq += m.acq; S.cashToComplete += m.cashToComplete;
+      if (m.acqOn) S.anyAcq = true;
+      if (m.ngNew) S.anyNG = true;
+    }
+    function finishSeg(S) {
+      S.weekly = S.annual / 52;
+      S.lvr = S.value > 0 ? S.loan / S.value * 100 : null;
+      S.grossYield = S.value > 0 ? S.grossRent / S.value * 100 : null;
+      S.netYield = S.value > 0 ? S.netRent / S.value * 100 : null;
+      S.pctValue = S.value > 0 ? S.annual / S.value * 100 : null;
+      S.toNeutral = S.weekly < 0 ? -S.weekly : 0;
+      return S;
     }
 
     function model() {
       var props = propIds.map(modelProp);
       var live = props.filter(function (x) { return x.valid; });
-      var T = {
-        n: live.length,
-        value: 0, loan: 0, equity: 0, grossRent: 0, expenses: 0, netRent: 0,
-        pm: 0, letting: 0, council: 0, strata: 0, landTax: 0, insurance: 0,
-        maint: 0, vacancy: 0, loanFees: 0, sundry: 0,
-        interest: 0, preTax: 0, taxPreDepr: 0, deprCredit: 0, annual: 0, acq: 0,
-        cashToComplete: 0, anyAcq: false, anyNG: false
-      };
+      var T = seg(), R = seg(), C = seg();
       live.forEach(function (m) {
-        T.value += m.value; T.loan += m.loan; T.equity += m.equity;
-        T.grossRent += m.grossRent; T.expenses += m.expenses; T.netRent += m.netRent;
-        T.pm += m.pm; T.letting += m.letting; T.council += m.council; T.strata += m.strata;
-        T.landTax += m.landTax; T.insurance += m.insurance; T.maint += m.maint;
-        T.vacancy += m.vacancy; T.loanFees += m.loanFees; T.sundry += m.sundry;
-        T.interest += m.interest; T.preTax += m.preTax; T.taxPreDepr += m.taxPreDepr;
-        T.deprCredit += m.deprCredit; T.annual += m.annual;
-        T.acq += m.acq; T.cashToComplete += m.cashToComplete;
-        if (m.acqOn) T.anyAcq = true;
-        if (m.ngNew) T.anyNG = true;
+        addTo(T, m);
+        addTo(m.isCom ? C : R, m);
       });
-      T.weekly = T.annual / 52;
-      T.lvr = T.value > 0 ? T.loan / T.value * 100 : null;
-      T.grossYield = T.value > 0 ? T.grossRent / T.value * 100 : null;
-      T.netYield = T.value > 0 ? T.netRent / T.value * 100 : null;
-      T.pctValue = T.value > 0 ? T.annual / T.value * 100 : null;
-      T.toNeutral = T.weekly < 0 ? -T.weekly : 0;
+      finishSeg(T); finishSeg(R); finishSeg(C);
+      T.anyCom = C.n > 0;
+      T.mixed = R.n > 0 && C.n > 0;
       T.valid = live.length > 0;
-      return { props: props, live: live, T: T };
+      return { props: props, live: live, T: T, R: R, C: C };
     }
 
     /* ---- render ----------------------------------------------------------- */
@@ -796,8 +979,9 @@
         putCard("oPreTax", r.valid ? signedMoney(r.preTax) : "—");
         putCard("oAnnual", r.valid ? signedMoney(r.annual) : "—");
         putCard("oWeekly", r.valid ? signedMoney(r.weekly) : "—");
-        putCard("oNeutral", r.valid && r.neutralWk != null && isFinite(r.neutralWk)
-          ? money(r.neutralWk) + " / wk" : "—");
+        var nv = r.isCom ? r.neutralYr : r.neutralWk;
+        putCard("oNeutral", r.valid && nv != null && isFinite(nv)
+          ? money(nv) + (r.isCom ? " / yr" : " / wk") : "—");
       });
 
       function put(key, str, teaser) {
@@ -813,6 +997,7 @@
       put("expenses", T.valid ? money(T.expenses) : "—");
       put("netRent", T.valid ? signedMoney(T.netRent) : "—");
       put("netYield", T.netYield != null ? pct(T.netYield) : "—");
+      put("recovered", T.anyCom ? (T.recovered > 0 ? "(" + money(T.recovered) + ")" : "None") : "n/a", true);
       put("interest", T.valid ? money(T.interest) : "—");
       put("preTax", T.valid ? signedMoney(T.preTax) : "—");
       put("taxPreDepr", T.valid ? signedMoney(T.taxPreDepr) : "—");
@@ -824,35 +1009,73 @@
       put("acq", T.anyAcq ? money(T.acq) : "None");
       put("cash", T.anyAcq ? money(T.cashToComplete) : "None");
 
+      renderSegTable(m);
+
       var body = document.getElementById("calcScheduleBody");
       if (!T.valid) {
-        body.innerHTML = '<tr><td colspan="8" class="calc-schedule-empty">Enter a property value and weekly rent to see the breakdown.</td></tr>';
+        body.innerHTML = '<tr><td colspan="9" class="calc-schedule-empty">Enter a property value and rent to see the breakdown.</td></tr>';
         return;
       }
       var html = "";
       m.props.forEach(function (r, i) {
         if (!r.valid) return;
         var cells = [
+          r.isCom ? "Commercial" : "Residential",
           money(r.value), money(r.loan), pct(r.lvr),
           r.grossYield != null ? pct(r.grossYield * 100) : "—",
           r.netYield != null ? pct(r.netYield * 100) : "—",
           signedMoney(r.annual), signedMoney(r.weekly)
         ];
         html += "<tr><td>" + (r.label || ("Property " + (i + 1))) + "</td>";
-        cells.forEach(function (c) { html += "<td>" + (unlocked ? c : mask(c)) + "</td>"; });
+        cells.forEach(function (c, ci) { html += "<td>" + (unlocked || ci === 0 ? c : mask(c)) + "</td>"; });
         html += "</tr>";
       });
-      html += '<tr><td><strong>Portfolio</strong></td>' +
-        '<td>' + cell(money(T.value)) + '</td>' +
-        '<td>' + cell(money(T.loan)) + '</td>' +
-        '<td>' + cell(T.lvr != null ? pct(T.lvr) : "—") + '</td>' +
-        '<td>' + cell(T.grossYield != null ? pct(T.grossYield) : "—") + '</td>' +
-        '<td>' + cell(T.netYield != null ? pct(T.netYield) : "—") + '</td>' +
-        '<td>' + cell(signedMoney(T.annual)) + '</td>' +
-        '<td>' + cell(signedMoney(T.weekly)) + '</td></tr>';
+      function totalRow(name, S) {
+        return '<tr><td><strong>' + name + '</strong></td><td><strong>' + S.n + '</strong></td>' +
+          '<td>' + cell(money(S.value)) + '</td>' +
+          '<td>' + cell(money(S.loan)) + '</td>' +
+          '<td>' + cell(S.lvr != null ? pct(S.lvr) : "—") + '</td>' +
+          '<td>' + cell(S.grossYield != null ? pct(S.grossYield) : "—") + '</td>' +
+          '<td>' + cell(S.netYield != null ? pct(S.netYield) : "—") + '</td>' +
+          '<td>' + cell(signedMoney(S.annual)) + '</td>' +
+          '<td>' + cell(signedMoney(S.weekly)) + '</td></tr>';
+      }
+      if (m.T.mixed) {
+        html += totalRow("Residential", m.R);
+        html += totalRow("Commercial", m.C);
+      }
+      html += totalRow("Portfolio", T);
       body.innerHTML = html;
     }
     function cell(c) { return unlocked ? "<strong>" + c + "</strong>" : "<strong>" + mask(c) + "</strong>"; }
+
+    /* ---- residential vs commercial comparison table --------------------- */
+    function renderSegTable(m) {
+      var wrap = document.getElementById("segWrap");
+      var body = document.getElementById("segBody");
+      if (!wrap || !body) return;
+      if (!m.T.valid) { wrap.hidden = true; return; }
+      wrap.hidden = false;
+      var rows = [
+        ["Properties", function (S) { return String(S.n); }, true],
+        ["Value", function (S) { return S.value > 0 ? money(S.value) : "—"; }, true],
+        ["Net yield", function (S) { return S.netYield != null ? pct(S.netYield) : "—"; }, false],
+        ["Net income after costs / yr", function (S) { return S.n ? signedMoney(S.netRent) : "—"; }, false],
+        ["Loan interest / yr", function (S) { return S.n ? money(S.interest) : "—"; }, false],
+        ["After-tax cash flow / yr", function (S) { return S.n ? signedMoney(S.annual) : "—"; }, false],
+        ["After-tax cash flow / wk", function (S) { return S.n ? signedMoney(S.weekly) : "—"; }, false]
+      ];
+      var html = "";
+      rows.forEach(function (r) {
+        function c(S) {
+          var v = r[1](S);
+          return (unlocked || r[2]) ? v : mask(v);
+        }
+        html += "<tr><td>" + r[0] + "</td><td>" + c(m.R) + "</td><td>" + c(m.C) +
+          "</td><td><strong>" + c(m.T) + "</strong></td></tr>";
+      });
+      body.innerHTML = html;
+    }
 
     inputs.addEventListener("input", render);
 
@@ -956,10 +1179,16 @@
       costRow("Body corporate / strata", T.strata);
       costRow("Land tax", T.landTax);
       costRow("Insurance", T.insurance);
-      costRow("Maintenance", T.maint);
+      costRow("Water & sewer rates", T.water);
+      costRow("Repairs & maintenance", T.maint);
+      costRow("Fire & essential services", T.fire);
+      costRow("Air-conditioning / HVAC", T.hvac);
+      costRow("Cleaning, security & pest", T.clean);
+      costRow("Outgoings audit & admin", T.ogadmin);
       costRow("Vacancy allowance", T.vacancy);
       costRow("Loan fees", T.loanFees);
       costRow("Sundry", T.sundry);
+      if (T.recovered > 0) row("  add Outgoings recovered from tenant", money(T.recovered));
       subrule();
       row("Net rent after running costs", signedMoney(T.netRent), true);
       row("  less Loan interest", money(T.interest));
@@ -985,10 +1214,28 @@
         row("Cash needed to buy (equity + costs)", money(T.cashToComplete), true);
       }
 
+      if (m.C.n > 0) {
+        y += 8;
+        section("Residential vs commercial");
+        function segBlock(name, S) {
+          row(name + " - properties", String(S.n), true);
+          row("  Value", money(S.value));
+          row("  Net yield", S.netYield != null ? pct(S.netYield) : "-");
+          row("  Net rent after costs / yr", signedMoney(S.netRent));
+          row("  Loan interest / yr", money(S.interest));
+          row("  After-tax cash flow / yr", bracketMoney(S.annual));
+          row("  After-tax cash flow / wk", bracketMoney(S.weekly));
+          if (S.recovered > 0) row("  Outgoings recovered from tenant", money(S.recovered));
+        }
+        segBlock("Residential", m.R);
+        y += 4;
+        segBlock("Commercial", m.C);
+      }
+
       y += 8;
       section("Property by property");
-      var cols = ["Property", "Value", "Debt", "LVR", "Gross", "Net", "Cash/yr", "Cash/wk"];
-      var cx = [L, L + 132, L + 210, L + 288, L + 340, L + 396, L + 452, L + 510];
+      var cols = ["Property", "Type", "Value", "Debt", "LVR", "Net", "Cash/yr", "Cash/wk"];
+      var cx = [L, L + 120, L + 178, L + 258, L + 330, L + 386, L + 442, L + 500];
       doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
       cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
       y += 4; doc.setDrawColor(225); doc.line(L, y, w - L, y); y += 13;
@@ -997,22 +1244,27 @@
         if (!r.valid) return;
         ensure(16);
         var cells = [
-          (r.label || ("Property " + (i + 1))).slice(0, 22),
+          (r.label || ("Property " + (i + 1))).slice(0, 20),
+          r.isCom ? "Comm" : "Resi",
           money(r.value), money(r.loan), pct(r.lvr),
-          r.grossYield != null ? pct(r.grossYield * 100) : "-",
           r.netYield != null ? pct(r.netYield * 100) : "-",
           bracketMoney(r.annual), bracketMoney(r.weekly)
         ];
         cells.forEach(function (c, j) { doc.text(String(c), cx[j], y); });
         y += 15;
       });
-      ensure(16);
-      doc.setFont("helvetica", "bold"); doc.setTextColor(20);
-      var tcells = ["Portfolio", money(T.value), money(T.loan), T.lvr != null ? pct(T.lvr) : "-",
-        T.grossYield != null ? pct(T.grossYield) : "-", T.netYield != null ? pct(T.netYield) : "-",
-        bracketMoney(T.annual), bracketMoney(T.weekly)];
-      tcells.forEach(function (c, j) { doc.text(String(c), cx[j], y); });
-      y += 20;
+      function pdfTotal(name, S) {
+        ensure(16);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        [name, "", money(S.value), money(S.loan), S.lvr != null ? pct(S.lvr) : "-",
+          S.netYield != null ? pct(S.netYield) : "-", bracketMoney(S.annual), bracketMoney(S.weekly)
+        ].forEach(function (c, j) { doc.text(String(c), cx[j], y); });
+        y += 15;
+        doc.setFont("helvetica", "normal");
+      }
+      if (m.T.mixed) { pdfTotal("Residential", m.R); pdfTotal("Commercial", m.C); }
+      pdfTotal("Portfolio", T);
+      y += 6;
 
       ensure(90);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
@@ -1035,7 +1287,8 @@
         "Loan to value (LVR): " + (T.lvr != null ? pct(T.lvr) : "n/a"),
         "Rent collected: " + money(T.grossRent) + "/yr",
         "Gross yield: " + (T.grossYield != null ? pct(T.grossYield) : "n/a"),
-        "Running costs: " + money(T.expenses) + "/yr (incl. land tax " + money(T.landTax) + ")",
+        "Running costs (net of recoveries): " + money(T.expenses) + "/yr (incl. land tax " + money(T.landTax) + ")",
+        (T.anyCom ? "Outgoings recovered from tenant: " + money(T.recovered) + "/yr" : null),
         "Net rent after costs: " + signedMoney(T.netRent) + "/yr",
         "Net yield: " + (T.netYield != null ? pct(T.netYield) : "n/a"),
         "Loan interest: " + money(T.interest) + "/yr",
@@ -1051,14 +1304,30 @@
         lines.push("One-off purchase costs: " + money(T.acq));
         lines.push("Cash needed to buy: " + money(T.cashToComplete));
       }
+      if (T.mixed) {
+        lines.push("----");
+        lines.push("Residential subtotal (" + m.R.n + "): value " + money(m.R.value) +
+          ", net yield " + (m.R.netYield != null ? pct(m.R.netYield) : "n/a") +
+          ", after-tax " + signedMoney(m.R.annual) + "/yr (" + signedMoney(m.R.weekly) + "/wk)");
+        lines.push("Commercial subtotal (" + m.C.n + "): value " + money(m.C.value) +
+          ", net yield " + (m.C.netYield != null ? pct(m.C.netYield) : "n/a") +
+          ", after-tax " + signedMoney(m.C.annual) + "/yr (" + signedMoney(m.C.weekly) + "/wk)" +
+          (m.C.recovered > 0 ? ", outgoings recovered " + money(m.C.recovered) + "/yr" : ""));
+      }
       lines.push("----");
+      var LEASE = { net: "net lease", gross: "gross lease", partial: "partial/mixed lease" };
       m.props.forEach(function (r, i) {
         if (!r.valid) return;
-        lines.push((r.label || ("Property " + (i + 1))) + (r.ngNew ? " [post-Budget NG]" : "") + ": value " + money(r.value) +
-          ", debt " + money(r.loan) + " (" + pct(r.lvr) + "), rent " + money(r.rentWk) + "/wk, " +
+        var tag = (r.isCom ? "[Commercial, " + (LEASE[r.lease] || "net lease") + "]" : "[Residential]") +
+          (r.ngNew ? " [post-Budget NG]" : "");
+        var rentStr = r.isCom ? money(r.grossRent) + "/yr" : money(r.rentWk) + "/wk";
+        var neutralStr = r.isCom
+          ? (r.neutralYr != null && isFinite(r.neutralYr) ? money(r.neutralYr) + "/yr" : "n/a")
+          : (r.neutralWk != null && isFinite(r.neutralWk) ? money(r.neutralWk) + "/wk" : "n/a");
+        lines.push((r.label || ("Property " + (i + 1))) + " " + tag + ": value " + money(r.value) +
+          ", debt " + money(r.loan) + " (" + pct(r.lvr) + "), rent " + rentStr + ", " +
           "net yield " + (r.netYield != null ? pct(r.netYield * 100) : "n/a") + ", " +
-          "weekly " + signedMoney(r.weekly) + ", neutral rent " +
-          (r.neutralWk != null && isFinite(r.neutralWk) ? money(r.neutralWk) + "/wk" : "n/a"));
+          "weekly " + signedMoney(r.weekly) + ", break-even rent " + neutralStr);
       });
       return lines.filter(Boolean).join("\n");
     }
@@ -1124,12 +1393,12 @@
 
     /* ---- reveal gate wiring ------------------------------------------------ */
     var resultsEl = document.querySelector(".calc-results");
-    var scheduleWrap = document.querySelector(".calc-schedule-wrap");
+    var scheduleWraps = Array.prototype.slice.call(document.querySelectorAll(".calc-schedule-wrap"));
     var lockNote = document.getElementById("lockNote");
 
     function applyLock() {
       resultsEl.classList.toggle("is-locked", !unlocked);
-      scheduleWrap.classList.toggle("is-locked", !unlocked);
+      scheduleWraps.forEach(function (w) { w.classList.toggle("is-locked", !unlocked); });
       if (lockNote) lockNote.hidden = unlocked;
       openLead.textContent = unlocked ? "Download the PDF again" : "Download portfolio review (PDF)";
       render();
@@ -1182,7 +1451,9 @@
     resultsEl.addEventListener("click", function (e) {
       if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
     });
-    scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+    scheduleWraps.forEach(function (w) {
+      w.addEventListener("click", function () { if (!unlocked) openModal(); });
+    });
   })();
   </script>
   <script src="pc-report.js"></script>

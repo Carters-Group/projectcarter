@@ -1040,6 +1040,9 @@ h1, h2, h3 {
 .field.is-recovered .input-pct input { text-decoration: line-through; opacity: 0.55; }
 .field.is-recovered .calc-recover { color: var(--accent); }
 
+/* type-swapped card fields (PR calculator: residential vs commercial) */
+.field[hidden], .calc-check[hidden], .field-row[hidden] { display: none !important; }
+
 .calc-uplift {
   display: grid; gap: 16px;
   padding: 18px;
