@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Development Feasibility (GRV) Calculator | Project Carter</title>
-  <meta name="description" content="Development feasibility from DA to settlement: cost to approval, post-DA consultants, a 2026 construction cost estimator for D&C or trade contracts, council fees, finance and holding, then gross realisation, GST and selling costs by dwelling type. See expected profit, profit on cost, cash-on-cash return and a worst-case scenario, and take away a one-page PDF. A guide only, not financial advice." />
+  <meta name="description" content="Full development feasibility from DA to settlement: construction cost, finance, GST and gross realisation. See expected profit and a worst-case scenario." />
   <meta name="theme-color" content="#0c1016" />
 
   <meta property="og:type" content="website" />
@@ -100,7 +100,7 @@
       <div class="wrap">
         <div class="calc-intro">
           <p class="kicker">Project Carter</p>
-          <h1>GRV Calculator</h1>
+          <h1>Development Feasibility (GRV) Calculator</h1>
           <p>Take a development from approval to settled sales. Start with the cost to reach DA, then add the post-DA consultants, the construction by dwelling type, the council and finance costs, and the gross realisation on sale. The tool has a 2026 construction cost estimator for a design-and-construct or a trade-contract build, estimates GST under the margin scheme, and reports expected profit, profit on cost, cash-on-cash return and a worst-case scenario. The numbers update live, and you can take away a one-page PDF. It is an estimate to help you think, not financial, tax or planning advice.</p>
         </div>
 
@@ -140,8 +140,8 @@
               <div class="field">
                 <label>How is the build contracted?</label>
                 <div class="site-checks" id="contractChoice">
-                  <label class="calc-check"><input type="radio" name="contract" value="dc" checked /><span>Design &amp; construct (D&amp;C) &mdash; one fixed price, the builder carries the design consultants</span></label>
-                  <label class="calc-check"><input type="radio" name="contract" value="trade" /><span>Construct only / trade contracts &mdash; you carry the consultant team through documentation and construction</span></label>
+                  <label class="calc-check"><input type="radio" name="contract" value="dc" checked /><span>Design &amp; construct (D&amp;C) - one fixed price, the builder carries the design consultants</span></label>
+                  <label class="calc-check"><input type="radio" name="contract" value="trade" /><span>Construct only / trade contracts - you carry the consultant team through documentation and construction</span></label>
                 </div>
                 <p class="calc-note" id="dcNote" hidden><strong>Under a design &amp; construct contract</strong> the builder carries and prices the architect's documentation to CC, the structural and civil, hydraulic, mechanical / electrical / fire, facade and ESD design, the building surveyor / certifier, the construction certificate / permit fee, the long service levy, and the contract works and public liability insurance. Those lines are struck out below and left out of your totals; they sit inside the contract sum you enter per dwelling type. You still carry the set-out surveyor, the superintendent, the QS progress inspections, the infrastructure charges and contributions, and your own project management. Enter your own professional indemnity or latent-defects cover under "Other holding cost".</p>
               </div>
@@ -477,8 +477,8 @@
             <div class="result-row"><dt>Average debt drawn</dt><dd data-out="avgDebt">&mdash;</dd></div>
             <div class="result-row"><dt>Peak debt <span>(end of period)</span></dt><dd data-out="peakDebt">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Cash-on-cash return</dt><dd data-out="coc">&mdash;</dd></div>
-            <div class="result-row"><dt>Profit &mdash; worst case</dt><dd data-out="worstProfit">&mdash;</dd></div>
-            <div class="result-row"><dt>Profit on cost &mdash; worst case</dt><dd data-out="worstMargin">&mdash;</dd></div>
+            <div class="result-row"><dt>Profit - worst case</dt><dd data-out="worstProfit">&mdash;</dd></div>
+            <div class="result-row"><dt>Profit on cost - worst case</dt><dd data-out="worstMargin">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>

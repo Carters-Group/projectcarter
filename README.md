@@ -36,6 +36,8 @@ script.js                       header scroll state, mobile nav, scroll reveals
 assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
 assets/images/team/             Trent portrait
 .nojekyll                       serve files as-is on GitHub Pages
+sitemap.xml                     lists every indexable page (noindex pages excluded) for search engines
+robots.txt                      allows all crawlers, points at sitemap.xml
 ```
 
 Every link on the site opens in the same tab (no `target="_blank"`); visitors use
