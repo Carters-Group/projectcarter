@@ -56,7 +56,11 @@
         <div class="calc-intro">
           <p class="kicker">Project Carter</p>
           <h1>Commercial Lending Calculator</h1>
-          <p>Work out where you stand on deposit or equity for a commercial purchase, before income and serviceability come into it. Pick the loan type that matches your situation and see the minimum deposit banks typically expect, compared across major banks and tier 2 / non-bank lenders. This shows your likely equity position, not a borrowing capacity or credit decision &mdash; that comes later through a registered brokerage.</p>
+          <p>Work out where you stand on deposit or equity for a commercial purchase. Pick the loan type that matches your situation and see the minimum deposit banks typically expect, compared across major banks and tier 2 / non-bank lenders. This shows your likely equity position, not a borrowing capacity or credit decision &mdash; that comes later through a registered brokerage.</p>
+        </div>
+
+        <div class="calc-warn">
+          <p><strong>These minimum deposit levels assume the lender's full assessment is met</strong> &mdash; income servicing the debt, acceptable liabilities, and security the bank is comfortable with. They are not a deposit-only threshold: a stronger or weaker position can move the deposit a lender actually asks for. Speak to a mortgage broker to work out what applies to your situation.</p>
         </div>
 
         <div class="calc-grid">
@@ -183,13 +187,13 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
-            <li><strong>This is a deposit / equity guide, not a borrowing capacity or credit assessment.</strong> It shows the minimum deposit or equity a lender in each tier typically expects for the loan type you pick, given the price or total development cost you enter. What you can actually borrow depends on income, serviceability, credit history and the specific security &mdash; that assessment happens with a registered brokerage.</li>
-            <li><strong>Major banks</strong> are the big four and other large deposit-taking banks. They generally offer the sharpest rates for the lowest-risk, most straightforward deals, and are the most conservative on leverage and documentation.</li>
-            <li><strong>Tier 2 / non-bank lenders</strong> covers second-tier banks, credit unions, private and specialist commercial lenders. They typically lend at a higher loan-to-value ratio (a smaller deposit) and are more flexible on documentation and credit, for a higher interest rate.</li>
-            <li><strong>Owner-occupied commercial</strong> is a business buying or refinancing the premises it trades from. This is the lowest-risk category for lenders and generally attracts the highest leverage and sharpest rates.</li>
-            <li><strong>Commercial investment</strong> is a property leased to a tenant, assessed mainly on the strength of the lease and tenant covenant rather than the owner's own trade.</li>
-            <li><strong>SMSF commercial property</strong> is bought through a limited recourse borrowing arrangement (LRBA) inside a self-managed super fund, including a business buying its own premises back into its members' SMSF (a "rent-back"). Most major banks have stepped back from this market, so it is largely written by specialist SMSF / LRBA lenders.</li>
-            <li><strong>Lease doc / low doc investment</strong> is serviced mainly by the property's own lease rather than the borrower's financials. Lower deposit requirements from the majors generally aren't available; this is tier 2 / non-bank territory.</li>
+            <li><strong>This is a deposit / equity guide, not a borrowing capacity or credit assessment.</strong> The minimum deposit shown for each tier assumes the lender's full assessment is met &mdash; income servicing the debt, acceptable liabilities and security the bank is comfortable with &mdash; not just a deposit threshold on its own. What you can actually borrow depends on income, serviceability, credit history and the specific security &mdash; that assessment happens with a registered brokerage.</li>
+            <li><strong>Major banks</strong> are the big four and other large deposit-taking banks. Rates shown for the majors are indicative of where they currently cap out for a low-risk deal (around 7.25% &ndash; 8.00% p.a.); actual pricing depends on the full assessment.</li>
+            <li><strong>Tier 2 / non-bank lenders</strong> covers second-tier banks, credit unions, private and specialist commercial lenders. They are typically more flexible on documentation and credit, for a higher interest rate.</li>
+            <li><strong>Owner-occupied commercial</strong> is a business buying or refinancing the premises it trades from. A 20% deposit is available from majors and tier 2 alike, provided income comfortably services the debt and liabilities are limited.</li>
+            <li><strong>Commercial investment</strong> is a property leased to a tenant. Treated the same as owner-occupied &mdash; a 20% deposit is available where income (including the lease) services the debt and liabilities are limited.</li>
+            <li><strong>SMSF commercial property</strong> is bought through a limited recourse borrowing arrangement (LRBA) inside a self-managed super fund, including a business buying its own premises back into its members' SMSF (a "rent-back"). Only a limited, panel-approved list of lenders write this lending, major and specialist alike, and the asset's own income needs to support the debt level.</li>
+            <li><strong>Lease doc / low doc investment</strong> is serviced by the property's own lease &mdash; no trading income is required in the entity. Available through a limited number of majors as well as tier 2 lenders; the lease itself needs to support the debt.</li>
             <li><strong>Build to Rent (BTR)</strong> uses the total development cost as the base for lending rather than a purchase price. Lenders only recognise part of the projected rental income toward covering debt costs &mdash; the rental cover check below uses a 75% recognition of gross rent as a rough guide.</li>
             <li><strong>Build to sell</strong> (development / construction for sale) also lends against total development cost. Major banks typically want a level of qualifying presales in place before funding; tier 2 / non-bank lenders are more likely to fund with less presale cover, priced according to the deposit or equity contributed.</li>
             <li>All loan-to-value ratios, deposit percentages and rate ranges shown are indicative starting points based on typical market settings as at the time of writing. Every lender, deal and security is different &mdash; treat these as a planning guide, not a quote or approval.</li>
@@ -270,35 +274,35 @@
         label: "Owner-occupied commercial",
         unit: "Purchase price",
         hint: "Business buying or refinancing the premises it trades from.",
-        major: { lvr: 70, rate: [6.05, 7.50], note: "Full financials expected; up to ~75% LVR possible with a strong trading history and low-risk security." },
-        tier2: { lvr: 75, rate: [7.50, 9.50], note: "Faster, more flexible credit assessment for the extra leverage." }
+        major: { lvr: 80, rate: [7.25, 8.00], note: "Provided income comfortably services the debt and liabilities are limited." },
+        tier2: { lvr: 80, rate: [7.50, 9.50], note: "Same standard as the majors — income servicing the debt and limited liabilities." }
       },
       investment: {
         label: "Commercial investment (leased)",
         unit: "Purchase price",
         hint: "Property leased to a tenant, bought as an investment.",
-        major: { lvr: 65, rate: [7.00, 8.50], note: "Assessed mainly on the strength of the lease and tenant covenant." },
-        tier2: { lvr: 75, rate: [8.00, 10.50], note: "Higher leverage available for strong tenants and longer lease terms." }
+        major: { lvr: 80, rate: [7.25, 8.00], note: "Same standard as owner-occupied — income (incl. the lease) servicing the debt and limited liabilities." },
+        tier2: { lvr: 80, rate: [8.00, 10.50], note: "Same standard as the majors — income servicing the debt and limited liabilities." }
       },
       smsf: {
         label: "SMSF commercial property (LRBA)",
         unit: "Purchase price",
         hint: "Bought inside a self-managed super fund via a limited recourse borrowing arrangement, including a business rent-back to its own SMSF.",
-        major: { lvr: 65, rate: [7.50, 9.00], note: "Most major banks have exited SMSF lending — limited, case-by-case appetite where offered." },
-        tier2: { lvr: 75, rate: [8.00, 10.50], note: "Specialist SMSF / LRBA lenders are the primary market for this loan type." }
+        major: { lvr: 75, rate: [7.25, 8.00], note: "Only a limited, panel-approved list of lenders write SMSF lending; the asset's income needs to support the debt level." },
+        tier2: { lvr: 75, rate: [8.00, 10.50], note: "Specialist SMSF / LRBA lenders, panel-approved; the asset's income needs to support the debt level." }
       },
       leasedoc: {
         label: "Lease doc / low doc investment",
         unit: "Purchase price",
-        hint: "Serviced mainly by the property's own lease, with minimal financials.",
-        major: { lvr: null, rate: null, note: "Majors generally require full financials — not typically written as lease doc." },
-        tier2: { lvr: 65, rate: [8.50, 12.00], note: "Serviced primarily by the lease itself, with minimal financials required." }
+        hint: "Serviced by the property's own lease, with no trading income required in the entity.",
+        major: { lvr: 65, rate: [7.25, 8.00], note: "Available through a limited number of majors; the lease needs to support the debt, no trading income required in the entity." },
+        tier2: { lvr: 70, rate: [8.50, 12.00], note: "More flexible on documentation; the lease needs to support the debt, no trading income required in the entity." }
       },
       btr: {
         label: "Build to Rent (BTR)",
         unit: "Total development cost (TDC)",
         hint: "Lending is based on total development cost, not a purchase price.",
-        major: { lvr: 65, rate: [7.50, 9.00], note: "Deal-by-deal appetite, usually for larger, institutional-grade schemes." },
+        major: { lvr: 65, rate: [7.25, 8.00], note: "Deal-by-deal appetite, usually for larger, institutional-grade schemes." },
         tier2: { lvr: 65, rate: [8.50, 11.00], note: "Rental income (recognised at ~75%) needs to cover debt costs." },
         rentalCover: 0.75
       },
@@ -306,7 +310,7 @@
         label: "Build to sell (development / construction)",
         unit: "Total development cost (TDC)",
         hint: "Lending is based on total development cost, not a purchase price.",
-        major: { lvr: 70, rate: [7.50, 9.50], note: "Presales are typically required to support the debt." },
+        major: { lvr: 70, rate: [7.25, 8.00], note: "Presales are typically required to support the debt." },
         tier2: { lvr: 70, rate: [8.50, 12.00], note: "Rate varies with the deposit / equity contributed; presale pressure is usually lower." }
       }
     };
@@ -519,7 +523,7 @@
 
       y += 14;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This is a deposit / equity planning guide only, not a borrowing capacity estimate, credit decision or loan offer. Loan-to-value ratios, deposit percentages and rate ranges are indicative starting points based on typical market settings and the loan type selected, and will vary by lender, deal and security. The rental cover check for build to rent is a rough guide only and does not reflect a lender's actual serviceability assessment. Speak to Project Carter and a registered brokerage before acting.";
+      var disc = "This is a deposit / equity planning guide only, not a borrowing capacity estimate, credit decision or loan offer. The minimum deposit levels shown assume a lender's full assessment is met (income servicing the debt, acceptable liabilities and security), not just a deposit threshold on its own. Loan-to-value ratios, deposit percentages and rate ranges are indicative starting points based on typical market settings and the loan type selected, and will vary by lender, deal and security. The rental cover check for build to rent is a rough guide only and does not reflect a lender's actual serviceability assessment. Speak to Project Carter and a registered mortgage broker before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
