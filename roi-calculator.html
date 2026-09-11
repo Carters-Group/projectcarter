@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ROI Calculator | Project Carter</title>
+  <title>Commercial Property ROI Calculator | Project Carter</title>
   <meta name="description" content="Model the return on a property hold: loan, acquisition costs, growing net rent, interest, debt reduction from profit and an optional value uplift. See total ROI, return per year, equity multiple and IRR, and take away a one-page PDF. A guide only, not financial advice." />
   <meta name="theme-color" content="#0c1016" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="ROI Calculator | Project Carter" />
+  <meta property="og:title" content="Commercial Property ROI Calculator | Project Carter" />
   <meta property="og:description" content="Model a property hold end to end: costs, rent growth, interest, debt reduction and a value uplift. Total ROI, equity multiple and IRR, plus a one-page PDF." />
   <meta property="og:image" content="assets/og-image.svg" />
 
@@ -17,6 +17,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Commercial Property ROI Calculator",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any (web browser)",
+    "description": "Model the return on a commercial property hold from purchase to sale: total ROI, return per year, equity multiple and IRR.",
+    "url": "https://projectcarter.com.au/roi-calculator.html",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
+    "publisher": { "@type": "Organization", "name": "Project Carter" }
+  }
+  </script>
 </head>
 <body data-pc-calc="roi">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -28,9 +42,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="nav" id="primaryNav" aria-label="Primary">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
       </nav>
       <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
@@ -313,9 +327,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="footer-nav" aria-label="Footer">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
         <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
@@ -1003,12 +1017,23 @@
       if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
     });
     scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+
+    /* Small labelled snapshot, saved alongside the report so other
+       calculators can pull a figure across (e.g. sale proceeds to fund the
+       next deal) without re-running this page's model. See pc-report.js. */
+    window.pcCalcSummary = function () {
+      var m = model();
+      if (!m.valid) return {};
+      return { netSaleProceeds: Math.round(m.netProceeds) };
+    };
   })();
   </script>
   <script>
     window.PC_PULLERS = [
       { fieldId: "fundsAvailable", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
       { fieldId: "fundsAvailable", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
+      { fieldId: "fundsAvailable", sourceCalc: "grv", summaryKey: "equityAtSettlement", label: "Pull sale proceeds from a saved GRV report" },
+      { fieldId: "fundsAvailable", sourceCalc: "roi", summaryKey: "netSaleProceeds", label: "Pull sale proceeds from another saved ROI report" },
       { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" }
     ];
   </script>

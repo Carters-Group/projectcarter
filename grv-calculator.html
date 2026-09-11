@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GRV Calculator | Project Carter</title>
+  <title>Development Feasibility (GRV) Calculator | Project Carter</title>
   <meta name="description" content="Development feasibility from DA to settlement: cost to approval, post-DA consultants, a 2026 construction cost estimator for D&C or trade contracts, council fees, finance and holding, then gross realisation, GST and selling costs by dwelling type. See expected profit, profit on cost, cash-on-cash return and a worst-case scenario, and take away a one-page PDF. A guide only, not financial advice." />
   <meta name="theme-color" content="#0c1016" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="GRV Calculator | Project Carter" />
+  <meta property="og:title" content="Development Feasibility (GRV) Calculator | Project Carter" />
   <meta property="og:description" content="Development feasibility: cost to DA, construction by dwelling type, GST and gross realisation. Expected profit, profit on cost, cash-on-cash and a worst-case scenario, plus a one-page PDF." />
   <meta property="og:image" content="assets/og-image.svg" />
 
@@ -17,6 +17,58 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Development Feasibility (GRV) Calculator",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any (web browser)",
+    "description": "Full development feasibility from DA to settled sales: construction cost by dwelling type, finance, GST, expected profit and a worst-case scenario.",
+    "url": "https://projectcarter.com.au/grv-calculator.html",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
+    "publisher": { "@type": "Organization", "name": "Project Carter" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What's the difference between Design & Construct and Construct-only?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Under Design & Construct, the architect's documentation to CC, structural and civil, hydraulic, services, facade and ESD design, the building surveyor or certifier, the construction certificate or permit fee, the long service levy, and contract works and public liability insurance all sit inside the builder's contract sum, so those lines are struck out and left out of the developer's totals. Under construct-only, every line is a developer cost and a builder's margin applies." }
+      },
+      {
+        "@type": "Question",
+        "name": "What builder's margin should I use?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Leave it at 0 when construction costs come from the built-in estimator, since that rate already includes builder preliminaries and margin. Only add a margin percentage when you're entering bare trade costs." }
+      },
+      {
+        "@type": "Question",
+        "name": "How is GST calculated on the sale?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The default is a margin-scheme estimate: gross realisation less the land price, divided by 11. You can switch to no GST for input-taxed stock, or override it with your accountant's figure. Input tax credits on construction are claimed separately and are not netted here." }
+      },
+      {
+        "@type": "Question",
+        "name": "What contingency percentage is typical for a development feasibility?",
+        "acceptedAnswer": { "@type": "Answer", "text": "This calculator defaults to 10%, applied to the post-DA consultants, statutory fees and construction. It's editable, and it is not applied to the DA total or to finance charges." }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the finance drawdown work in this calculator?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Costs are assumed to draw on a smooth S-curve through the construction period, equity is spent before any debt, and interest accrues monthly on the balance outstanding and is capitalised. Results show both the average debt drawn and the peak debt at the end of the period." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this a profit forecast?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. It's a feasibility estimate built from the figures you enter, plus a sensitivity check on sale prices and costs. It excludes changes in interest rates, the sales program, presales conditions and staging, and it is not financial, tax or planning advice." }
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-pc-calc="grv">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -28,9 +80,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="nav" id="primaryNav" aria-label="Primary">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
       </nav>
       <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
@@ -508,6 +560,34 @@
             <li>This is a feasibility estimate built from the figures entered. It excludes changes in interest rates and the sales program, presales conditions, staging, tax other than GST, and anything specific to a site or a funder. It is not financial, tax or planning advice. Speak to Project Carter, your accountant and a licensed adviser before acting.</li>
           </ul>
         </div>
+
+        <div class="calc-faq">
+          <h2 class="calc-subhead">Common questions</h2>
+          <details>
+            <summary>What's the difference between Design &amp; Construct and Construct-only?</summary>
+            <p>Under Design &amp; Construct, the architect's documentation to CC, structural and civil, hydraulic, services, facade and ESD design, the building surveyor or certifier, the construction certificate or permit fee, the long service levy, and contract works and public liability insurance all sit inside the builder's contract sum, so those lines are struck out and left out of your totals. Under construct-only, every line is a developer cost and a builder's margin applies.</p>
+          </details>
+          <details>
+            <summary>What builder's margin should I use?</summary>
+            <p>Leave it at 0 when construction costs come from the built-in estimator, since that rate already includes builder preliminaries and margin. Only add a margin percentage when you're entering bare trade costs.</p>
+          </details>
+          <details>
+            <summary>How is GST calculated on the sale?</summary>
+            <p>The default is a margin-scheme estimate: gross realisation less the land price, divided by 11. Switch to "no GST" for input-taxed stock, or override it with your accountant's figure. Input tax credits on construction are claimed separately and are not netted here.</p>
+          </details>
+          <details>
+            <summary>What contingency percentage is typical for a development feasibility?</summary>
+            <p>This calculator defaults to 10%, applied to the post-DA consultants, statutory fees and construction. It's editable, and it is not applied to the DA total or to finance charges.</p>
+          </details>
+          <details>
+            <summary>How does the finance drawdown work in this calculator?</summary>
+            <p>Costs are assumed to draw on a smooth S-curve through the construction period, your equity is spent before any debt, and interest accrues monthly on the balance outstanding and is capitalised. Results show both the average debt drawn and the peak debt at the end of the period.</p>
+          </details>
+          <details>
+            <summary>Is this a profit forecast?</summary>
+            <p>No. It's a feasibility estimate built from the figures you enter, plus a sensitivity check on sale prices and costs. It excludes changes in interest rates, the sales program, presales conditions and staging, and it is not financial, tax or planning advice.</p>
+          </details>
+        </div>
       </div>
     </section>
   </main>
@@ -519,9 +599,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="footer-nav" aria-label="Footer">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
         <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
@@ -1506,13 +1586,26 @@
       if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
     });
     scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+
+    /* Small labelled snapshot, saved alongside the report so other
+       calculators can pull a figure across (e.g. settlement proceeds to fund
+       the next site) without re-running this page's model. See pc-report.js. */
+    window.pcCalcSummary = function () {
+      var m = model();
+      if (!m.valid) return {};
+      var out = { totalProjectCost: Math.round(m.totalCost) };
+      if (m.equityTotal > 0 && m.profit != null) out.equityAtSettlement = Math.round(m.equityTotal + m.profit);
+      return out;
+    };
   })();
   </script>
   <script>
     window.PC_PULLERS = [
       { fieldId: "daEquity", sourceCalc: "da", summaryKey: "cashEquityRequired", label: "Pull from a saved DA report" },
       { fieldId: "cashIn", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
-      { fieldId: "cashIn", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" }
+      { fieldId: "cashIn", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
+      { fieldId: "cashIn", sourceCalc: "roi", summaryKey: "netSaleProceeds", label: "Pull sale proceeds from a saved ROI report" },
+      { fieldId: "cashIn", sourceCalc: "grv", summaryKey: "equityAtSettlement", label: "Pull settlement proceeds from another saved GRV report" }
     ];
   </script>
   <script src="pc-report.js"></script>

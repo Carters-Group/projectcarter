@@ -14,7 +14,9 @@ editorial layout with an amber accent.
 Plain static site. No build step, no framework, no dependencies.
 
 ```
-index.html                      home — hero, about (Trent), projects, "what I do"
+index.html                      home — hero, a short about teaser, projects, a short "what I do" teaser, each linking to its own standalone page
+about.html                      standalone About page — Trent's full bio, who he works with, service area, links to every calculator
+approach.html                   standalone Approach page — the four-stage process, all six service pillars in depth, links to every calculator
 project-haig-on-the-park.html   project detail — Haig On The Park (completed)
 project-royal-terraces.html     project detail — Royal Terraces (construction commencing)
 project-city-west-villas.html   project detail — City West Villas (construction commencing)
@@ -39,13 +41,15 @@ assets/images/team/             Trent portrait
 Every link on the site opens in the same tab (no `target="_blank"`); visitors use
 the browser back button to return. Every page (home, project details,
 `roi-calculator.html`, `noi-calculator.html`, `da-calculator.html`,
-`grv-calculator.html`, `pr-calculator.html`, `enquire.html`) carries the same fixed site header and
+`grv-calculator.html`, `pr-calculator.html`, `cl-calculator.html`, `enquire.html`) carries the same fixed site header and
 footer. Top-nav order is **About, Projects, Approach, Calculators**, then the
-**Enquire** button. **Calculators** is a dropdown (`.nav-dropdown`, toggled by
+**Enquire** button. **About** and **Approach** are their own pages
+(`about.html`, `approach.html`); **Projects** stays an in-page anchor to the
+project grid on `index.html`. **Calculators** is a dropdown (`.nav-dropdown`, toggled by
 `script.js`) with **Net Operating Income (NOI)**, **Return on Equity (ROI)**,
-**Development Site (DA)**, **Gross Realisation Value (GRV)** then **Portfolio
-Review (PR)**; on mobile it expands inline in the slide-down menu. The footer nav
-lists all five calculators flat plus a **Contact** link.
+**Development Site (DA)**, **Gross Realisation Value (GRV)**, **Portfolio
+Review (PR)** and **Commercial Lending (CL)**; on mobile it expands inline in the slide-down menu. The footer nav
+lists About, Projects, Approach, Calculators, Account and Contact.
 
 `enquire.html` is the multi-step lead-capture form (no footer, no personal phone
 or email; enquiries arrive only through the form). `roi-calculator.html` is a

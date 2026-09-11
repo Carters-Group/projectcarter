@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Commercial Lending Calculator | Project Carter</title>
+  <title>Commercial Lending Deposit &amp; Equity Calculator</title>
   <meta name="description" content="Work out the deposit or equity position for commercial lending: owner-occupied, investment, SMSF, lease doc, build to rent and build to sell, compared across major banks and tier 2 / non-bank lenders. Take away a one-page PDF. A guide only, not financial or credit advice." />
   <meta name="theme-color" content="#0c1016" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Commercial Lending Calculator | Project Carter" />
+  <meta property="og:title" content="Commercial Lending Deposit & Equity Calculator | Project Carter" />
   <meta property="og:description" content="Deposit and equity position for commercial lending by loan type, compared across major banks and tier 2 / non-bank lenders." />
   <meta property="og:image" content="assets/og-image.svg" />
 
@@ -17,6 +17,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Commercial Lending Deposit & Equity Calculator",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any (web browser)",
+    "description": "Work out the deposit or equity position for commercial lending by loan type, compared across major banks and tier 2 / non-bank lenders.",
+    "url": "https://projectcarter.com.au/cl-calculator.html",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
+    "publisher": { "@type": "Organization", "name": "Project Carter" }
+  }
+  </script>
 </head>
 <body data-pc-calc="cl">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -28,9 +42,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="nav" id="primaryNav" aria-label="Primary">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
       </nav>
       <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
@@ -264,9 +278,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="footer-nav" aria-label="Footer">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
         <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
@@ -902,6 +916,8 @@
     window.PC_PULLERS = [
       { fieldId: "fundsAvailable", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
       { fieldId: "fundsAvailable", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
+      { fieldId: "fundsAvailable", sourceCalc: "roi", summaryKey: "netSaleProceeds", label: "Pull sale proceeds from a saved ROI report" },
+      { fieldId: "fundsAvailable", sourceCalc: "grv", summaryKey: "equityAtSettlement", label: "Pull settlement proceeds from a saved GRV report" },
       { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" }
     ];
   </script>

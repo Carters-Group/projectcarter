@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Development Site (DA) Calculator | Project Carter</title>
+  <title>Development Feasibility (DA) Cost Calculator</title>
   <meta name="description" content="Cost the run from buying a development site to a lodged and approved DA: acquisition, consultants, site works, council fees and holding costs, with optional debt and interest over the DA period. Enter the address and site characteristics to see which reports are likely at lodgement, plus a state-based demolition range. A guide only, not financial advice." />
   <meta name="theme-color" content="#0c1016" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Development Site (DA) Calculator | Project Carter" />
+  <meta property="og:title" content="Development Feasibility (DA) Cost Calculator | Project Carter" />
   <meta property="og:description" content="From buying a block to DA approval: acquisition, consultants, site works, council fees, holding costs and interest. Report flags from the site's characteristics, a state-based demolition range, all-in cost, cash required, one-page PDF." />
   <meta property="og:image" content="assets/og-image.svg" />
 
@@ -17,6 +17,58 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Development Feasibility (DA) Cost Calculator",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any (web browser)",
+    "description": "Cost the run from buying a development site to a lodged and approved DA, including consultants, council fees, holding costs and interest.",
+    "url": "https://projectcarter.com.au/da-calculator.html",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
+    "publisher": { "@type": "Organization", "name": "Project Carter" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What consultant reports do I actually need for a DA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "It depends on the site and the development type. This calculator's rules engine flags each consultant line as standard for most DAs, likely for this site, or may be required, based on the site characteristics you tick. The tags are a guide, not a council determination: always hold a pre-lodgement (pre-DA) meeting before you lodge, unless the outcome is already certain." }
+      },
+      {
+        "@type": "Question",
+        "name": "How is stamp duty estimated on a development site?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Pick a state or territory and tick commercial if it applies. The estimate is transfer duty from that jurisdiction's published general rate scale, plus land-titles-office registration fees and, if a loan is entered, mortgage registration. It excludes foreign-purchaser surcharges and concessions." }
+      },
+      {
+        "@type": "Question",
+        "name": "How accurate is the demolition cost estimate?",
+        "acceptedAnswer": { "@type": "Answer", "text": "It's indicative, from published price guides rather than a quote. With a state and a footprint area entered, it applies a per-square-metre rate that runs higher for a small job and lower for a large one, with a minimum job cost floor, plus an uplift if asbestos is likely." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I really need a pre-lodgement meeting with council?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes, unless the outcome is already certain. A pre-DA meeting is the cheapest way to find out what a council will actually want before you've spent consultant fees finding out the hard way." }
+      },
+      {
+        "@type": "Question",
+        "name": "What if the site has no mains water or sewer connected?",
+        "acceptedAnswer": { "@type": "Answer", "text": "This calculator flags it as a major servicing constraint, not just a cost line. Getting services to an unconnected block can mean main extensions, easements, a pump station or on-site wastewater, and water authority headworks charges running into six figures, and it can cap the yield the site can support." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this development feasibility calculator financial or planning advice?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. It's a pre-construction cost estimate built from the figures you enter, to help you think through a site before you commit. Speak to Project Carter, your accountant, a town planner and a licensed adviser before acting on it." }
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-pc-calc="da">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -28,9 +80,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="nav" id="primaryNav" aria-label="Primary">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
       </nav>
       <a href="enquire.html" class="btn btn-accent header-cta">Enquire</a>
@@ -548,6 +600,34 @@
             <li>This is a pre-construction view. It excludes GST, the build itself, construction certificate costs, finance beyond the DA period, selling or holding past approval, and it is not financial, tax or planning advice.</li>
           </ul>
         </div>
+
+        <div class="calc-faq">
+          <h2 class="calc-subhead">Common questions</h2>
+          <details>
+            <summary>What consultant reports do I actually need for a DA?</summary>
+            <p>It depends on the site and the development type. Tick what applies in the site characteristics checklist above and this calculator's rules engine flags each consultant line as standard for most DAs, "likely for this site" or "may be required" &mdash; see the reports panel it builds for you. The tags are a guide, not a council determination: always hold a pre-lodgement (pre-DA) meeting before you lodge, unless the outcome is already certain.</p>
+          </details>
+          <details>
+            <summary>How is stamp duty estimated on a development site?</summary>
+            <p>Pick a state or territory in the stamp duty field and tick "commercial" if it applies. The figure that fills in is transfer duty from that jurisdiction's published general rate scale, plus land-titles-office registration fees and, if you've entered a loan, mortgage registration. It's an estimate for a company or investor purchase, not the state revenue office's or titles registry's figure, and it excludes foreign-purchaser surcharges and concessions.</p>
+          </details>
+          <details>
+            <summary>How accurate is the demolition cost estimate?</summary>
+            <p>It's indicative, from published price guides rather than a quote. With a state set and a footprint area entered, it applies a $/m² rate that runs higher for a small job and lower for a large one (mobilising plant costs roughly the same either way), with a minimum job cost floor. Ticking "asbestos is likely" adds a percentage uplift. Get an actual demolition quote before committing to a number.</p>
+          </details>
+          <details>
+            <summary>Do I really need a pre-lodgement meeting with council?</summary>
+            <p>Yes, unless the outcome is already certain. A pre-DA meeting is the cheapest way to find out what a council will actually want before you've spent consultant fees finding out the hard way &mdash; it's a standing recommendation on this page, and repeated in the PDF disclaimer.</p>
+          </details>
+          <details>
+            <summary>What if the site has no mains water or sewer connected?</summary>
+            <p>Tick it in site characteristics and this calculator flags it as a major servicing constraint, not just a line item. Getting services to an unconnected block can mean main extensions, easements, a pump station or on-site wastewater, and water authority headworks charges running into six figures &mdash; and it can cap the yield the site can support. Get a servicing feasibility and a written connection offer before committing to the site.</p>
+          </details>
+          <details>
+            <summary>Is this development feasibility calculator financial or planning advice?</summary>
+            <p>No. It's a pre-construction cost estimate built from the figures you enter, to help you think through a site before you commit. It excludes GST, the build itself, and anything specific to your site or council. Speak to Project Carter, your accountant, a town planner and a licensed adviser before acting on it.</p>
+          </details>
+        </div>
       </div>
     </section>
   </main>
@@ -559,9 +639,9 @@
         <span class="brand-name">PROJECT&nbsp;CARTER</span>
       </a>
       <nav class="footer-nav" aria-label="Footer">
-        <a href="index.html#about">About</a>
+        <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
-        <a href="index.html#approach">Approach</a>
+        <a href="approach.html">Approach</a>
         <a href="calculators.html">Calculators</a>
         <a href="account.html">Account</a>
         <a href="enquire.html">Contact</a>
@@ -1542,7 +1622,10 @@
   <script>
     window.PC_PULLERS = [
       { fieldId: "fundsAvailable", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
-      { fieldId: "fundsAvailable", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" }
+      { fieldId: "fundsAvailable", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
+      { fieldId: "fundsAvailable", sourceCalc: "roi", summaryKey: "netSaleProceeds", label: "Pull sale proceeds from a saved ROI report" },
+      { fieldId: "fundsAvailable", sourceCalc: "grv", summaryKey: "equityAtSettlement", label: "Pull settlement proceeds from a saved GRV report" },
+      { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" }
     ];
   </script>
   <script src="pc-report.js"></script>
