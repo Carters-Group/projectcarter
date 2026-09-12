@@ -20,7 +20,7 @@
 
   var SUPABASE_URL      = "PC_SUPABASE_URL";        // e.g. https://abcdxyz.supabase.co
   var SUPABASE_ANON_KEY = "PC_SUPABASE_ANON_KEY";   // the anon / public key
-  var FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
+  var FORMSPREE_ENDPOINT = "https://formspree.io/f/xqpkjvkb";
 
   var CONFIGURED =
     SUPABASE_URL.indexOf("http") === 0 &&

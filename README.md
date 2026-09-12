@@ -105,7 +105,7 @@ still re-run the model from the script; a true gate needs server-side rendering,
 which a static site can't do. With JavaScript off, nothing is masked. Figures update live, the
 modal form builds a one-page PDF with **jsPDF** (loaded from cdnjs) that downloads
 in the browser, and the figures + contact details are POSTed to Formspree in the
-background. Both forms share the same `YOUR_FORM_ID` Formspree placeholder.
+background. Both forms share the same Formspree endpoint (`https://formspree.io/f/xqpkjvkb`).
 
 The brand wordmark is **"PROJECT CARTER"** only (no "DEVELOPMENT" sub-line).
 
@@ -206,12 +206,10 @@ Everything below is placeholder and should be replaced before the site goes publ
 
 | Item | Where |
 | --- | --- |
-| **Formspree form ID** (so enquiries reach your inbox) | `enquire.html`, `roi-calculator.html`, `noi-calculator.html`, `da-calculator.html`, `grv-calculator.html`, `pr-calculator.html` and `pc-auth.js` → replace `YOUR_FORM_ID` |
 | **Supabase project URL + anon key** (accounts + saved reports) | `pc-auth.js` → `PC_SUPABASE_URL`, `PC_SUPABASE_ANON_KEY` (see "Accounts and saved reports") |
-| Landing page headline + sub-text | `enquire.html` → between the `EDIT THIS WORDING` comments |
+| Optional email-validation key (abstractapi.com, free tier) | `enquire.html` → `YOUR_ABSTRACT_API_KEY` (skips the deliverability check while unset, everything else on the form still works) |
 | Landing background photo or video | `enquire.html` → `.landing-media` (instructions in the file + `assets/images/README.md`) |
 | Ad conversion tracking (Google Ads / Meta Pixel) | `thanks.html` → `AD CONVERSION TRACKING` comment |
-| Hero words ("Every property / has a / solution") | `index.html` → `.hero-words` |
 | About / bio copy | `index.html` → `#about` |
 | Project copy, stats and galleries | `project-*.html` |
 | Contact phone / email | `enquire.html` (currently `0411 940 010` / `trent@cartersinvestments.com.au`) |
@@ -232,17 +230,13 @@ on the City West Villas page are the WIP plans from the current site.
 ## Making the enquiry form email you
 
 The landing page form (`enquire.html`) is wired for [Formspree](https://formspree.io),
-which emails you every submission — no backend, works on GitHub Pages, includes
-spam filtering.
-
-1. Sign up at [formspree.io](https://formspree.io) with the inbox you want
-   enquiries to land in.
-2. Create a new form; Formspree gives you an endpoint like
-   `https://formspree.io/f/abcdwxyz`.
-3. In `enquire.html`, replace `YOUR_FORM_ID` in the form `action` with that id
-   (e.g. `action="https://formspree.io/f/abcdwxyz"`).
-4. Submit the form once yourself and confirm the verification email from
-   Formspree so future submissions come straight through.
+which emails you every submission, no backend needed, works on GitHub Pages, includes
+spam filtering. Already configured, pointing at `https://formspree.io/f/xqpkjvkb`
+across `enquire.html`, all six calculators and `pc-auth.js`. If you ever need to
+change it, update the `action` attribute on each calculator's lead-capture form,
+`enquire.html`'s own form, and `FORMSPREE_ENDPOINT` in `pc-auth.js`. If you haven't
+already, submit the form once yourself and confirm the verification email from
+Formspree so submissions come straight through.
 
 After a successful submit the visitor is sent to `thanks.html` (via the hidden
 `_next` field) — put your Google Ads / Meta conversion tag on that page so a
