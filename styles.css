@@ -848,12 +848,16 @@ h1, h2, h3 {
 .intro-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(260px, 32vw, 440px);
+  grid-template-areas:
+    "head portrait"
+    "body portrait";
   gap: clamp(36px, 6vw, 80px);
   align-items: start;
 }
-.intro-grid .intro-body { margin-top: clamp(24px, 3.5vw, 40px); }
-.intro-head { max-width: 20ch; }
+.intro-grid .intro-body { grid-area: body; margin-top: clamp(24px, 3.5vw, 40px); }
+.intro-head { grid-area: head; max-width: 20ch; }
 .intro-portrait {
+  grid-area: portrait;
   position: relative;
   margin: 0;
   border: 1px solid var(--line-soft);
@@ -876,9 +880,16 @@ h1, h2, h3 {
   background: var(--bg-2);
 }
 @media (max-width: 820px) {
-  .intro-grid { grid-template-columns: 1fr; }
-  .intro-portrait { max-width: 340px; order: -1; margin: 0 0 28px; }
+  .intro-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "head"
+      "portrait"
+      "body";
+  }
+  .intro-portrait { max-width: 340px; margin: 28px 0; }
   .intro-portrait img { aspect-ratio: 4 / 5; }
+  .intro-grid .intro-body { margin-top: 0; }
 }
 
 /* =========================================================
