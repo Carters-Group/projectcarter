@@ -192,7 +192,7 @@
         '<div class="wrap pc-auth-bar__inner">' +
           '<span class="pc-auth-bar__who">Signed in as <strong></strong></span>' +
           '<span class="pc-auth-bar__links">' +
-            '<a href="account.html">My saved reports</a>' +
+            '<a href="account">My saved reports</a>' +
             '<button type="button" class="linklike" data-pc-signout>Sign out</button>' +
           '</span>' +
         '</div>';
@@ -204,7 +204,7 @@
       bar.innerHTML =
         '<div class="wrap pc-auth-bar__inner">' +
           '<span class="pc-auth-bar__who">Free account: save these figures and open them again later.</span>' +
-          '<span class="pc-auth-bar__links"><a href="account.html">Sign in or create an account</a></span>' +
+          '<span class="pc-auth-bar__links"><a href="account">Sign in or create an account</a></span>' +
         '</div>';
     }
   }
@@ -259,7 +259,7 @@
         email: email,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: opts.redirectTo || (window.location.origin + "/account.html"),
+          emailRedirectTo: opts.redirectTo || (window.location.origin + "/account"),
           data: data
         }
       });

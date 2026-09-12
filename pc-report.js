@@ -349,7 +349,7 @@
     if (!window.pcAuth.isMember()) {
       stashDraft();
       var here = window.location.pathname.split("/").pop() || ("" + CALC + "-calculator.html");
-      window.location.href = "account.html?from=" + encodeURIComponent(here);
+      window.location.href = "account?from=" + encodeURIComponent(here);
       return;
     }
     saveBtn.disabled = true;
