@@ -18,8 +18,8 @@
 (function () {
   "use strict";
 
-  var SUPABASE_URL      = "PC_SUPABASE_URL";        // e.g. https://abcdxyz.supabase.co
-  var SUPABASE_ANON_KEY = "PC_SUPABASE_ANON_KEY";   // the anon / public key
+  var SUPABASE_URL      = "https://rqbdumfqucptklmhlskr.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_eUP7BAawFxUJiN_EbCm4Sw_Lk4BCu3o";
   var FORMSPREE_ENDPOINT = "https://formspree.io/f/xqpkjvkb";
 
   var CONFIGURED =

@@ -55,6 +55,29 @@ create policy "profiles - update own"
 
 
 -- ---------------------------------------------------------------------------
+--  pc_can_save()  -  the single subscription gate
+--  Today: always true (everything is free). Later: return false unless the
+--  caller's profile row has an active plan, or cap the free tier by count.
+--  Defined here, before the reports table, because its insert policy below
+--  references it.
+-- ---------------------------------------------------------------------------
+create or replace function public.pc_can_save()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select true;
+  -- Example paywall for later:
+  -- select coalesce(
+  --   (select subscription_status = 'active' from public.profiles where id = auth.uid()),
+  --   false
+  -- )
+  -- or (select count(*) from public.reports where user_id = auth.uid()) < 3;
+$$;
+
+
+-- ---------------------------------------------------------------------------
 --  reports
 -- ---------------------------------------------------------------------------
 create table if not exists public.reports (
@@ -118,27 +141,6 @@ create policy "reports - update own"
 create policy "reports - delete own"
   on public.reports for delete
   using ( auth.uid() = user_id );
-
-
--- ---------------------------------------------------------------------------
---  pc_can_save()  -  the single subscription gate
---  Today: always true (everything is free). Later: return false unless the
---  caller's profile row has an active plan, or cap the free tier by count.
--- ---------------------------------------------------------------------------
-create or replace function public.pc_can_save()
-returns boolean
-language sql
-security definer
-set search_path = public
-as $$
-  select true;
-  -- Example paywall for later:
-  -- select coalesce(
-  --   (select subscription_status = 'active' from public.profiles where id = auth.uid()),
-  --   false
-  -- )
-  -- or (select count(*) from public.reports where user_id = auth.uid()) < 3;
-$$;
 
 
 -- ---------------------------------------------------------------------------
