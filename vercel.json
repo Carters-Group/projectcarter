@@ -1,4 +1,29 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/calculators", "destination": "/commercial-calculators", "permanent": true },
+    { "source": "/calculators.html", "destination": "/commercial-calculators", "permanent": true },
+    { "source": "/pr-calculator", "destination": "/portfolio-review-calculator", "permanent": true },
+    { "source": "/pr-calculator.html", "destination": "/portfolio-review-calculator", "permanent": true },
+    { "source": "/cl-calculator", "destination": "/commercial-lending-calculator", "permanent": true },
+    { "source": "/cl-calculator.html", "destination": "/commercial-lending-calculator", "permanent": true },
+    { "source": "/roi-calculator", "destination": "/return-on-equity-calculator", "permanent": true },
+    { "source": "/roi-calculator.html", "destination": "/return-on-equity-calculator", "permanent": true },
+    { "source": "/da-calculator", "destination": "/development-site-calculator", "permanent": true },
+    { "source": "/da-calculator.html", "destination": "/development-site-calculator", "permanent": true },
+    { "source": "/grv-calculator", "destination": "/gross-realisation-value-calculator", "permanent": true },
+    { "source": "/grv-calculator.html", "destination": "/gross-realisation-value-calculator", "permanent": true },
+    { "source": "/noi-calculator", "destination": "/net-operating-income-calculator", "permanent": true },
+    { "source": "/noi-calculator.html", "destination": "/net-operating-income-calculator", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/commercial-calculators", "destination": "/calculators.html" },
+    { "source": "/portfolio-review-calculator", "destination": "/pr-calculator.html" },
+    { "source": "/commercial-lending-calculator", "destination": "/cl-calculator.html" },
+    { "source": "/return-on-equity-calculator", "destination": "/roi-calculator.html" },
+    { "source": "/development-site-calculator", "destination": "/da-calculator.html" },
+    { "source": "/gross-realisation-value-calculator", "destination": "/grv-calculator.html" },
+    { "source": "/net-operating-income-calculator", "destination": "/noi-calculator.html" }
+  ]
 }

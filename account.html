@@ -28,7 +28,7 @@
         <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
         <a href="approach.html">Approach</a>
-        <a href="calculators.html">Calculators</a>
+        <a href="commercial-calculators">Calculators</a>
         <a href="account.html">Login</a>
         <a href="enquire.html" class="btn btn-accent nav-cta-mobile">Contact</a>
       </nav>
@@ -100,7 +100,7 @@
               <div class="acct-overview" id="portfolioStats"></div>
               <p class="acct-report__date" id="portfolioUpdated"></p>
               <p class="acct-calc-links">
-                <a id="portfolioOpenLink" href="pr-calculator.html">Open in Portfolio Review</a>
+                <a id="portfolioOpenLink" href="portfolio-review-calculator">Open in Portfolio Review</a>
                 &nbsp;&middot;&nbsp;
                 <button type="button" class="linklike" id="portfolioChangeBtn">Choose a different report</button>
               </p>
@@ -131,12 +131,12 @@
             </p>
             <p class="acct-calc-links">
               New report:
-              <a href="noi-calculator.html">NOI</a> ·
-              <a href="roi-calculator.html">ROI</a> ·
-              <a href="da-calculator.html">DA</a> ·
-              <a href="grv-calculator.html">GRV</a> ·
-              <a href="pr-calculator.html">PR</a> ·
-              <a href="cl-calculator.html">CL</a>
+              <a href="net-operating-income-calculator">NOI</a> ·
+              <a href="return-on-equity-calculator">ROI</a> ·
+              <a href="development-site-calculator">DA</a> ·
+              <a href="gross-realisation-value-calculator">GRV</a> ·
+              <a href="portfolio-review-calculator">PR</a> ·
+              <a href="commercial-lending-calculator">CL</a>
             </p>
           </div>
 
@@ -170,7 +170,7 @@
         <a href="about.html">About</a>
         <a href="index.html#projects">Projects</a>
         <a href="approach.html">Approach</a>
-        <a href="calculators.html">Calculators</a>
+        <a href="commercial-calculators">Calculators</a>
         <a href="enquire.html">Contact</a>
       </nav>
     </div>
@@ -191,9 +191,9 @@
       grv: "GRV Calculator", pr: "Portfolio Review", cl: "CL Calculator"
     };
     var CALC_PAGES = {
-      noi: "noi-calculator.html", roi: "roi-calculator.html",
-      da: "da-calculator.html", grv: "grv-calculator.html",
-      pr: "pr-calculator.html", cl: "cl-calculator.html"
+      noi: "net-operating-income-calculator", roi: "return-on-equity-calculator",
+      da: "development-site-calculator", grv: "gross-realisation-value-calculator",
+      pr: "portfolio-review-calculator", cl: "commercial-lending-calculator"
     };
     var CALC_ORDER = ["noi", "roi", "da", "grv", "pr", "cl"];
 
@@ -359,7 +359,7 @@
         show(setEl); hide(unsetEl);
         document.getElementById("portfolioTitle").textContent = master.title || "Untitled report";
         document.getElementById("portfolioUpdated").textContent = "Updated " + fmtDate(master.updated_at);
-        document.getElementById("portfolioOpenLink").href = "pr-calculator.html?report=" + encodeURIComponent(master.id);
+        document.getElementById("portfolioOpenLink").href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
 
         var s = master.summary || {};
         var stats = [
@@ -395,7 +395,7 @@
       if (isChange) { show(document.getElementById("portfolioUnset")); hide(document.getElementById("portfolioSet")); }
 
       if (!prReports.length) {
-        unsetMsg.innerHTML = 'Start a <a href="pr-calculator.html">Portfolio Review</a> and save it to build your portfolio overview here.';
+        unsetMsg.innerHTML = 'Start a <a href="portfolio-review-calculator">Portfolio Review</a> and save it to build your portfolio overview here.';
         chooser.innerHTML = "";
         return;
       }
@@ -435,7 +435,7 @@
       }
     }
 
-    var CALC_PAGE_SET = { "noi-calculator.html":1, "roi-calculator.html":1, "da-calculator.html":1, "grv-calculator.html":1 };
+    var CALC_PAGE_SET = { "net-operating-income-calculator":1, "return-on-equity-calculator":1, "development-site-calculator":1, "gross-realisation-value-calculator":1 };
     function fromParam() {
       try {
         var f = new URL(window.location.href).searchParams.get("from");
