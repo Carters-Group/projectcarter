@@ -96,7 +96,7 @@
               <h2 class="calc-subhead">Your position</h2>
               <div class="field">
                 <label for="taxRate">Marginal tax rate <span>(% &mdash; applied across the portfolio)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="37" value="37" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="taxRate" autocomplete="off" placeholder="37" value="37" /></div>
                 <p class="field-hint">The rate at which a rental loss is refunded, or a rental profit is taxed. Use the top rate that applies to the entity or person that holds the properties.</p>
               </div>
             </div>
@@ -547,12 +547,12 @@
           '<div class="field"><label for="' + p + 'value">Current value</label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'value" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'lvr">Loan to value <span>(%)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'lvr" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'lvr" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<p class="field-hint" id="' + p + 'loanHint">Loan &mdash; &nbsp;·&nbsp; Equity &mdash;</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field" data-res-only><label for="' + p + 'rentwk">Rent <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentwk" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field" data-com-only hidden><label for="' + p + 'rentyr">Gross rent <span>(per year)</span></label>' +
@@ -564,10 +564,10 @@
         '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
           recoverTick(p, "pm") + '</div>' +
           '<div class="field"><label for="' + p + 'letting">Letting / leasing fee</label>' +
-          '<div class="input-money" id="' + p + 'lettingWrap"><input type="text" inputmode="decimal" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div>' +
+          '<div class="input-money" id="' + p + 'lettingWrap"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div>' +
           '<select id="' + p + 'lettingUnit" data-res-only>' +
             '<option value="amount">$ amount</option>' +
             '<option value="weeks">Weeks of rent</option>' +
@@ -598,9 +598,9 @@
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintyr" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "maint") + '</div>' +
           '<div class="field" data-res-only><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
-          '<input type="text" inputmode="decimal" id="' + p + 'vacwks" autocomplete="off" placeholder="1" /></div>' +
+          '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'vacwks" autocomplete="off" placeholder="1" /></div>' +
           '<div class="field" data-com-only hidden><label for="' + p + 'vacmths">Vacancy allowance <span>(months of the year)</span></label>' +
-          '<input type="text" inputmode="decimal" id="' + p + 'vacmths" autocomplete="off" placeholder="0" /></div>' +
+          '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'vacmths" autocomplete="off" placeholder="0" /></div>' +
         '</div>' +
         '<div data-com-only hidden>' +
           '<div class="field"><label for="' + p + 'water">Water &amp; sewer rates <span>(per year)</span></label>' +
@@ -633,13 +633,13 @@
           '<div class="field"><label for="' + p + 'deprbuild">Building at cost</label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'deprbuild" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'deprbuildpct">Building rate <span>(% per year)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'deprbuildpct" autocomplete="off" placeholder="2.5" value="2.5" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'deprbuildpct" autocomplete="off" placeholder="2.5" value="2.5" /></div></div>' +
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'deprfit">Fittings at cost</label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'deprfit" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'deprfitpct">Fittings rate <span>(% per year)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="' + p + 'deprfitpct" autocomplete="off" placeholder="10" value="10" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'deprfitpct" autocomplete="off" placeholder="10" value="10" /></div></div>' +
         '</div>' +
 
         '<div data-res-only>' +

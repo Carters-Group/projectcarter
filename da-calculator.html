@@ -180,7 +180,7 @@
 
               <div class="field">
                 <label for="lvr">Loan <span>(% of land price)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="lvr" autocomplete="off" placeholder="0" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="lvr" autocomplete="off" placeholder="0" /></div>
                 <p class="field-hint" id="loanBreakdown">Loan &mdash; &nbsp;·&nbsp; Deposit &mdash;</p>
               </div>
 
@@ -232,7 +232,7 @@
 
               <div class="field">
                 <label for="rate">Loan interest <span>(% per year)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="rate" autocomplete="off" placeholder="7.5" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="rate" autocomplete="off" placeholder="7.5" /></div>
                 <p class="field-hint">Charged on the loan through the DA period. Leave the loan and rate blank for an unleveraged hold.</p>
               </div>
 
@@ -267,7 +267,6 @@
 
               <div class="field">
                 <label for="demolition">Demolition <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="demolition" autocomplete="off" placeholder="0" /></div>
                 <div class="demo-est" id="demoEst" hidden>
                   <div class="field">
                     <label for="demoArea">Footprint to demolish <span>(m²)</span></label>
@@ -283,12 +282,13 @@
                   </div>
                   <div class="field">
                     <label for="demoUplift">Asbestos uplift <span>(%)</span></label>
-                    <div class="input-pct"><input type="text" inputmode="decimal" id="demoUplift" autocomplete="off" placeholder="40" value="40" /></div>
+                    <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="demoUplift" autocomplete="off" placeholder="40" value="40" /></div>
                     <p class="field-hint">Added to the figure when "asbestos is likely" is ticked in Site characteristics.</p>
                   </div>
-                  <p class="field-hint" id="demoEstNote">Set a state (from the address check or the stamp duty field) and enter a footprint to see an indicative figure.</p>
+                  <p class="field-hint" id="demoEstNote">Set a state (from the address check or the stamp duty field) and enter a footprint to fill the figure below. It will keep updating unless you amend the figure yourself.</p>
                   <p class="stamp-disclaimer">Indicative only, compiled from Australian demolition price guides. The rate per m² is higher for a small footprint and lower for a large one, since plant still has to be mobilised either way. Costs also vary with access, materials, service disconnections and contractor demand, and a minimum job cost applies. Not a quote. Asbestos, when present, is usually priced into the demolition contract; the separate "Asbestos / hazardous material removal" line is for standalone remediation.</p>
                 </div>
+                <div class="input-money"><input type="text" inputmode="numeric" id="demolition" autocomplete="off" placeholder="0" /></div>
               </div>
               <div class="field">
                 <label for="asbestos">Asbestos / hazardous material removal <span>(optional)</span></label>
@@ -489,7 +489,7 @@
 
               <div class="field">
                 <label for="contingency">Contingency <span>(% of costs)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="contingency" autocomplete="off" placeholder="10" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="contingency" autocomplete="off" placeholder="10" /></div>
                 <p class="field-hint">Applied to site, consultant, statutory and holding costs. Not to the land or stamp duty.</p>
               </div>
               <div class="field">

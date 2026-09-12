@@ -471,7 +471,7 @@ h1, h2, h3 {
   text-transform: uppercase; letter-spacing: 0.16em;
   font-size: 11px; font-weight: 600; color: var(--muted);
 }
-.field input, .field select, .field textarea {
+.field input:not([type="checkbox"]):not([type="radio"]), .field select, .field textarea {
   width: 100%;
   background: var(--bg-2);
   border: 1px solid var(--line);
@@ -696,12 +696,13 @@ h1, h2, h3 {
   font-size: 12px;
   color: var(--muted);
 }
-/* Spam honeypot - kept out of view and out of the tab order */
+/* Spam honeypot - kept out of view and out of the tab order.
+   display:none (not just off-screen) so browser autofill and password
+   managers - which check computed visibility, not screen position - leave
+   it alone instead of stuffing it and tripping Formspree's spam flag on a
+   genuine human submission. */
 .hp {
-  position: absolute !important;
-  left: -9999px !important;
-  width: 1px; height: 1px;
-  opacity: 0;
+  display: none !important;
 }
 
 /* ---- Multi-step lead form (enquire.html) ---- */
@@ -1062,7 +1063,7 @@ h1, h2, h3 {
   display: flex; gap: 12px; align-items: flex-start;
   font-size: 0.95rem; color: var(--text); cursor: pointer;
 }
-.calc-check input { margin-top: 3px; flex: none; accent-color: var(--accent); }
+.calc-check input { width: auto; margin-top: 3px; flex: none; accent-color: var(--accent); }
 
 /* Tenant-recoverable outgoings (NOI calculator) */
 .calc-recover { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
@@ -1094,7 +1095,7 @@ h1, h2, h3 {
 /* Demolition $/m2 estimator (DA calculator) */
 .demo-est {
   display: grid; gap: 8px;
-  margin-top: 4px; padding: 14px;
+  margin: 4px 0 10px; padding: 14px;
   border: 1px solid var(--line);
   background: var(--bg-3);
 }
@@ -1145,7 +1146,7 @@ h1, h2, h3 {
 /* GRV calculator: dwelling-type cards + finance-charge rows */
 .dwelling-types, .finance-rows { display: grid; gap: 16px; }
 .dwelling-type, .finance-row { gap: 14px; }
-.dwelling-type .field-row, .finance-row .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dwelling-type .field-row, .finance-row .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
 .dwelling-type__remove, .finance-row__remove { justify-self: start; }
 @media (max-width: 560px) {
   .dwelling-type .field-row, .finance-row .field-row { grid-template-columns: 1fr; }

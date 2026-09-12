@@ -337,7 +337,7 @@
 
               <div class="field">
                 <label for="builderMargin">Builder's margin <span>(% of build, optional)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="builderMargin" autocomplete="off" placeholder="0" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="builderMargin" autocomplete="off" placeholder="0" /></div>
                 <p class="field-hint">Added on top of the dwelling and basement build costs. The estimator's rate already includes builder preliminaries and margin, so leave this at 0 when the build costs come from the estimator. Use it only when you have entered bare trade or construction costs.</p>
               </div>
 
@@ -409,7 +409,7 @@
               <h2 class="calc-subhead">Contingency &amp; management</h2>
               <div class="field">
                 <label for="contPct">Contingency <span>(% of costs)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="contPct" autocomplete="off" placeholder="10" value="10" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="contPct" autocomplete="off" placeholder="10" value="10" /></div>
                 <p class="field-hint">Applied to the post-DA consultants, statutory fees and construction. Not to the DA total or finance. Defaults to 10%; change or clear it as needed.</p>
               </div>
               <div class="field">
@@ -452,11 +452,11 @@
               </div>
               <div class="field">
                 <label for="whatIfSale">What if sale prices fell by <span>(%)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="whatIfSale" autocomplete="off" placeholder="5" value="5" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="whatIfSale" autocomplete="off" placeholder="5" value="5" /></div>
               </div>
               <div class="field">
                 <label for="whatIfCost">What if construction &amp; consultant costs rose by <span>(%)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" id="whatIfCost" autocomplete="off" placeholder="5" value="5" /></div>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="whatIfCost" autocomplete="off" placeholder="5" value="5" /></div>
               </div>
             </div>
 
@@ -814,7 +814,7 @@
           '<div class="field"><label for="t' + id + '_price">Sale price per dwelling</label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="t' + id + '_price" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="t' + id + '_sellpct">Selling cost <span>(% of price)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" id="t' + id + '_sellpct" autocomplete="off" placeholder="2" value="2" /></div></div>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="t' + id + '_sellpct" autocomplete="off" placeholder="2" value="2" /></div></div>' +
         '</div>' +
         '<p class="dwelling-type__calc">' +
           '<span>Construction only / dwelling <strong id="t' + id + '_cOnly">&mdash;</strong></span>' +
@@ -878,7 +878,7 @@
           '<div class="field"><label for="f' + id + '_label">Charge</label>' +
           '<input type="text" id="f' + id + '_label" autocomplete="off" placeholder="Interest (BBSY + margin)" /></div>' +
           '<div class="field"><label for="f' + id + '_rate">Rate</label>' +
-          '<div class="input-pct" data-rate-wrap="' + id + '"><input type="text" inputmode="decimal" id="f' + id + '_rate" autocomplete="off" placeholder="' + (p.ratePh || "0") + '" /></div></div>' +
+          '<div class="input-pct" data-rate-wrap="' + id + '"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="f' + id + '_rate" autocomplete="off" placeholder="' + (p.ratePh || "0") + '" /></div></div>' +
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="f' + id + '_basis">Applies to</label>' +
