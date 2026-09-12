@@ -28,7 +28,21 @@
         <a href="about">About</a>
         <a href="/#projects">Projects</a>
         <a href="approach">Approach</a>
-        <a href="commercial-calculators">Calculators</a>
+        <div class="nav-dropdown" id="calcDropdown">
+          <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="calcDropdownMenu">
+            Calculators
+            <svg class="nav-caret" viewBox="0 0 9 6" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" id="calcDropdownMenu">
+            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
+            <a href="return-on-equity-calculator">Return on Equity (ROI)</a>
+            <a href="development-site-calculator">Development Site (DA)</a>
+            <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
+            <a href="portfolio-review-calculator">Portfolio Review (PR)</a>
+            <a href="commercial-lending-calculator">Commercial Lending (CL)</a>
+            <a href="commercial-calculators">View all calculators</a>
+          </div>
+        </div>
         <a href="account">Login</a>
         <a href="enquire" class="btn btn-accent nav-cta-mobile">Contact</a>
       </nav>

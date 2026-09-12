@@ -30,6 +30,33 @@
     });
   }
 
+  /* Calculators dropdown */
+  var dropdowns = document.querySelectorAll(".nav-dropdown");
+  var desktopQuery = window.matchMedia("(min-width: 781px)");
+  Array.prototype.forEach.call(dropdowns, function (dd) {
+    var ddToggle = dd.querySelector(".nav-dropdown-toggle");
+    var menu = dd.querySelector(".nav-dropdown-menu");
+    if (!ddToggle || !menu) return;
+
+    function setOpen(on) {
+      dd.classList.toggle("open", on);
+      ddToggle.setAttribute("aria-expanded", String(on));
+    }
+
+    ddToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setOpen(!dd.classList.contains("open"));
+    });
+    dd.addEventListener("mouseenter", function () { if (desktopQuery.matches) setOpen(true); });
+    dd.addEventListener("mouseleave", function () { if (desktopQuery.matches) setOpen(false); });
+    document.addEventListener("click", function (e) {
+      if (dd.classList.contains("open") && !dd.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && dd.classList.contains("open")) { setOpen(false); ddToggle.focus(); }
+    });
+  });
+
   /* Reveal on scroll */
   var reveal = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
