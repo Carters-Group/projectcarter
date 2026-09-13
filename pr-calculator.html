@@ -60,7 +60,7 @@
             <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
           </div>
         </div>
-        <a href="account">Login</a>
+        <a href="account">Account</a>
         <a href="enquire" class="btn btn-accent nav-cta-mobile">Contact</a>
       </nav>
       <a href="enquire" class="btn btn-accent header-cta">Contact</a>
@@ -557,6 +557,42 @@
           '<label for="' + p + 'label">Property ' + idx + ' - name or address</label>' +
           '<input type="text" id="' + p + 'label" autocomplete="off" placeholder="Property ' + letter(idx - 1) + '" />' +
         '</div>' +
+        '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
+          '<span>This property is being purchased - include one-off acquisition costs</span></label>' +
+        '<div class="calc-uplift" id="' + p + 'acqFields" hidden>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'stampState">Estimate for</label>' +
+            '<select id="' + p + 'stampState">' +
+              '<option value="">No estimate</option>' +
+              '<option value="NSW">New South Wales</option>' +
+              '<option value="VIC">Victoria</option>' +
+              '<option value="QLD">Queensland</option>' +
+              '<option value="WA">Western Australia</option>' +
+              '<option value="SA">South Australia</option>' +
+              '<option value="TAS">Tasmania</option>' +
+              '<option value="ACT">Australian Capital Territory</option>' +
+              '<option value="NT">Northern Territory</option>' +
+            '</select></div>' +
+            '<div class="field"><label for="' + p + 'stamp">Stamp duty + registration</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'stamp" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<label class="calc-check"><input type="checkbox" id="' + p + 'stampComm" />' +
+            '<span>Commercial / non-residential property</span></label>' +
+          '<p class="field-hint" id="' + p + 'stampNote">Pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.</p>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'convey">Conveyancing</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'convey" autocomplete="off" placeholder="0" /></div></div>' +
+            '<div class="field"><label for="' + p + 'borrow">Borrowing costs</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'borrow" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'qs">Other <span>(one-off, lump sum)</span></label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
+            '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<p class="field-hint">Add any other one-off purchase costs here as a single lump sum - BA / planning fees, building or pest reports, quantity surveyor&rsquo;s report, or other specialist consultants, if required.</p>' +
+        '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'ptype">Property type</label>' +
           '<select id="' + p + 'ptype">' +
@@ -573,7 +609,7 @@
         '</div>' +
         '<p class="field-hint" data-com-only hidden>Under a net lease the tenant reimburses the building outgoings, so they drop out of your running costs. Under a gross lease you carry them. The ticks below set which outgoings pass through; choosing a lease basis sets the usual ones, then adjust.</p>' +
         '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'value">Current value</label>' +
+          '<div class="field"><label for="' + p + 'value" id="' + p + 'valueLabel">Current value</label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'value" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field"><label for="' + p + 'lvr">Loan to value <span>(%)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'lvr" autocomplete="off" placeholder="0" /></div></div>' +
@@ -684,43 +720,6 @@
         '<p class="field-hint" id="' + p + 'ngExemptHint" hidden>New and off-the-plan dwellings are carved out of the post-Budget change, so a loss on this property still offsets other income as before.</p>' +
         '</div>' +
 
-        '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
-          '<span>This property is being purchased - include one-off acquisition costs</span></label>' +
-        '<div class="calc-uplift" id="' + p + 'acqFields" hidden>' +
-          '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'stampState">Estimate for</label>' +
-            '<select id="' + p + 'stampState">' +
-              '<option value="">No estimate</option>' +
-              '<option value="NSW">New South Wales</option>' +
-              '<option value="VIC">Victoria</option>' +
-              '<option value="QLD">Queensland</option>' +
-              '<option value="WA">Western Australia</option>' +
-              '<option value="SA">South Australia</option>' +
-              '<option value="TAS">Tasmania</option>' +
-              '<option value="ACT">Australian Capital Territory</option>' +
-              '<option value="NT">Northern Territory</option>' +
-            '</select></div>' +
-            '<div class="field"><label for="' + p + 'stamp">Stamp duty + registration</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'stamp" autocomplete="off" placeholder="0" /></div></div>' +
-          '</div>' +
-          '<label class="calc-check"><input type="checkbox" id="' + p + 'stampComm" />' +
-            '<span>Commercial / non-residential property</span></label>' +
-          '<p class="field-hint" id="' + p + 'stampNote">Pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.</p>' +
-          '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'convey">Conveyancing</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'convey" autocomplete="off" placeholder="0" /></div></div>' +
-            '<div class="field"><label for="' + p + 'borrow">Borrowing costs</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'borrow" autocomplete="off" placeholder="0" /></div></div>' +
-          '</div>' +
-          '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'qs">Other <span>(one-off, lump sum)</span></label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
-            '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
-          '</div>' +
-          '<p class="field-hint">Add any other one-off purchase costs here as a single lump sum - BA / planning fees, building or pest reports, quantity surveyor&rsquo;s report, or other specialist consultants, if required.</p>' +
-        '</div>' +
-
         '<p class="dwelling-type__calc" data-invest-only>' +
           '<span>Net rental yield <strong id="' + p + 'oNetYield">&mdash;</strong></span>' +
           '<span>Cash flow before tax / yr <strong id="' + p + 'oPreTax">&mdash;</strong></span>' +
@@ -741,6 +740,7 @@
       });
       card.querySelector("#" + p + "acqOn").addEventListener("change", function () {
         card.querySelector("#" + p + "acqFields").hidden = !this.checked;
+        card.querySelector("#" + p + "valueLabel").textContent = this.checked ? "Purchase price" : "Current value";
         render();
       });
       card.querySelector("#" + p + "ngNew").addEventListener("change", function () {
@@ -793,7 +793,18 @@
         }
       }
       applyType(id, false);
+      syncAcqUi(id);
       updateRemoveButtons();
+    }
+
+    function syncAcqUi(id) {
+      var p = "p" + id + "_";
+      var acqOn = document.getElementById(p + "acqOn");
+      if (!acqOn) return;
+      var fields = document.getElementById(p + "acqFields");
+      var label = document.getElementById(p + "valueLabel");
+      if (fields) fields.hidden = !acqOn.checked;
+      if (label) label.textContent = acqOn.checked ? "Purchase price" : "Current value";
     }
 
     /* ---- reusable property templates (saved to this browser) ------------ */
@@ -1069,7 +1080,7 @@
         taxPreDepr: taxPreDepr, deprCredit: deprCredit, depr: depr, ngNew: ngNew,
         annual: annual, weekly: weekly, neutralWk: neutralWk, neutralYr: neutralYr,
         acqOn: acqOn, acq: acq, cashToComplete: equity + acq,
-        valid: value > 0 && grossRent > 0
+        valid: value > 0
       };
     }
 
