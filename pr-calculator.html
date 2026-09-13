@@ -640,7 +640,7 @@
           '<label for="' + p + 'outLump">Total yearly outgoings <span>(lump sum, excl. vacancy)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'outLump" autocomplete="off" placeholder="0" /></div>' +
         '</div>' +
-        '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
+        '<p class="field-hint" id="' + p + 'outRecHint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
@@ -652,7 +652,7 @@
             '<option value="weeks">Weeks of rent</option>' +
           '</select></div>' +
         '</div>' +
-        '<p class="field-hint" data-res-only>Letting fee is commonly quoted as a number of weeks of rent (often 1&ndash;2 weeks) rather than a dollar figure - pick whichever you have.</p>' +
+        '<p class="field-hint" id="' + p + 'lettingHint" data-res-only>Letting fee is commonly quoted as a number of weeks of rent (often 1&ndash;2 weeks) rather than a dollar figure - pick whichever you have.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div>' +
@@ -669,7 +669,7 @@
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "insurance") + '</div>' +
         '</div>' +
-        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.<span data-com-only hidden> Many retail leases cannot pass land tax to the tenant even on a net lease - leave its tick off if so.</span> If a body corporate or strata scheme covers this property, building insurance is usually already included in the body corporate fee - enter landlord/other insurance (contents, loss of rent, liability) here instead. With no body corporate, include building insurance too.</p>' +
+        '<p class="field-hint" id="' + p + 'ltHint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.<span data-com-only hidden> Many retail leases cannot pass land tax to the tenant even on a net lease - leave its tick off if so.</span> If a body corporate or strata scheme covers this property, building insurance is usually already included in the body corporate fee - enter landlord/other insurance (contents, loss of rent, liability) here instead. With no body corporate, include building insurance too.</p>' +
         '<div class="field-row">' +
           '<div class="field" data-res-only><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="0" /></div></div>' +
@@ -704,7 +704,7 @@
           '<div class="field"><label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
-        '<p class="field-hint"><span data-res-only>Sundry covers the small holding costs not listed above - smoke alarm and safety checks, gardening and lawns, pest control, cleaning between tenants, bank and statement fees, postage and minor compliance.</span>' +
+        '<p class="field-hint" id="' + p + 'sundryHint"><span data-res-only>Sundry covers the small holding costs not listed above - smoke alarm and safety checks, gardening and lawns, pest control, cleaning between tenants, bank and statement fees, postage and minor compliance.</span>' +
           '<span data-com-only hidden>Sundry covers anything not itemised above - bank and statement fees, statutory registrations, minor compliance and consultants.</span> A rough yearly allowance is fine.</p>' +
 
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Depreciation <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></h3>' +
@@ -839,6 +839,7 @@
       "maintwk", "maintyr", "water", "fire", "hvac", "clean", "ogadmin", "loanfees", "sundry"];
     var OUT_RECOVER_KEYS = ["pm", "council", "water", "strata", "landtax", "insurance",
       "maint", "fire", "hvac", "clean", "ogadmin"];
+    var OUT_HINT_IDS = ["outRecHint", "lettingHint", "ltHint", "sundryHint"];
     function syncOutLumpUi(id, lumpOn) {
       var p = "p" + id + "_";
       var wrap = document.getElementById(p + "outLumpWrap");
@@ -859,6 +860,29 @@
         var lumpEl = document.getElementById(p + "outLump");
         if (lumpEl) lumpEl.value = "";
       }
+      /* re-derive the normal res/com-only visibility first (only elements
+         carrying those attributes are touched by it), then lay the
+         lump-sum hiding on top: force-hide when the lump is on, or restore
+         visibility when it's off - but only for elements that aren't
+         already governed by the res/com-only gating above, so we don't
+         fight it. */
+      applyType(id);
+      function toggle(el) {
+        if (!el) return;
+        if (lumpOn) { el.hidden = true; return; }
+        if (!el.hasAttribute("data-com-only") && !el.hasAttribute("data-res-only")) el.hidden = false;
+      }
+      OUT_ITEMISED_FIELDS.forEach(function (sfx) {
+        var el = document.getElementById(p + sfx);
+        toggle(el && el.closest(".field"));
+      });
+      OUT_RECOVER_KEYS.forEach(function (key) {
+        var cb = document.getElementById(p + key + "Rec");
+        toggle(cb && cb.closest("label"));
+      });
+      OUT_HINT_IDS.forEach(function (hid) {
+        toggle(document.getElementById(p + hid));
+      });
     }
 
     /* ---- reusable property templates (saved to this browser) ------------ */

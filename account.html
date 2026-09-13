@@ -62,7 +62,7 @@
       </div>
     </section>
     <section class="calc calc--after-hero">
-      <div class="wrap narrow">
+      <div class="wrap narrow" id="acctWrap">
 
         <!-- not configured -->
         <div class="card acct-card" id="acctUnconfigured" hidden>
@@ -95,8 +95,8 @@
         </div>
 
         <!-- signed in -->
-        <div id="acctSignedIn" hidden>
-          <a class="acct-starthere-bar" id="acctStartHere" href="portfolio-review-calculator" hidden>
+        <div id="acctSignedIn" class="acct-dashboard" hidden>
+          <a class="acct-starthere-bar acct-dash-start" id="acctStartHere" href="portfolio-review-calculator" hidden>
             <span class="acct-starthere-bar__icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" aria-hidden="true"></span>
             <span class="acct-starthere-bar__text">
               <strong>Start here - Portfolio Review</strong>
@@ -105,7 +105,7 @@
             <span class="link-arrow">Open</span>
           </a>
 
-          <div class="card acct-card" id="acctPortfolioCard">
+          <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
             <div class="acct-profile-row">
               <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap" aria-hidden="true">
                 <img id="acctAvatarImg" alt="" hidden />
@@ -118,6 +118,7 @@
               </div>
               <label for="avatarFile" class="btn btn-ghost btn-sm acct-profile-row__actions" title="JPG, PNG or a phone photo (HEIC), under 5MB. Shown only to you, on this page.">Change photo</label>
               <input type="file" id="avatarFile" accept="image/*,.heic,.heif" hidden />
+              <button type="button" class="btn btn-ghost btn-sm acct-profile-row__actions" id="signOutBtn">Sign out</button>
             </div>
             <p class="acct-msg" id="avatarMsg" hidden></p>
 
@@ -153,6 +154,7 @@
               <p class="acct-msg" id="portfolioRoiMsg" hidden></p>
               <div id="portfolioRoiResult" hidden>
                 <div class="acct-overview acct-overview--modes" id="portfolioRoiStats"></div>
+                <div id="portfolioRoiChart" class="acct-chart-wrap"></div>
                 <p class="acct-calc-links"><a id="portfolioRoiOpenLink" href="#">Open and fine-tune in the ROI calculator</a></p>
               </div>
             </div>
@@ -167,66 +169,59 @@
             </div>
           </div>
 
-          <div class="card acct-card" id="acctQuickCard">
+          <div class="card acct-card acct-dash-quick" id="acctQuickCard">
             <h2 class="calc-subhead">Quick access</h2>
             <p class="acct-empty">Once you've saved a Portfolio Review, these calculators connect to it - each one can pull your equity, value and cash flow straight in to prefill its own figures. Jump into any of them below; resumes your most recently saved report where you have one.</p>
             <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
           </div>
 
-          <div class="card acct-card">
-            <div class="acct-card-head">
-              <h2 class="calc-subhead" style="border-bottom:none;padding-bottom:0">Your account</h2>
-              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
-            </div>
+          <div class="card acct-card acct-dash-activity" id="acctActivityCard">
+            <h2 class="calc-subhead">Recently updated</h2>
+            <div id="activityList" class="acct-reports"></div>
+            <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
+          </div>
 
-            <div class="acct-subsection" id="acctActivityCard">
-              <h3 class="acct-subhead-sm">Recently updated</h3>
-              <div id="activityList" class="acct-reports"></div>
-              <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
-            </div>
+          <div class="card acct-card acct-dash-reports" id="acctReportsCard">
+            <h2 class="calc-subhead">My saved reports</h2>
+            <p class="acct-msg" id="reportsMsg" hidden></p>
+            <div id="reportsList" class="acct-reports"></div>
+            <p class="acct-empty" id="reportsEmpty" hidden>
+              No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
+            </p>
+            <p class="acct-calc-links">
+              New report:
+              <a href="net-operating-income-calculator">NOI</a> ·
+              <a href="return-on-investment-calculator">ROI</a> ·
+              <a href="development-site-calculator">DA</a> ·
+              <a href="gross-realisation-value-calculator">GRV</a> ·
+              <a href="portfolio-review-calculator">PR</a> ·
+              <a href="commercial-lending-calculator">CL</a>
+            </p>
+          </div>
 
-            <div class="acct-subsection">
-              <h3 class="acct-subhead-sm">My saved reports</h3>
-              <p class="acct-msg" id="reportsMsg" hidden></p>
-              <div id="reportsList" class="acct-reports"></div>
-              <p class="acct-empty" id="reportsEmpty" hidden>
-                No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
-              </p>
-              <p class="acct-calc-links">
-                New report:
-                <a href="net-operating-income-calculator">NOI</a> ·
-                <a href="return-on-investment-calculator">ROI</a> ·
-                <a href="development-site-calculator">DA</a> ·
-                <a href="gross-realisation-value-calculator">GRV</a> ·
-                <a href="portfolio-review-calculator">PR</a> ·
-                <a href="commercial-lending-calculator">CL</a>
-              </p>
-            </div>
-
-            <div class="acct-subsection">
-              <h3 class="acct-subhead-sm">Your details</h3>
-              <form id="profileForm">
-                <div class="field">
-                  <label for="profName">Name</label>
-                  <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
-                </div>
-                <div class="field">
-                  <label for="profEmail">Email</label>
-                  <input type="email" id="profEmail" disabled />
-                  <p class="field-hint">Your sign-in email. Contact us to change it.</p>
-                </div>
-                <div class="field">
-                  <label for="profPhone">Phone</label>
-                  <input type="tel" id="profPhone" autocomplete="tel" placeholder="0400 000 000" />
-                </div>
-                <div class="field">
-                  <label for="profOccupation">Occupation</label>
-                  <input type="text" id="profOccupation" autocomplete="organization-title" placeholder="e.g. Company director" />
-                </div>
-                <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
-              </form>
-              <p class="acct-msg" id="profMsg" hidden></p>
-            </div>
+          <div class="card acct-card acct-dash-details" id="acctDetailsCard">
+            <h2 class="calc-subhead">Your details</h2>
+            <form id="profileForm">
+              <div class="field">
+                <label for="profName">Name</label>
+                <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
+              </div>
+              <div class="field">
+                <label for="profEmail">Email</label>
+                <input type="email" id="profEmail" disabled />
+                <p class="field-hint">Your sign-in email. Contact us to change it.</p>
+              </div>
+              <div class="field">
+                <label for="profPhone">Phone</label>
+                <input type="tel" id="profPhone" autocomplete="tel" placeholder="0400 000 000" />
+              </div>
+              <div class="field">
+                <label for="profOccupation">Occupation</label>
+                <input type="text" id="profOccupation" autocomplete="organization-title" placeholder="e.g. Company director" />
+              </div>
+              <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
+            </form>
+            <p class="acct-msg" id="profMsg" hidden></p>
           </div>
         </div>
       </div>
@@ -683,6 +678,7 @@
         show(elUnconfigured); hide(elSignedOut); hide(elSignedIn); return;
       }
       hide(elUnconfigured);
+      document.getElementById("acctWrap").classList.toggle("is-signedin", !!u);
       if (u) {
         hide(elSignedOut); show(elSignedIn);
         document.getElementById("acctWhoEmail").textContent = u.email;
@@ -754,6 +750,7 @@
       var balance = s.portfolioDebt || 0;
       var totalKept = 0;
       var value = price;
+      var rows = [{ year: 0, value: price, balance: s.portfolioDebt || 0, equity: price - (s.portfolioDebt || 0) }];
       for (var t = 1; t <= term; t++) {
         var rent = rent1 * Math.pow(1 + g, t - 1);
         var interest = balance * rate;
@@ -762,8 +759,56 @@
         balance -= debtPay;
         totalKept += cashAfterInterest - debtPay;
         value = entryYield ? rent / entryYield : price;
+        rows.push({ year: t, value: value, balance: balance, equity: value - balance });
       }
-      return { value: value, loan: balance, equity: value - balance, totalKept: totalKept };
+      return { value: value, loan: balance, equity: value - balance, totalKept: totalKept, rows: rows };
+    }
+
+    /* small inline-SVG line chart - value / debt / equity over the hold, so
+       the portfolio's growth trajectory reads at a glance next to the
+       year-5 numbers. No charting library on this site, so it is drawn by
+       hand from the same rows[] the stats above are built from. */
+    function renderRoiGrowthChart(rows) {
+      var host = document.getElementById("portfolioRoiChart");
+      if (!host) return;
+      var w = 640, h = 260, padL = 64, padR = 18, padT = 18, padB = 30;
+      var innerW = w - padL - padR, innerH = h - padT - padB;
+      var maxV = 0;
+      rows.forEach(function (r) { maxV = Math.max(maxV, r.value, r.equity, r.balance); });
+      maxV = maxV > 0 ? maxV * 1.08 : 1;
+      var n = rows.length - 1;
+      function x(i) { return padL + (n > 0 ? (i / n) * innerW : 0); }
+      function y(v) { return padT + innerH - (v / maxV) * innerH; }
+
+      function path(key) {
+        return rows.map(function (r, i) {
+          return (i === 0 ? "M" : "L") + x(i).toFixed(1) + "," + y(r[key]).toFixed(1);
+        }).join(" ");
+      }
+
+      var gridN = 4, gridLines = "", gridLabels = "";
+      for (var g = 0; g <= gridN; g++) {
+        var gv = maxV * g / gridN;
+        var gy = y(gv);
+        gridLines += '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (w - padR) + '" y2="' + gy.toFixed(1) + '" class="acct-chart__grid" />';
+        gridLabels += '<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" class="acct-chart__axis" text-anchor="end">' + fmtMoney(gv) + '</text>';
+      }
+      var xLabels = rows.map(function (r, i) {
+        return '<text x="' + x(i).toFixed(1) + '" y="' + (h - 8) + '" class="acct-chart__axis" text-anchor="middle">' + (r.year === 0 ? "Now" : "Yr " + r.year) + '</text>';
+      }).join("");
+
+      host.innerHTML =
+        '<svg viewBox="0 0 ' + w + ' ' + h + '" class="acct-chart" role="img" aria-label="Projected portfolio value, debt and equity over the hold">' +
+          gridLines + gridLabels + xLabels +
+          '<path d="' + path("value") + '" class="acct-chart__line acct-chart__line--value" fill="none" />' +
+          '<path d="' + path("equity") + '" class="acct-chart__line acct-chart__line--equity" fill="none" />' +
+          '<path d="' + path("balance") + '" class="acct-chart__line acct-chart__line--debt" fill="none" />' +
+        '</svg>' +
+        '<div class="acct-chart__legend">' +
+          '<span class="acct-chart__legend-item"><i class="acct-chart__swatch acct-chart__swatch--value"></i>Portfolio value</span>' +
+          '<span class="acct-chart__legend-item"><i class="acct-chart__swatch acct-chart__swatch--equity"></i>Equity</span>' +
+          '<span class="acct-chart__legend-item"><i class="acct-chart__swatch acct-chart__swatch--debt"></i>Debt</span>' +
+        '</div>';
     }
 
     document.getElementById("portfolioRoiBtn").addEventListener("click", function () {
@@ -805,6 +850,7 @@
           '<div class="acct-overview__stat"><dt>Projected value, Yr ' + term + '</dt><dd>' + fmtMoney(proj.value) + '</dd></div>' +
           '<div class="acct-overview__stat"><dt>Equity now</dt><dd>' + fmtMoney(s.portfolioEquity) + '</dd></div>' +
           '<div class="acct-overview__stat"><dt>Projected equity, Yr ' + term + '</dt><dd>' + fmtMoney(proj.equity) + '</dd></div>';
+        renderRoiGrowthChart(proj.rows);
         document.getElementById("portfolioRoiOpenLink").href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
         show(resultEl);
       });

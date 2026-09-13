@@ -1557,15 +1557,11 @@ h1, h2, h3 {
 .acct-profile-row__actions { flex: none; }
 #avatarHint, #avatarMsg { margin-bottom: 20px; }
 
-/* combined bottom card - Recently updated / My saved reports / Your details */
 .acct-card-head {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   margin-bottom: 18px;
 }
 .acct-card-head h2 { margin: 0; }
-.acct-subsection + .acct-subsection {
-  margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line-soft);
-}
 .acct-subhead-sm {
   font-family: var(--font-body); font-weight: 600; font-size: 12px;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
@@ -1579,3 +1575,46 @@ h1, h2, h3 {
 .acct-quick-card .card-body { padding: 18px 20px; }
 .acct-quick-card .card-body h3 { font-size: 19px; margin-bottom: 4px; }
 .acct-quick-card .card-meta { margin: 0 0 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 13px; }
+
+/* signed-in dashboard layout - desktop only. Below the breakpoint everything
+   falls back to the plain stacked flow (DOM order) it always had, so mobile
+   is untouched. */
+#acctWrap.is-signedin { max-width: 1180px; }
+@media (min-width: 901px) {
+  .acct-dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-areas:
+      "start      start"
+      "portfolio  quick"
+      "portfolio  activity"
+      "reports    reports"
+      "details    details";
+    align-items: start;
+    gap: 20px;
+  }
+  .acct-dashboard .acct-card,
+  .acct-dashboard .acct-starthere-bar { margin-bottom: 0; }
+  .acct-dash-start     { grid-area: start; }
+  .acct-dash-portfolio { grid-area: portfolio; }
+  .acct-dash-quick     { grid-area: quick; }
+  .acct-dash-activity  { grid-area: activity; }
+  .acct-dash-reports   { grid-area: reports; }
+  .acct-dash-details   { grid-area: details; }
+}
+
+/* portfolio ROI projection - growth chart */
+.acct-chart-wrap { margin: 18px 0 4px; }
+.acct-chart { width: 100%; height: auto; display: block; overflow: visible; }
+.acct-chart__grid { stroke: var(--line-soft); stroke-width: 1; }
+.acct-chart__axis { font-size: 10px; fill: var(--muted); font-family: var(--font-body); }
+.acct-chart__line { stroke-width: 2.5; }
+.acct-chart__line--value  { stroke: var(--accent-2); }
+.acct-chart__line--equity { stroke: #6fcf97; }
+.acct-chart__line--debt   { stroke: #e2938c; }
+.acct-chart__legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+.acct-chart__legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.acct-chart__swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.acct-chart__swatch--value  { background: var(--accent-2); }
+.acct-chart__swatch--equity { background: #6fcf97; }
+.acct-chart__swatch--debt   { background: #e2938c; }
