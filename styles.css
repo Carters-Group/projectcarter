@@ -508,8 +508,16 @@ h1, h2, h3 {
   font-size: 12px; letter-spacing: 0.14em; color: var(--muted);
 }
 .footer-nav a:hover { color: var(--text); }
-.footer-legal { border-top: 1px solid var(--line-soft); padding-block: 26px; }
+.footer-legal {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  border-top: 1px solid var(--line-soft); padding-block: 26px;
+}
 .footer-legal p { margin: 0; color: var(--muted); font-size: 12px; letter-spacing: 0.05em; }
+.footer-social { display: flex; gap: 18px; }
+.footer-social a { color: var(--muted); display: inline-flex; }
+.footer-social a:hover { color: var(--accent); }
+.footer-social svg { width: 18px; height: 18px; }
 
 /* ---------- Reveal animation ---------- */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
