@@ -514,6 +514,19 @@
       }
       syncLettingUnit(id);
       if (fromUser && isCom) autoRecovers(id);
+      /* keep the acquisition-costs "commercial / non-residential property"
+         stamp-duty checkbox in lockstep with the property type above it -
+         otherwise a card can end up commercial everywhere except its stamp
+         duty rate (or vice versa), which is confusing and wrong. Only when
+         the change actually comes from the visitor picking a type, so
+         restoring a saved report doesn't fight itself field by field. */
+      if (fromUser) {
+        var commCb = document.getElementById(p + "stampComm");
+        if (commCb && commCb.checked !== isCom) {
+          commCb.checked = isCom;
+          recalcCardStamp(id);
+        }
+      }
     }
 
     /* letting fee can be a flat $ amount or a number of weeks of rent
@@ -563,42 +576,6 @@
           '<label for="' + p + 'label">Property ' + idx + ' - name or address</label>' +
           '<input type="text" id="' + p + 'label" autocomplete="off" placeholder="Property ' + letter(idx - 1) + '" />' +
         '</div>' +
-        '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
-          '<span>This property is being purchased - include one-off acquisition costs</span></label>' +
-        '<div class="calc-uplift" id="' + p + 'acqFields" hidden>' +
-          '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'stampState">Estimate for</label>' +
-            '<select id="' + p + 'stampState">' +
-              '<option value="">No estimate</option>' +
-              '<option value="NSW">New South Wales</option>' +
-              '<option value="VIC">Victoria</option>' +
-              '<option value="QLD">Queensland</option>' +
-              '<option value="WA">Western Australia</option>' +
-              '<option value="SA">South Australia</option>' +
-              '<option value="TAS">Tasmania</option>' +
-              '<option value="ACT">Australian Capital Territory</option>' +
-              '<option value="NT">Northern Territory</option>' +
-            '</select></div>' +
-            '<div class="field"><label for="' + p + 'stamp">Stamp duty + registration</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'stamp" autocomplete="off" placeholder="0" /></div></div>' +
-          '</div>' +
-          '<label class="calc-check"><input type="checkbox" id="' + p + 'stampComm" />' +
-            '<span>Commercial / non-residential property</span></label>' +
-          '<p class="field-hint" id="' + p + 'stampNote">Pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.</p>' +
-          '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'convey">Conveyancing</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'convey" autocomplete="off" placeholder="0" /></div></div>' +
-            '<div class="field"><label for="' + p + 'borrow">Borrowing costs</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'borrow" autocomplete="off" placeholder="0" /></div></div>' +
-          '</div>' +
-          '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'qs">Other <span>(one-off, lump sum)</span></label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
-            '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
-          '</div>' +
-          '<p class="field-hint">Add any other one-off purchase costs here as a single lump sum - BA / planning fees, building or pest reports, quantity surveyor&rsquo;s report, or other specialist consultants, if required.</p>' +
-        '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'ptype">Property type</label>' +
           '<select id="' + p + 'ptype">' +
@@ -621,6 +598,42 @@
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'loan" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<p class="field-hint" id="' + p + 'loanHint">Loan &mdash; &nbsp;·&nbsp; Equity &mdash; &nbsp;·&nbsp; LVR &mdash;</p>' +
+        '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
+          '<span>This property is being purchased - include one-off acquisition costs</span></label>' +
+        '<div class="calc-uplift" id="' + p + 'acqFields" hidden>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'stampState">Estimate for</label>' +
+            '<select id="' + p + 'stampState">' +
+              '<option value="">No estimate</option>' +
+              '<option value="NSW">New South Wales</option>' +
+              '<option value="VIC">Victoria</option>' +
+              '<option value="QLD">Queensland</option>' +
+              '<option value="WA">Western Australia</option>' +
+              '<option value="SA">South Australia</option>' +
+              '<option value="TAS">Tasmania</option>' +
+              '<option value="ACT">Australian Capital Territory</option>' +
+              '<option value="NT">Northern Territory</option>' +
+            '</select></div>' +
+            '<div class="field"><label for="' + p + 'stamp">Stamp duty + registration</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'stamp" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<label class="calc-check"><input type="checkbox" id="' + p + 'stampComm" />' +
+            '<span>Commercial / non-residential property</span></label>' +
+          '<p class="field-hint" id="' + p + 'stampNote">Follows the property type above; tick or untick here only if this purchase needs a different stamp duty rate. Pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.</p>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'convey">Conveyancing</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'convey" autocomplete="off" placeholder="0" /></div></div>' +
+            '<div class="field"><label for="' + p + 'borrow">Borrowing costs</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'borrow" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<div class="field-row">' +
+            '<div class="field"><label for="' + p + 'qs">Other <span>(one-off, lump sum)</span></label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
+            '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<p class="field-hint">Add any other one-off purchase costs here as a single lump sum - BA / planning fees, building or pest reports, quantity surveyor&rsquo;s report, or other specialist consultants, if required.</p>' +
+        '</div>' +
         '<div class="field-row">' +
           '<div class="field" data-invest-only><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
