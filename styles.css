@@ -473,6 +473,7 @@ h1, h2, h3 {
 }
 .field input:not([type="checkbox"]):not([type="radio"]), .field select, .field textarea {
   width: 100%;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
   background: var(--bg-2);
   border: 1px solid var(--line);
   color: var(--text);
@@ -1246,7 +1247,10 @@ h1, h2, h3 {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
   color: var(--muted); font-size: 15px; pointer-events: none;
 }
-.input-money input { padding-left: 28px; }
+/* !important: the base .field input rule's :not() clauses out-specificity
+   this otherwise-equal selector, which was silently clobbering the space
+   reserved for the "$" prefix and letting the first digit render under it. */
+.input-money input { padding-left: 28px !important; }
 /* % sits just after the number; --pct-x is set from the value width in JS */
 .input-pct input { text-align: left; }
 .input-pct::after {

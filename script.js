@@ -43,9 +43,16 @@
       ddToggle.setAttribute("aria-expanded", String(on));
     }
 
+    /* The toggle is a real link to the calculators landing page (crawlable,
+       and works with JS off). First click/tap just opens the menu; a
+       second click while it's already open (or a click after hover already
+       opened it on desktop) goes ahead and navigates there. */
     ddToggle.addEventListener("click", function (e) {
-      e.stopPropagation();
-      setOpen(!dd.classList.contains("open"));
+      if (!dd.classList.contains("open")) {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(true);
+      }
     });
     dd.addEventListener("mouseenter", function () { if (desktopQuery.matches) setOpen(true); });
     dd.addEventListener("mouseleave", function () { if (desktopQuery.matches) setOpen(false); });
