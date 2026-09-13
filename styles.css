@@ -1019,6 +1019,18 @@ h1, h2, h3 {
 .gallery a:hover img { opacity: 0.86; }
 .gallery.floorplans img { object-fit: contain; background: #fff; padding: 8px; }
 
+.calc-hero-strip {
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2px;
+  margin: 28px 0 40px; border: 1px solid var(--line-soft);
+}
+.calc-hero-strip__img {
+  aspect-ratio: 4 / 3; background-size: cover; background-position: center;
+}
+@media (max-width: 700px) {
+  .calc-hero-strip { grid-template-columns: 1fr; }
+  .calc-hero-strip__img:nth-child(n+2) { display: none; }
+}
+
 .project-cta {
   border-top: 1px solid var(--line-soft);
   padding-block: clamp(56px, 9vw, 110px);
@@ -1168,6 +1180,21 @@ h1, h2, h3 {
 .dwelling-type, .finance-row { gap: 14px; }
 .dwelling-type .field-row, .finance-row .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
 .dwelling-type__remove, .finance-row__remove { justify-self: start; }
+
+.calc-prop-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.calc-prop-templates {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft);
+}
+.calc-prop-templates label {
+  display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.calc-prop-templates__row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.calc-prop-templates__row select {
+  flex: 1; min-width: 180px; background: var(--bg-2); color: var(--text);
+  border: 1px solid var(--line-soft); border-radius: 4px; padding: 9px 12px; font-size: 14px;
+  font-family: var(--font-body);
+}
 @media (max-width: 560px) {
   .dwelling-type .field-row, .finance-row .field-row { grid-template-columns: 1fr; }
 }
@@ -1422,6 +1449,13 @@ h1, h2, h3 {
   margin: 0; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
 }
 .acct-email { margin: 4px 0 0; font-size: 18px; font-weight: 600; word-break: break-all; }
+
+.acct-starthere {
+  display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+  background: rgba(95,161,208,0.16); border: 1px solid rgba(95,161,208,0.4);
+  color: var(--accent-2); font-family: var(--font-body); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; vertical-align: middle;
+}
 
 .acct-reports { display: grid; gap: 2px; }
 .acct-group-head {

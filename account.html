@@ -93,12 +93,6 @@
 
         <!-- signed in -->
         <div id="acctSignedIn" hidden>
-          <div class="card acct-card" id="acctQuickCard">
-            <h2 class="calc-subhead">Quick access</h2>
-            <p class="acct-empty">Jump straight into a calculator - resumes your most recently saved report where you have one.</p>
-            <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
-          </div>
-
           <div class="card acct-card" id="acctPortfolioCard">
             <h2 class="calc-subhead">Your portfolio</h2>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
@@ -137,6 +131,12 @@
               </p>
               <div id="portfolioChooser"></div>
             </div>
+          </div>
+
+          <div class="card acct-card" id="acctQuickCard">
+            <h2 class="calc-subhead">Quick access</h2>
+            <p class="acct-empty">Jump straight into a calculator - resumes your most recently saved report where you have one.</p>
+            <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
           </div>
 
           <div class="card acct-card" id="acctActivityCard">
@@ -256,7 +256,7 @@
       da: "development-site-calculator", grv: "gross-realisation-value-calculator",
       pr: "portfolio-review-calculator", cl: "commercial-lending-calculator"
     };
-    var CALC_ORDER = ["noi", "roi", "da", "grv", "pr", "cl"];
+    var CALC_ORDER = ["pr", "cl", "roi", "noi", "da", "grv"];
     var CALC_ICON = {
       noi: "assets/images/calculators/noi-icon.svg", roi: "assets/images/calculators/roi-icon.svg",
       da: "assets/images/calculators/da-icon.svg", grv: "assets/images/calculators/grv-icon.svg",
@@ -618,7 +618,7 @@
         a.innerHTML =
           '<div class="card-media has-photo card-media--icon" style="background-image:url(\'' + CALC_ICON[calc] + '\')" data-label="' + calc.toUpperCase() + '"></div>' +
           '<div class="card-body">' +
-            '<h3>' + CALC_SHORT[calc] + '</h3>' +
+            '<h3>' + CALC_SHORT[calc] + (calc === "pr" ? ' <span class="acct-starthere">Start here</span>' : '') + '</h3>' +
             '<p class="card-meta"></p>' +
             '<span class="link-arrow">' + (latest ? "Resume" : "Open calculator") + '</span>' +
           '</div>';
