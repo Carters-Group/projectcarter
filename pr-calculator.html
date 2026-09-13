@@ -634,6 +634,12 @@
 
         '<div data-invest-only>' +
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Yearly running costs</h3>' +
+        '<label class="calc-check"><input type="checkbox" id="' + p + 'outLumpOn" />' +
+          '<span>I just know the total - enter yearly outgoings as a lump sum instead</span></label>' +
+        '<div class="field" id="' + p + 'outLumpWrap" hidden>' +
+          '<label for="' + p + 'outLump">Total yearly outgoings <span>(lump sum, excl. vacancy)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'outLump" autocomplete="off" placeholder="0" /></div>' +
+        '</div>' +
         '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
@@ -752,6 +758,10 @@
         if (!this.checked) setCardCollapsed(id, true);
         render();
       });
+      card.querySelector("#" + p + "outLumpOn").addEventListener("change", function () {
+        syncOutLumpUi(id, this.checked);
+        render();
+      });
       card.querySelector("#" + p + "ngNew").addEventListener("change", function () {
         var on = this.checked;
         card.querySelector("#" + p + "ngExemptWrap").hidden = !on;
@@ -807,6 +817,7 @@
       }
       applyType(id, false);
       syncAcqUi(id);
+      syncOutLumpUi(id, card.querySelector("#" + p + "outLumpOn").checked);
       maybeAutoCollapse(id);
       updateRemoveButtons();
     }
@@ -819,6 +830,35 @@
       var label = document.getElementById(p + "valueLabel");
       if (fields) fields.hidden = !acqOn.checked;
       if (label) label.textContent = acqOn.checked ? "Purchase price" : "Current value";
+    }
+
+    /* yearly running costs - itemised fields (and their "recovered from
+       tenant" ticks) replaced by a single lump sum. Vacancy allowance is
+       left alone since it is not a dollar outgoing. */
+    var OUT_ITEMISED_FIELDS = ["pmpct", "letting", "council", "strata", "landtax", "insurance",
+      "maintwk", "maintyr", "water", "fire", "hvac", "clean", "ogadmin", "loanfees", "sundry"];
+    var OUT_RECOVER_KEYS = ["pm", "council", "water", "strata", "landtax", "insurance",
+      "maint", "fire", "hvac", "clean", "ogadmin"];
+    function syncOutLumpUi(id, lumpOn) {
+      var p = "p" + id + "_";
+      var wrap = document.getElementById(p + "outLumpWrap");
+      if (wrap) wrap.hidden = !lumpOn;
+      OUT_ITEMISED_FIELDS.forEach(function (sfx) {
+        var el = document.getElementById(p + sfx);
+        if (!el) return;
+        el.disabled = lumpOn;
+        if (lumpOn) el.value = "";
+      });
+      OUT_RECOVER_KEYS.forEach(function (key) {
+        var cb = document.getElementById(p + key + "Rec");
+        if (!cb) return;
+        cb.disabled = lumpOn;
+        if (lumpOn) cb.checked = false;
+      });
+      if (!lumpOn) {
+        var lumpEl = document.getElementById(p + "outLump");
+        if (lumpEl) lumpEl.value = "";
+      }
     }
 
     /* ---- reusable property templates (saved to this browser) ------------ */
@@ -1018,6 +1058,8 @@
 
       var opexGross = pm + letting + council + water + strata + landTax + insurance +
         maint + fire + hvac + clean + ogadmin + loanFees + sundry;
+      var outLumpOn = document.getElementById(p + "outLumpOn").checked;
+      if (outLumpOn) opexGross = num(p + "outLump");        /* itemised lines are blanked while this is on */
       var opexNet = opexGross - recovered;                 /* what the landlord carries */
       var expenses = opexNet + vacancy;                    /* "running costs", net of recoveries */
 
