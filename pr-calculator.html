@@ -566,6 +566,13 @@
         '<label class="calc-check"><input type="checkbox" id="' + p + 'acqOn" />' +
           '<span>This property is being purchased - include one-off acquisition costs</span></label>' +
         '<div class="calc-uplift" id="' + p + 'acqFields" hidden>' +
+          '<label class="calc-check"><input type="checkbox" id="' + p + 'acqLumpOn" />' +
+            '<span>I just know the total - enter it as a lump sum instead</span></label>' +
+          '<div class="field" id="' + p + 'acqLumpWrap" hidden>' +
+            '<label for="' + p + 'acqLump">Total acquisition costs <span>(lump sum)</span></label>' +
+            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'acqLump" autocomplete="off" placeholder="0" /></div>' +
+          '</div>' +
+          '<div id="' + p + 'acqItemised">' +
           '<div class="field-row">' +
             '<div class="field"><label for="' + p + 'stampState">Estimate for</label>' +
             '<select id="' + p + 'stampState">' +
@@ -598,6 +605,7 @@
             '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
           '</div>' +
           '<p class="field-hint">Add any other one-off purchase costs here as a single lump sum - BA / planning fees, building or pest reports, quantity surveyor&rsquo;s report, or other specialist consultants, if required.</p>' +
+          '</div>' +
         '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'ptype">Property type</label>' +
@@ -752,6 +760,19 @@
         if (!this.checked) setCardCollapsed(id, true);
         render();
       });
+      var ACQ_ITEMISED_FIELDS = ["stampState", "stamp", "stampComm", "convey", "borrow", "qs", "improve"];
+      card.querySelector("#" + p + "acqLumpOn").addEventListener("change", function () {
+        var lump = this.checked;
+        card.querySelector("#" + p + "acqLumpWrap").hidden = !lump;
+        ACQ_ITEMISED_FIELDS.forEach(function (sfx) {
+          var el = card.querySelector("#" + p + sfx);
+          if (!el) return;
+          el.disabled = lump;
+          if (lump) { if (el.type === "checkbox") el.checked = false; else el.value = ""; }
+        });
+        if (!lump) card.querySelector("#" + p + "acqLump").value = "";
+        render();
+      });
       card.querySelector("#" + p + "ngNew").addEventListener("change", function () {
         var on = this.checked;
         card.querySelector("#" + p + "ngExemptWrap").hidden = !on;
@@ -819,6 +840,15 @@
       var label = document.getElementById(p + "valueLabel");
       if (fields) fields.hidden = !acqOn.checked;
       if (label) label.textContent = acqOn.checked ? "Purchase price" : "Current value";
+      var lumpOn = document.getElementById(p + "acqLumpOn");
+      var lumpWrap = document.getElementById(p + "acqLumpWrap");
+      if (lumpOn && lumpWrap) {
+        lumpWrap.hidden = !lumpOn.checked;
+        ["stampState", "stamp", "stampComm", "convey", "borrow", "qs", "improve"].forEach(function (sfx) {
+          var el = document.getElementById(p + sfx);
+          if (el) el.disabled = lumpOn.checked;
+        });
+      }
     }
 
     /* ---- reusable property templates (saved to this browser) ------------ */
@@ -904,6 +934,8 @@
       var stampEl = document.getElementById(p + "stamp");
       var noteEl = document.getElementById(p + "stampNote");
       if (!st || !stampEl) return;
+      var lumpOn = document.getElementById(p + "acqLumpOn");
+      if (lumpOn && lumpOn.checked) return;
       var state = st.value;
       var comm = document.getElementById(p + "stampComm").checked;
       var price = num(p + "value");
@@ -937,6 +969,13 @@
       }
     }
 
+    /* a lump-sum acquisition cost, when ticked, replaces the itemised total */
+    function acqCostFor(p) {
+      var lumpOn = document.getElementById(p + "acqLumpOn");
+      if (lumpOn && lumpOn.checked) return num(p + "acqLump");
+      return num(p + "stamp") + num(p + "convey") + num(p + "borrow") + num(p + "qs") + num(p + "improve");
+    }
+
     /* ---- per-property model ------------------------------------------- */
     function modelProp(id) {
       var p = "p" + id + "_";
@@ -951,9 +990,7 @@
       var equity = value - loan;
 
       var acqOnEarly = document.getElementById(p + "acqOn").checked;
-      var acqEarly = acqOnEarly
-        ? num(p + "stamp") + num(p + "convey") + num(p + "borrow") + num(p + "qs") + num(p + "improve")
-        : 0;
+      var acqEarly = acqOnEarly ? acqCostFor(p) : 0;
 
       /* owner-occupied: counts toward portfolio value/debt/equity only - no
          rent, running costs, depreciation or tax treatment apply to a home */
@@ -1081,9 +1118,7 @@
       }
 
       var acqOn = document.getElementById(p + "acqOn").checked;
-      var acq = acqOn
-        ? num(p + "stamp") + num(p + "convey") + num(p + "borrow") + num(p + "qs") + num(p + "improve")
-        : 0;
+      var acq = acqOn ? acqCostFor(p) : 0;
 
       return {
         id: id, label: (document.getElementById(p + "label").value || "").trim(),
