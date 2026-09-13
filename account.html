@@ -109,6 +109,17 @@
               <div class="acct-overview" id="portfolioStats"></div>
               <p class="acct-report__date" id="portfolioUpdated"></p>
               <div class="acct-equity-modes" id="portfolioEquityModes"></div>
+
+              <div class="acct-debt-goal" id="portfolioDebtGoal" hidden>
+                <p class="acct-eyebrow">Debt reduction goal</p>
+                <div class="field">
+                  <label for="debtGoalExtra">Extra contribution toward your portfolio debt <span>(per year, from savings or other income)</span></label>
+                  <div class="input-money"><input type="text" inputmode="numeric" id="debtGoalExtra" autocomplete="off" placeholder="0" /></div>
+                </div>
+                <div class="acct-overview acct-overview--modes" id="debtGoalStats" hidden></div>
+                <p class="field-hint">A simple planning figure - not part of any calculator or saved report, and it has no effect on any ROI projection. Assumes your portfolio debt is interest-only (as modelled in Portfolio Review) so every dollar contributed goes straight to principal, at the blended rate implied by your saved properties.</p>
+              </div>
+
               <p class="acct-calc-links">
                 <a id="portfolioOpenLink" href="portfolio-review-calculator">Open in Portfolio Review</a>
                 &nbsp;&middot;&nbsp;
@@ -424,6 +435,31 @@
 
     var currentMasterReport = null;
 
+    /* Purely a planning figure on this page - not tied to any calculator or
+       saved report, and it never touches an ROI projection's IRR. Portfolio
+       Review models debt as interest-only, so an extra $/year contribution
+       goes straight to principal: payoff time is a simple division, and the
+       interest saved once paid off is that principal x the blended rate
+       implied by the saved properties (total interest / total debt). */
+    function renderDebtGoal(debt, blendedRate) {
+      var input = document.getElementById("debtGoalExtra");
+      var statsEl = document.getElementById("debtGoalStats");
+      function recalc() {
+        var extra = parseFloat((input.value || "").replace(/[^0-9.]/g, "")) || 0;
+        if (extra <= 0) { hide(statsEl); return; }
+        var years = debt / extra;
+        var interestSaved = debt * blendedRate;
+        statsEl.innerHTML =
+          '<div class="acct-overview__stat"><dt>Years to pay off entirely</dt><dd>' + years.toFixed(1) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Interest saved / yr once paid off</dt><dd>' + fmtMoney(interestSaved) + '</dd></div>';
+        show(statsEl);
+      }
+      input.removeEventListener("input", input._pcRecalc || function () {});
+      input._pcRecalc = recalc;
+      input.addEventListener("input", recalc);
+      recalc();
+    }
+
     function renderPortfolio(rows) {
       var setEl = document.getElementById("portfolioSet");
       var unsetEl = document.getElementById("portfolioUnset");
@@ -473,6 +509,14 @@
           note.className = "field-hint";
           note.textContent = "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs.";
           modesEl.appendChild(note);
+        }
+
+        var goalEl = document.getElementById("portfolioDebtGoal");
+        if (s.portfolioDebt > 0 && s.blendedRate > 0) {
+          show(goalEl);
+          renderDebtGoal(s.portfolioDebt, s.blendedRate);
+        } else {
+          hide(goalEl);
         }
 
         document.getElementById("portfolioChangeBtn").onclick = function () { renderPortfolioChooser(rows, true); };
@@ -665,6 +709,7 @@
       btn.disabled = true;
       setMsg(roiMsg, "Building your projection…");
       var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 100)) : 0;
+      var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 1000) / 10) : 6.5;
       var title = (currentMasterReport.title || "Your portfolio") + " - ROI projection";
       var inputs = {
         v: 2, calc: "roi", projectName: title,
@@ -675,8 +720,8 @@
           stampDuty: "0", valuationCost: "0", legalCost: "0", buildingInspection: "0", otherCost: "0",
           fundsAvailable: "0",
           rent: String(Math.round(s.netRentalIncome || 0)),
-          rentGrowth: "3", rate: "6.5", term: "5",
-          debtReduction: "50", extraPaydown: "0", exitCap: ""
+          rentGrowth: "3", rate: String(rate), term: "5",
+          debtReduction: "50", exitCap: ""
         },
         dyn: {}
       };

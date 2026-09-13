@@ -1569,6 +1569,7 @@
         usableEquity70: Math.round(usableEquity70),
         usableEquity80: Math.round(usableEquity80),
         netRentalIncome: Math.round(T.netRent),
+        blendedRate: T.loan > 0 ? T.interest / T.loan : null,
         portfolioLvr: T.lvr != null ? Math.round(T.lvr * 10) / 10 : null,
         annualSurplus: Math.round(T.annual),
         weeklySurplus: Math.round(T.weekly),
