@@ -238,7 +238,7 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
-            <li><strong>Loan and equity.</strong> The loan is the LVR you enter times the value; the equity (your net position) is the rest. Interest is interest-only, loan &times; rate, so nothing is paid off the loan.</li>
+            <li><strong>Loan and equity.</strong> Enter each property's loan in dollars; the loan to value ratio (LVR) is worked out for you, and the equity (your net position) is the rest. Interest is interest-only, loan &times; rate, so nothing is paid off the loan.</li>
             <li><strong>Rent collected</strong> is the weekly rent &times; 52 for a residential property, or the gross annual rent you enter for a commercial one.</li>
             <li><strong>Running costs</strong> are property management (a % of the rent), the letting / leasing fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance, a vacancy allowance, loan fees and sundry. Residential maintenance is per week &times; 52 and vacancy is weeks &times; the weekly rent; commercial maintenance is annual and vacancy is months &divide; 12 &times; the gross rent. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
             <li><strong>Commercial properties</strong> add a lease basis and the usual building outgoings - water &amp; sewer rates, fire &amp; essential services, air-conditioning / HVAC, cleaning &amp; security, and an outgoings audit / admin allowance. Each recoverable line has a &ldquo;recovered from the tenant&rdquo; tick: ticked, that outgoing drops out of your running costs. Choosing <strong>net lease</strong> ticks the usual recoverable set, <strong>gross lease</strong> clears them, and <strong>partial / mixed</strong> leaves them as you set them. <strong>Land tax is never auto-ticked</strong> under any lease basis - many retail leases can't pass it through to the tenant even on a net lease, so tick it yourself only if this lease does.</li>
@@ -611,10 +611,10 @@
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'value" id="' + p + 'valueLabel">Current value</label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'value" autocomplete="off" placeholder="0" /></div></div>' +
-          '<div class="field"><label for="' + p + 'lvr">Loan to value <span>(%)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'lvr" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'loan">Loan <span>($)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'loan" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
-        '<p class="field-hint" id="' + p + 'loanHint">Loan &mdash; &nbsp;·&nbsp; Equity &mdash;</p>' +
+        '<p class="field-hint" id="' + p + 'loanHint">Loan &mdash; &nbsp;·&nbsp; Equity &mdash; &nbsp;·&nbsp; LVR &mdash;</p>' +
         '<div class="field-row">' +
           '<div class="field" data-invest-only><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
@@ -779,7 +779,7 @@
       card.querySelector("#" + p + "value").addEventListener("input", function () {
         recalcCardStamp(id);
       });
-      card.querySelector("#" + p + "lvr").addEventListener("input", function () {
+      card.querySelector("#" + p + "loan").addEventListener("input", function () {
         recalcCardStamp(id);
       });
 
@@ -789,7 +789,7 @@
         } else {
           if (prefill.label != null) card.querySelector("#" + p + "label").value = prefill.label;
           if (prefill.value != null) card.querySelector("#" + p + "value").value = prefill.value;
-          if (prefill.lvr != null) card.querySelector("#" + p + "lvr").value = prefill.lvr;
+          if (prefill.loan != null) card.querySelector("#" + p + "loan").value = prefill.loan;
         }
       }
       applyType(id, false);
@@ -891,7 +891,7 @@
       var comm = document.getElementById(p + "stampComm").checked;
       var price = num(p + "value");
       var est = state ? stampEstimate(state, price, comm) : null;
-      var fees = regoFees(state, price, num(p + "lvr") > 0);
+      var fees = regoFees(state, price, num(p + "loan") > 0);
       if (!touchedStamp[id] && state) {
         if (est == null) stampEl.value = "";
         else {
@@ -929,9 +929,9 @@
       var lease = isCom ? (((document.getElementById(p + "lease") || {}).value) || "net") : "";
 
       var value = num(p + "value");
-      var lvr = num(p + "lvr");
-      var loan = value * lvr / 100;
-      var equity = Math.max(value - loan, 0);
+      var loan = num(p + "loan");
+      var lvr = value > 0 ? loan / value * 100 : null;
+      var equity = value - loan;
 
       var acqOnEarly = document.getElementById(p + "acqOn").checked;
       var acqEarly = acqOnEarly
@@ -1154,7 +1154,8 @@
         var p = "p" + r.id + "_";
         var lh = document.getElementById(p + "loanHint");
         if (lh) lh.textContent = "Loan " + (r.value > 0 ? money(r.loan) : "—") +
-          "   ·   Equity " + (r.value > 0 ? money(r.equity) : "—");
+          "   ·   Equity " + (r.value > 0 ? money(r.equity) : "—") +
+          "   ·   LVR " + (r.lvr != null ? pct(r.lvr) : "—");
         var rh = document.getElementById(p + "rentHint");
         if (rh) rh.textContent = "Gross rent " + (r.grossRent > 0 ? money(r.grossRent) + " / yr" : "—") +
           "   ·   Gross yield " + (r.grossYield ? pct(r.grossYield * 100) : "—");
