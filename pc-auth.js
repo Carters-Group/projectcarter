@@ -136,7 +136,12 @@
     }
 
     client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      /* implicit flow puts the session straight in the redirect URL rather
+         than requiring a code-verifier saved earlier in this same browser -
+         magic links are routinely opened from a mail app's own in-app
+         browser, a different storage context than the one the visitor
+         requested the link from, and PKCE fails silently in that case */
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "implicit" }
     });
 
     client.auth.getSession().then(function (res) {

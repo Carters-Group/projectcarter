@@ -48,7 +48,7 @@ footer. Top-nav order is **About, Projects, Approach, Calculators**, then the
 **Enquire** button. **About** and **Approach** are their own pages
 (`about.html`, `approach.html`); **Projects** stays an in-page anchor to the
 project grid on `index.html`. **Calculators** is a dropdown (`.nav-dropdown`, toggled by
-`script.js`) with **Net Operating Income (NOI)**, **Return on Equity (ROI)**,
+`script.js`) with **Net Operating Income (NOI)**, **Return on Investment (ROI)**,
 **Development Site (DA)**, **Gross Realisation Value (GRV)**, **Portfolio
 Review (PR)** and **Commercial Lending (CL)**; on mobile it expands inline in the slide-down menu. The footer nav
 lists About, Projects, Approach, Calculators, Account and Contact.
@@ -164,8 +164,13 @@ and the `pc_can_save()` SQL function are the hooks for a future paywall - today
    anon key grants nothing without a signed-in user, because row-level security
    scopes every row to its owner.
 4. **Authentication - URL Configuration**: set the **Site URL** to your deployed
-   origin and add it (plus `http://localhost:PORT` for local work) to
-   **Redirect URLs**, so the magic link returns to `.../account.html`.
+   origin and add `<origin>/account` (plus `http://localhost:PORT/account` for
+   local work) to **Redirect URLs**, exactly matching the clean URL the site
+   links to (`vercel.json` rewrites `/account` to `account.html`) - the magic
+   link's `redirectTo` is always `<origin>/account`, and Supabase requires an
+   exact match, so whitelisting `account.html` instead silently breaks
+   sign-in (the visitor never gets a session and just sees the sign-in form
+   again).
 5. Optional: **Authentication - Providers - Email** - turn **"Confirm email"**
    off, since the magic link already proves the address.
 

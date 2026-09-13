@@ -36,7 +36,7 @@
           <div class="nav-dropdown-menu" id="calcDropdownMenu">
             <a href="portfolio-review-calculator">Portfolio Review (PR)</a>
             <a href="commercial-lending-calculator">Commercial Lending (CL)</a>
-            <a href="return-on-equity-calculator">Return on Equity (ROI)</a>
+            <a href="return-on-investment-calculator">Return on Investment (ROI)</a>
             <a href="development-site-calculator">Development Site (DA)</a>
             <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
             <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
@@ -145,7 +145,7 @@
             <p class="acct-calc-links">
               New report:
               <a href="net-operating-income-calculator">NOI</a> ·
-              <a href="return-on-equity-calculator">ROI</a> ·
+              <a href="return-on-investment-calculator">ROI</a> ·
               <a href="development-site-calculator">DA</a> ·
               <a href="gross-realisation-value-calculator">GRV</a> ·
               <a href="portfolio-review-calculator">PR</a> ·
@@ -204,7 +204,7 @@
       grv: "GRV Calculator", pr: "Portfolio Review", cl: "CL Calculator"
     };
     var CALC_PAGES = {
-      noi: "net-operating-income-calculator", roi: "return-on-equity-calculator",
+      noi: "net-operating-income-calculator", roi: "return-on-investment-calculator",
       da: "development-site-calculator", grv: "gross-realisation-value-calculator",
       pr: "portfolio-review-calculator", cl: "commercial-lending-calculator"
     };
@@ -249,9 +249,22 @@
       node.className = "acct-msg" + (kind ? " is-" + kind : "");
     }
 
+    /* surface a failed magic-link redirect (expired/used link, or a
+       misconfigured Supabase Redirect URL) instead of silently discarding it -
+       otherwise a failure looks identical to nothing happening and the
+       visitor just sees the sign-in form again with no explanation */
+    function reportUrlError() {
+      var raw = (window.location.hash || "").replace(/^#/, "") + "&" + (window.location.search || "").replace(/^\?/, "");
+      var params;
+      try { params = new URLSearchParams(raw); } catch (e) { return; }
+      var desc = params.get("error_description") || params.get("error_code") || params.get("error");
+      if (desc) setMsg(magicMsg, "Sign-in link failed: " + desc.replace(/\+/g, " ") + ". Request a new link below.", "error");
+    }
+
     /* strip the magic-link hash once supabase-js has consumed it */
     function tidyUrl() {
       if (window.location.hash && /access_token|error_description/.test(window.location.hash)) {
+        reportUrlError();
         history.replaceState(null, "", window.location.pathname + window.location.search);
       }
     }
@@ -448,7 +461,7 @@
       }
     }
 
-    var CALC_PAGE_SET = { "net-operating-income-calculator":1, "return-on-equity-calculator":1, "development-site-calculator":1, "gross-realisation-value-calculator":1 };
+    var CALC_PAGE_SET = { "net-operating-income-calculator":1, "return-on-investment-calculator":1, "development-site-calculator":1, "gross-realisation-value-calculator":1 };
     function fromParam() {
       try {
         var f = new URL(window.location.href).searchParams.get("from");
@@ -519,8 +532,7 @@
       magicBtn.disabled = true;
       setMsg(magicMsg, "Sending your link…");
       window.pcAuth.signInWithMagicLink(email, {
-        full_name: name, phone: phone,
-        redirectTo: window.location.origin + window.location.pathname
+        full_name: name, phone: phone
       }).then(function (res) {
         magicBtn.disabled = false;
         if (res && res.error) { setMsg(magicMsg, res.error.message, "error"); return; }
