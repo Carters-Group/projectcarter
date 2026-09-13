@@ -1108,6 +1108,7 @@ h1, h2, h3 {
   border: 1px solid var(--line);
   background: var(--bg-2);
 }
+.calc-uplift[hidden] { display: none !important; }
 
 /* Stamp duty state estimator */
 .stamp-est {

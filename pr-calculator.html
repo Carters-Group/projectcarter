@@ -249,7 +249,7 @@
             <li><strong>Break-even rent.</strong> Each card shows the rent that would bring that property's yearly after-tax result to zero, with everything else held the same - per week for residential, per year for commercial.</li>
             <li><strong>Residential vs commercial.</strong> The comparison table and the schedule subtotals split the portfolio by type so you can see each side's value, yield and after-tax position on its own, then combined.</li>
             <li><strong>Owner-occupied (your home).</strong> Add your own home as a property type and it counts toward your combined value, debt and equity - useful for a true useable-equity figure - but it carries no rent or running-cost fields and is left out of every rent, yield, cash-flow and tax figure entirely.</li>
-            <li><strong>Buying a property.</strong> Tick "being purchased" to add one-off costs: stamp duty (estimable by state), conveyancing, borrowing costs, a quantity surveyor's report and improvements. These do not change the holding result; they feed "cash needed to buy" (your equity plus those costs).</li>
+            <li><strong>Buying a property.</strong> Tick "being purchased" to add stamp duty (estimable by state), conveyancing and borrowing costs. These do not change the holding result; they feed "cash needed to buy" (your equity plus those costs). "Other one-off cost" and "Cost of improvements" are separate and always available: while buying, they add to that same cash-needed-to-buy figure; already own it, and they come straight off that property's equity instead.</li>
             <li><strong>The portfolio</strong> figures add up every investment property; the yields are combined rent &divide; combined investment value (your home's value is excluded from that ratio, though it is included in the portfolio value, debt and equity above it). This is a point-in-time review: it holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax.</li>
           </ul>
         </div>
@@ -626,14 +626,14 @@
             '<div class="field"><label for="' + p + 'borrow">Borrowing costs</label>' +
             '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'borrow" autocomplete="off" placeholder="0" /></div></div>' +
           '</div>' +
-          '<div class="field-row">' +
-            '<div class="field"><label for="' + p + 'qs">Other <span>(one-off, lump sum)</span></label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
-            '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
-            '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
-          '</div>' +
-          '<p class="field-hint">Add any other one-off purchase costs here as a single lump sum - BA / planning fees, building or pest reports, quantity surveyor&rsquo;s report, or other specialist consultants, if required.</p>' +
         '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'qs">Other one-off cost</label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'qs" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'improve">Cost of improvements</label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'improve" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<p class="field-hint">Any other one-off spend on this property - BA / planning fees, reports, renovations or improvements. Available whether you&rsquo;re buying or already own it: if being purchased, it adds to the cash needed to buy; if already owned, it comes straight off this property&rsquo;s equity.</p>' +
         '<div class="field-row">' +
           '<div class="field" data-invest-only><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
@@ -843,10 +843,12 @@
       if (label) label.textContent = acqOn.checked ? "Purchase price" : "Current value";
     }
 
-    /* one-off purchase costs don't apply once "being purchased" is unticked
-       - clear them rather than leave stale figures behind the hidden toggle,
-       which would otherwise silently keep counting toward "cash required". */
-    var ACQ_FIELDS = ["stamp", "convey", "borrow", "qs", "improve"];
+    /* purchase-only costs don't apply once "being purchased" is unticked -
+       clear them rather than leave stale figures behind the hidden toggle,
+       which would otherwise silently keep counting toward "cash required".
+       "Other one-off cost" / "Cost of improvements" are NOT in this list -
+       they stay put, since they still apply (against equity) either way. */
+    var ACQ_FIELDS = ["stamp", "convey", "borrow"];
     function clearAcqFields(id) {
       var p = "p" + id + "_";
       ACQ_FIELDS.forEach(function (sfx) {
@@ -987,12 +989,19 @@
       var value = num(p + "value");
       var loan = num(p + "loan");
       var lvr = value > 0 ? loan / value * 100 : null;
-      var equity = value - loan;
+      var rawEquity = value - loan;
 
       var acqOnEarly = document.getElementById(p + "acqOn").checked;
+      /* "Other one-off cost" / "Cost of improvements" apply either way: while
+         buying, they're added to the cash needed to buy (as before); already
+         owned, they instead come straight off this property's equity, since
+         they're real money spent on it that the value/loan figures alone
+         don't capture. */
+      var oneOffEarly = num(p + "qs") + num(p + "improve");
       var acqEarly = acqOnEarly
-        ? num(p + "stamp") + num(p + "convey") + num(p + "borrow") + num(p + "qs") + num(p + "improve")
+        ? num(p + "stamp") + num(p + "convey") + num(p + "borrow") + oneOffEarly
         : 0;
+      var equity = acqOnEarly ? rawEquity : rawEquity - oneOffEarly;
 
       /* owner-occupied: counts toward portfolio value/debt/equity only - no
          rent, running costs, depreciation or tax treatment apply to a home */
@@ -1121,7 +1130,7 @@
 
       var acqOn = document.getElementById(p + "acqOn").checked;
       var acq = acqOn
-        ? num(p + "stamp") + num(p + "convey") + num(p + "borrow") + num(p + "qs") + num(p + "improve")
+        ? num(p + "stamp") + num(p + "convey") + num(p + "borrow") + oneOffEarly
         : 0;
 
       return {
