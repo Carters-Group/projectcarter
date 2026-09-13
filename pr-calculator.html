@@ -638,7 +638,8 @@
         '<p class="field-hint" data-own-only hidden>Your home does not carry a rent or running-cost figure here - just its value and loan, so it can count toward your overall equity position.</p>' +
 
         '<div data-invest-only>' +
-        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Yearly running costs</h3>' +
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0" data-res-only>Yearly running costs</h3>' +
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0" data-com-only hidden>Usual claimable outgoings <span style="font-weight:400;text-transform:none;letter-spacing:0">(variable)</span></h3>' +
         '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'letting">Letting / leasing fee</label>' +
@@ -646,7 +647,9 @@
           '<select id="' + p + 'lettingUnit" data-res-only>' +
             '<option value="amount">$ amount</option>' +
             '<option value="weeks">Weeks of rent</option>' +
-          '</select></div>' +
+          '</select>' +
+          recoverTick(p, "letting") +
+          '<span class="field-ref" id="' + p + 'lettingRef"></span></div>' +
           '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "council") + '</div>' +
@@ -663,9 +666,11 @@
         '<p class="field-hint">If a body corporate or strata scheme covers this property, building insurance is usually already included in the body corporate fee - enter landlord/other insurance (contents, loss of rent, liability) here instead. With no body corporate, include building insurance too.</p>' +
         '<div class="field-row">' +
           '<div class="field" data-res-only><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="0" /></div>' +
+          '<span class="field-ref" id="' + p + 'maintwkRef"></span></div>' +
           '<div class="field" data-res-only><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
-          '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'vacwks" autocomplete="off" placeholder="1" /></div>' +
+          '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'vacwks" autocomplete="off" placeholder="1" />' +
+          '<span class="field-ref" id="' + p + 'vacwksRef"></span></div>' +
           '<div class="field" data-com-only hidden><label for="' + p + 'vacmths">Vacancy allowance <span>(months of the year)</span></label>' +
           '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'vacmths" autocomplete="off" placeholder="0" /></div>' +
         '</div>' +
@@ -687,8 +692,8 @@
           recoverTick(p, "ogadmin") + '</div>' +
         '</div>' +
 
-        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Usual claimable outgoings <span style="font-weight:400;text-transform:none;letter-spacing:0">(variable)</span></h3>' +
-        '<p class="field-hint" data-com-only hidden>Property management, land tax, maintenance, loan fees and sundry are not always passed through under a net lease - it depends on the deal, so confirm with the lease rather than assuming any of these are recovered.</p>' +
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Other outgoings <span style="font-weight:400;text-transform:none;letter-spacing:0">(variable)</span></h3>' +
+        '<p class="field-hint" data-com-only hidden>Property management, land tax, maintenance and sundry are not always passed through under a net lease - it depends on the deal, so leave these unticked unless the lease specifically recovers them, and add them in yourself if it does.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
@@ -708,7 +713,8 @@
         '<p class="field-hint" data-com-only hidden>Loan fees are never claimable from the tenant, even on a net lease - they always stay with you as the owner.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "sundry") + '</div>' +
         '</div>' +
         '<p class="field-hint"><span data-res-only>Sundry covers the small holding costs not listed above - smoke alarm and safety checks, gardening and lawns, pest control, cleaning between tenants, bank and statement fees, postage and minor compliance.</span>' +
           '<span data-com-only hidden>Sundry covers anything not itemised above - bank and statement fees, statutory registrations, minor compliance and consultants.</span> A rough yearly allowance is fine.</p>' +
@@ -732,7 +738,7 @@
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Tax treatment</h3>' +
         '<label class="calc-check"><input type="checkbox" id="' + p + 'ngNew" />' +
           '<span>Bought after the 2026 Federal Budget - post-Budget negative gearing rules apply</span></label>' +
-        '<p class="field-hint">From the 2026 Federal Budget, a rental loss on a property bought after Budget night can no longer be offset against salary or other income. Tick this and any loss on this property is quarantined: no tax refund in the year, and the loss carries forward against future rental profit from this property or the gain on sale. Rental profits are still taxed. Properties held before the Budget are unaffected. This change applies to residential property only - commercial negative gearing is unaffected. A modelling assumption, not tax advice.</p>' +
+        '<p class="field-hint">From the 2026 Federal Budget, a rental loss on a property bought after Budget night can no longer be offset against salary or other income. Tick this and any loss on this property is quarantined: no tax refund in the year, and the loss carries forward against future rental profit from this property or the gain on sale. Rental profits are still taxed. Properties held before the Budget are unaffected. This change applies to residential property only - commercial negative gearing is unaffected. Brand-new and off-the-plan dwellings are exempt from the quarantine, so a loss on a new home can still be claimed against other income as normal - tick the box below if this property qualifies. A modelling assumption, not tax advice.</p>' +
         '<label class="calc-check" id="' + p + 'ngExemptWrap" hidden><input type="checkbox" id="' + p + 'ngExempt" />' +
           '<span>Brand-new dwelling - exempt from the quarantine</span></label>' +
         '<p class="field-hint" id="' + p + 'ngExemptHint" hidden>New and off-the-plan dwellings are carved out of the post-Budget change, so a loss on this property still offsets other income as before.</p>' +
@@ -1046,9 +1052,9 @@
       var vacancy = isCom ? grossRent * (vacMths / 12) : vacWks * rentWk;
 
       /* outgoings the tenant reimburses under the lease */
-      var recoverable = { pm: pm, council: council, water: water, strata: strata,
+      var recoverable = { pm: pm, letting: letting, council: council, water: water, strata: strata,
         landtax: landTax, insurance: insurance, maint: maint, fire: fire,
-        hvac: hvac, clean: clean, ogadmin: ogadmin };
+        hvac: hvac, clean: clean, ogadmin: ogadmin, sundry: sundry };
       var recovered = 0;
       Object.keys(recoverable).forEach(function (k) { if (rec(k)) recovered += recoverable[k]; });
 
@@ -1096,9 +1102,9 @@
       if (isCom) {
         var pmFactor = rec("pm") ? 0 : 1;
         var k = 1 - (vacMths / 12) - pmPct * pmFactor;
-        var fixedNet = letting + loanFees + sundry;
-        ["council", "water", "strata", "landtax", "insurance", "maint",
-         "fire", "hvac", "clean", "ogadmin"].forEach(function (key) {
+        var fixedNet = loanFees;
+        ["letting", "council", "water", "strata", "landtax", "insurance", "maint",
+         "fire", "hvac", "clean", "ogadmin", "sundry"].forEach(function (key) {
           if (!rec(key)) fixedNet += recoverable[key];
         });
         if (k > 0) {
@@ -1224,6 +1230,15 @@
         var rh = document.getElementById(p + "rentHint");
         if (rh) rh.textContent = "Gross rent " + (r.grossRent > 0 ? money(r.grossRent) + " / yr" : "—") +
           "   ·   Gross yield " + (r.grossYield ? pct(r.grossYield * 100) : "—");
+
+        var mref = document.getElementById(p + "maintwkRef");
+        if (mref) mref.textContent = r.maint > 0 ? ("= " + money(r.maint) + " / yr") : "";
+        var vref = document.getElementById(p + "vacwksRef");
+        if (vref) vref.textContent = r.vacancy > 0 ? ("= " + money(r.vacancy) + " / yr") : "";
+        var lu = document.getElementById(p + "lettingUnit");
+        var lref = document.getElementById(p + "lettingRef");
+        if (lref) lref.textContent = (lu && lu.value === "weeks" && r.letting > 0)
+          ? ("= " + money(r.letting) + " / yr") : "";
 
         function putCard(sfx, str) {
           var el = document.getElementById(p + sfx);
