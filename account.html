@@ -149,6 +149,10 @@
               </p>
               <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn" style="margin-top:14px">See this as an ROI projection</button>
               <p class="acct-msg" id="portfolioRoiMsg" hidden></p>
+              <div id="portfolioRoiResult" hidden>
+                <div class="acct-overview acct-overview--modes" id="portfolioRoiStats"></div>
+                <p class="acct-calc-links"><a id="portfolioRoiOpenLink" href="#">Open and fine-tune in the ROI calculator</a></p>
+              </div>
             </div>
 
             <div id="portfolioUnset" hidden>
@@ -730,14 +734,43 @@
       });
     });
 
+    /* project the portfolio's combined value forward at the ROI calculator's
+       own "flat cap rate = entry yield" rule (exit cap rate left blank), so
+       the figure shown here matches what the ROI calculator would produce
+       from the same seeded inputs. Kept in sync manually with model() in
+       roi-calculator.html - not shared code, since that page has no exports. */
+    function projectPortfolioRoi(s, term) {
+      var price = s.portfolioValue || 0;
+      var rent1 = s.netRentalIncome || 0;
+      var rate = s.blendedRate > 0 ? s.blendedRate : 0.065;
+      var g = 0.03, dr = 0.5;
+      var entryYield = price > 0 ? rent1 / price : null;
+      var balance = s.portfolioDebt || 0;
+      var totalKept = 0;
+      var value = price;
+      for (var t = 1; t <= term; t++) {
+        var rent = rent1 * Math.pow(1 + g, t - 1);
+        var interest = balance * rate;
+        var cashAfterInterest = rent - interest;
+        var debtPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
+        balance -= debtPay;
+        totalKept += cashAfterInterest - debtPay;
+        value = entryYield ? rent / entryYield : price;
+      }
+      return { value: value, loan: balance, equity: value - balance, totalKept: totalKept };
+    }
+
     document.getElementById("portfolioRoiBtn").addEventListener("click", function () {
       var roiMsg = document.getElementById("portfolioRoiMsg");
+      var resultEl = document.getElementById("portfolioRoiResult");
+      hide(resultEl);
       if (!currentMasterReport) { setMsg(roiMsg, "Set a master portfolio first.", "error"); return; }
       var s = currentMasterReport.summary || {};
       if (!(s.portfolioValue > 0)) { setMsg(roiMsg, "This portfolio has no combined value to project yet."); return; }
       var btn = document.getElementById("portfolioRoiBtn");
       btn.disabled = true;
       setMsg(roiMsg, "Building your projection…");
+      var term = 5;
       var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 100)) : 0;
       var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 1000) / 10) : 6.5;
       var title = (currentMasterReport.title || "Your portfolio") + " - ROI projection";
@@ -750,7 +783,7 @@
           stampDuty: "0", valuationCost: "0", legalCost: "0", buildingInspection: "0", otherCost: "0",
           fundsAvailable: "0",
           rent: String(Math.round(s.netRentalIncome || 0)),
-          rentGrowth: "3", rate: String(rate), term: "5",
+          rentGrowth: "3", rate: String(rate), term: String(term),
           debtReduction: "50", exitCap: ""
         },
         dyn: {}
@@ -758,7 +791,16 @@
       window.pcAuth.saveReport({ calculator: "roi", title: title, inputs: inputs, summary: {} }).then(function (res) {
         btn.disabled = false;
         if (res.error) { setMsg(roiMsg, res.error.message, "error"); return; }
-        window.location.href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
+        setMsg(roiMsg, "Saved as “" + title + "”.", "ok");
+        var proj = projectPortfolioRoi(s, term);
+        var statsEl = document.getElementById("portfolioRoiStats");
+        statsEl.innerHTML =
+          '<div class="acct-overview__stat"><dt>Combined value now</dt><dd>' + fmtMoney(s.portfolioValue) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Projected value, Yr ' + term + '</dt><dd>' + fmtMoney(proj.value) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Equity now</dt><dd>' + fmtMoney(s.portfolioEquity) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Projected equity, Yr ' + term + '</dt><dd>' + fmtMoney(proj.equity) + '</dd></div>';
+        document.getElementById("portfolioRoiOpenLink").href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
+        show(resultEl);
       });
     });
 
