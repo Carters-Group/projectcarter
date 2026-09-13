@@ -93,21 +93,6 @@
 
         <!-- signed in -->
         <div id="acctSignedIn" hidden>
-          <div class="card acct-card">
-            <div class="acct-whoami">
-              <div class="acct-avatar" id="acctAvatarWrap" aria-hidden="true">
-                <img id="acctAvatarImg" alt="" hidden />
-                <span id="acctAvatarInitial">?</span>
-              </div>
-              <div>
-                <p class="acct-eyebrow">Signed in as</p>
-                <p class="acct-email" id="acctWhoEmail">&mdash;</p>
-                <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
-              </div>
-              <button type="button" class="btn btn-ghost" id="signOutBtn">Sign out</button>
-            </div>
-          </div>
-
           <div class="card acct-card" id="acctQuickCard">
             <h2 class="calc-subhead">Quick access</h2>
             <p class="acct-empty">Jump straight into a calculator - resumes your most recently saved report where you have one.</p>
@@ -169,19 +154,25 @@
 
           <div class="card acct-card">
             <h2 class="calc-subhead">Your details</h2>
-            <div class="acct-avatar-field">
-              <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap2" aria-hidden="true">
-                <img id="acctAvatarImg2" alt="" hidden />
-                <span id="acctAvatarInitial2">?</span>
+            <div class="acct-whoami">
+              <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap" aria-hidden="true">
+                <img id="acctAvatarImg" alt="" hidden />
+                <span id="acctAvatarInitial">?</span>
               </div>
               <div>
-                <label for="avatarFile" class="btn btn-ghost btn-sm">Change photo</label>
-                <input type="file" id="avatarFile" accept="image/*" hidden />
-                <p class="field-hint">JPG or PNG, under 5MB. Shown only to you, on this page.</p>
+                <p class="acct-eyebrow">Signed in as</p>
+                <p class="acct-email" id="acctWhoEmail">&mdash;</p>
+                <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
               </div>
+              <button type="button" class="btn btn-ghost" id="signOutBtn">Sign out</button>
             </div>
             <p class="acct-msg" id="avatarMsg" hidden></p>
             <form id="profileForm">
+              <div class="field">
+                <label for="avatarFile" class="btn btn-ghost btn-sm" style="justify-self:start">Change photo</label>
+                <input type="file" id="avatarFile" accept="image/*" hidden />
+                <p class="field-hint">JPG or PNG, under 5MB. Shown only to you, on this page.</p>
+              </div>
               <div class="field">
                 <label for="profName">Name</label>
                 <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
@@ -557,20 +548,18 @@
     }
 
     function renderAvatar(u) {
-      [["acctAvatarImg", "acctAvatarInitial"], ["acctAvatarImg2", "acctAvatarInitial2"]].forEach(function (pair) {
-        var img = document.getElementById(pair[0]);
-        var initial = document.getElementById(pair[1]);
-        if (!img) return;
-        if (u && u.avatar_url) {
-          img.src = u.avatar_url;
-          img.hidden = false;
-          initial.hidden = true;
-        } else {
-          img.hidden = true;
-          initial.hidden = false;
-          initial.textContent = u ? initials(u) : "?";
-        }
-      });
+      var img = document.getElementById("acctAvatarImg");
+      var initial = document.getElementById("acctAvatarInitial");
+      if (!img) return;
+      if (u && u.avatar_url) {
+        img.src = u.avatar_url;
+        img.hidden = false;
+        initial.hidden = true;
+      } else {
+        img.hidden = true;
+        initial.hidden = false;
+        initial.textContent = u ? initials(u) : "?";
+      }
     }
 
     function renderQuickLaunch(rows) {

@@ -1472,8 +1472,7 @@ h1, h2, h3 {
 .acct-whoami .acct-avatar + div { flex: 1; }
 .acct-avatar--lg { width: 84px; height: 84px; }
 .acct-avatar--lg span { font-size: 28px; }
-.acct-avatar-field { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
-.acct-avatar-field .field-hint { margin: 8px 0 0; }
+.acct-card .acct-whoami { margin-bottom: 22px; }
 
 .btn-sm { padding: 9px 16px; font-size: 13px; display: inline-block; cursor: pointer; }
 
