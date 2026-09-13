@@ -1052,6 +1052,13 @@ h1, h2, h3 {
 @media (max-width: 620px) {
   .calc { padding-top: calc(clamp(120px, 15vw, 170px) + 76px); }
 }
+/* a calc-style section that follows a .project-hero (account.html) doesn't
+   need the fixed-header clearance baked into .calc - the hero already pushes
+   it down, so the extra padding just leaves a dead gap under the hero image */
+.calc--after-hero { padding-top: clamp(72px, 12vw, 130px); }
+@media (max-width: 620px) {
+  .calc--after-hero { padding-top: clamp(72px, 12vw, 130px); }
+}
 .calc-intro { max-width: 640px; margin-bottom: clamp(36px, 6vw, 60px); }
 .calc-intro h1 { font-size: clamp(34px, 6vw, 62px); margin-bottom: 18px; }
 .calc-intro p { color: var(--muted); margin: 0; }
@@ -1438,49 +1445,10 @@ h1, h2, h3 {
 }
 .acct-email { margin: 4px 0 0; font-size: 18px; font-weight: 600; word-break: break-all; }
 
-/* Account page hero - a couple of blurred, slowly crossfading photos behind
-   the intro text, matching the homepage hero's dark scrim treatment */
-.acct-hero {
-  position: relative;
-  overflow: hidden;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line-soft);
-}
-.acct-hero-media {
-  position: absolute; inset: 0;
-}
-.acct-hero-media::before {
-  content: "";
-  position: absolute; inset: 0; z-index: 1;
-  background:
-    linear-gradient(180deg, rgba(12, 16, 22, 0.78) 0%, rgba(12, 16, 22, 0.86) 60%, var(--bg) 100%),
-    radial-gradient(1000px 600px at 80% 10%, rgba(95, 161, 208, 0.14), transparent 60%);
-}
-.acct-hero-media__layer {
-  position: absolute; inset: 0;
-  background-size: cover; background-position: center;
-  filter: blur(7px) saturate(0.9) brightness(0.75);
-  transform: scale(1.06); /* hide the blur's soft edge */
-  opacity: 0;
-  animation: acctHeroFade 16s infinite;
-}
-.acct-hero-media__layer--a { animation-delay: 0s; }
-.acct-hero-media__layer--b { animation-delay: -8s; }
-@keyframes acctHeroFade {
-  0%, 42% { opacity: 1; }
-  50%, 92% { opacity: 0; }
-  100% { opacity: 1; }
-}
-.acct-hero-inner {
-  position: relative; z-index: 2;
-  padding-block: clamp(56px, 9vw, 96px) clamp(40px, 6vw, 64px);
-}
-.acct-hero-inner p:last-child { max-width: 56ch; }
-@media (prefers-reduced-motion: reduce) {
-  .acct-hero-media__layer { animation: none; opacity: 1; }
-  .acct-hero-media__layer--b { opacity: 0; }
-}
+/* account.html now uses the standard .project-hero (see project-*.html /
+   calculators.html) for a crisp, consistent header image site-wide */
 
+.acct-starthere-bar[hidden] { display: none; }
 .acct-starthere-bar {
   display: flex; align-items: center; gap: 16px;
   padding: 16px 20px; margin-bottom: 22px;
@@ -1518,6 +1486,13 @@ h1, h2, h3 {
 .acct-report__date { font-size: 12px; color: var(--muted); }
 .acct-report__actions { display: flex; gap: 14px; white-space: nowrap; }
 .acct-report__actions .linklike { font-size: 13px; }
+@media (max-width: 560px) {
+  /* the action row (Duplicate / Rename / Delete, plus "Your portfolio ★" on
+     the master PR report) is too wide to stay on one nowrap line at phone
+     widths - let it wrap under the title instead of running off-screen */
+  .acct-report { flex-wrap: wrap; }
+  .acct-report__actions { flex: 0 0 100%; white-space: normal; flex-wrap: wrap; row-gap: 8px; }
+}
 
 .acct-empty { color: var(--muted); font-size: 14px; }
 .acct-calc-links { margin-top: 18px; font-size: 14px; color: var(--muted); }
@@ -1555,6 +1530,30 @@ h1, h2, h3 {
 .acct-avatar--lg { width: 84px; height: 84px; }
 .acct-avatar--lg span { font-size: 28px; }
 .acct-card .acct-whoami { margin-bottom: 22px; }
+
+/* profile row at the top of the portfolio card - round photo on the left */
+.acct-profile-row {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line-soft);
+}
+.acct-profile-row__text { flex: 1; min-width: 160px; }
+.acct-profile-row__actions { flex: none; }
+#avatarHint, #avatarMsg { margin-bottom: 20px; }
+
+/* combined bottom card - Recently updated / My saved reports / Your details */
+.acct-card-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-bottom: 18px;
+}
+.acct-card-head h2 { margin: 0; }
+.acct-subsection + .acct-subsection {
+  margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line-soft);
+}
+.acct-subhead-sm {
+  font-family: var(--font-body); font-weight: 600; font-size: 12px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 14px;
+}
 
 .btn-sm { padding: 9px 16px; font-size: 13px; display: inline-block; cursor: pointer; }
 

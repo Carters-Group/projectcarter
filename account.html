@@ -53,18 +53,15 @@
   </header>
 
   <main id="main">
-    <section class="acct-hero">
-      <div class="acct-hero-media" aria-hidden="true">
-        <div class="acct-hero-media__layer acct-hero-media__layer--a" style="background-image:url('assets/images/projects/haig/haig-02.jpg')"></div>
-        <div class="acct-hero-media__layer acct-hero-media__layer--b" style="background-image:url('assets/images/projects/haig/haig-09.jpg')"></div>
-      </div>
-      <div class="wrap narrow acct-hero-inner">
-        <p class="kicker">Project Carter</p>
-        <h1>Your account</h1>
-        <p>Your home for every figure you've run with Project Carter. Save any calculator's numbers, open them again on any device, and build up a running picture of your portfolio's value, equity and cash flow over time. It is free. Sign in with a one-time link sent to your email, no password to remember.</p>
+    <section class="project-hero">
+      <div class="project-hero-media" style="background-image:url('assets/images/projects/haig/haig-02.jpg')" aria-hidden="true"></div>
+      <div class="wrap project-hero-inner">
+        <p class="project-eyebrow">Project Carter</p>
+        <h1 class="project-title">Your account</h1>
+        <p class="project-locale" style="max-width:56ch">Your home for every figure you've run with Project Carter. Save any calculator's numbers, open them again on any device, and build up a running picture of your portfolio's value, equity and cash flow over time. It is free. Sign in with a one-time link sent to your email, no password to remember.</p>
       </div>
     </section>
-    <section class="calc">
+    <section class="calc calc--after-hero">
       <div class="wrap narrow">
 
         <!-- not configured -->
@@ -99,7 +96,7 @@
 
         <!-- signed in -->
         <div id="acctSignedIn" hidden>
-          <a class="acct-starthere-bar" href="portfolio-review-calculator">
+          <a class="acct-starthere-bar" id="acctStartHere" href="portfolio-review-calculator" hidden>
             <span class="acct-starthere-bar__icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" aria-hidden="true"></span>
             <span class="acct-starthere-bar__text">
               <strong>Start here - Portfolio Review</strong>
@@ -109,6 +106,22 @@
           </a>
 
           <div class="card acct-card" id="acctPortfolioCard">
+            <div class="acct-profile-row">
+              <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap" aria-hidden="true">
+                <img id="acctAvatarImg" alt="" hidden />
+                <span id="acctAvatarInitial">?</span>
+              </div>
+              <div class="acct-profile-row__text">
+                <p class="acct-eyebrow">Signed in as</p>
+                <p class="acct-email" id="acctWhoEmail">&mdash;</p>
+                <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
+              </div>
+              <label for="avatarFile" class="btn btn-ghost btn-sm acct-profile-row__actions">Change photo</label>
+              <input type="file" id="avatarFile" accept="image/*,.heic,.heif" hidden />
+            </div>
+            <p class="field-hint" id="avatarHint">JPG, PNG or a phone photo (HEIC), under 5MB. Shown only to you, on this page.</p>
+            <p class="acct-msg" id="avatarMsg" hidden></p>
+
             <h2 class="calc-subhead">Your portfolio</h2>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
 
@@ -150,75 +163,64 @@
 
           <div class="card acct-card" id="acctQuickCard">
             <h2 class="calc-subhead">Quick access</h2>
-            <p class="acct-empty">Jump straight into a calculator - resumes your most recently saved report where you have one.</p>
+            <p class="acct-empty">Once you've saved a Portfolio Review, these calculators connect to it - each one can pull your equity, value and cash flow straight in to prefill its own figures. Jump into any of them below; resumes your most recently saved report where you have one.</p>
             <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
           </div>
 
-          <div class="card acct-card" id="acctActivityCard">
-            <h2 class="calc-subhead">Recently updated</h2>
-            <div id="activityList" class="acct-reports"></div>
-            <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
-          </div>
-
           <div class="card acct-card">
-            <h2 class="calc-subhead">My saved reports</h2>
-            <p class="acct-msg" id="reportsMsg" hidden></p>
-            <div id="reportsList" class="acct-reports"></div>
-            <p class="acct-empty" id="reportsEmpty" hidden>
-              No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
-            </p>
-            <p class="acct-calc-links">
-              New report:
-              <a href="net-operating-income-calculator">NOI</a> ·
-              <a href="return-on-investment-calculator">ROI</a> ·
-              <a href="development-site-calculator">DA</a> ·
-              <a href="gross-realisation-value-calculator">GRV</a> ·
-              <a href="portfolio-review-calculator">PR</a> ·
-              <a href="commercial-lending-calculator">CL</a>
-            </p>
-          </div>
-
-          <div class="card acct-card">
-            <h2 class="calc-subhead">Your details</h2>
-            <div class="acct-whoami">
-              <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap" aria-hidden="true">
-                <img id="acctAvatarImg" alt="" hidden />
-                <span id="acctAvatarInitial">?</span>
-              </div>
-              <div>
-                <p class="acct-eyebrow">Signed in as</p>
-                <p class="acct-email" id="acctWhoEmail">&mdash;</p>
-                <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
-              </div>
-              <button type="button" class="btn btn-ghost" id="signOutBtn">Sign out</button>
+            <div class="acct-card-head">
+              <h2 class="calc-subhead" style="border-bottom:none;padding-bottom:0">Your account</h2>
+              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
             </div>
-            <p class="acct-msg" id="avatarMsg" hidden></p>
-            <form id="profileForm">
-              <div class="field">
-                <label for="avatarFile" class="btn btn-ghost btn-sm" style="justify-self:start">Change photo</label>
-                <input type="file" id="avatarFile" accept="image/*" hidden />
-                <p class="field-hint">JPG or PNG, under 5MB. Shown only to you, on this page.</p>
-              </div>
-              <div class="field">
-                <label for="profName">Name</label>
-                <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
-              </div>
-              <div class="field">
-                <label for="profEmail">Email</label>
-                <input type="email" id="profEmail" disabled />
-                <p class="field-hint">Your sign-in email. Contact us to change it.</p>
-              </div>
-              <div class="field">
-                <label for="profPhone">Phone</label>
-                <input type="tel" id="profPhone" autocomplete="tel" placeholder="0400 000 000" />
-              </div>
-              <div class="field">
-                <label for="profOccupation">Occupation</label>
-                <input type="text" id="profOccupation" autocomplete="organization-title" placeholder="e.g. Company director" />
-              </div>
-              <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
-            </form>
-            <p class="acct-msg" id="profMsg" hidden></p>
+
+            <div class="acct-subsection" id="acctActivityCard">
+              <h3 class="acct-subhead-sm">Recently updated</h3>
+              <div id="activityList" class="acct-reports"></div>
+              <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
+            </div>
+
+            <div class="acct-subsection">
+              <h3 class="acct-subhead-sm">My saved reports</h3>
+              <p class="acct-msg" id="reportsMsg" hidden></p>
+              <div id="reportsList" class="acct-reports"></div>
+              <p class="acct-empty" id="reportsEmpty" hidden>
+                No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
+              </p>
+              <p class="acct-calc-links">
+                New report:
+                <a href="net-operating-income-calculator">NOI</a> ·
+                <a href="return-on-investment-calculator">ROI</a> ·
+                <a href="development-site-calculator">DA</a> ·
+                <a href="gross-realisation-value-calculator">GRV</a> ·
+                <a href="portfolio-review-calculator">PR</a> ·
+                <a href="commercial-lending-calculator">CL</a>
+              </p>
+            </div>
+
+            <div class="acct-subsection">
+              <h3 class="acct-subhead-sm">Your details</h3>
+              <form id="profileForm">
+                <div class="field">
+                  <label for="profName">Name</label>
+                  <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
+                </div>
+                <div class="field">
+                  <label for="profEmail">Email</label>
+                  <input type="email" id="profEmail" disabled />
+                  <p class="field-hint">Your sign-in email. Contact us to change it.</p>
+                </div>
+                <div class="field">
+                  <label for="profPhone">Phone</label>
+                  <input type="tel" id="profPhone" autocomplete="tel" placeholder="0400 000 000" />
+                </div>
+                <div class="field">
+                  <label for="profOccupation">Occupation</label>
+                  <input type="text" id="profOccupation" autocomplete="organization-title" placeholder="e.g. Company director" />
+                </div>
+                <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
+              </form>
+              <p class="acct-msg" id="profMsg" hidden></p>
+            </div>
           </div>
         </div>
       </div>
@@ -446,6 +448,18 @@
         row.querySelector(".acct-report__title").textContent = r.title || "Untitled report";
         list.appendChild(row);
       });
+    }
+
+    /* the "Start here" bar only makes sense before a visitor has entered
+       their first property - once any saved Portfolio Review has at least
+       one property in it, hide the prompt so the portfolio card can sit
+       straight under the hero instead */
+    function updateStartHere(rows) {
+      var bar = document.getElementById("acctStartHere");
+      var hasProperty = (rows || []).some(function (r) {
+        return r.calculator === "pr" && r.summary && r.summary.propertyCount > 0;
+      });
+      if (hasProperty) hide(bar); else show(bar);
     }
 
     var currentMasterReport = null;
@@ -677,6 +691,7 @@
           renderActivity(res.data);
           renderPortfolio(res.data);
           renderQuickLaunch(res.data);
+          updateStartHere(res.data);
         });
       } else {
         show(elSignedOut); hide(elSignedIn);
