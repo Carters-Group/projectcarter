@@ -95,6 +95,15 @@
               <h2 class="calc-subhead">Purchase</h2>
 
               <div class="field">
+                <label for="propType">Property type</label>
+                <select id="propType">
+                  <option value="com">Commercial</option>
+                  <option value="res">Residential</option>
+                </select>
+                <p class="field-hint">Commercial values the property off net rent at a capitalisation rate. Residential instead grows the purchase price at a capital growth rate, since a residential value is not usually read off its rent.</p>
+              </div>
+
+              <div class="field">
                 <label for="price">Purchase price</label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="2,000,000" /></div>
               </div>
@@ -184,10 +193,16 @@
                 <input type="text" inputmode="numeric" id="term" autocomplete="off" placeholder="5" />
               </div>
 
-              <div class="field">
+              <div class="field" data-com-only>
                 <label for="exitCap">Exit cap rate on sale <span>(optional)</span></label>
                 <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="exitCap" autocomplete="off" placeholder="6.0" /></div>
                 <p class="field-hint">The yield a buyer pays on exit, for local cap rate, yield compression or market shifts. Blank holds the entry yield. Lower than entry lifts value; higher softens it.</p>
+              </div>
+
+              <div class="field" data-res-only hidden>
+                <label for="capGrowth">Capital growth rate <span>(% per year)</span></label>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="capGrowth" autocomplete="off" placeholder="5" /></div>
+                <p class="field-hint">Compounds the purchase price each year to estimate the property's value at sale, instead of deriving it from rent.</p>
               </div>
             </div>
 
@@ -235,7 +250,7 @@
             <div class="result-row is-teaser"><dt>Funds available</dt><dd data-out="fundsAvailableOut">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Shortfall / surplus</dt><dd data-out="shortfall">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Entry net yield</dt><dd data-out="entryYield">&mdash;</dd></div>
-            <div class="result-row is-teaser"><dt>Exit cap rate on sale</dt><dd data-out="exitCap">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt id="exitCapLabel">Exit cap rate on sale</dt><dd data-out="exitCap">&mdash;</dd></div>
             <div class="result-row"><dt>Property value at sale</dt><dd data-out="saleValue">&mdash;</dd></div>
             <div class="result-row"><dt>Loan balance at sale</dt><dd data-out="loanAtSale">&mdash;</dd></div>
             <div class="result-row"><dt>Net sale proceeds</dt><dd data-out="netProceeds">&mdash;</dd></div>
@@ -326,7 +341,7 @@
             <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan / valuation cost, legal cost, building inspection and other purchasing cost.</li>
             <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions. Commercial and industrial property is treated differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax.</li>
             <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
-            <li><strong>Property value</strong> is net rent &divide; capitalisation rate. The cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale. Leave the exit cap rate blank to hold the entry yield. A rent uplift lifts value too.</li>
+            <li><strong>Property value</strong> depends on the property type you pick. For <strong>commercial</strong>, value is net rent &divide; capitalisation rate: the cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale (leave it blank to hold the entry yield; a rent uplift lifts value too). For <strong>residential</strong>, value instead compounds the purchase price at the <strong>capital growth rate</strong> you enter, since a home's value is not usually read off its rent.</li>
             <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
             <li><strong>At sale</strong> (end of the term) the property is sold at its value that year, the loan is repaid, and net sale proceeds plus all rental cash kept, less the cash you put in, is the total profit.</li>
             <li><strong>IRR</strong> is the annual compound return that makes the cash you put in and the cash you take out balance over time.</li>
@@ -552,7 +567,7 @@
     function fmtAmount(n) { return n > 0 ? Math.round(n).toLocaleString("en-AU") : ""; }
 
     /* Slide the "%" suffix to sit right after the typed number, left-aligned */
-    var PCT_FIELDS = ["lvr", "rentGrowth", "rate", "debtReduction", "exitCap", "upliftGrowth"];
+    var PCT_FIELDS = ["lvr", "rentGrowth", "rate", "debtReduction", "exitCap", "upliftGrowth", "capGrowth"];
     var pctCanvas = document.createElement("canvas").getContext("2d");
     function positionPct() {
       PCT_FIELDS.forEach(function (id) {
@@ -610,6 +625,9 @@
       var uRent = num("upliftRent");
       var uG = num("upliftGrowth") / 100;
 
+      var isRes = document.getElementById("propType").value === "res";
+      var capGrowth = num("capGrowth") / 100;
+
       var entryYield = price > 0 ? nr1 / price : null;
       var exitCapIn = num("exitCap") / 100;
       var exitCap = (entryYield && exitCapIn > 0) ? exitCapIn : entryYield;
@@ -633,10 +651,17 @@
           balance -= debtPay;
           var kept = cashAfterInterest - debtPay;
           totalKept += kept;
-          /* cap rate glides from the entry yield to the exit cap rate over the hold */
-          var frac = term > 1 ? (t - 1) / (term - 1) : 1;
-          var capT = entryYield + (exitCap - entryYield) * frac;
-          var value = capT ? rent / capT : 0;
+          var value;
+          if (isRes) {
+            /* residential: value compounds off the purchase price at a flat
+               capital growth rate, rather than being derived from rent */
+            value = price * Math.pow(1 + capGrowth, t);
+          } else {
+            /* commercial: cap rate glides from the entry yield to the exit cap rate over the hold */
+            var frac = term > 1 ? (t - 1) / (term - 1) : 1;
+            var capT = entryYield + (exitCap - entryYield) * frac;
+            value = capT ? rent / capT : 0;
+          }
           rows.push({
             year: t, rent: rent, interest: interest,
             cashAfterInterest: cashAfterInterest, debtPay: debtPay,
@@ -672,6 +697,7 @@
         fundsAvailable: fundsAvailable, shortfall: shortfall,
         nr1: nr1, g: g, rate: rate, term: term, dr: dr,
         uplift: uplift, uYear: uYear, uRent: uRent, uG: uG,
+        isRes: isRes, capGrowth: capGrowth,
         entryYield: entryYield, exitCap: exitCap, rows: rows,
         saleValue: saleValue, loanAtSale: loanAtSale, netProceeds: netProceeds,
         totalKept: totalKept, totalProfit: totalProfit, totalRoi: totalRoi,
@@ -721,7 +747,7 @@
       put("fundsAvailableOut", m.fundsAvailable > 0 ? money(m.fundsAvailable) : "—", true);
       put("shortfall", (m.valid && m.fundsAvailable > 0) ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
       put("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—", true);
-      put("exitCap", m.exitCap ? pct(m.exitCap * 100) : "—", true);
+      put("exitCap", m.isRes ? (m.capGrowth ? pct(m.capGrowth * 100) : "—") : (m.exitCap ? pct(m.exitCap * 100) : "—"), true);
       put("saleValue", m.valid ? money(m.saleValue) : "—");
       put("loanAtSale", m.valid ? money(m.loanAtSale) : "—");
       put("netProceeds", m.valid ? money(m.netProceeds) : "—");
@@ -754,6 +780,17 @@
     inputs.addEventListener("input", render);
     upliftOn.addEventListener("change", function () {
       upliftFields.hidden = !upliftOn.checked;
+      render();
+    });
+
+    var propTypeEl = document.getElementById("propType");
+    var exitCapLabelEl = document.getElementById("exitCapLabel");
+    propTypeEl.addEventListener("change", function () {
+      var isRes = propTypeEl.value === "res";
+      Array.prototype.forEach.call(document.querySelectorAll("[data-com-only]"), function (el) { el.hidden = isRes; });
+      Array.prototype.forEach.call(document.querySelectorAll("[data-res-only]"), function (el) { el.hidden = !isRes; });
+      exitCapLabelEl.textContent = isRes ? "Capital growth rate" : "Exit cap rate on sale";
+      positionPct();
       render();
     });
 
@@ -857,7 +894,9 @@
       row("Rental increase", (m.g * 100).toFixed(2) + "% / year");
       row("Loan interest", (m.rate * 100).toFixed(2) + "% / year");
       row("Term of ownership", m.term + " year" + (m.term === 1 ? "" : "s"));
-      row("Exit cap rate on sale", m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "-");
+      row("Property type", m.isRes ? "Residential" : "Commercial");
+      row(m.isRes ? "Capital growth rate" : "Exit cap rate on sale",
+        m.isRes ? (m.capGrowth ? (m.capGrowth * 100).toFixed(2) + "%" : "-") : (m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "-"));
       row("Profit used for debt reduction", (m.dr * 100).toFixed(0) + "%");
       if (m.uplift && m.uRent > 0) {
         row("Value uplift", "Year " + m.uYear + ", new base rent " + money(m.uRent) +
@@ -870,7 +909,8 @@
       section("Your return");
       row("Total cash required", money(m.cashRequired));
       row("Entry net yield", m.entryYield ? (m.entryYield * 100).toFixed(2) + "%" : "-", true);
-      row("Exit cap rate on sale", m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "-", true);
+      row(m.isRes ? "Capital growth rate" : "Exit cap rate on sale",
+        m.isRes ? (m.capGrowth ? (m.capGrowth * 100).toFixed(2) + "%" : "-") : (m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "-"), true);
       row("Property value at sale", money(m.saleValue));
       row("Loan balance at sale", money(m.loanAtSale));
       row("Net sale proceeds", money(m.netProceeds));
@@ -925,7 +965,9 @@
         "Rental increase: " + (m.g * 100).toFixed(2) + "%/yr",
         "Loan interest: " + (m.rate * 100).toFixed(2) + "%/yr",
         "Term of ownership: " + m.term + " years",
-        "Exit cap rate on sale: " + (m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "n/a"),
+        "Property type: " + (m.isRes ? "Residential" : "Commercial"),
+        (m.isRes ? "Capital growth rate: " : "Exit cap rate on sale: ") +
+          (m.isRes ? (m.capGrowth ? (m.capGrowth * 100).toFixed(2) + "%" : "n/a") : (m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "n/a")),
         "Profit used for debt reduction: " + (m.dr * 100).toFixed(0) + "%"
       ];
       if (m.uplift && m.uRent > 0) {
