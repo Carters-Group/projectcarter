@@ -748,6 +748,8 @@
       card.querySelector("#" + p + "acqOn").addEventListener("change", function () {
         card.querySelector("#" + p + "acqFields").hidden = !this.checked;
         card.querySelector("#" + p + "valueLabel").textContent = this.checked ? "Purchase price" : "Current value";
+        /* not a new purchase - nothing more to add here, so collapse it */
+        if (!this.checked) setCardCollapsed(id, true);
         render();
       });
       card.querySelector("#" + p + "ngNew").addEventListener("change", function () {
@@ -789,6 +791,10 @@
       card.querySelector("#" + p + "loan").addEventListener("input", function () {
         recalcCardStamp(id);
       });
+      ["value", "loan", "rentwk", "rentyr"].forEach(function (sfx) {
+        var el = card.querySelector("#" + p + sfx);
+        if (el) el.addEventListener("blur", function () { maybeAutoCollapse(id); });
+      });
 
       if (prefill) {
         if (prefill.fields) {
@@ -801,6 +807,7 @@
       }
       applyType(id, false);
       syncAcqUi(id);
+      maybeAutoCollapse(id);
       updateRemoveButtons();
     }
 
@@ -863,6 +870,7 @@
       if (card) card.parentNode.removeChild(card);
       propIds = propIds.filter(function (x) { return x !== id; });
       delete touchedStamp[id];
+      delete collapseOverride[id];
       renumber();
       updateRemoveButtons();
       render();
@@ -1213,7 +1221,7 @@
       put("taxPreDepr", I.valid ? signedMoney(I.taxPreDepr) : "—");
       put("deprCredit", I.valid ? money(I.deprCredit) : "—");
       put("annual", I.valid ? signedMoney(I.annual) : "—");
-      put("weekly", I.valid ? signedMoney(I.weekly) : "—");
+      put("weekly", I.valid ? signedMoney(I.weekly) + "  (= " + signedMoney(I.annual) + "/yr)" : "—");
       put("pctValue", I.pctValue != null ? pct(I.pctValue) : "—");
       put("toNeutral", I.valid ? (I.toNeutral > 0 ? money(I.toNeutral) + " / wk" : "Already breaks even") : "—");
       put("acq", T.anyAcq ? money(T.acq) : "None");
@@ -1302,9 +1310,22 @@
       if (toggle) toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
       card.classList.toggle("is-collapsed", collapsed);
     }
-    window.pcPrCollapseAll = function () {
-      propIds.forEach(function (id) { setCardCollapsed(id, true); });
-    };
+
+    /* once a card has its core numbers in (value, loan, and rent unless it's
+       owner-occupied) it auto-collapses to a summary row, checked whenever
+       one of those fields is left (covers typing and a restored report,
+       since restoring a field fires a synthetic blur too). A visitor who
+       manually opens or closes a card takes it out of this auto-management
+       so we never fight their explicit choice. */
+    var collapseOverride = {};
+    function propIsFull(r) {
+      if (!(r.value > 0 && r.loan > 0)) return false;
+      return r.isOwn || r.grossRent > 0;
+    }
+    function maybeAutoCollapse(id) {
+      if (collapseOverride[id]) return;
+      if (propIsFull(modelProp(id))) setCardCollapsed(id, true);
+    }
 
     propertyCards.addEventListener("click", function (e) {
       var t = e.target.closest("[data-toggle]");
@@ -1312,6 +1333,7 @@
         var tCard = t.closest("[data-prop]");
         if (tCard) {
           var tId = parseInt(tCard.getAttribute("data-prop"), 10);
+          collapseOverride[tId] = true;
           setCardCollapsed(tId, !tCard.classList.contains("is-collapsed"));
         }
         return;
@@ -1321,6 +1343,13 @@
       removeProperty(parseInt(b.getAttribute("data-remove"), 10));
     });
     document.getElementById("addProperty").addEventListener("click", function () {
+      /* save progress on the properties already entered before adding a
+         blank card, so nothing is lost if the visitor gets interrupted -
+         signed-in members only, since there is nothing to save to for an
+         anonymous visitor */
+      if (window.pcAuth && window.pcAuth.isMember() && window.pcReport && window.pcReport.save) {
+        window.pcReport.save();
+      }
       addProperty();
       render();
     });

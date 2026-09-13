@@ -294,7 +294,7 @@
 
   window.pcReport = { calc: CALC, serialize: serialize, restore: restore,
                       currentId: function () { return loadedReportId; },
-                      addPuller: addPuller };
+                      addPuller: addPuller, save: onSave };
 
   /* ---- Save button ------------------------------------------------------ */
   var cta = document.querySelector(".calc-cta");
@@ -374,7 +374,17 @@
       try { window.sessionStorage.removeItem(DRAFT_KEY); } catch (e) {}
       msg("Saved as “" + title + "”. Open it any time from your account.", "ok");
       syncUi();
-      if (window.pcPrCollapseAll) window.pcPrCollapseAll();
+      /* a Portfolio Review report is what drives the account page's
+         portfolio overview, but only once it is flagged as the master
+         report - without this, saving your first one silently does
+         nothing on the account page, which reads as broken. So: the
+         first PR report anyone saves becomes their master automatically;
+         later ones stay opt-in via "Make this my portfolio" on account. */
+      if (CALC === "pr" && res.data && res.data.id) {
+        window.pcAuth.getMasterReport().then(function (mres) {
+          if (!mres.error && !mres.data) window.pcAuth.setMasterReport(res.data.id);
+        });
+      }
     });
   }
 
@@ -397,7 +407,6 @@
       try { window.sessionStorage.removeItem(DRAFT_KEY); } catch (e) {}
       msg("Loaded “" + (res.data.title || "Untitled report") + "”. Changes here can be saved back.", "ok");
       syncUi();
-      if (window.pcPrCollapseAll) window.pcPrCollapseAll();
     });
   }
 

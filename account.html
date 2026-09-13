@@ -116,13 +116,15 @@
                 <p class="acct-email" id="acctWhoEmail">&mdash;</p>
                 <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
               </div>
-              <label for="avatarFile" class="btn btn-ghost btn-sm acct-profile-row__actions">Change photo</label>
+              <label for="avatarFile" class="btn btn-ghost btn-sm acct-profile-row__actions" title="JPG, PNG or a phone photo (HEIC), under 5MB. Shown only to you, on this page.">Change photo</label>
               <input type="file" id="avatarFile" accept="image/*,.heic,.heif" hidden />
             </div>
-            <p class="field-hint" id="avatarHint">JPG, PNG or a phone photo (HEIC), under 5MB. Shown only to you, on this page.</p>
             <p class="acct-msg" id="avatarMsg" hidden></p>
 
-            <h2 class="calc-subhead">Your portfolio</h2>
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Your portfolio</h2>
+              <a href="portfolio-review-calculator" id="portfolioEditBtn" class="btn btn-ghost btn-sm" hidden>Edit portfolio</a>
+            </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
 
             <div id="portfolioSet" hidden>
@@ -499,11 +501,14 @@
       var master = (rows || []).filter(function (r) { return r.calculator === "pr" && r.is_master; })[0];
       currentMasterReport = master || null;
 
+      var editBtn = document.getElementById("portfolioEditBtn");
       if (master) {
         show(setEl); hide(unsetEl);
         document.getElementById("portfolioTitle").textContent = master.title || "Untitled report";
         document.getElementById("portfolioUpdated").textContent = "Updated " + fmtDate(master.updated_at);
         document.getElementById("portfolioOpenLink").href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
+        editBtn.href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
+        show(editBtn);
 
         var s = master.summary || {};
         var stats = [
@@ -555,6 +560,7 @@
         document.getElementById("portfolioChangeBtn").onclick = function () { renderPortfolioChooser(rows, true); };
       } else {
         hide(setEl); show(unsetEl);
+        hide(editBtn);
         renderPortfolioChooser(rows, false);
       }
     }
