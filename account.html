@@ -53,13 +53,19 @@
   </header>
 
   <main id="main">
+    <section class="acct-hero">
+      <div class="acct-hero-media" aria-hidden="true">
+        <div class="acct-hero-media__layer acct-hero-media__layer--a" style="background-image:url('assets/images/projects/haig/haig-02.jpg')"></div>
+        <div class="acct-hero-media__layer acct-hero-media__layer--b" style="background-image:url('assets/images/projects/haig/haig-09.jpg')"></div>
+      </div>
+      <div class="wrap narrow acct-hero-inner">
+        <p class="kicker">Project Carter</p>
+        <h1>Your account</h1>
+        <p>Your home for every figure you've run with Project Carter. Save any calculator's numbers, open them again on any device, and build up a running picture of your portfolio's value, equity and cash flow over time. It is free. Sign in with a one-time link sent to your email, no password to remember.</p>
+      </div>
+    </section>
     <section class="calc">
       <div class="wrap narrow">
-        <div class="calc-intro">
-          <p class="kicker">Project Carter</p>
-          <h1>Your account</h1>
-          <p>Save the figures from any calculator and open them again later on any device. It is free. Sign in with a one-time link sent to your email, no password to remember.</p>
-        </div>
 
         <!-- not configured -->
         <div class="card acct-card" id="acctUnconfigured" hidden>
@@ -93,6 +99,15 @@
 
         <!-- signed in -->
         <div id="acctSignedIn" hidden>
+          <a class="acct-starthere-bar" href="portfolio-review-calculator">
+            <span class="acct-starthere-bar__icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" aria-hidden="true"></span>
+            <span class="acct-starthere-bar__text">
+              <strong>Start here - Portfolio Review</strong>
+              <span>This is the foundation calculator. Save it once and every other calculator can pull your equity, value and cash flow straight from it.</span>
+            </span>
+            <span class="link-arrow">Open</span>
+          </a>
+
           <div class="card acct-card" id="acctPortfolioCard">
             <h2 class="calc-subhead">Your portfolio</h2>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
@@ -618,7 +633,7 @@
         a.innerHTML =
           '<div class="card-media has-photo card-media--icon" style="background-image:url(\'' + CALC_ICON[calc] + '\')" data-label="' + calc.toUpperCase() + '"></div>' +
           '<div class="card-body">' +
-            '<h3>' + CALC_SHORT[calc] + (calc === "pr" ? ' <span class="acct-starthere">Start here</span>' : '') + '</h3>' +
+            '<h3>' + CALC_SHORT[calc] + '</h3>' +
             '<p class="card-meta"></p>' +
             '<span class="link-arrow">' + (latest ? "Resume" : "Open calculator") + '</span>' +
           '</div>';
