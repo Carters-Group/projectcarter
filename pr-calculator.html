@@ -650,8 +650,9 @@
         '<label class="calc-check"><input type="checkbox" id="' + p + 'outLumpOn" />' +
           '<span>I just know the total - enter yearly outgoings as a lump sum instead</span></label>' +
         '<div class="field" id="' + p + 'outLumpWrap" hidden>' +
-          '<label for="' + p + 'outLump">Total yearly outgoings <span>(lump sum, excl. vacancy)</span></label>' +
+          '<label for="' + p + 'outLump">Total yearly outgoings <span>(lump sum)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'outLump" autocomplete="off" placeholder="0" /></div>' +
+          '<p class="field-hint">Vacancy allowance is assumed nil while you use a lump sum - build some allowance into the total if you want to account for it.</p>' +
         '</div>' +
         '<p class="field-hint" id="' + p + 'outRecHint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
@@ -765,10 +766,19 @@
         render();
       });
       card.querySelector("#" + p + "acqOn").addEventListener("change", function () {
-        card.querySelector("#" + p + "acqFields").hidden = !this.checked;
-        card.querySelector("#" + p + "valueLabel").textContent = this.checked ? "Purchase price" : "Current value";
-        /* not a new purchase - nothing more to add here, so collapse it */
-        if (!this.checked) setCardCollapsed(id, true);
+        syncAcqUi(id);
+        if (this.checked) {
+          /* re-ticked - line the stamp-duty rate back up with the card's
+             property type, same as picking a property type does */
+          var commEl = document.getElementById(p + "stampComm");
+          if (commEl) commEl.checked = document.getElementById(p + "ptype").value === "com";
+          recalcCardStamp(id);
+        } else {
+          /* not a purchase - these one-off costs don't apply if the property
+             is already owned, so clear them rather than leave stale figures
+             sitting hidden behind the toggle */
+          clearAcqFields(id);
+        }
         render();
       });
       card.querySelector("#" + p + "outLumpOn").addEventListener("change", function () {
@@ -845,11 +855,30 @@
       if (label) label.textContent = acqOn.checked ? "Purchase price" : "Current value";
     }
 
+    /* one-off purchase costs don't apply once "being purchased" is unticked
+       - clear them rather than leave stale figures behind the hidden toggle,
+       which would otherwise silently keep counting toward "cash required". */
+    var ACQ_FIELDS = ["stamp", "convey", "borrow", "qs", "improve"];
+    function clearAcqFields(id) {
+      var p = "p" + id + "_";
+      ACQ_FIELDS.forEach(function (sfx) {
+        var el = document.getElementById(p + sfx);
+        if (el) el.value = "";
+      });
+      var stateEl = document.getElementById(p + "stampState");
+      if (stateEl) stateEl.value = "";
+      var commEl = document.getElementById(p + "stampComm");
+      if (commEl) commEl.checked = false;
+      delete touchedStamp[id];
+    }
+
     /* yearly running costs - itemised fields (and their "recovered from
-       tenant" ticks) replaced by a single lump sum. Vacancy allowance is
-       left alone since it is not a dollar outgoing. */
+       tenant" ticks) replaced by a single lump sum. Vacancy allowance rides
+       along too (Trent: fold it in rather than keep asking for it
+       separately) - hidden and treated as nil while the lump sum is on. */
     var OUT_ITEMISED_FIELDS = ["pmpct", "letting", "council", "strata", "landtax", "insurance",
-      "maintwk", "maintyr", "water", "fire", "hvac", "clean", "ogadmin", "loanfees", "sundry"];
+      "maintwk", "maintyr", "vacwks", "vacmths", "water", "fire", "hvac", "clean", "ogadmin",
+      "loanfees", "sundry"];
     var OUT_RECOVER_KEYS = ["pm", "council", "water", "strata", "landtax", "insurance",
       "maint", "fire", "hvac", "clean", "ogadmin"];
     var OUT_HINT_IDS = ["outRecHint", "lettingHint", "ltHint", "sundryHint"];
