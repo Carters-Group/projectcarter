@@ -1202,6 +1202,23 @@ h1, h2, h3 {
 }
 .dwelling-type__calc strong { color: var(--accent); font-weight: 600; margin-left: 4px; }
 
+/* Collapsible property/dwelling-type cards (PR calculator) */
+.dwelling-type__head {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; text-align: left;
+  background: none; border: none; padding: 0; margin: 0;
+  color: var(--text); font: inherit; cursor: pointer;
+}
+.dwelling-type__head-title { font-weight: 600; flex-shrink: 0; }
+.dwelling-type__head-summary {
+  flex: 1; min-width: 0;
+  font-size: 12.5px; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dwelling-type__head-caret { flex-shrink: 0; transition: transform 0.15s ease; }
+.dwelling-type.is-collapsed .dwelling-type__head-caret { transform: rotate(-90deg); }
+.dwelling-type.is-collapsed .dwelling-type__head-summary { color: var(--text); }
+
 /* GRV calculator: line items folded into a D&C contract sum */
 .field.is-included .input-money input { text-decoration: line-through; opacity: 0.5; }
 .field.is-included > label { opacity: 0.6; }

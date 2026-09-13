@@ -374,6 +374,7 @@
       try { window.sessionStorage.removeItem(DRAFT_KEY); } catch (e) {}
       msg("Saved as “" + title + "”. Open it any time from your account.", "ok");
       syncUi();
+      if (window.pcPrCollapseAll) window.pcPrCollapseAll();
     });
   }
 
@@ -396,6 +397,7 @@
       try { window.sessionStorage.removeItem(DRAFT_KEY); } catch (e) {}
       msg("Loaded “" + (res.data.title || "Untitled report") + "”. Changes here can be saved back.", "ok");
       syncUi();
+      if (window.pcPrCollapseAll) window.pcPrCollapseAll();
     });
   }
 

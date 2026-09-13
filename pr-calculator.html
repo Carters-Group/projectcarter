@@ -553,6 +553,12 @@
       card.className = "calc-uplift dwelling-type";
       card.setAttribute("data-prop", id);
       card.innerHTML =
+        '<button type="button" class="dwelling-type__head" data-toggle aria-expanded="true">' +
+          '<span class="dwelling-type__head-title" data-head-title>Property ' + idx + '</span>' +
+          '<span class="dwelling-type__head-summary" data-head-summary></span>' +
+          '<svg class="nav-caret dwelling-type__head-caret" viewBox="0 0 9 6" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>' +
+        '</button>' +
+        '<div class="dwelling-type__body" data-body>' +
         '<div class="field">' +
           '<label for="' + p + 'label">Property ' + idx + ' - name or address</label>' +
           '<input type="text" id="' + p + 'label" autocomplete="off" placeholder="Property ' + letter(idx - 1) + '" />' +
@@ -727,7 +733,8 @@
           '<span>After-tax cash flow / wk <strong id="' + p + 'oWeekly">&mdash;</strong></span>' +
           '<span id="' + p + 'neutralWrap">Rent / wk to break even <strong id="' + p + 'oNeutral">&mdash;</strong></span>' +
         '</p>' +
-        '<button type="button" class="linklike dwelling-type__remove" data-remove="' + id + '">Remove this property</button>';
+        '<button type="button" class="linklike dwelling-type__remove" data-remove="' + id + '">Remove this property</button>' +
+        '</div>';
 
       propertyCards.appendChild(card);
 
@@ -869,6 +876,8 @@
           var l = card.querySelector('label[for="p' + id + '_label"]');
           if (l) l.innerHTML = "Property " + (i + 1) + " &mdash; name or address";
           if (!lab.value) lab.placeholder = "Property " + letter(i);
+          var head = card.querySelector("[data-head-title]");
+          if (head && !lab.value) head.textContent = "Property " + (i + 1);
         }
       });
     }
@@ -1152,6 +1161,18 @@
       /* per-card hints + derived figures */
       m.props.forEach(function (r) {
         var p = "p" + r.id + "_";
+        var card = propertyCards.querySelector('[data-prop="' + r.id + '"]');
+        if (card) {
+          var title = card.querySelector("[data-head-title]");
+          if (title && r.label) title.textContent = r.label;
+          var sum = card.querySelector("[data-head-summary]");
+          if (sum) {
+            var bits = [r.value > 0 ? money(r.value) : "no value yet"];
+            if (r.lvr != null) bits.push(pct(r.lvr) + " LVR");
+            if (!r.isOwn && r.valid) bits.push(signedMoney(r.weekly) + " / wk");
+            sum.textContent = bits.join("  ·  ");
+          }
+        }
         var lh = document.getElementById(p + "loanHint");
         if (lh) lh.textContent = "Loan " + (r.value > 0 ? money(r.loan) : "—") +
           "   ·   Equity " + (r.value > 0 ? money(r.equity) : "—") +
@@ -1272,7 +1293,29 @@
 
     inputs.addEventListener("input", render);
 
+    function setCardCollapsed(id, collapsed) {
+      var card = propertyCards.querySelector('[data-prop="' + id + '"]');
+      if (!card) return;
+      var body = card.querySelector("[data-body]");
+      var toggle = card.querySelector("[data-toggle]");
+      if (body) body.hidden = collapsed;
+      if (toggle) toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      card.classList.toggle("is-collapsed", collapsed);
+    }
+    window.pcPrCollapseAll = function () {
+      propIds.forEach(function (id) { setCardCollapsed(id, true); });
+    };
+
     propertyCards.addEventListener("click", function (e) {
+      var t = e.target.closest("[data-toggle]");
+      if (t) {
+        var tCard = t.closest("[data-prop]");
+        if (tCard) {
+          var tId = parseInt(tCard.getAttribute("data-prop"), 10);
+          setCardCollapsed(tId, !tCard.classList.contains("is-collapsed"));
+        }
+        return;
+      }
       var b = e.target.closest(".dwelling-type__remove");
       if (!b) return;
       removeProperty(parseInt(b.getAttribute("data-remove"), 10));
