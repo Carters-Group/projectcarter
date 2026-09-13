@@ -480,9 +480,12 @@
     /* outgoing lines a commercial lease can pass through to the tenant */
     var RECOVER_KEYS = ["pm", "council", "water", "strata", "landtax", "insurance",
                         "maint", "fire", "hvac", "clean", "ogadmin"];
-    /* what a plain net lease recovers by default (land tax handled separately) */
-    var NET_DEFAULT = ["pm", "council", "water", "strata", "insurance",
-                       "maint", "fire", "hvac", "clean", "ogadmin"];
+    /* what a plain net lease recovers by default. Land tax, property
+       management, maintenance and loan fees are left out deliberately -
+       they're variable / deal-specific (grouped as such on the card), not
+       standard passthroughs, so they're left for the visitor to decide. */
+    var NET_DEFAULT = ["council", "water", "strata", "insurance",
+                       "fire", "hvac", "clean", "ogadmin"];
 
     function recoverTick(p, key) {
       return '<label class="calc-check calc-recover" data-com-only hidden>' +
@@ -514,19 +517,10 @@
       }
       syncLettingUnit(id);
       if (fromUser && isCom) autoRecovers(id);
-      /* keep the acquisition-costs "commercial / non-residential property"
-         stamp-duty checkbox in lockstep with the property type above it -
-         otherwise a card can end up commercial everywhere except its stamp
-         duty rate (or vice versa), which is confusing and wrong. Only when
-         the change actually comes from the visitor picking a type, so
-         restoring a saved report doesn't fight itself field by field. */
-      if (fromUser) {
-        var commCb = document.getElementById(p + "stampComm");
-        if (commCb && commCb.checked !== isCom) {
-          commCb.checked = isCom;
-          recalcCardStamp(id);
-        }
-      }
+      /* the stamp-duty rate reads the property type directly (no separate
+         "commercial property" tick to keep in sync any more) - just
+         recompute the estimate in case a state is already selected. */
+      recalcCardStamp(id);
     }
 
     /* letting fee can be a flat $ amount or a number of weeks of rent
@@ -604,7 +598,7 @@
           '<div class="field-row">' +
             '<div class="field"><label for="' + p + 'stampState">Estimate for</label>' +
             '<select id="' + p + 'stampState">' +
-              '<option value="">No estimate</option>' +
+              '<option value="">State</option>' +
               '<option value="NSW">New South Wales</option>' +
               '<option value="VIC">Victoria</option>' +
               '<option value="QLD">Queensland</option>' +
@@ -617,9 +611,7 @@
             '<div class="field"><label for="' + p + 'stamp">Stamp duty + registration</label>' +
             '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'stamp" autocomplete="off" placeholder="0" /></div></div>' +
           '</div>' +
-          '<label class="calc-check"><input type="checkbox" id="' + p + 'stampComm" />' +
-            '<span>Commercial / non-residential property</span></label>' +
-          '<p class="field-hint" id="' + p + 'stampNote">Follows the property type above; tick or untick here only if this purchase needs a different stamp duty rate. Pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.</p>' +
+          '<p class="field-hint" id="' + p + 'stampNote">Uses the property type set above (residential or commercial) to pick the right duty rate - pick a state and this fills from its general transfer duty rates plus title-office registration fees. Company / investor purchase, no concession. Edit it if you have the exact figure.</p>' +
           '<div class="field-row">' +
             '<div class="field"><label for="' + p + 'convey">Conveyancing</label>' +
             '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'convey" autocomplete="off" placeholder="0" /></div></div>' +
@@ -649,40 +641,29 @@
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Yearly running costs</h3>' +
         '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
-          recoverTick(p, "pm") + '</div>' +
           '<div class="field"><label for="' + p + 'letting">Letting / leasing fee</label>' +
           '<div class="input-money" id="' + p + 'lettingWrap"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div>' +
           '<select id="' + p + 'lettingUnit" data-res-only>' +
             '<option value="amount">$ amount</option>' +
             '<option value="weeks">Weeks of rent</option>' +
           '</select></div>' +
-        '</div>' +
-        '<p class="field-hint" data-res-only>Letting fee is commonly quoted as a number of weeks of rent (often 1&ndash;2 weeks) rather than a dollar figure - pick whichever you have.</p>' +
-        '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "council") + '</div>' +
+        '</div>' +
+        '<p class="field-hint" data-res-only>Letting fee is commonly quoted as a number of weeks of rent (often 1&ndash;2 weeks) rather than a dollar figure - pick whichever you have.</p>' +
+        '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'strata">Body corporate / strata <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'strata" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "strata") + '</div>' +
-        '</div>' +
-        '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'landtax">Land tax <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'landtax" autocomplete="off" placeholder="0" /></div>' +
-          recoverTick(p, "landtax") + '</div>' +
           '<div class="field"><label for="' + p + 'insurance">Landlord &amp;/or building insurance <span>(per year, depends on body corporate)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'insurance" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "insurance") + '</div>' +
         '</div>' +
-        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.<span data-com-only hidden> Many retail leases cannot pass land tax to the tenant even on a net lease - leave its tick off if so.</span> If a body corporate or strata scheme covers this property, building insurance is usually already included in the body corporate fee - enter landlord/other insurance (contents, loss of rent, liability) here instead. With no body corporate, include building insurance too.</p>' +
+        '<p class="field-hint">If a body corporate or strata scheme covers this property, building insurance is usually already included in the body corporate fee - enter landlord/other insurance (contents, loss of rent, liability) here instead. With no body corporate, include building insurance too.</p>' +
         '<div class="field-row">' +
           '<div class="field" data-res-only><label for="' + p + 'maintwk">Maintenance <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintwk" autocomplete="off" placeholder="0" /></div></div>' +
-          '<div class="field" data-com-only hidden><label for="' + p + 'maintyr">Repairs &amp; maintenance <span>(per year)</span></label>' +
-          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintyr" autocomplete="off" placeholder="0" /></div>' +
-          recoverTick(p, "maint") + '</div>' +
           '<div class="field" data-res-only><label for="' + p + 'vacwks">Vacancy allowance <span>(weeks of rent)</span></label>' +
           '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'vacwks" autocomplete="off" placeholder="1" /></div>' +
           '<div class="field" data-com-only hidden><label for="' + p + 'vacmths">Vacancy allowance <span>(months of the year)</span></label>' +
@@ -705,9 +686,27 @@
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'ogadmin" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "ogadmin") + '</div>' +
         '</div>' +
+
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Usual claimable outgoings <span style="font-weight:400;text-transform:none;letter-spacing:0">(variable)</span></h3>' +
+        '<p class="field-hint" data-com-only hidden>Property management, land tax, maintenance, loan fees and sundry are not always passed through under a net lease - it depends on the deal, so confirm with the lease rather than assuming any of these are recovered.</p>' +
         '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'pmpct">Property management <span>(% of rent)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'pmpct" autocomplete="off" placeholder="4.4" /></div>' +
+          recoverTick(p, "pm") + '</div>' +
+          '<div class="field"><label for="' + p + 'landtax">Land tax <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'landtax" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "landtax") + '</div>' +
+        '</div>' +
+        '<p class="field-hint">Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings. Enter the assessed or expected figure for this property.<span data-com-only hidden> Many retail leases cannot pass land tax to the tenant even on a net lease - leave its tick off if so.</span></p>' +
+        '<div class="field-row">' +
+          '<div class="field" data-com-only hidden><label for="' + p + 'maintyr">Repairs &amp; maintenance <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'maintyr" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "maint") + '</div>' +
           '<div class="field"><label for="' + p + 'loanfees">Annual loan fees <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'loanfees" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<p class="field-hint" data-com-only hidden>Loan fees are never claimable from the tenant, even on a net lease - they always stay with you as the owner.</p>' +
+        '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'sundry">Sundry <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'sundry" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
@@ -761,10 +760,6 @@
       card.querySelector("#" + p + "acqOn").addEventListener("change", function () {
         syncAcqUi(id);
         if (this.checked) {
-          /* re-ticked - line the stamp-duty rate back up with the card's
-             property type, same as picking a property type does */
-          var commEl = document.getElementById(p + "stampComm");
-          if (commEl) commEl.checked = document.getElementById(p + "ptype").value === "com";
           recalcCardStamp(id);
         } else {
           /* not a purchase - these one-off costs don't apply if the property
@@ -798,11 +793,6 @@
         touchedStamp[id] = this.value.trim() !== "";
       });
       card.querySelector("#" + p + "stampState").addEventListener("change", function () {
-        touchedStamp[id] = false;
-        recalcCardStamp(id);
-        render();
-      });
-      card.querySelector("#" + p + "stampComm").addEventListener("change", function () {
         touchedStamp[id] = false;
         recalcCardStamp(id);
         render();
@@ -857,8 +847,6 @@
       });
       var stateEl = document.getElementById(p + "stampState");
       if (stateEl) stateEl.value = "";
-      var commEl = document.getElementById(p + "stampComm");
-      if (commEl) commEl.checked = false;
       delete touchedStamp[id];
     }
 
@@ -946,7 +934,7 @@
       var noteEl = document.getElementById(p + "stampNote");
       if (!st || !stampEl) return;
       var state = st.value;
-      var comm = document.getElementById(p + "stampComm").checked;
+      var comm = ((document.getElementById(p + "ptype") || {}).value) === "com";
       var price = num(p + "value");
       var est = state ? stampEstimate(state, price, comm) : null;
       var fees = regoFees(state, price, num(p + "loan") > 0);
