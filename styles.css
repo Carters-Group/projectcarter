@@ -1409,12 +1409,14 @@ h1, h2, h3 {
   font: inherit; border-radius: 2px;
 }
 .acct-card input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.acct-card input:disabled { opacity: 0.6; cursor: not-allowed; }
+.acct-card .field-hint, .acct-equity-modes .field-hint { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
 
 .acct-msg { margin: 14px 0 0; font-size: 13.5px; line-height: 1.6; }
 .acct-msg.is-ok    { color: var(--accent-2); }
 .acct-msg.is-error { color: #e2938c; }
 
-.acct-whoami { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.acct-whoami { display: flex; align-items: center; gap: 16px; }
 .acct-eyebrow {
   margin: 0; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
 }
@@ -1457,3 +1459,26 @@ h1, h2, h3 {
 }
 .acct-overview__stat dt { margin: 0 0 4px; font-size: 12px; color: var(--muted); }
 .acct-overview__stat dd { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--text); }
+
+.acct-overview--modes { margin: 8px 0 10px; }
+
+.acct-avatar {
+  width: 56px; height: 56px; border-radius: 50%; flex: none;
+  background: var(--bg-3); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.acct-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.acct-avatar span { font-family: var(--font-display); font-size: 20px; color: var(--muted); }
+.acct-whoami .acct-avatar + div { flex: 1; }
+.acct-avatar--lg { width: 84px; height: 84px; }
+.acct-avatar--lg span { font-size: 28px; }
+.acct-avatar-field { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+.acct-avatar-field .field-hint { margin: 8px 0 0; }
+
+.btn-sm { padding: 9px 16px; font-size: 13px; display: inline-block; cursor: pointer; }
+
+.acct-quick-grid { margin-top: 16px; }
+.acct-quick-card .card-media { aspect-ratio: 16 / 7; }
+.acct-quick-card .card-body { padding: 18px 20px; }
+.acct-quick-card .card-body h3 { font-size: 19px; margin-bottom: 4px; }
+.acct-quick-card .card-meta { margin: 0 0 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 13px; }

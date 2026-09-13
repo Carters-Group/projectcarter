@@ -55,9 +55,9 @@
             <a href="portfolio-review-calculator">Portfolio Review (PR)</a>
             <a href="commercial-lending-calculator">Commercial Lending (CL)</a>
             <a href="return-on-investment-calculator">Return on Investment (ROI)</a>
+            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
             <a href="development-site-calculator">Development Site (DA)</a>
             <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
-            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
           </div>
         </div>
         <a href="account">Login</a>
@@ -199,6 +199,12 @@
                 <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="debtReduction" autocomplete="off" placeholder="50" /></div>
                 <p class="field-hint">Each year, this share of the cash left after interest is used to pay down the loan. The rest is cash you keep.</p>
               </div>
+
+              <div class="field">
+                <label for="extraPaydown">Extra contribution <span>(per year, from savings or other income)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="extraPaydown" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">On top of the share above - money from outside the property (savings, salary) put toward the loan each year. Pays the loan down faster, saving interest and lifting net proceeds at sale - but since it is extra capital you're putting in along the way, it dilutes your IRR even where total profit rises.</p>
+              </div>
             </div>
 
             <div class="calc-group">
@@ -240,6 +246,7 @@
             <div class="result-row"><dt>Loan balance at sale</dt><dd data-out="loanAtSale">&mdash;</dd></div>
             <div class="result-row"><dt>Net sale proceeds</dt><dd data-out="netProceeds">&mdash;</dd></div>
             <div class="result-row"><dt>Rental cash kept (total)</dt><dd data-out="cashKept">&mdash;</dd></div>
+            <div class="result-row" id="extraContribRow" hidden><dt>Extra contributed (total)</dt><dd data-out="extraContributed">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Total profit</dt><dd data-out="totalProfit">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Total ROI</dt><dd data-out="totalRoi">&mdash;</dd></div>
             <div class="result-row"><dt>Return per year (simple avg)</dt><dd data-out="roiPerYear">&mdash;</dd></div>
@@ -604,6 +611,7 @@
       var rate = num("rate") / 100;
       var term = Math.round(num("term"));
       var dr = Math.min(num("debtReduction") / 100, 1);
+      var extraPaydown = Math.max(0, num("extraPaydown"));
 
       var uplift = upliftOn.checked;
       var uYear = Math.round(num("upliftYear"));
@@ -617,6 +625,7 @@
       var rows = [];
       var balance = loan;
       var totalKept = 0;
+      var totalExtraContributed = 0;
       var valid = price > 0 && nr1 > 0 && term > 0;
 
       if (valid) {
@@ -629,8 +638,18 @@
           }
           var interest = balance * rate;
           var cashAfterInterest = rent - interest;
-          var debtPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
+          var profitPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
+          var extraPay = Math.min(extraPaydown, balance - profitPay);
+          var debtPay = profitPay + extraPay;
           balance -= debtPay;
+          totalExtraContributed += extraPay;
+          /* cashAfterInterest minus the profit-share paydown is cash the investor keeps
+             from the property; the extra contribution comes out of their own pocket on
+             top of that, so it shows up here as a further reduction (often negative for
+             that year) in the yearly cash flow used for IRR - the loan balance drops by
+             the same amount, so it flows straight back out as higher net proceeds at
+             sale (plus the interest it saved along the way), which is why total $ profit
+             can rise even as the extra capital drags the annualised IRR down */
           var kept = cashAfterInterest - debtPay;
           totalKept += kept;
           /* cap rate glides from the entry yield to the exit cap rate over the hold */
@@ -670,7 +689,8 @@
         price: price, lvr: lvr, loan: loan, deposit: deposit,
         acqCosts: acqCosts, cashRequired: cashRequired,
         fundsAvailable: fundsAvailable, shortfall: shortfall,
-        nr1: nr1, g: g, rate: rate, term: term, dr: dr,
+        nr1: nr1, g: g, rate: rate, term: term, dr: dr, extraPaydown: extraPaydown,
+        totalExtraContributed: totalExtraContributed,
         uplift: uplift, uYear: uYear, uRent: uRent, uG: uG,
         entryYield: entryYield, exitCap: exitCap, rows: rows,
         saleValue: saleValue, loanAtSale: loanAtSale, netProceeds: netProceeds,
@@ -726,6 +746,8 @@
       put("loanAtSale", m.valid ? money(m.loanAtSale) : "—");
       put("netProceeds", m.valid ? money(m.netProceeds) : "—");
       put("cashKept", m.valid ? signedMoney(m.totalKept) : "—");
+      document.getElementById("extraContribRow").hidden = !(m.valid && m.totalExtraContributed > 0);
+      put("extraContributed", m.valid ? money(m.totalExtraContributed) : "—");
       put("totalProfit", m.totalProfit != null ? signedMoney(m.totalProfit) : "—");
       put("totalRoi", m.totalRoi != null ? pct(m.totalRoi) : "—");
       put("roiPerYear", m.roiPerYear != null ? pct(m.roiPerYear) : "—");
@@ -859,6 +881,7 @@
       row("Term of ownership", m.term + " year" + (m.term === 1 ? "" : "s"));
       row("Exit cap rate on sale", m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "-");
       row("Profit used for debt reduction", (m.dr * 100).toFixed(0) + "%");
+      if (m.extraPaydown > 0) row("Extra contribution", money(m.extraPaydown) + " / year");
       if (m.uplift && m.uRent > 0) {
         row("Value uplift", "Year " + m.uYear + ", new base rent " + money(m.uRent) +
           ", then " + (m.uG * 100).toFixed(2) + "% / year");
@@ -928,6 +951,7 @@
         "Exit cap rate on sale: " + (m.exitCap ? (m.exitCap * 100).toFixed(2) + "%" : "n/a"),
         "Profit used for debt reduction: " + (m.dr * 100).toFixed(0) + "%"
       ];
+      if (m.extraPaydown > 0) lines.push("Extra contribution: " + money(m.extraPaydown) + "/yr");
       if (m.uplift && m.uRent > 0) {
         lines.push("Value uplift: year " + m.uYear + ", new base rent " + money(m.uRent) +
           ", then " + (m.uG * 100).toFixed(2) + "%/yr");

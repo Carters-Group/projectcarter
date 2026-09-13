@@ -55,9 +55,9 @@
             <a href="portfolio-review-calculator">Portfolio Review (PR)</a>
             <a href="commercial-lending-calculator">Commercial Lending (CL)</a>
             <a href="return-on-investment-calculator">Return on Investment (ROI)</a>
+            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
             <a href="development-site-calculator">Development Site (DA)</a>
             <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
-            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
           </div>
         </div>
         <a href="account">Login</a>
@@ -1561,11 +1561,14 @@
       var m = model(), T = m.T;
       if (!(T.value > 0)) return {};
       var usableEquity70 = Math.max(0, T.value * 0.70 - T.loan);
+      var usableEquity80 = Math.max(0, T.value * 0.80 - T.loan);
       return {
         portfolioValue: Math.round(T.value),
         portfolioDebt: Math.round(T.loan),
         portfolioEquity: Math.round(T.equity),
         usableEquity70: Math.round(usableEquity70),
+        usableEquity80: Math.round(usableEquity80),
+        netRentalIncome: Math.round(T.netRent),
         portfolioLvr: T.lvr != null ? Math.round(T.lvr * 10) / 10 : null,
         annualSurplus: Math.round(T.annual),
         weeklySurplus: Math.round(T.weekly),

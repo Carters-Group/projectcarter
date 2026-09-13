@@ -37,9 +37,9 @@
             <a href="portfolio-review-calculator">Portfolio Review (PR)</a>
             <a href="commercial-lending-calculator">Commercial Lending (CL)</a>
             <a href="return-on-investment-calculator">Return on Investment (ROI)</a>
+            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
             <a href="development-site-calculator">Development Site (DA)</a>
             <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
-            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
           </div>
         </div>
         <a href="account">Login</a>
@@ -95,12 +95,23 @@
         <div id="acctSignedIn" hidden>
           <div class="card acct-card">
             <div class="acct-whoami">
+              <div class="acct-avatar" id="acctAvatarWrap" aria-hidden="true">
+                <img id="acctAvatarImg" alt="" hidden />
+                <span id="acctAvatarInitial">?</span>
+              </div>
               <div>
                 <p class="acct-eyebrow">Signed in as</p>
                 <p class="acct-email" id="acctWhoEmail">&mdash;</p>
+                <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
               </div>
               <button type="button" class="btn btn-ghost" id="signOutBtn">Sign out</button>
             </div>
+          </div>
+
+          <div class="card acct-card" id="acctQuickCard">
+            <h2 class="calc-subhead">Quick access</h2>
+            <p class="acct-empty">Jump straight into a calculator - resumes your most recently saved report where you have one.</p>
+            <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
           </div>
 
           <div class="card acct-card" id="acctPortfolioCard">
@@ -112,11 +123,14 @@
               <p class="acct-email" id="portfolioTitle">&mdash;</p>
               <div class="acct-overview" id="portfolioStats"></div>
               <p class="acct-report__date" id="portfolioUpdated"></p>
+              <div class="acct-equity-modes" id="portfolioEquityModes"></div>
               <p class="acct-calc-links">
                 <a id="portfolioOpenLink" href="portfolio-review-calculator">Open in Portfolio Review</a>
                 &nbsp;&middot;&nbsp;
                 <button type="button" class="linklike" id="portfolioChangeBtn">Choose a different report</button>
               </p>
+              <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn" style="margin-top:14px">See this as an ROI projection</button>
+              <p class="acct-msg" id="portfolioRoiMsg" hidden></p>
             </div>
 
             <div id="portfolioUnset" hidden>
@@ -155,14 +169,35 @@
 
           <div class="card acct-card">
             <h2 class="calc-subhead">Your details</h2>
+            <div class="acct-avatar-field">
+              <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap2" aria-hidden="true">
+                <img id="acctAvatarImg2" alt="" hidden />
+                <span id="acctAvatarInitial2">?</span>
+              </div>
+              <div>
+                <label for="avatarFile" class="btn btn-ghost btn-sm">Change photo</label>
+                <input type="file" id="avatarFile" accept="image/*" hidden />
+                <p class="field-hint">JPG or PNG, under 5MB. Shown only to you, on this page.</p>
+              </div>
+            </div>
+            <p class="acct-msg" id="avatarMsg" hidden></p>
             <form id="profileForm">
               <div class="field">
                 <label for="profName">Name</label>
                 <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
               </div>
               <div class="field">
+                <label for="profEmail">Email</label>
+                <input type="email" id="profEmail" disabled />
+                <p class="field-hint">Your sign-in email. Contact us to change it.</p>
+              </div>
+              <div class="field">
                 <label for="profPhone">Phone</label>
                 <input type="tel" id="profPhone" autocomplete="tel" placeholder="0400 000 000" />
+              </div>
+              <div class="field">
+                <label for="profOccupation">Occupation</label>
+                <input type="text" id="profOccupation" autocomplete="organization-title" placeholder="e.g. Company director" />
               </div>
               <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
             </form>
@@ -220,6 +255,15 @@
       pr: "portfolio-review-calculator", cl: "commercial-lending-calculator"
     };
     var CALC_ORDER = ["noi", "roi", "da", "grv", "pr", "cl"];
+    var CALC_ICON = {
+      noi: "assets/images/calculators/noi-icon.svg", roi: "assets/images/calculators/roi-icon.svg",
+      da: "assets/images/calculators/da-icon.svg", grv: "assets/images/calculators/grv-icon.svg",
+      pr: "assets/images/calculators/pr-icon.svg", cl: "assets/images/calculators/cl-icon.svg"
+    };
+    var CALC_SHORT = {
+      noi: "Net Operating Income", roi: "Return on Investment", da: "Development Site (DA)",
+      grv: "Gross Realisation Value", pr: "Portfolio Review", cl: "Commercial Lending"
+    };
 
     var elUnconfigured = document.getElementById("acctUnconfigured");
     var elSignedOut    = document.getElementById("acctSignedOut");
@@ -387,10 +431,13 @@
       });
     }
 
+    var currentMasterReport = null;
+
     function renderPortfolio(rows) {
       var setEl = document.getElementById("portfolioSet");
       var unsetEl = document.getElementById("portfolioUnset");
       var master = (rows || []).filter(function (r) { return r.calculator === "pr" && r.is_master; })[0];
+      currentMasterReport = master || null;
 
       if (master) {
         show(setEl); hide(unsetEl);
@@ -402,9 +449,10 @@
         var stats = [
           ["Properties", s.propertyCount != null ? String(s.propertyCount) : "—"],
           ["Combined value", fmtMoney(s.portfolioValue)],
-          ["Combined equity", fmtMoney(s.portfolioEquity)],
+          ["Current equity position", fmtMoney(s.portfolioEquity)],
           ["Combined debt", fmtMoney(s.portfolioDebt)],
           ["Portfolio LVR", fmtPct(s.portfolioLvr)],
+          ["Investment income (net rent)", fmtMoney(s.netRentalIncome)],
           ["After-tax cash flow / yr", fmtSignedMoney(s.annualSurplus)],
           ["After-tax cash flow / wk", fmtSignedMoney(s.weeklySurplus)]
         ];
@@ -416,6 +464,25 @@
           d.innerHTML = '<dt>' + pair[0] + '</dt><dd>' + pair[1] + '</dd>';
           statsEl.appendChild(d);
         });
+
+        var modesEl = document.getElementById("portfolioEquityModes");
+        modesEl.innerHTML = "";
+        if (s.usableEquity70 != null || s.usableEquity80 != null) {
+          var head = document.createElement("p");
+          head.className = "acct-eyebrow";
+          head.textContent = "Useable equity";
+          modesEl.appendChild(head);
+          var wrap = document.createElement("div");
+          wrap.className = "acct-overview acct-overview--modes";
+          wrap.innerHTML =
+            '<div class="acct-overview__stat"><dt>Conservative (70% LVR)</dt><dd>' + fmtMoney(s.usableEquity70) + '</dd></div>' +
+            '<div class="acct-overview__stat"><dt>Higher gearing (80% LVR)</dt><dd>' + fmtMoney(s.usableEquity80) + '</dd></div>';
+          modesEl.appendChild(wrap);
+          var note = document.createElement("p");
+          note.className = "field-hint";
+          note.textContent = "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs.";
+          modesEl.appendChild(note);
+        }
 
         document.getElementById("portfolioChangeBtn").onclick = function () { renderPortfolioChooser(rows, true); };
       } else {
@@ -480,6 +547,53 @@
       } catch (e) { return null; }
     }
 
+    function initials(u) {
+      var name = (u.full_name || "").trim();
+      if (name) {
+        var parts = name.split(/\s+/);
+        return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+      }
+      return (u.email || "?").charAt(0).toUpperCase();
+    }
+
+    function renderAvatar(u) {
+      [["acctAvatarImg", "acctAvatarInitial"], ["acctAvatarImg2", "acctAvatarInitial2"]].forEach(function (pair) {
+        var img = document.getElementById(pair[0]);
+        var initial = document.getElementById(pair[1]);
+        if (!img) return;
+        if (u && u.avatar_url) {
+          img.src = u.avatar_url;
+          img.hidden = false;
+          initial.hidden = true;
+        } else {
+          img.hidden = true;
+          initial.hidden = false;
+          initial.textContent = u ? initials(u) : "?";
+        }
+      });
+    }
+
+    function renderQuickLaunch(rows) {
+      var grid = document.getElementById("quickLaunchGrid");
+      grid.innerHTML = "";
+      CALC_ORDER.forEach(function (calc) {
+        var latest = (rows || []).filter(function (r) { return r.calculator === calc; })[0];
+        var href = CALC_PAGES[calc] + (latest ? "?report=" + encodeURIComponent(latest.id) : "");
+        var a = document.createElement("a");
+        a.className = "card project-card acct-quick-card";
+        a.href = href;
+        a.innerHTML =
+          '<div class="card-media has-photo card-media--icon" style="background-image:url(\'' + CALC_ICON[calc] + '\')" data-label="' + calc.toUpperCase() + '"></div>' +
+          '<div class="card-body">' +
+            '<h3>' + CALC_SHORT[calc] + '</h3>' +
+            '<p class="card-meta"></p>' +
+            '<span class="link-arrow">' + (latest ? "Resume" : "Open calculator") + '</span>' +
+          '</div>';
+        a.querySelector(".card-meta").textContent = latest ? "Resume: " + (latest.title || "Untitled report") : "Start a new report";
+        grid.appendChild(a);
+      });
+    }
+
     function load() {
       var u = window.pcAuth.user();
       var from = fromParam();
@@ -500,14 +614,21 @@
       if (u) {
         hide(elSignedOut); show(elSignedIn);
         document.getElementById("acctWhoEmail").textContent = u.email;
+        var occEl = document.getElementById("acctWhoOccupation");
+        occEl.textContent = u.occupation || "";
+        occEl.hidden = !u.occupation;
+        renderAvatar(u);
         document.getElementById("profName").value = u.full_name || "";
+        document.getElementById("profEmail").value = u.email || "";
         document.getElementById("profPhone").value = u.phone || "";
+        document.getElementById("profOccupation").value = u.occupation || "";
         setMsg(reportsMsg, "");
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
           renderReports(res.data);
           renderActivity(res.data);
           renderPortfolio(res.data);
+          renderQuickLaunch(res.data);
         });
       } else {
         show(elSignedOut); hide(elSignedIn);
@@ -523,11 +644,57 @@
       setMsg(profMsg, "Saving…");
       window.pcAuth.updateProfile({
         full_name: document.getElementById("profName").value,
-        phone: document.getElementById("profPhone").value
+        phone: document.getElementById("profPhone").value,
+        occupation: document.getElementById("profOccupation").value
       }).then(function (res) {
         btn.disabled = false;
         if (res.error) { setMsg(profMsg, res.error.message, "error"); return; }
         setMsg(profMsg, "Saved.", "ok");
+        load();
+      });
+    });
+
+    var avatarMsg = document.getElementById("avatarMsg");
+    document.getElementById("avatarFile").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      setMsg(avatarMsg, "Uploading…");
+      window.pcAuth.uploadAvatar(file).then(function (res) {
+        e.target.value = "";
+        if (res.error) { setMsg(avatarMsg, res.error.message, "error"); return; }
+        setMsg(avatarMsg, "Photo updated.", "ok");
+        renderAvatar(window.pcAuth.user());
+      });
+    });
+
+    document.getElementById("portfolioRoiBtn").addEventListener("click", function () {
+      var roiMsg = document.getElementById("portfolioRoiMsg");
+      if (!currentMasterReport) { setMsg(roiMsg, "Set a master portfolio first.", "error"); return; }
+      var s = currentMasterReport.summary || {};
+      if (!(s.portfolioValue > 0)) { setMsg(roiMsg, "This portfolio has no combined value to project yet."); return; }
+      var btn = document.getElementById("portfolioRoiBtn");
+      btn.disabled = true;
+      setMsg(roiMsg, "Building your projection…");
+      var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 100)) : 0;
+      var title = (currentMasterReport.title || "Your portfolio") + " - ROI projection";
+      var inputs = {
+        v: 2, calc: "roi", projectName: title,
+        fields: {
+          pcProjectName: title,
+          price: String(Math.round(s.portfolioValue)),
+          lvr: String(lvr),
+          stampDuty: "0", valuationCost: "0", legalCost: "0", buildingInspection: "0", otherCost: "0",
+          fundsAvailable: "0",
+          rent: String(Math.round(s.netRentalIncome || 0)),
+          rentGrowth: "3", rate: "6.5", term: "5",
+          debtReduction: "50", extraPaydown: "0", exitCap: ""
+        },
+        dyn: {}
+      };
+      window.pcAuth.saveReport({ calculator: "roi", title: title, inputs: inputs, summary: {} }).then(function (res) {
+        btn.disabled = false;
+        if (res.error) { setMsg(roiMsg, res.error.message, "error"); return; }
+        window.location.href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
       });
     });
 
