@@ -217,7 +217,7 @@
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
-              <button type="button" class="btn btn-accent btn-block" id="openLead">Download the summary (PDF)</button>
+              <button type="button" class="btn btn-accent btn-block" id="openLead">Download PDF</button>
               <p class="acct-msg is-error" id="leadEmptyNote" hidden>Enter your figures above first &mdash; there's nothing to download yet.</p>
               <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
             </div>
@@ -260,7 +260,7 @@
                 <input type="password" id="leadPassword" autocomplete="new-password" placeholder="Set one to also create a free account" />
                 <p class="field-hint">Add a password to create a free account in the same step, so you can save this report and open it again later.</p>
               </div>
-              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download my summary (PDF)</button>
+              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download PDF</button>
               <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one. You'll only need to do this once - every calculator on this site will let you download straight away after this.</p>
             </form>
 
@@ -713,7 +713,7 @@
     function applyLock() {
       resultsEl.classList.toggle("is-locked", !unlocked);
       if (lockNote) lockNote.hidden = unlocked;
-      openLead.textContent = unlocked ? "Download the PDF again" : "Download NOI summary (PDF)";
+      openLead.textContent = "Download PDF";
       render();
     }
     function unlock() {
