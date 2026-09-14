@@ -234,7 +234,7 @@
             <li><strong>Running costs</strong> are property management (a % of the rent), the letting / leasing fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance, a vacancy allowance, loan fees and sundry. Residential maintenance is per week &times; 52 and vacancy is weeks &times; the weekly rent; commercial maintenance is annual and vacancy is months &divide; 12 &times; the gross rent. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
             <li><strong>Commercial properties</strong> add a lease basis and the usual building outgoings - water &amp; sewer rates, fire &amp; essential services, air-conditioning / HVAC, cleaning &amp; security, and an outgoings audit / admin allowance. Each recoverable line has a &ldquo;recovered from the tenant&rdquo; tick: ticked, that outgoing drops out of your running costs. Choosing <strong>net lease</strong> ticks the usual recoverable set, <strong>gross lease</strong> clears them, and <strong>partial / mixed</strong> leaves them as you set them. <strong>Land tax is never auto-ticked</strong> under any lease basis - many retail leases can't pass it through to the tenant even on a net lease, so tick it yourself only if this lease does.</li>
             <li><strong>Cash flow before tax</strong> is net rent after costs, less loan interest. A figure in brackets is what the property costs you to hold each year before tax.</li>
-            <li><strong>Tax.</strong> Each property has its own holding entity and marginal tax rate, set under Tax treatment on its card - useful where properties sit in different names, companies or trusts. A rental loss is refunded at that property's rate; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving. The holding entity is for your report only and does not change the calculation.</li>
+            <li><strong>Tax.</strong> Each property has its own entity and tax rate, set under Tax treatment on its card - useful where properties sit in different names, companies or trusts. A rental loss is refunded at that property's rate; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving. The entity is for your report only and does not change the calculation.</li>
             <li><strong>Post-Budget negative gearing.</strong> Tick &ldquo;bought after the 2026 Federal Budget&rdquo; on a residential property and a rental loss on it is quarantined: it no longer offsets your salary or other income, so it earns no refund in the year. The loss carries forward against future rental profit from that property or the gain on its sale. Rental profits are still taxed, and depreciation only reduces a profit. Properties held before the Budget keep the current treatment. This change applies to residential property only - the Budget did not change negative gearing for commercial property, so this option is not shown on commercial cards. This is a modelling assumption, not tax advice.</li>
             <li><strong>After-tax cash flow</strong> is cash flow before tax plus the tax refund and the depreciation tax saving. Divided by 52 it is the weekly figure - the real out-of-pocket cost, or income, of holding the property.</li>
             <li><strong>Break-even rent.</strong> Each card shows the rent that would bring that property's yearly after-tax result to zero, with everything else held the same - per week for residential, per year for commercial.</li>
@@ -478,6 +478,8 @@
     var NET_DEFAULT = ["council", "water", "strata", "insurance",
                        "fire", "hvac", "clean", "ogadmin"];
 
+    var ENTITY_LABELS = { personal: "Personal", company: "Company", trust: "Trust" };
+
     function recoverTick(p, key) {
       return '<label class="calc-check calc-recover" data-com-only hidden>' +
         '<input type="checkbox" id="' + p + key + 'Rec" />' +
@@ -712,18 +714,17 @@
 
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Tax treatment</h3>' +
         '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'entity">Holding entity <span>(for your report)</span></label>' +
+          '<div class="field"><label for="' + p + 'entity">Entity</label>' +
           '<select id="' + p + 'entity">' +
-            '<option value="">Not set</option>' +
-            '<option value="personal">Personal name</option>' +
+            '<option value="">Entity</option>' +
+            '<option value="personal">Personal</option>' +
             '<option value="company">Company</option>' +
-            '<option value="trust_disc">Discretionary trust</option>' +
-            '<option value="trust_corp">Corporate trust</option>' +
+            '<option value="trust">Trust</option>' +
           '</select></div>' +
-          '<div class="field"><label for="' + p + 'taxrate">Marginal tax rate <span>(%)</span></label>' +
-          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'taxrate" autocomplete="off" placeholder="37" value="37" /></div></div>' +
+          '<div class="field"><label for="' + p + 'taxrate">Tax rate <span>(%)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'taxrate" autocomplete="off" placeholder="30" /></div></div>' +
         '</div>' +
-        '<p class="field-hint">Set the entity that holds this property and its top marginal rate - a company pays a flat rate, a trust distributes to beneficiaries at theirs, so use whatever rate actually applies once the numbers land. The entity itself is for your report only and does not change the calculation; only the rate does.</p>' +
+        '<p class="field-hint">Set the entity that holds this property and its tax rate - a company pays a flat rate, a trust distributes to beneficiaries at theirs, so use whatever rate actually applies once the numbers land. The entity itself is for your report only and does not change the calculation; only the rate does.</p>' +
         '<div data-res-only>' +
         '<label class="calc-check"><input type="checkbox" id="' + p + 'ngNew" />' +
           '<span>Bought after the 2026 Federal Budget - post-Budget negative gearing rules apply</span></label>' +
@@ -1578,7 +1579,7 @@
       doc.setFont("helvetica", "normal"); doc.setTextColor(30);
       m.props.forEach(function (r, i) {
         if (!r.valid) return;
-        ensure(16);
+        ensure(24);
         var cells = [
           (r.label || ("Property " + (i + 1))).slice(0, 20),
           r.isOwn ? "Own" : (r.isCom ? "Comm" : "Resi"),
@@ -1587,7 +1588,14 @@
           r.isOwn ? "n/a" : bracketMoney(r.annual), r.isOwn ? "n/a" : bracketMoney(r.weekly)
         ];
         cells.forEach(function (c, j) { doc.text(String(c), cx[j], y); });
-        y += 15;
+        if (!r.isOwn && ENTITY_LABELS[r.entity]) {
+          doc.setFontSize(7); doc.setTextColor(130);
+          doc.text(ENTITY_LABELS[r.entity] + " · " + pct(r.taxRate * 100) + " tax", cx[0], y + 9);
+          doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(30);
+          y += 22;
+        } else {
+          y += 15;
+        }
       });
       function pdfTotal(name, S) {
         ensure(16);
@@ -1605,7 +1613,7 @@
 
       ensure(90);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and loans are treated as interest-only (no principal paid down). The tax lines apply each property's own marginal rate and holding entity to its rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and loans are treated as interest-only (no principal paid down). The tax lines apply each property's own entity and tax rate to its rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -1653,7 +1661,6 @@
       }
       lines.push("----");
       var LEASE = { net: "net lease", gross: "gross lease", partial: "partial/mixed lease" };
-      var ENTITY = { personal: "personal name", company: "company", trust_disc: "discretionary trust", trust_corp: "corporate trust" };
       m.props.forEach(function (r, i) {
         if (!r.valid) return;
         if (r.isOwn) {
@@ -1663,7 +1670,7 @@
         }
         var tag = (r.isCom ? "[Commercial, " + (LEASE[r.lease] || "net lease") + "]" : "[Residential]") +
           (r.ngNew ? " [post-Budget NG]" : "") +
-          (ENTITY[r.entity] ? " [" + ENTITY[r.entity] + ", " + pct(r.taxRate * 100) + " tax]" : "");
+          (ENTITY_LABELS[r.entity] ? " [" + ENTITY_LABELS[r.entity] + ", " + pct(r.taxRate * 100) + " tax]" : "");
         var rentStr = r.isCom ? money(r.grossRent) + "/yr" : money(r.rentWk) + "/wk";
         var neutralStr = r.isCom
           ? (r.neutralYr != null && isFinite(r.neutralYr) ? money(r.neutralYr) + "/yr" : "n/a")
