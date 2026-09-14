@@ -1185,6 +1185,14 @@
       var m = model();
       var T = m.T, I = m.I;
 
+      /* saving (or saving-and-adding) only makes sense while a card is open
+         to work on - with everything already collapsed there's nothing to
+         save, and it reads as odd to offer it next to two finished cards
+         when the visitor just wants a third */
+      var hasOpenCard = openCardId() != null;
+      document.getElementById("saveProperty").hidden = !hasOpenCard;
+      document.getElementById("saveAddProperty").hidden = !hasOpenCard;
+
       /* per-card hints + derived figures */
       m.props.forEach(function (r) {
         var p = "p" + r.id + "_";
@@ -1379,6 +1387,18 @@
       propIds.forEach(function (id) { maybeAutoCollapse(id); });
     }
 
+    /* the property card a visitor is actually working on right now - not
+       just "whichever was added last", since re-opening an earlier card to
+       tweak it (then hitting Save) must save THAT one. Prefers the last
+       open card in DOM order if more than one happens to be open. */
+    function openCardId() {
+      var open = propIds.filter(function (id) {
+        var card = propertyCards.querySelector('[data-prop="' + id + '"]');
+        return card && !card.classList.contains("is-collapsed");
+      });
+      return open.length ? open[open.length - 1] : null;
+    }
+
     function doAddProperty(fromUser) {
       /* collapse whatever's already filled in, then save progress on the
          properties already entered before adding a blank card, so nothing
@@ -1411,17 +1431,27 @@
        just this browser's local template list. Returns the save promise (or
        null if there was nothing to push) so a caller can wait for it. */
     function doSaveProperty(forceCloud) {
-      var lastId = propIds[propIds.length - 1];
-      if (lastId == null) return null;
-      var fields = serializeCard(lastId);
+      var id = openCardId();
+      if (id == null) return null;
+      var fields = serializeCard(id);
       if (!fields) return null;
       var label = (fields.label || "").trim() || "Saved property";
       var list = loadTemplates();
-      list.unshift({ id: "t" + Date.now(), label: label, savedAt: new Date().toISOString(), fields: fields });
-      if (list.length > MAXT) list = list.slice(0, MAXT);
+      /* re-saving under a name that's already there updates that template
+         in place rather than piling up duplicates */
+      var existing = list.filter(function (t) {
+        return (t.label || "").trim().toLowerCase() === label.toLowerCase();
+      })[0];
+      if (existing) {
+        existing.fields = fields;
+        existing.savedAt = new Date().toISOString();
+      } else {
+        list.unshift({ id: "t" + Date.now(), label: label, savedAt: new Date().toISOString(), fields: fields });
+        if (list.length > MAXT) list = list.slice(0, MAXT);
+      }
       saveTemplates(list);
       renderTemplatePicker();
-      maybeAutoCollapse(lastId);
+      maybeAutoCollapse(id);
       render();
       flashSaveMsg('Saved "' + label + '" - reuse it any time from "Reuse a saved property" below.');
       var wantsCloud = forceCloud || (window.pcAuth && window.pcAuth.isMember());
