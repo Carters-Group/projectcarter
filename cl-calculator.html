@@ -293,7 +293,7 @@
             <li><strong>Tier 2 / non-bank lenders</strong> covers second-tier banks, credit unions, private and specialist commercial lenders. They are typically more flexible on documentation and credit, for a higher interest rate.</li>
             <li><strong>Owner-occupied commercial</strong> is a business buying or refinancing the premises it trades from. A 20% deposit is available from majors and tier 2 alike, provided income comfortably services the debt and liabilities are limited.</li>
             <li><strong>Commercial investment</strong> is a property leased to a tenant. Treated the same as owner-occupied - a 20% deposit is available where income (including the lease) services the debt and liabilities are limited.</li>
-            <li><strong>SMSF commercial property</strong> is bought through a limited recourse borrowing arrangement (LRBA) inside a self-managed super fund, including a business buying its own premises back into its members' SMSF (a "rent-back"). Only a limited, panel-approved list of lenders write this lending, major and specialist alike, and the asset's own income needs to support the debt level.</li>
+            <li><strong>SMSF commercial property</strong> is bought through a limited recourse borrowing arrangement (LRBA) inside a self-managed super fund, including a business buying its own premises back into its members' SMSF (a "rent-back"). The majors have largely exited this lending; it is now written almost entirely by specialist non-bank and panel lenders, and the asset's own income needs to support the debt level.</li>
             <li><strong>Lease doc / low doc investment</strong> is serviced by the property's own lease - no trading income is required in the entity. Available through a limited number of majors as well as tier 2 lenders; the lease itself needs to support the debt.</li>
             <li><strong>Build to Rent (BTR)</strong> uses the total development cost as the base for lending rather than a purchase price. Lenders only recognise part of the projected rental income toward covering debt costs - the rental cover check below uses a 75% recognition of gross rent as a rough guide.</li>
             <li><strong>Build to sell</strong> (development / construction for sale) also lends against total development cost. Major banks typically want a level of qualifying presales in place before funding; tier 2 / non-bank lenders are more likely to fund with less presale cover, priced according to the deposit or equity contributed.</li>
@@ -544,29 +544,29 @@
         label: "Owner-occupied commercial",
         unit: "Purchase price",
         hint: "Business buying or refinancing the premises it trades from.",
-        major: { lvr: 80, rate: [7.25, 8.00], note: "Provided income comfortably services the debt and liabilities are limited." },
-        tier2: { lvr: 80, rate: [7.50, 9.50], note: "Same standard as the majors: income servicing the debt and limited liabilities." }
+        major: { lvr: 80, rate: [6.30, 7.30], note: "Provided income comfortably services the debt and liabilities are limited." },
+        tier2: { lvr: 80, rate: [7.25, 8.30], note: "Same standard as the majors: income servicing the debt and limited liabilities." }
       },
       investment: {
         label: "Commercial investment (leased)",
         unit: "Purchase price",
         hint: "Property leased to a tenant, bought as an investment.",
-        major: { lvr: 80, rate: [7.25, 8.00], note: "Same standard as owner-occupied: income (incl. the lease) servicing the debt and limited liabilities." },
-        tier2: { lvr: 80, rate: [8.00, 10.50], note: "Same standard as the majors: income servicing the debt and limited liabilities." }
+        major: { lvr: 80, rate: [6.30, 7.30], note: "Same standard as owner-occupied: income (incl. the lease) servicing the debt and limited liabilities." },
+        tier2: { lvr: 80, rate: [7.25, 8.30], note: "Same standard as the majors: income servicing the debt and limited liabilities." }
       },
       smsf: {
         label: "SMSF commercial property (LRBA)",
         unit: "Purchase price",
         hint: "Bought inside a self-managed super fund via a limited recourse borrowing arrangement, including a business rent-back to its own SMSF.",
-        major: { lvr: 75, rate: [7.25, 8.00], note: "Only a limited, panel-approved list of lenders write SMSF lending; the asset's income needs to support the debt level." },
-        tier2: { lvr: 75, rate: [8.00, 10.50], note: "Specialist SMSF / LRBA lenders, panel-approved; the asset's income needs to support the debt level." }
+        major: { lvr: null, note: "The majors have largely exited SMSF lending; this is now written almost entirely by specialist non-bank and panel lenders." },
+        tier2: { lvr: 75, rate: [6.75, 8.50], note: "Specialist SMSF / LRBA lenders; the asset's income needs to support the debt level." }
       },
       leasedoc: {
         label: "Lease doc / low doc investment",
         unit: "Purchase price",
         hint: "Serviced by the property's own lease, with no trading income required in the entity.",
-        major: { lvr: 65, rate: [7.25, 8.00], note: "Available through a limited number of majors; the lease needs to support the debt, no trading income required in the entity." },
-        tier2: { lvr: 70, rate: [8.50, 12.00], note: "More flexible on documentation; the lease needs to support the debt, no trading income required in the entity." }
+        major: { lvr: 65, rate: [6.30, 7.30], note: "Available through a limited number of majors; the lease needs to support the debt, no trading income required in the entity." },
+        tier2: { lvr: 70, rate: [7.25, 8.30], note: "More flexible on documentation; the lease needs to support the debt, no trading income required in the entity." }
       },
       btr: {
         label: "Build to Rent (BTR)",
@@ -1009,14 +1009,17 @@
        loan type supports, straight into a hold-model calculator) without
        re-running this page's model. See pc-report.js. Only exposed for the
        "purchase price" loan types (not BTR/BTS, which price off total
-       development cost, not a purchase price a hold model can use) and only
-       for the major-bank tier - the more commonly quoted, conservative
-       figure; tier 2 stays a page-only comparison for now. */
+       development cost, not a purchase price a hold model can use), and
+       prefers the major-bank tier - the more commonly quoted, conservative
+       figure - falling back to tier 2 for a loan type like SMSF where the
+       majors aren't a realistic option at all. */
     window.pcCalcSummary = function () {
       var m = model();
-      if (!m.valid || !m.major.available || m.type.unit !== "Purchase price") return {};
-      var rateMid = m.major.rate ? (m.major.rate[0] + m.major.rate[1]) / 2 : null;
-      var summary = { price: Math.round(m.price), lvr: m.major.lvr };
+      if (!m.valid || m.type.unit !== "Purchase price") return {};
+      var tier = m.major.available ? m.major : m.tier2;
+      if (!tier.available) return {};
+      var rateMid = tier.rate ? (tier.rate[0] + tier.rate[1]) / 2 : null;
+      var summary = { price: Math.round(m.price), lvr: tier.lvr };
       if (rateMid != null) summary.rateMid = Math.round(rateMid * 100) / 100;
       if (m.fundsAvailable > 0) summary.fundsAvailable = Math.round(m.fundsAvailable);
       return summary;
