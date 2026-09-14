@@ -120,6 +120,14 @@
         <div class="calc-grid">
           <div class="calc-inputs" id="calcInputs">
 
+            <div class="calc-group" id="connectGroup" hidden>
+              <label class="calc-check">
+                <input type="checkbox" id="connectToggle" />
+                <span>Connect this to your portfolio or lending potential?</span>
+              </label>
+              <p class="field-hint">Pull figures in from your saved portfolio equity. Leave unticked to run this as a standalone assessment.</p>
+            </div>
+
             <div class="calc-group" id="portfolioFillGroup" hidden>
               <h2 class="calc-subhead">Use your portfolio equity</h2>
               <p class="field-hint">Prefill "Funds you have available" below from your saved portfolio's usable equity.</p>
@@ -527,14 +535,14 @@
             <div class="result-row"><dt>Contingency</dt><dd data-out="contingency">&mdash;</dd></div>
             <div class="result-row"><dt>Project management</dt><dd data-out="pmFee">&mdash;</dd></div>
             <div class="result-row"><dt>Loan set-up &amp; fees</dt><dd data-out="estFee">&mdash;</dd></div>
+            <div class="result-row"><dt>Debt at DA <span>(loan + interest)</span></dt><dd data-out="debtAtDA">&mdash;</dd></div>
+            <div class="result-row"><dt>Cost to DA as a % of land price</dt><dd data-out="costOnPrice">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Interest during the DA</dt><dd data-out="interestDA">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Total cost to DA</dt><dd data-out="totalCostToDA">&mdash;</dd></div>
             <div class="result-row"><dt>Cost to reach DA, excluding land</dt><dd data-out="costExclLand">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Cash (equity) required</dt><dd data-out="equityRequired">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Funds available</dt><dd data-out="fundsAvailableOut">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Shortfall / surplus</dt><dd data-out="shortfall">&mdash;</dd></div>
-            <div class="result-row"><dt>Debt at DA <span>(loan + interest)</span></dt><dd data-out="debtAtDA">&mdash;</dd></div>
-            <div class="result-row"><dt>Cost to DA as a % of land price</dt><dd data-out="costOnPrice">&mdash;</dd></div>
+            <div class="result-row is-final"><dt>Shortfall / surplus</dt><dd data-out="shortfall">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -1390,11 +1398,12 @@
       var L = 48;
       var y = 56;
 
-      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.setFillColor(95, 161, 208); doc.rect(0, 0, w, 6, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(95, 161, 208);
       doc.text("PROJECT CARTER", L, y);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("helvetica", "normal"); doc.setTextColor(120);
       doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
-      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+      doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
 
       doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
       doc.text("Development Site (DA)", L, y + 44);
@@ -1428,6 +1437,20 @@
       }
       function rowIf(k, n) { if (n > 0) row(k, money(n)); }
       function groupRows(ids, labels) { ids.forEach(function (id) { rowIf(labels[id], num(id)); }); }
+      /* the one figure this report is building toward - boxed off in brand
+         colour so it reads as the answer, not another line in the list */
+      function bigrow(k, v) {
+        var top = y - 15, h = 32;
+        doc.setFillColor(234, 242, 248);
+        doc.roundedRect(L, top, w - 2 * L, h, 4, 4, "F");
+        doc.setFillColor(95, 161, 208);
+        doc.rect(L, top, 4, h, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(30);
+        doc.text(k, L + 14, y + 4);
+        doc.setFontSize(13); doc.setTextColor(30, 80, 120);
+        doc.text(String(v), w - L - 10, y + 4, { align: "right" });
+        y += h + 8;
+      }
 
       section("The site");
       wrapLine("Address", document.getElementById("address").value.trim() || "Not entered");
@@ -1478,11 +1501,16 @@
 
       y += 4;
       section("Result");
+      row("Debt at DA (loan + interest)", money(m.debtAtDA));
+      row("Cost to DA as a % of land price", m.costOnPrice != null ? m.costOnPrice.toFixed(2) + "%" : "-");
       row("Total cost to DA", money(m.totalCostToDA), true);
       row("Cost to reach DA, excluding land", money(m.costExclLand));
       row("Cash (equity) required", money(m.equityRequired), true);
-      row("Debt at DA (loan + interest)", money(m.debtAtDA), true);
-      row("Cost to DA as a % of land price", m.costOnPrice != null ? m.costOnPrice.toFixed(2) + "%" : "-");
+      if (m.fundsAvailable > 0) row("Funds available", money(m.fundsAvailable));
+      y += 6;
+      bigrow("SHORTFALL / SURPLUS", m.fundsAvailable > 0
+        ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short")
+        : "Enter funds available to compare");
 
       y += 4;
       section("Reports flagged for this site");
@@ -1500,6 +1528,16 @@
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This estimate is a guide only, generated from the figures entered above. Report tags are derived from the site characteristics you ticked and are not a determination by the council; always confirm the required documents at a pre-lodgement (pre-DA) meeting before lodging, unless the outcome is already certain. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure. Demolition figures are indicative $/m2 ranges from price guides, not quotes, with a minimum job cost. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      var totalPages = doc.internal.getNumberOfPages();
+      for (var p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        var ph = doc.internal.pageSize.getHeight();
+        doc.setDrawColor(95, 161, 208); doc.setLineWidth(0.6); doc.line(L, ph - 34, w - L, ph - 34); doc.setLineWidth(0.2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140);
+        doc.text("Project Carter", L, ph - 22);
+        doc.text("Page " + p + " of " + totalPages, w - L, ph - 22, { align: "right" });
+      }
 
       return doc;
     }
@@ -1727,6 +1765,23 @@
        only ever one master portfolio, so asking which report to pull from
        would just be friction for a choice that doesn't exist. */
     (function () {
+      var connectGroup = document.getElementById("connectGroup");
+      var connectToggle = document.getElementById("connectToggle");
+
+      function refreshConnectGroup(available) {
+        connectGroup.hidden = !available;
+        if (!available) connectToggle.checked = false;
+      }
+      connectToggle.addEventListener("change", function () {
+        document.dispatchEvent(new CustomEvent("pc-connect-change"));
+      });
+      window.pcConnect = {
+        isOn: function () { return connectToggle.checked; },
+        setAvailable: function (key, val) { refreshConnectGroup(val); }
+      };
+    })();
+
+    (function () {
       var group = document.getElementById("portfolioFillGroup");
       var amountEl = document.getElementById("portfolioFillAmount");
       var btn = document.getElementById("portfolioFillBtn");
@@ -1770,23 +1825,31 @@
         field.scrollIntoView({ behavior: "smooth", block: "center" });
       });
 
+      function render() {
+        group.hidden = !window.pcConnect.isOn();
+        if (!group.hidden) renderAmount();
+      }
+
       function sync() {
         if (!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember())) {
+          window.pcConnect.setAvailable("portfolio", false);
           group.hidden = true;
           return;
         }
         window.pcAuth.getMasterReport().then(function (res) {
           var s = res && res.data && res.data.summary;
           if (res.error || !s || (s.usableEquity70 == null && s.usableEquity80 == null)) {
+            window.pcConnect.setAvailable("portfolio", false);
             group.hidden = true;
             return;
           }
           summary = s;
-          group.hidden = false;
-          renderAmount();
+          window.pcConnect.setAvailable("portfolio", true);
+          render();
         });
       }
       document.addEventListener("pc-auth-change", sync);
+      document.addEventListener("pc-connect-change", render);
       if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
     })();
   </script>

@@ -1376,6 +1376,19 @@ h1, h2, h3 {
 .result-row.is-key dt { color: var(--text); }
 .result-row.is-key dd { color: var(--accent); font-size: 1.15rem; }
 
+/* The single bottom-line figure a calculator is building toward (profit,
+   IRR, cash-on-cash, and the like) - always the last row, boxed off so it
+   reads as the answer rather than another line in the list. */
+.result-row.is-final {
+  margin-top: 10px;
+  padding: 16px;
+  border: 1px solid rgba(95, 161, 208, 0.4);
+  background: rgba(95, 161, 208, 0.08);
+  border-radius: 6px;
+}
+.result-row.is-final dt { color: var(--text); font-weight: 600; }
+.result-row.is-final dd { color: var(--accent); font-size: 1.4rem; }
+
 /* CTA under the results panel */
 .calc-cta { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
 .calc-cta .form-fineprint { margin: 0; }

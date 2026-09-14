@@ -131,12 +131,12 @@
             <div class="result-row"><dt>Cash flow before tax (per year)</dt><dd data-out="preTax">&mdash;</dd></div>
             <div class="result-row"><dt>Tax refund / (payable) on that</dt><dd data-out="taxPreDepr">&mdash;</dd></div>
             <div class="result-row"><dt>Depreciation tax saving (per year)</dt><dd data-out="deprCredit">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>After-tax cash flow (per year)</dt><dd data-out="annual">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>After-tax cash flow (per week)</dt><dd data-out="weekly">&mdash;</dd></div>
             <div class="result-row"><dt>As a % of portfolio value</dt><dd data-out="pctValue">&mdash;</dd></div>
             <div class="result-row"><dt>Extra rent per week to break even</dt><dd data-out="toNeutral">&mdash;</dd></div>
             <div class="result-row"><dt>One-off purchase costs</dt><dd data-out="acq">&mdash;</dd></div>
             <div class="result-row"><dt>Cash needed to buy</dt><dd data-out="cash">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>After-tax cash flow (per year)</dt><dd data-out="annual">&mdash;</dd></div>
+            <div class="result-row is-final"><dt>After-tax cash flow (per week)</dt><dd data-out="weekly">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -1582,11 +1582,12 @@
         y = 56;
       }
 
-      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.setFillColor(95, 161, 208); doc.rect(0, 0, w, 6, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(95, 161, 208);
       doc.text("PROJECT CARTER", L, y);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("helvetica", "normal"); doc.setTextColor(120);
       doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
-      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+      doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
 
       doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
       doc.text("Portfolio Review", L, y + 44);
@@ -1621,13 +1622,20 @@
       function subrule() {
         doc.setDrawColor(225); doc.line(w - L - 150, y - 12, w - L, y - 12);
       }
+      /* the one figure this report is building toward - boxed off in brand
+         colour so it reads as the answer, not another line in the list */
       function bigrow(k, v) {
-        ensure(24);
-        doc.setDrawColor(60); doc.line(L, y - 13, w - L, y - 13);
-        doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.setTextColor(20);
-        doc.text(k, L, y);
-        doc.text(String(v), w - L, y, { align: "right" });
-        y += 20;
+        ensure(46);
+        var top = y - 18, boxH = 36;
+        doc.setFillColor(234, 242, 248);
+        doc.roundedRect(L, top, w - 2 * L, boxH, 4, 4, "F");
+        doc.setFillColor(95, 161, 208);
+        doc.rect(L, top, 4, boxH, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(30);
+        doc.text(k, L + 16, y + 2);
+        doc.setFontSize(15); doc.setTextColor(30, 80, 120);
+        doc.text(String(v), w - L - 12, y + 2, { align: "right" });
+        y += boxH + 10;
       }
       /* only print a cost line when it has a value */
       function costRow(k, v) { if (v > 0) row("  less " + k, money(v)); }
@@ -1638,6 +1646,13 @@
       row("Debt", money(T.loan));
       row("Equity (net position)", money(T.equity), true);
       row("Loan to value (LVR)", T.lvr != null ? pct(T.lvr) : "-");
+
+      if (T.anyAcq) {
+        y += 8;
+        section("If buying");
+        row("One-off purchase costs", money(T.acq));
+        row("Cash needed to buy (equity + costs)", money(T.cashToComplete), true);
+      }
 
       y += 8;
       section("Yearly cash flow");
@@ -1671,17 +1686,11 @@
         doc.text(doc.splitTextToSize("One or more properties are marked as bought after the 2026 Budget: a rental loss on those is quarantined, so it earns no refund in the year and carries forward against future rental profit or the gain on sale.", w - 2 * L), L, y);
         y += 22;
       }
-      bigrow("AFTER-TAX CASH FLOW (PER YEAR)", bracketMoney(T.annual));
-      row("After-tax cash flow (per week)", bracketMoney(T.weekly), true);
       row("As a % of portfolio value", I.pctValue != null ? pct(I.pctValue) : "-");
       row("Extra rent per week to break even", T.toNeutral > 0 ? money(T.toNeutral) : "Already breaks even");
-
-      if (T.anyAcq) {
-        y += 8;
-        section("If buying");
-        row("One-off purchase costs", money(T.acq));
-        row("Cash needed to buy (equity + costs)", money(T.cashToComplete), true);
-      }
+      row("After-tax cash flow (per year)", bracketMoney(T.annual), true);
+      y += 6;
+      bigrow("AFTER-TAX CASH FLOW (PER WEEK)", bracketMoney(T.weekly));
 
       if (m.C.n > 0) {
         y += 8;
@@ -1747,6 +1756,16 @@
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and loans are treated as interest-only (no principal paid down). The tax lines apply each property's own entity and tax rate to its rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      var totalPages = doc.internal.getNumberOfPages();
+      for (var p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        var ph = doc.internal.pageSize.getHeight();
+        doc.setDrawColor(95, 161, 208); doc.setLineWidth(0.6); doc.line(L, ph - 34, w - L, ph - 34); doc.setLineWidth(0.2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140);
+        doc.text("Project Carter", L, ph - 22);
+        doc.text("Page " + p + " of " + totalPages, w - L, ph - 22, { align: "right" });
+      }
 
       return doc;
     }

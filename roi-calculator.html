@@ -82,6 +82,14 @@
         <div class="calc-grid">
           <div class="calc-inputs" id="calcInputs">
 
+            <div class="calc-group" id="connectGroup" hidden>
+              <label class="calc-check">
+                <input type="checkbox" id="connectToggle" />
+                <span>Connect this to your portfolio or lending potential?</span>
+              </label>
+              <p class="field-hint">Pull figures in from your saved portfolio equity or a Commercial Lending report. Leave unticked to run this as a standalone assessment.</p>
+            </div>
+
             <div class="calc-group" id="portfolioFillGroup" hidden>
               <h2 class="calc-subhead">Use your portfolio equity</h2>
               <p class="field-hint">Prefill "Funds you have available" below from your saved portfolio's usable equity.</p>
@@ -256,6 +264,11 @@
                   <label for="upliftGrowth">Rental % increase <span>(from that year on)</span></label>
                   <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="upliftGrowth" autocomplete="off" placeholder="4" /></div>
                 </div>
+                <div class="field">
+                  <label for="upliftCapex">Capex / value-add investment <span>(optional)</span></label>
+                  <div class="input-money"><input type="text" inputmode="numeric" id="upliftCapex" autocomplete="off" placeholder="150,000" /></div>
+                  <p class="field-hint">The cost of the works that get you the uplift (refurbishment, re-leasing incentives, etc.), spent in that year. It reduces cash kept for that year and the IRR cashflow, but is not added to Total cash required at settlement.</p>
+                </div>
               </div>
             </div>
 
@@ -274,11 +287,11 @@
             <div class="result-row"><dt>Loan balance at sale</dt><dd data-out="loanAtSale">&mdash;</dd></div>
             <div class="result-row"><dt>Net sale proceeds</dt><dd data-out="netProceeds">&mdash;</dd></div>
             <div class="result-row"><dt>Rental cash kept (total)</dt><dd data-out="cashKept">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Total profit</dt><dd data-out="totalProfit">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Total ROI</dt><dd data-out="totalRoi">&mdash;</dd></div>
             <div class="result-row"><dt>Return per year (simple avg)</dt><dd data-out="roiPerYear">&mdash;</dd></div>
             <div class="result-row"><dt>Equity multiple</dt><dd data-out="equityMultiple">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>IRR (compound)</dt><dd data-out="irr">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total profit</dt><dd data-out="totalProfit">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Total ROI</dt><dd data-out="totalRoi">&mdash;</dd></div>
+            <div class="result-row is-final"><dt>IRR (compound)</dt><dd data-out="irr">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -368,7 +381,7 @@
             <li><strong>Loan and deposit.</strong> The loan is the percentage of purchase price you enter. The deposit is the rest.</li>
             <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan / valuation cost, legal cost, building inspection and other purchasing cost.</li>
             <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions. Commercial and industrial property is treated differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax.</li>
-            <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
+            <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on. A <strong>capex / value-add investment</strong> figure, if entered, is treated as cash spent in that year on the works that get you the uplift &mdash; it comes straight off cash kept (and the IRR cashflow) for that year, not off Total cash required at settlement.</li>
             <li><strong>Property value</strong> depends on the property type you pick. For <strong>commercial</strong>, value is net rent &divide; capitalisation rate: the cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale (leave it blank to hold the entry yield; a rent uplift lifts value too). For <strong>residential</strong>, value instead compounds the purchase price at the <strong>capital growth rate</strong> you enter, since a home's value is not usually read off its rent.</li>
             <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
             <li><strong>At sale</strong> (end of the term) the property is sold at its value that year, the loan is repaid, and net sale proceeds plus all rental cash kept, less the cash you put in, is the total profit.</li>
@@ -654,6 +667,7 @@
       var uYear = Math.round(num("upliftYear"));
       var uRent = num("upliftRent");
       var uG = num("upliftGrowth") / 100;
+      var uCapex = num("upliftCapex");
 
       var isRes = document.getElementById("propType").value === "res";
       var capGrowth = num("capGrowth") / 100;
@@ -680,6 +694,7 @@
           var debtPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
           balance -= debtPay;
           var kept = cashAfterInterest - debtPay;
+          if (uplift && uCapex > 0 && t === uYear) kept -= uCapex;
           totalKept += kept;
           var value;
           if (isRes) {
@@ -726,7 +741,7 @@
         acqCosts: acqCosts, cashRequired: cashRequired,
         fundsAvailable: fundsAvailable, shortfall: shortfall,
         nr1: nr1, g: g, rate: rate, term: term, dr: dr,
-        uplift: uplift, uYear: uYear, uRent: uRent, uG: uG,
+        uplift: uplift, uYear: uYear, uRent: uRent, uG: uG, uCapex: uCapex,
         isRes: isRes, capGrowth: capGrowth,
         entryYield: entryYield, exitCap: exitCap, rows: rows,
         saleValue: saleValue, loanAtSale: loanAtSale, netProceeds: netProceeds,
@@ -845,7 +860,7 @@
     document.getElementById("lvr").addEventListener("input", recalcAutofills);
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "fundsAvailable", "rent", "upliftRent"].forEach(function (id) {
+    ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "fundsAvailable", "rent", "upliftRent", "upliftCapex"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -873,11 +888,12 @@
       var L = 48;
       var y = 56;
 
-      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.setFillColor(95, 161, 208); doc.rect(0, 0, w, 6, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(95, 161, 208);
       doc.text("PROJECT CARTER", L, y);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("helvetica", "normal"); doc.setTextColor(120);
       doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
-      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+      doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
 
       doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
       doc.text("ROI Calculator", L, y + 44);
@@ -907,6 +923,20 @@
         doc.text(String(v), w - L, y, { align: "right" });
         y += 18;
       }
+      /* the one figure this report is building toward - boxed off in brand
+         colour so it reads as the answer, not another line in the list */
+      function bigrow(k, v) {
+        var top = y - 18, h = 36;
+        doc.setFillColor(234, 242, 248);
+        doc.roundedRect(L, top, w - 2 * L, h, 4, 4, "F");
+        doc.setFillColor(95, 161, 208);
+        doc.rect(L, top, 4, h, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(30);
+        doc.text(k, L + 16, y + 2);
+        doc.setFontSize(15); doc.setTextColor(30, 80, 120);
+        doc.text(String(v), w - L - 12, y + 2, { align: "right" });
+        y += h + 10;
+      }
 
       section("What you entered");
       row("Purchase price", money(m.price));
@@ -931,6 +961,7 @@
       if (m.uplift && m.uRent > 0) {
         row("Value uplift", "Year " + m.uYear + ", new base rent " + money(m.uRent) +
           ", then " + (m.uG * 100).toFixed(2) + "% / year");
+        if (m.uCapex > 0) row("Capex / value-add investment", money(m.uCapex) + " in year " + m.uYear);
       } else {
         row("Value uplift", "None");
       }
@@ -945,11 +976,12 @@
       row("Loan balance at sale", money(m.loanAtSale));
       row("Net sale proceeds", money(m.netProceeds));
       row("Rental cash kept (total)", signedMoney(m.totalKept));
-      row("Total profit", m.totalProfit != null ? signedMoney(m.totalProfit) : "-", true);
-      row("Total ROI", m.totalRoi != null ? m.totalRoi.toFixed(2) + "%" : "-", true);
       row("Return per year (simple avg)", m.roiPerYear != null ? m.roiPerYear.toFixed(2) + "%" : "-");
       row("Equity multiple", m.equityMultiple != null ? m.equityMultiple.toFixed(2) + "x" : "-");
-      row("IRR (compound)", m.irr != null ? (m.irr * 100).toFixed(2) + "%" : "-", true);
+      row("Total profit", m.totalProfit != null ? signedMoney(m.totalProfit) : "-", true);
+      row("Total ROI", m.totalRoi != null ? m.totalRoi.toFixed(2) + "%" : "-", true);
+      y += 6;
+      bigrow("IRR (compound)", m.irr != null ? (m.irr * 100).toFixed(2) + "%" : "-");
 
       if (m.rows.length) {
         y += 10;
@@ -974,6 +1006,16 @@
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This estimate is a guide only, generated from the figures entered above. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure, and excludes surcharges and concessions. Property value is modelled off net rent at a capitalisation rate that runs from the entry yield to the exit cap rate over the hold, and will differ from a real valuation. It ignores vacancy, tax, depreciation, selling costs, interest-rate changes and costs specific to a transaction, and it is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      var totalPages = doc.internal.getNumberOfPages();
+      for (var p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        var ph = doc.internal.pageSize.getHeight();
+        doc.setDrawColor(95, 161, 208); doc.setLineWidth(0.6); doc.line(L, ph - 34, w - L, ph - 34); doc.setLineWidth(0.2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140);
+        doc.text("Project Carter", L, ph - 22);
+        doc.text("Page " + p + " of " + totalPages, w - L, ph - 22, { align: "right" });
+      }
 
       return doc;
     }
@@ -1003,6 +1045,7 @@
       if (m.uplift && m.uRent > 0) {
         lines.push("Value uplift: year " + m.uYear + ", new base rent " + money(m.uRent) +
           ", then " + (m.uG * 100).toFixed(2) + "%/yr");
+        if (m.uCapex > 0) lines.push("Capex / value-add investment: " + money(m.uCapex) + " in year " + m.uYear);
       } else {
         lines.push("Value uplift: none");
       }
@@ -1012,10 +1055,10 @@
       lines.push("Loan balance at sale: " + money(m.loanAtSale));
       lines.push("Net sale proceeds: " + money(m.netProceeds));
       lines.push("Rental cash kept (total): " + signedMoney(m.totalKept));
-      lines.push("Total profit: " + (m.totalProfit != null ? signedMoney(m.totalProfit) : "n/a"));
-      lines.push("Total ROI: " + (m.totalRoi != null ? m.totalRoi.toFixed(2) + "%" : "n/a"));
       lines.push("Return per year (simple avg): " + (m.roiPerYear != null ? m.roiPerYear.toFixed(2) + "%" : "n/a"));
       lines.push("Equity multiple: " + (m.equityMultiple != null ? m.equityMultiple.toFixed(2) + "x" : "n/a"));
+      lines.push("Total profit: " + (m.totalProfit != null ? signedMoney(m.totalProfit) : "n/a"));
+      lines.push("Total ROI: " + (m.totalRoi != null ? m.totalRoi.toFixed(2) + "%" : "n/a"));
       lines.push("IRR (compound): " + (m.irr != null ? (m.irr * 100).toFixed(2) + "%" : "n/a"));
       return lines.filter(Boolean).join("\n");
     }
@@ -1182,6 +1225,25 @@
        only ever one master portfolio, so asking which report to pull from
        would just be friction for a choice that doesn't exist. */
     (function () {
+      var connectGroup = document.getElementById("connectGroup");
+      var connectToggle = document.getElementById("connectToggle");
+      var connectState = { portfolio: false, cl: false };
+
+      function refreshConnectGroup() {
+        var any = connectState.portfolio || connectState.cl;
+        connectGroup.hidden = !any;
+        if (!any) connectToggle.checked = false;
+      }
+      connectToggle.addEventListener("change", function () {
+        document.dispatchEvent(new CustomEvent("pc-connect-change"));
+      });
+      window.pcConnect = {
+        isOn: function () { return connectToggle.checked; },
+        setAvailable: function (key, val) { connectState[key] = val; refreshConnectGroup(); }
+      };
+    })();
+
+    (function () {
       var group = document.getElementById("portfolioFillGroup");
       var amountEl = document.getElementById("portfolioFillAmount");
       var btn = document.getElementById("portfolioFillBtn");
@@ -1225,23 +1287,31 @@
         field.scrollIntoView({ behavior: "smooth", block: "center" });
       });
 
+      function render() {
+        group.hidden = !window.pcConnect.isOn();
+        if (!group.hidden) renderAmount();
+      }
+
       function sync() {
         if (!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember())) {
+          window.pcConnect.setAvailable("portfolio", false);
           group.hidden = true;
           return;
         }
         window.pcAuth.getMasterReport().then(function (res) {
           var s = res && res.data && res.data.summary;
           if (res.error || !s || (s.usableEquity70 == null && s.usableEquity80 == null)) {
+            window.pcConnect.setAvailable("portfolio", false);
             group.hidden = true;
             return;
           }
           summary = s;
-          group.hidden = false;
-          renderAmount();
+          window.pcConnect.setAvailable("portfolio", true);
+          render();
         });
       }
       document.addEventListener("pc-auth-change", sync);
+      document.addEventListener("pc-connect-change", render);
       if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
     })();
 
@@ -1290,14 +1360,24 @@
         document.getElementById("price").scrollIntoView({ behavior: "smooth", block: "center" });
       });
 
+      function render() {
+        group.hidden = !window.pcConnect.isOn();
+        if (!group.hidden) renderAmount();
+      }
+
       function sync() {
         if (!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember())) {
+          window.pcConnect.setAvailable("cl", false);
           group.hidden = true;
           return;
         }
         window.pcAuth.listReports("cl").then(function (res) {
           rows = (res.data || []).filter(function (r) { return r.summary && r.summary.price != null; });
-          if (res.error || !rows.length) { group.hidden = true; return; }
+          if (res.error || !rows.length) {
+            window.pcConnect.setAvailable("cl", false);
+            group.hidden = true;
+            return;
+          }
           sel.innerHTML = "";
           rows.forEach(function (r) {
             var o = document.createElement("option");
@@ -1305,11 +1385,12 @@
             o.textContent = (r.title || "Untitled report") + " (" + new Date(r.updated_at).toLocaleDateString("en-AU") + ")";
             sel.appendChild(o);
           });
-          group.hidden = false;
-          renderAmount();
+          window.pcConnect.setAvailable("cl", true);
+          render();
         });
       }
       document.addEventListener("pc-auth-change", sync);
+      document.addEventListener("pc-connect-change", render);
       if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
     })();
   </script>

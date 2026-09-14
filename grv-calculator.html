@@ -488,19 +488,19 @@
             <div class="result-row"><dt>Selling costs</dt><dd data-out="sellCost">&mdash;</dd></div>
             <div class="result-row"><dt>GST <span data-out="gstLabel">(margin scheme)</span></dt><dd data-out="gst">&mdash;</dd></div>
             <div class="result-row"><dt>Net sales proceeds</dt><dd data-out="netSales">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Expected profit</dt><dd data-out="profit">&mdash;</dd></div>
-            <div class="result-row"><dt>Profit per dwelling</dt><dd data-out="profitPerDwelling">&mdash;</dd></div>
-            <div class="result-row is-key"><dt>Profit on cost</dt><dd data-out="margin">&mdash;</dd></div>
-            <div class="result-row"><dt>Profit margin on GRV</dt><dd data-out="grvMargin">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Equity to reach DA</dt><dd data-out="daEquity">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Additional cash contribution</dt><dd data-out="cashIn">&mdash;</dd></div>
             <div class="result-row"><dt>Total equity contributed</dt><dd data-out="equityTotal">&mdash;</dd></div>
             <div class="result-row"><dt>Debt required</dt><dd data-out="debtRequired">&mdash;</dd></div>
             <div class="result-row"><dt>Average debt drawn</dt><dd data-out="avgDebt">&mdash;</dd></div>
             <div class="result-row"><dt>Peak debt <span>(end of period)</span></dt><dd data-out="peakDebt">&mdash;</dd></div>
+            <div class="result-row"><dt>Profit per dwelling</dt><dd data-out="profitPerDwelling">&mdash;</dd></div>
+            <div class="result-row"><dt>Profit margin on GRV</dt><dd data-out="grvMargin">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Profit on cost</dt><dd data-out="margin">&mdash;</dd></div>
+            <div class="result-row"><dt>Profit on cost - worst case</dt><dd data-out="worstMargin">&mdash;</dd></div>
             <div class="result-row is-key"><dt>Cash-on-cash return</dt><dd data-out="coc">&mdash;</dd></div>
             <div class="result-row"><dt>Profit - worst case</dt><dd data-out="worstProfit">&mdash;</dd></div>
-            <div class="result-row"><dt>Profit on cost - worst case</dt><dd data-out="worstMargin">&mdash;</dd></div>
+            <div class="result-row is-final"><dt>Expected profit</dt><dd data-out="profit">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -1344,11 +1344,12 @@
       var L = 48;
       var y = 56;
 
-      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(120);
+      doc.setFillColor(95, 161, 208); doc.rect(0, 0, w, 6, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(95, 161, 208);
       doc.text("PROJECT CARTER", L, y);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("helvetica", "normal"); doc.setTextColor(120);
       doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
-      doc.setDrawColor(205); doc.line(L, y + 12, w - L, y + 12);
+      doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
 
       doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
       doc.text("GRV Calculator", L, y + 44);
@@ -1384,13 +1385,20 @@
         doc.text(String(v), w - L, y, { align: "right" });
         y += 14;
       }
+      /* the one figure this report is building toward - boxed off in brand
+         colour so it reads as the answer, not another line in the list */
       function bigrow(k, v) {
-        ensure(30);
-        doc.setDrawColor(150); doc.setLineWidth(1); doc.line(L, y - 3, w - L, y - 3); doc.setLineWidth(0.2);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(20);
-        doc.text(k, L, y + 13);
-        doc.text(String(v), w - L, y + 13, { align: "right" });
-        y += 32;
+        ensure(46);
+        var top = y - 18, boxH = 36;
+        doc.setFillColor(234, 242, 248);
+        doc.roundedRect(L, top, w - 2 * L, boxH, 4, 4, "F");
+        doc.setFillColor(95, 161, 208);
+        doc.rect(L, top, 4, boxH, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(30);
+        doc.text(k, L + 16, y + 2);
+        doc.setFontSize(15); doc.setTextColor(30, 80, 120);
+        doc.text(String(v), w - L - 12, y + 2, { align: "right" });
+        y += boxH + 10;
       }
       /* accounting style: a loss shows in brackets, no minus sign */
       function acct(n) { return n < 0 ? "(" + money(Math.abs(n)) + ")" : money(n); }
@@ -1436,11 +1444,10 @@
       row("Holding costs", money(m.holdCosts));
       row("Development management", money(m.pm));
       row("Total development cost", money(m.totalCost), true);
-      bigrow(m.profit < 0 ? "EXPECTED LOSS" : "EXPECTED PROFIT", acct(m.profit));
-      row("Profit on cost", m.margin != null ? m.margin.toFixed(2) + "%" : "-", true);
-      row("Profit margin on GRV", m.grvMargin != null ? m.grvMargin.toFixed(2) + "%" : "-");
-      row("Profit per dwelling", m.profitPerDwelling != null ? acct(m.profitPerDwelling) : "-");
       row("Cost per dwelling", m.costPerDwelling != null ? money(m.costPerDwelling) : "-");
+      row("Profit per dwelling", m.profitPerDwelling != null ? acct(m.profitPerDwelling) : "-");
+      row("Profit margin on GRV", m.grvMargin != null ? m.grvMargin.toFixed(2) + "%" : "-");
+      row("Profit on cost", m.margin != null ? m.margin.toFixed(2) + "%" : "-", true);
 
       y += 6;
       section("Funding");
@@ -1467,13 +1474,27 @@
       y += 6;
       section("Worst case: sale -" + (m.sDrop * 100).toFixed(1) + "%, costs +" + (m.cRise * 100).toFixed(1) + "%");
       row("Combined effect on profit", acct(m.combined));
-      row("Profit / (loss) - worst case", acct(m.worstProfit), true);
       row("Profit on cost - worst case", m.worstMargin != null ? m.worstMargin.toFixed(2) + "%" : "-", true);
+      row("Profit / (loss) - worst case", acct(m.worstProfit), true);
+
+      y += 10;
+      bigrow(m.profit < 0 ? "EXPECTED LOSS" : "EXPECTED PROFIT", acct(m.profit));
 
       y += 12; ensure(140);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This feasibility estimate is a guide only, generated from the figures entered. All cost inputs are treated as exclusive of GST; input tax credits on construction and consultants are claimed separately and are not shown here. Under a design and construct contract the builder carries the design consultants, the certifier, the construction certificate or permit fee, the long service levy, and the contract works and public liability insurance, and those lines are excluded. Construction figures, where the estimator is used, come from published Australian quantity surveyor cost guides projected to 2026 and include builder preliminaries and margin but exclude GST, land, demolition, external infrastructure, fees and finance; a real cost plan will differ. Interest is run through a simple drawdown: costs are assumed to draw on a smooth S-curve through the period, equity is spent before debt, and interest accrues on the balance outstanding month by month and is capitalised, so it sits well below the peak debt times the rate times the term. The real draw profile, presale releases and funder conditions will differ. GST under the margin scheme is estimated as (gross realisation less land price) divided by eleven and ignores input tax credits on construction; confirm your position with your accountant. The figures ignore interest-rate and sales-program changes, presale conditions, staging and anything specific to a site or funder, and this is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      var totalPages = doc.internal.getNumberOfPages();
+      for (var p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        var ph = doc.internal.pageSize.getHeight();
+        doc.setDrawColor(95, 161, 208); doc.setLineWidth(0.6); doc.line(L, ph - 34, w - L, ph - 34); doc.setLineWidth(0.2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140);
+        doc.text("Project Carter", L, ph - 22);
+        doc.text("Page " + p + " of " + totalPages, w - L, ph - 22, { align: "right" });
+      }
+
       return doc;
     }
 
