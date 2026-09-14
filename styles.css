@@ -1487,7 +1487,20 @@ h1, h2, h3 {
 .calc-lvr-toggle__btn.is-active { color: var(--text); border-color: var(--accent); background: var(--bg-2); }
 .calc-lvr-toggle__btn:hover { color: var(--text); }
 .calc-portfolio-amount { font-size: 1.1rem; font-weight: 600; margin: 4px 0 14px; }
-.pc-pull__select { width: 100%; margin-top: 2px; font-size: 16px; padding: 8px 10px; }
+.pc-pull__select {
+  width: 100%; margin-top: 2px; font-size: 16px; padding: 10px 40px 10px 12px;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-color: var(--bg-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239aa8b8' stroke-width='1.6'%3E%3Cpath d='M5 7.5l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: inherit;
+  border-radius: 0;
+}
+.pc-pull__select:focus { outline: none; border-color: var(--accent); }
 .pc-pull__note { margin: 0 0 4px; color: var(--muted); }
 
 /* ---- account.html ---- */
