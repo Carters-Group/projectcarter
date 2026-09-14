@@ -343,7 +343,15 @@
     if (!cta || saveInstances.length) return;
     makeSaveInstance(cta, { insertBefore: (openLead && openLead.parentNode === cta) ? openLead : null });
 
-    var bottomAnchor = document.querySelector(".calc-assumptions");
+    /* right after the schedule/what-if table(s) - the last thing a visitor
+       who has scrolled through their results actually came to see - rather
+       than all the way down past the "How the numbers work" assumptions.
+       Last of possibly several .calc-schedule-wrap sections (PR has two);
+       .calc-assumptions itself is unreliable as an anchor since DA nests
+       an unrelated same-classed "Reports for this site" block inside its
+       own schedule wrap. */
+    var scheduleWraps = document.querySelectorAll(".calc-schedule-wrap");
+    var bottomAnchor = scheduleWraps.length ? scheduleWraps[scheduleWraps.length - 1] : document.querySelector(".calc-assumptions");
     if (bottomAnchor && bottomAnchor.parentNode) {
       var bottomGroup = document.createElement("div");
       bottomGroup.className = "calc-group pc-save-bottom";
