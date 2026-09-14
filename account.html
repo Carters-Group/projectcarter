@@ -161,6 +161,15 @@
             <span class="link-arrow">Open</span>
           </a>
 
+          <div class="acct-starthere-bar acct-dash-pwnudge" id="acctPasswordNudge" hidden>
+            <span class="acct-starthere-bar__text">
+              <strong>Set a password for next time</strong>
+              <span>You're signed in via an emailed link. Set a password so you can sign in directly, without waiting on an email.</span>
+            </span>
+            <button type="button" class="btn btn-ghost btn-sm" id="acctPasswordNudgeGo">Set a password</button>
+            <button type="button" class="linklike" id="acctPasswordNudgeDismiss">Not now</button>
+          </div>
+
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
             <div class="acct-profile-row">
               <div class="acct-profile-row__text">
@@ -616,6 +625,17 @@
       if (hasProperty) hide(bar); else show(bar);
     }
 
+    /* nudges a magic-link-only visitor to set a password, once - stays gone
+       for good on this device/browser once they dismiss it or actually set
+       one (has_password flips server-side, see pcAuth.setPassword). */
+    function passwordNudgeDismissedKey(u) { return "pc_pw_nudge_dismissed_" + u.id; }
+    function updatePasswordNudge(u) {
+      var bar = document.getElementById("acctPasswordNudge");
+      var dismissed = false;
+      try { dismissed = window.localStorage.getItem(passwordNudgeDismissedKey(u)) === "1"; } catch (e) {}
+      if (u.has_password || dismissed) hide(bar); else show(bar);
+    }
+
     var currentMasterReport = null;
 
     /* Purely a planning figure on this page - not tied to any calculator or
@@ -841,6 +861,7 @@
         document.getElementById("profPhone").value = u.phone || "";
         document.getElementById("profOccupation").value = u.occupation || "";
         renderNewReportGrid();
+        updatePasswordNudge(u);
         setMsg(reportsMsg, "");
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
@@ -1177,6 +1198,17 @@
 
     document.getElementById("signOutBtn").addEventListener("click", function () {
       window.pcAuth.signOut().then(load);
+    });
+
+    document.getElementById("acctPasswordNudgeGo").addEventListener("click", function () {
+      var field = document.getElementById("profPassword");
+      field.scrollIntoView({ behavior: "smooth", block: "center" });
+      field.focus();
+    });
+    document.getElementById("acctPasswordNudgeDismiss").addEventListener("click", function () {
+      var u = window.pcAuth.user();
+      if (u) { try { window.localStorage.setItem(passwordNudgeDismissedKey(u), "1"); } catch (e) {} }
+      hide(document.getElementById("acctPasswordNudge"));
     });
 
     var deleteAcctBtn = document.getElementById("deleteAcctBtn");

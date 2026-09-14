@@ -1446,6 +1446,15 @@ h1, h2, h3 {
 .pc-pull { margin-top: 6px; font-size: 12px; line-height: 1.5; }
 .pc-pull[hidden] { display: none; }
 .pc-pull__btn { color: var(--accent); font-weight: 600; }
+
+.calc-lvr-toggle { display: flex; gap: 8px; margin: 10px 0; }
+.calc-lvr-toggle__btn {
+  flex: 1; padding: 10px 14px; font: inherit; font-weight: 600; font-size: 13px;
+  background: var(--bg-3); border: 1px solid var(--line); color: var(--muted); cursor: pointer; border-radius: 2px;
+}
+.calc-lvr-toggle__btn.is-active { color: var(--text); border-color: var(--accent); background: var(--bg-2); }
+.calc-lvr-toggle__btn:hover { color: var(--text); }
+.calc-portfolio-amount { font-size: 1.1rem; font-weight: 600; margin: 4px 0 14px; }
 .pc-pull__select { width: 100%; margin-top: 2px; font-size: 16px; padding: 8px 10px; }
 .pc-pull__note { margin: 0 0 4px; color: var(--muted); }
 
@@ -1611,6 +1620,7 @@ h1, h2, h3 {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     grid-template-areas:
       "start      start"
+      "pwnudge    pwnudge"
       "portfolio  quick"
       "portfolio  activity"
       "reports    reports"
@@ -1622,6 +1632,7 @@ h1, h2, h3 {
   .acct-dashboard .acct-card,
   .acct-dashboard .acct-starthere-bar { margin-bottom: 0; }
   .acct-dash-start     { grid-area: start; }
+  .acct-dash-pwnudge   { grid-area: pwnudge; }
   .acct-dash-portfolio { grid-area: portfolio; }
   .acct-dash-quick     { grid-area: quick; }
   .acct-dash-activity  { grid-area: activity; }

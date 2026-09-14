@@ -72,6 +72,7 @@
       full_name: (currentProfile && currentProfile.full_name) || meta.full_name || "",
       phone: (currentProfile && currentProfile.phone) || meta.phone || "",
       occupation: (currentProfile && currentProfile.occupation) || "",
+      has_password: !!(currentProfile && currentProfile.has_password),
       subscription_status: (currentProfile && currentProfile.subscription_status) || "free"
     };
   }
@@ -99,7 +100,7 @@
     if (!client || !currentUser) { currentProfile = null; return Promise.resolve(null); }
     return client
       .from("profiles")
-      .select("id,email,full_name,phone,occupation,subscription_status")
+      .select("id,email,full_name,phone,occupation,has_password,subscription_status")
       .eq("id", currentUser.id)
       .maybeSingle()
       .then(function (res) {
@@ -112,8 +113,9 @@
             id: currentUser.id,
             email: currentUser.email,
             full_name: meta.full_name || null,
-            phone: meta.phone || null
-          }).select("id,email,full_name,phone,occupation,subscription_status").maybeSingle()
+            phone: meta.phone || null,
+            has_password: !!meta.has_password
+          }).select("id,email,full_name,phone,occupation,has_password,subscription_status").maybeSingle()
             .then(function (r2) { currentProfile = r2.data || null; return currentProfile; });
         }
         return currentProfile;
@@ -280,7 +282,7 @@
     signUpWithPassword: function (email, password, opts) {
       if (!CONFIGURED) return Promise.resolve({ error: { message: "Accounts are not set up yet." } });
       opts = opts || {};
-      var data = {};
+      var data = { has_password: true };
       if (opts.full_name) data.full_name = opts.full_name;
       if (opts.phone) data.phone = opts.phone;
       return client.auth.signUp({
@@ -294,12 +296,19 @@
     },
 
     /* lets a signed-in visitor (who may have arrived via a magic link and
-       never set one) add or change their password for next time */
+       never set one) add or change their password for next time - also
+       flips profiles.has_password so the "set a password" nudge stops
+       showing once they've done this */
     setPassword: function (newPassword) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
       return client.auth.updateUser({ password: newPassword }).then(function (res) {
-        return { error: res.error };
+        if (res.error) return { error: res.error };
+        return client.from("profiles").update({ has_password: true }).eq("id", currentUser.id)
+          .then(function (r2) {
+            if (!r2.error && currentProfile) currentProfile.has_password = true;
+            return { error: r2.error };
+          });
       });
     },
 

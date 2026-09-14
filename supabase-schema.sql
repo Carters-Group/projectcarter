@@ -40,6 +40,15 @@ create table if not exists public.profiles (
 alter table public.profiles add column if not exists occupation text;
 alter table public.profiles add column if not exists avatar_url text;
 
+-- Whether this user has ever set a password (vs. magic-link-only). There is
+-- no reliable way to tell this apart from auth.users/identities - both
+-- magic-link and password sign-in use the same "email" identity provider -
+-- so we track it ourselves: set true at sign-up time (via user_metadata,
+-- see pc_handle_new_user below) or the moment an existing visitor sets one
+-- from the account page (see pcAuth.setPassword). Drives the "set a
+-- password" nudge on account.html for magic-link-only visitors.
+alter table public.profiles add column if not exists has_password boolean not null default false;
+
 alter table public.profiles enable row level security;
 
 drop policy if exists "profiles - read own"   on public.profiles;
@@ -185,12 +194,13 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name, phone)
+  insert into public.profiles (id, email, full_name, phone, has_password)
   values (
     new.id,
     new.email,
     nullif(new.raw_user_meta_data ->> 'full_name', ''),
-    nullif(new.raw_user_meta_data ->> 'phone', '')
+    nullif(new.raw_user_meta_data ->> 'phone', ''),
+    coalesce((new.raw_user_meta_data ->> 'has_password')::boolean, false)
   )
   on conflict (id) do nothing;
   return new;
