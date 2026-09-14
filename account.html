@@ -76,12 +76,12 @@
           <h2 class="calc-subhead">Sign in or create an account</h2>
 
           <div class="acct-authtabs" role="tablist" aria-label="Sign in or create an account">
-            <button type="button" class="acct-authtab is-active" id="acctTabSignin" role="tab" aria-selected="true">Sign in</button>
-            <button type="button" class="acct-authtab" id="acctTabSignup" role="tab" aria-selected="false">Create account</button>
+            <button type="button" class="acct-authtab" id="acctTabSignin" role="tab" aria-selected="false">Sign in</button>
+            <button type="button" class="acct-authtab is-active" id="acctTabSignup" role="tab" aria-selected="true">Create account</button>
           </div>
 
           <!-- sign in with password -->
-          <div id="acctPanelSignin">
+          <div id="acctPanelSignin" hidden>
             <form id="signinForm" novalidate>
               <div class="field">
                 <label for="signinEmail">Email</label>
@@ -98,7 +98,7 @@
           </div>
 
           <!-- create account -->
-          <div id="acctPanelSignup" hidden>
+          <div id="acctPanelSignup">
             <form id="signupForm" novalidate>
               <div class="field">
                 <label for="signupName">Name</label>
@@ -873,7 +873,7 @@
         });
       } else {
         show(elSignedOut); hide(elSignedIn);
-        showAuthPanel("signin");
+        showAuthPanel("signup");
       }
     }
 
