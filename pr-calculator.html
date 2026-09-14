@@ -92,15 +92,6 @@
             </div>
 
             <div class="calc-group">
-              <h2 class="calc-subhead">Your position</h2>
-              <div class="field">
-                <label for="taxRate">Marginal tax rate <span>(% &mdash; applied across the portfolio)</span></label>
-                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="taxRate" autocomplete="off" placeholder="37" value="37" /></div>
-                <p class="field-hint">The rate at which a rental loss is refunded, or a rental profit is taxed. Use the top rate that applies to the entity or person that holds the properties.</p>
-              </div>
-            </div>
-
-            <div class="calc-group">
               <h2 class="calc-subhead">Properties</h2>
               <p class="field-hint" style="margin-top:0">Add one card per property. Each card shows that property's own after-tax weekly position; the panel on the right combines them.</p>
               <div class="dwelling-types" id="propertyCards"></div>
@@ -243,7 +234,7 @@
             <li><strong>Running costs</strong> are property management (a % of the rent), the letting / leasing fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance, a vacancy allowance, loan fees and sundry. Residential maintenance is per week &times; 52 and vacancy is weeks &times; the weekly rent; commercial maintenance is annual and vacancy is months &divide; 12 &times; the gross rent. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
             <li><strong>Commercial properties</strong> add a lease basis and the usual building outgoings - water &amp; sewer rates, fire &amp; essential services, air-conditioning / HVAC, cleaning &amp; security, and an outgoings audit / admin allowance. Each recoverable line has a &ldquo;recovered from the tenant&rdquo; tick: ticked, that outgoing drops out of your running costs. Choosing <strong>net lease</strong> ticks the usual recoverable set, <strong>gross lease</strong> clears them, and <strong>partial / mixed</strong> leaves them as you set them. <strong>Land tax is never auto-ticked</strong> under any lease basis - many retail leases can't pass it through to the tenant even on a net lease, so tick it yourself only if this lease does.</li>
             <li><strong>Cash flow before tax</strong> is net rent after costs, less loan interest. A figure in brackets is what the property costs you to hold each year before tax.</li>
-            <li><strong>Tax.</strong> A rental loss is refunded at the marginal tax rate you enter; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving.</li>
+            <li><strong>Tax.</strong> Each property has its own holding entity and marginal tax rate, set under Tax treatment on its card - useful where properties sit in different names, companies or trusts. A rental loss is refunded at that property's rate; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving. The holding entity is for your report only and does not change the calculation.</li>
             <li><strong>Post-Budget negative gearing.</strong> Tick &ldquo;bought after the 2026 Federal Budget&rdquo; on a residential property and a rental loss on it is quarantined: it no longer offsets your salary or other income, so it earns no refund in the year. The loss carries forward against future rental profit from that property or the gain on its sale. Rental profits are still taxed, and depreciation only reduces a profit. Properties held before the Budget keep the current treatment. This change applies to residential property only - the Budget did not change negative gearing for commercial property, so this option is not shown on commercial cards. This is a modelling assumption, not tax advice.</li>
             <li><strong>After-tax cash flow</strong> is cash flow before tax plus the tax refund and the depreciation tax saving. Divided by 52 it is the weekly figure - the real out-of-pocket cost, or income, of holding the property.</li>
             <li><strong>Break-even rent.</strong> Each card shows the rent that would bring that property's yearly after-tax result to zero, with everything else held the same - per week for residential, per year for commercial.</li>
@@ -511,27 +502,14 @@
       var nw = document.getElementById(p + "neutralWrap");
       if (nw && nw.firstChild) nw.firstChild.nodeValue = isCom
         ? "Gross rent / yr to break even " : "Rent / wk to break even ";
-      if (isCom) {
-        var lu = document.getElementById(p + "lettingUnit");
-        if (lu) lu.value = "amount";
-      }
-      syncLettingUnit(id);
+      /* commercial PM fees run lower - bigger lease amounts for similar effort */
+      var pmEl = document.getElementById(p + "pmpct");
+      if (pmEl) pmEl.placeholder = isCom ? "4.4" : "6.6";
       if (fromUser && isCom) autoRecovers(id);
       /* the stamp-duty rate reads the property type directly (no separate
          "commercial property" tick to keep in sync any more) - just
          recompute the estimate in case a state is already selected. */
       recalcCardStamp(id);
-    }
-
-    /* letting fee can be a flat $ amount or a number of weeks of rent
-       (residential only - commercial is always a flat amount) */
-    function syncLettingUnit(id) {
-      var p = "p" + id + "_";
-      var unitEl = document.getElementById(p + "lettingUnit");
-      var wrap = document.getElementById(p + "lettingWrap");
-      if (!wrap) return;
-      var weeks = !!unitEl && unitEl.value === "weeks";
-      wrap.classList.toggle("input-money", !weeks);
     }
 
     /* net lease -> tick the standard recoverable set; gross -> clear;
@@ -642,19 +620,17 @@
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0" data-com-only hidden>Usual claimable outgoings <span style="font-weight:400;text-transform:none;letter-spacing:0">(variable)</span></h3>' +
         '<p class="field-hint" data-com-only hidden>Tick &ldquo;recovered from the tenant&rdquo; on any outgoing the lease passes through and it drops out of your running costs.</p>' +
         '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'letting">Letting / leasing fee</label>' +
-          '<div class="input-money" id="' + p + 'lettingWrap"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'letting" autocomplete="off" placeholder="0" /></div>' +
-          '<select id="' + p + 'lettingUnit" data-res-only>' +
-            '<option value="amount">$ amount</option>' +
-            '<option value="weeks">Weeks of rent</option>' +
-          '</select>' +
-          recoverTick(p, "letting") +
+          '<div class="field" data-res-only><label for="' + p + 'lettingwks">Letting / leasing fee <span>(weeks of rent)</span></label>' +
+          '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'lettingwks" autocomplete="off" placeholder="2" />' +
           '<span class="field-ref" id="' + p + 'lettingRef"></span></div>' +
+          '<div class="field" data-com-only hidden><label for="' + p + 'lettingamt">Letting / leasing fee <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'lettingamt" autocomplete="off" placeholder="0" /></div>' +
+          recoverTick(p, "letting") + '</div>' +
           '<div class="field"><label for="' + p + 'council">Council rates <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'council" autocomplete="off" placeholder="0" /></div>' +
           recoverTick(p, "council") + '</div>' +
         '</div>' +
-        '<p class="field-hint" data-res-only>Letting fee is commonly quoted as a number of weeks of rent (often 1&ndash;2 weeks) rather than a dollar figure - pick whichever you have.</p>' +
+        '<p class="field-hint" data-res-only>Usually 1&ndash;2 weeks of rent - entered as a number of weeks and converted to a dollar figure below.</p>' +
         '<div class="field-row">' +
           '<div class="field"><label for="' + p + 'strata">Body corporate / strata <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'strata" autocomplete="off" placeholder="0" /></div>' +
@@ -734,8 +710,21 @@
         '</div>' +
         '</div>' +
 
-        '<div data-res-only>' +
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Tax treatment</h3>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'entity">Holding entity <span>(for your report)</span></label>' +
+          '<select id="' + p + 'entity">' +
+            '<option value="">Not set</option>' +
+            '<option value="personal">Personal name</option>' +
+            '<option value="company">Company</option>' +
+            '<option value="trust_disc">Discretionary trust</option>' +
+            '<option value="trust_corp">Corporate trust</option>' +
+          '</select></div>' +
+          '<div class="field"><label for="' + p + 'taxrate">Marginal tax rate <span>(%)</span></label>' +
+          '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'taxrate" autocomplete="off" placeholder="37" value="37" /></div></div>' +
+        '</div>' +
+        '<p class="field-hint">Set the entity that holds this property and its top marginal rate - a company pays a flat rate, a trust distributes to beneficiaries at theirs, so use whatever rate actually applies once the numbers land. The entity itself is for your report only and does not change the calculation; only the rate does.</p>' +
+        '<div data-res-only>' +
         '<label class="calc-check"><input type="checkbox" id="' + p + 'ngNew" />' +
           '<span>Bought after the 2026 Federal Budget - post-Budget negative gearing rules apply</span></label>' +
         '<p class="field-hint">From the 2026 Federal Budget, a rental loss on a property bought after Budget night can no longer be offset against salary or other income. Tick this and any loss on this property is quarantined: no tax refund in the year, and the loss carries forward against future rental profit from this property or the gain on sale. Rental profits are still taxed. Properties held before the Budget are unaffected. This change applies to residential property only - commercial negative gearing is unaffected. Brand-new and off-the-plan dwellings are exempt from the quarantine, so a loss on a new home can still be claimed against other income as normal - tick the box below if this property qualifies. A modelling assumption, not tax advice.</p>' +
@@ -758,10 +747,6 @@
 
       Array.prototype.forEach.call(card.querySelectorAll(".input-money input"), function (el) {
         attachMoneyBlur(el);
-      });
-      card.querySelector("#" + p + "lettingUnit").addEventListener("change", function () {
-        syncLettingUnit(id);
-        render();
       });
       card.querySelector("#" + p + "acqOn").addEventListener("change", function () {
         syncAcqUi(id);
@@ -806,6 +791,7 @@
       card.querySelector("#" + p + "value").addEventListener("input", function () {
         recalcCardStamp(id);
       });
+      card.querySelector("#" + p + "entity").addEventListener("change", render);
       card.querySelector("#" + p + "loan").addEventListener("input", function () {
         recalcCardStamp(id);
       });
@@ -1032,8 +1018,7 @@
 
       var pmPct = num(p + "pmpct") / 100;
       var pm = grossRent * pmPct;
-      var lettingUnit = isCom ? "amount" : (((document.getElementById(p + "lettingUnit") || {}).value) || "amount");
-      var letting = lettingUnit === "weeks" ? num(p + "letting") * rentWk : num(p + "letting");
+      var letting = isCom ? num(p + "lettingamt") : num(p + "lettingwks") * rentWk;
       var council = num(p + "council");
       var water = isCom ? num(p + "water") : 0;
       var strata = num(p + "strata");
@@ -1067,7 +1052,7 @@
       var netYield = value > 0 ? netRent / value : null;
       var preTax = netRent - interest;
 
-      var taxRate = Math.min(num("taxRate") / 100, 0.99);
+      var taxRate = Math.min(num(p + "taxrate") / 100, 0.99);
       var deprBuild = num(p + "deprbuild") * num(p + "deprbuildpct") / 100;
       var deprFit = num(p + "deprfit") * num(p + "deprfitpct") / 100;
       var depr = deprBuild + deprFit;
@@ -1130,6 +1115,7 @@
       return {
         id: id, label: (document.getElementById(p + "label").value || "").trim(),
         isCom: isCom, isOwn: false, lease: lease,
+        entity: document.getElementById(p + "entity").value, taxRate: taxRate,
         value: value, lvr: lvr, loan: loan, equity: equity, rate: rate, interest: interest,
         rentWk: rentWk, grossRent: grossRent, grossYield: grossYield,
         pm: pm, letting: letting, council: council, water: water, strata: strata, landTax: landTax,
@@ -1235,10 +1221,8 @@
         if (mref) mref.textContent = r.maint > 0 ? ("= " + money(r.maint) + " / yr") : "";
         var vref = document.getElementById(p + "vacwksRef");
         if (vref) vref.textContent = r.vacancy > 0 ? ("= " + money(r.vacancy) + " / yr") : "";
-        var lu = document.getElementById(p + "lettingUnit");
         var lref = document.getElementById(p + "lettingRef");
-        if (lref) lref.textContent = (lu && lu.value === "weeks" && r.letting > 0)
-          ? ("= " + money(r.letting) + " / yr") : "";
+        if (lref) lref.textContent = (!r.isCom && r.letting > 0) ? ("= " + money(r.letting) + " / yr") : "";
 
         function putCard(sfx, str) {
           var el = document.getElementById(p + sfx);
@@ -1621,7 +1605,7 @@
 
       ensure(90);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and loans are treated as interest-only (no principal paid down). The tax lines apply the one marginal rate you entered to each property's rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and loans are treated as interest-only (no principal paid down). The tax lines apply each property's own marginal rate and holding entity to its rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       return doc;
@@ -1669,6 +1653,7 @@
       }
       lines.push("----");
       var LEASE = { net: "net lease", gross: "gross lease", partial: "partial/mixed lease" };
+      var ENTITY = { personal: "personal name", company: "company", trust_disc: "discretionary trust", trust_corp: "corporate trust" };
       m.props.forEach(function (r, i) {
         if (!r.valid) return;
         if (r.isOwn) {
@@ -1677,7 +1662,8 @@
           return;
         }
         var tag = (r.isCom ? "[Commercial, " + (LEASE[r.lease] || "net lease") + "]" : "[Residential]") +
-          (r.ngNew ? " [post-Budget NG]" : "");
+          (r.ngNew ? " [post-Budget NG]" : "") +
+          (ENTITY[r.entity] ? " [" + ENTITY[r.entity] + ", " + pct(r.taxRate * 100) + " tax]" : "");
         var rentStr = r.isCom ? money(r.grossRent) + "/yr" : money(r.rentWk) + "/wk";
         var neutralStr = r.isCom
           ? (r.neutralYr != null && isFinite(r.neutralYr) ? money(r.neutralYr) + "/yr" : "n/a")
