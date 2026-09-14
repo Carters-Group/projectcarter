@@ -120,13 +120,17 @@
         <div class="calc-grid">
           <div class="calc-inputs" id="calcInputs">
 
+            <div class="calc-group" id="daFillGroup" hidden>
+              <h2 class="calc-subhead">Bring over your DA report</h2>
+              <p class="field-hint">Prefill the project name, cost to DA, land value and DA-stage equity below from a saved <a href="development-site-calculator">DA calculator</a> report.</p>
+              <select class="pc-pull__select" id="daFillSelect"></select>
+              <p class="calc-portfolio-amount" id="daFillAmount">&mdash;</p>
+              <button type="button" class="btn btn-ghost" id="daFillBtn">Use this report</button>
+            </div>
+
             <div class="calc-group" id="portfolioFillGroup" hidden>
-              <h2 class="calc-subhead">Use your portfolio equity</h2>
-              <p class="field-hint">Prefill "Additional cash (equity) contribution" below from your saved portfolio's usable equity.</p>
-              <div class="calc-lvr-toggle" id="portfolioFillLvr">
-                <button type="button" class="calc-lvr-toggle__btn is-active" data-lvr="70">70% LVR</button>
-                <button type="button" class="calc-lvr-toggle__btn" data-lvr="80">80% LVR</button>
-              </div>
+              <h2 class="calc-subhead">Portfolio equity for construction</h2>
+              <p class="field-hint">Prefill "Additional cash (equity) contribution" below from your saved portfolio's usable equity, capped at 50% LVR and net of the equity already committed to reach DA above &mdash; so the same portfolio equity is not counted at both stages.</p>
               <p class="calc-portfolio-amount" id="portfolioFillAmount">&mdash;</p>
               <button type="button" class="btn btn-ghost" id="portfolioFillBtn">Use this amount</button>
             </div>
@@ -1696,49 +1700,119 @@
   })();
   </script>
   <script>
-    /* "Use your portfolio equity" - a dedicated shortcut at the top of the
-       page for the one thing almost every visitor arriving from Portfolio
-       Review wants: their usable equity, at whichever LVR they're planning
-       around, straight into the additional cash contribution field. One
-       clean block, not a scattered "Pull from..." link under every field -
-       there is only ever one master portfolio, so asking which report to
-       pull from would just be friction for a choice that doesn't exist. */
+    /* "Bring over your DA report" - same one-clean-block picker as ROI's
+       saved-CL-report shortcut, for the three figures that carry straight
+       across from the DA calculator: project name, total cost to DA, land
+       value and the DA-stage equity. */
+    (function () {
+      var group = document.getElementById("daFillGroup");
+      var sel = document.getElementById("daFillSelect");
+      var amountEl = document.getElementById("daFillAmount");
+      var btn = document.getElementById("daFillBtn");
+      var rows = [];
+
+      function describe(s) {
+        return "Cost to DA " + money(s.totalCostToDA) + "   ·   Equity to DA " + money(s.cashEquityRequired) + ".";
+      }
+      function money(v) { return "$" + Math.round(v).toLocaleString("en-AU"); }
+
+      function renderAmount() {
+        var row = rows.filter(function (r) { return r.id === sel.value; })[0];
+        if (row) { amountEl.textContent = describe(row.summary); btn.disabled = false; }
+        else { amountEl.textContent = "—"; btn.disabled = true; }
+      }
+
+      sel.addEventListener("change", renderAmount);
+
+      btn.addEventListener("click", function () {
+        var row = rows.filter(function (r) { return r.id === sel.value; })[0];
+        if (!row) return;
+        var s = row.summary;
+        function fill(id, val) {
+          if (val == null) return;
+          var field = document.getElementById(id);
+          field.value = Math.round(val).toLocaleString("en-AU");
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+          field.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        if (row.title) {
+          var nameField = document.getElementById("pcProjectName");
+          if (!nameField.value) {
+            nameField.value = row.title;
+            nameField.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        }
+        fill("daTotal", s.totalCostToDA);
+        fill("landValue", s.price);
+        fill("daEquity", s.cashEquityRequired);
+        document.getElementById("daTotal").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      function sync() {
+        if (!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember())) {
+          group.hidden = true;
+          return;
+        }
+        window.pcAuth.listReports("da").then(function (res) {
+          rows = (res.data || []).filter(function (r) { return r.summary && r.summary.totalCostToDA != null; });
+          if (res.error || !rows.length) { group.hidden = true; return; }
+          sel.innerHTML = "";
+          rows.forEach(function (r) {
+            var o = document.createElement("option");
+            o.value = r.id;
+            o.textContent = (r.title || "Untitled report") + " (" + new Date(r.updated_at).toLocaleDateString("en-AU") + ")";
+            sel.appendChild(o);
+          });
+          group.hidden = false;
+          renderAmount();
+        });
+      }
+      document.addEventListener("pc-auth-change", sync);
+      if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
+    })();
+  </script>
+  <script>
+    /* "Portfolio equity for construction" - usable equity from the saved
+       portfolio, but capped at a more conservative 50% LVR (rather than the
+       70/80% offered elsewhere) and netted against whatever DA-stage equity
+       is currently sitting in "Equity invested to reach DA" above. Without
+       that netting, a visitor who already drew portfolio equity to fund the
+       DA stage could draw the same headroom again here, double counting it
+       as both the DA equity and the additional cash contribution. */
     (function () {
       var group = document.getElementById("portfolioFillGroup");
       var amountEl = document.getElementById("portfolioFillAmount");
       var btn = document.getElementById("portfolioFillBtn");
-      var toggle = document.getElementById("portfolioFillLvr");
-      var lvr = 70;
+      var daEquityField = document.getElementById("daEquity");
       var summary = null;
 
-      function currentEquity() {
+      function parsedDaEquity() {
+        var v = parseFloat((daEquityField.value || "").replace(/[^0-9.-]/g, ""));
+        return isFinite(v) ? v : 0;
+      }
+
+      function available() {
         if (!summary) return null;
-        return lvr === 80 ? summary.usableEquity80 : summary.usableEquity70;
+        return Math.max((summary.usableEquity50 || 0) - parsedDaEquity(), 0);
       }
 
       function renderAmount() {
-        var val = currentEquity();
+        var val = available();
         if (val > 0) {
-          amountEl.textContent = "$" + Math.round(val).toLocaleString("en-AU") + " available at " + lvr + "% LVR";
+          amountEl.textContent = "$" + Math.round(val).toLocaleString("en-AU") +
+            " available at 50% LVR, after netting off " + "$" + Math.round(parsedDaEquity()).toLocaleString("en-AU") +
+            " already committed to reach DA.";
           btn.disabled = false;
-        } else {
-          amountEl.textContent = "No usable equity in your saved portfolio at " + lvr + "% LVR yet.";
+        } else if (summary) {
+          amountEl.textContent = "No further usable equity at 50% LVR once the DA-stage equity above is netted off.";
           btn.disabled = true;
         }
       }
 
-      toggle.addEventListener("click", function (e) {
-        var b = e.target.closest("[data-lvr]");
-        if (!b) return;
-        lvr = parseInt(b.getAttribute("data-lvr"), 10);
-        Array.prototype.forEach.call(toggle.querySelectorAll("[data-lvr]"), function (x) {
-          x.classList.toggle("is-active", x === b);
-        });
-        renderAmount();
-      });
+      daEquityField.addEventListener("input", renderAmount);
 
       btn.addEventListener("click", function () {
-        var val = currentEquity();
+        var val = available();
         if (!(val > 0)) return;
         var field = document.getElementById("cashIn");
         field.value = Math.round(val).toLocaleString("en-AU");
@@ -1754,7 +1828,7 @@
         }
         window.pcAuth.getMasterReport().then(function (res) {
           var s = res && res.data && res.data.summary;
-          if (res.error || !s || (s.usableEquity70 == null && s.usableEquity80 == null)) {
+          if (res.error || !s || s.usableEquity50 == null) {
             group.hidden = true;
             return;
           }

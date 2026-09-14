@@ -1709,6 +1709,7 @@
       var m = model();
       if (!m.valid) return {};
       return {
+        price: Math.round(m.price),
         cashEquityRequired: Math.round(m.equityRequired),
         totalCostToDA: Math.round(m.totalCostToDA)
       };
