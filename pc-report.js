@@ -301,49 +301,89 @@
                       currentId: function () { return loadedReportId; },
                       addPuller: addPuller, save: onSave };
 
-  /* ---- Save button ------------------------------------------------------ */
+  /* ---- Save button --------------------------------------------------------
+     Two identical save actions: one beside the results panel (as before),
+     and a second at the very bottom of the page, after the assumptions
+     section. On a long calculator - schedule, what-if scenarios, FAQ-style
+     assumptions - the results panel's button can be scrolled well out of
+     reach, so the bottom one means saving never requires scrolling back up.
+     Both drive the same onSave(); syncUi()/msg() update every instance. */
   var cta = document.querySelector(".calc-cta");
   var openLead = document.getElementById("openLead");
-  var saveBtn, saveMsg;
+  var saveInstances = [];
 
-  function buildSaveUi() {
-    if (!cta || saveBtn) return;
-    saveBtn = document.createElement("button");
-    saveBtn.type = "button";
-    saveBtn.id = "pcSaveBtn";
-    saveBtn.className = "btn btn-ghost btn-block pc-save-btn";
-    saveMsg = document.createElement("p");
+  function makeSaveInstance(container, opts) {
+    opts = opts || {};
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn " + (opts.accent ? "btn-accent" : "btn-ghost") + " btn-block pc-save-btn";
+    var saveMsg = document.createElement("p");
     saveMsg.className = "pc-save-msg";
     saveMsg.hidden = true;
-    if (openLead && openLead.parentNode === cta) {
-      cta.insertBefore(saveBtn, openLead);
-      cta.insertBefore(saveMsg, openLead);
+    var link = document.createElement("p");
+    link.className = "pc-save-link";
+    link.hidden = true;
+    link.innerHTML = "Open it any time from <a href=\"account\">your account</a>.";
+    if (opts.insertBefore) {
+      container.insertBefore(btn, opts.insertBefore);
+      container.insertBefore(saveMsg, opts.insertBefore);
+      container.insertBefore(link, opts.insertBefore);
     } else {
-      cta.appendChild(saveBtn);
-      cta.appendChild(saveMsg);
+      container.appendChild(btn);
+      container.appendChild(saveMsg);
+      container.appendChild(link);
     }
-    saveBtn.addEventListener("click", onSave);
+    btn.addEventListener("click", onSave);
+    var inst = { btn: btn, msg: saveMsg, link: link };
+    saveInstances.push(inst);
+    return inst;
+  }
+
+  function buildSaveUi() {
+    if (!cta || saveInstances.length) return;
+    makeSaveInstance(cta, { insertBefore: (openLead && openLead.parentNode === cta) ? openLead : null });
+
+    var bottomAnchor = document.querySelector(".calc-assumptions");
+    if (bottomAnchor && bottomAnchor.parentNode) {
+      var bottomGroup = document.createElement("div");
+      bottomGroup.className = "calc-group pc-save-bottom";
+      var h = document.createElement("h2");
+      h.className = "calc-subhead";
+      h.textContent = "Save this calculation";
+      var p = document.createElement("p");
+      p.className = "field-hint";
+      p.textContent = "Keeps these figures in your account so you can open them again later. It's free - if you don't have an account yet, saving creates one.";
+      bottomGroup.appendChild(h);
+      bottomGroup.appendChild(p);
+      makeSaveInstance(bottomGroup, { accent: true });
+      bottomAnchor.parentNode.insertBefore(bottomGroup, bottomAnchor.nextSibling);
+    }
+
     syncUi();
   }
 
   function msg(text, kind) {
-    if (!saveMsg) return;
-    saveMsg.textContent = text || "";
-    saveMsg.hidden = !text;
-    saveMsg.className = "pc-save-msg" + (kind ? " is-" + kind : "");
+    saveInstances.forEach(function (inst) {
+      inst.msg.textContent = text || "";
+      inst.msg.hidden = !text;
+      inst.msg.className = "pc-save-msg" + (kind ? " is-" + kind : "");
+    });
   }
 
   function syncUi() {
-    if (!saveBtn || !window.pcAuth) return;
-    if (!window.pcAuth.configured) { saveBtn.hidden = true; return; }
-    saveBtn.hidden = false;
-    if (window.pcAuth.isMember()) {
-      saveBtn.textContent = loadedReportId ? "Update saved report" : "Save report";
-      saveBtn.disabled = false;
-    } else {
-      saveBtn.textContent = "Sign in to save this report";
-      saveBtn.disabled = false;
+    if (!saveInstances.length || !window.pcAuth) return;
+    if (!window.pcAuth.configured) {
+      saveInstances.forEach(function (inst) { inst.btn.hidden = true; });
+      return;
     }
+    var label = window.pcAuth.isMember()
+      ? (loadedReportId ? "Update saved report" : "Save report")
+      : "Sign in to save this report";
+    saveInstances.forEach(function (inst) {
+      inst.btn.hidden = false;
+      inst.btn.disabled = false;
+      inst.btn.textContent = label;
+    });
   }
 
   function stashDraft() {
@@ -357,7 +397,7 @@
       window.location.href = "account?from=" + encodeURIComponent(here);
       return Promise.resolve({ redirected: true });
     }
-    saveBtn.disabled = true;
+    saveInstances.forEach(function (inst) { inst.btn.disabled = true; inst.link.hidden = true; });
     msg("Saving…");
     var title = projectName() || loadedTitle || defaultTitle();
     var summary = {};
@@ -365,8 +405,7 @@
     return window.pcAuth.saveReport({
       calculator: CALC, title: title, inputs: serialize(), summary: summary, id: loadedReportId || undefined
     }).then(function (res) {
-      saveBtn.disabled = false;
-      if (res.error) { msg(res.error.message || "Could not save.", "error"); return; }
+      if (res.error) { msg(res.error.message || "Could not save.", "error"); syncUi(); return res; }
       if (res.data && res.data.id) {
         loadedReportId = res.data.id;
         loadedTitle = res.data.title;
@@ -377,7 +416,8 @@
         } catch (e) {}
       }
       try { window.sessionStorage.removeItem(DRAFT_KEY); } catch (e) {}
-      msg("Saved as “" + title + "”. Open it any time from your account.", "ok");
+      msg("Saved as “" + title + "”.", "ok");
+      saveInstances.forEach(function (inst) { inst.link.hidden = false; });
       syncUi();
       /* a Portfolio Review report is what drives the account page's
          portfolio overview, but only once it is flagged as the master

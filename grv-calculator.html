@@ -120,6 +120,17 @@
         <div class="calc-grid">
           <div class="calc-inputs" id="calcInputs">
 
+            <div class="calc-group" id="portfolioFillGroup" hidden>
+              <h2 class="calc-subhead">Use your portfolio equity</h2>
+              <p class="field-hint">Prefill "Additional cash (equity) contribution" below from your saved portfolio's usable equity.</p>
+              <div class="calc-lvr-toggle" id="portfolioFillLvr">
+                <button type="button" class="calc-lvr-toggle__btn is-active" data-lvr="70">70% LVR</button>
+                <button type="button" class="calc-lvr-toggle__btn" data-lvr="80">80% LVR</button>
+              </div>
+              <p class="calc-portfolio-amount" id="portfolioFillAmount">&mdash;</p>
+              <button type="button" class="btn btn-ghost" id="portfolioFillBtn">Use this amount</button>
+            </div>
+
             <div class="calc-group">
               <h2 class="calc-subhead">Report</h2>
               <div class="field">
@@ -1684,11 +1695,82 @@
   <script>
     window.PC_PULLERS = [
       { fieldId: "daEquity", sourceCalc: "da", summaryKey: "cashEquityRequired", label: "Pull from a saved DA report" },
-      { fieldId: "cashIn", sourceCalc: "pr", summaryKey: "usableEquity70", label: "Pull equity from a saved Portfolio Review" },
       { fieldId: "cashIn", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
       { fieldId: "cashIn", sourceCalc: "roi", summaryKey: "netSaleProceeds", label: "Pull sale proceeds from a saved ROI report" },
       { fieldId: "cashIn", sourceCalc: "grv", summaryKey: "equityAtSettlement", label: "Pull settlement proceeds from another saved GRV report" }
     ];
+
+    /* "Use your portfolio equity" - a dedicated shortcut at the top of the
+       page for the one thing almost every visitor arriving from Portfolio
+       Review wants: their usable equity, at whichever LVR they're planning
+       around, straight into the additional cash contribution field.
+       Deliberately not the generic multi-report picker (addPuller/
+       PC_PULLERS above) - there is only ever one master portfolio, so
+       asking which report to pull from would just be friction for a
+       choice that doesn't exist. */
+    (function () {
+      var group = document.getElementById("portfolioFillGroup");
+      var amountEl = document.getElementById("portfolioFillAmount");
+      var btn = document.getElementById("portfolioFillBtn");
+      var toggle = document.getElementById("portfolioFillLvr");
+      var lvr = 70;
+      var summary = null;
+
+      function currentEquity() {
+        if (!summary) return null;
+        return lvr === 80 ? summary.usableEquity80 : summary.usableEquity70;
+      }
+
+      function renderAmount() {
+        var val = currentEquity();
+        if (val > 0) {
+          amountEl.textContent = "$" + Math.round(val).toLocaleString("en-AU") + " available at " + lvr + "% LVR";
+          btn.disabled = false;
+        } else {
+          amountEl.textContent = "No usable equity in your saved portfolio at " + lvr + "% LVR yet.";
+          btn.disabled = true;
+        }
+      }
+
+      toggle.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-lvr]");
+        if (!b) return;
+        lvr = parseInt(b.getAttribute("data-lvr"), 10);
+        Array.prototype.forEach.call(toggle.querySelectorAll("[data-lvr]"), function (x) {
+          x.classList.toggle("is-active", x === b);
+        });
+        renderAmount();
+      });
+
+      btn.addEventListener("click", function () {
+        var val = currentEquity();
+        if (!(val > 0)) return;
+        var field = document.getElementById("cashIn");
+        field.value = Math.round(val).toLocaleString("en-AU");
+        field.dispatchEvent(new Event("input", { bubbles: true }));
+        field.dispatchEvent(new Event("change", { bubbles: true }));
+        field.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      function sync() {
+        if (!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember())) {
+          group.hidden = true;
+          return;
+        }
+        window.pcAuth.getMasterReport().then(function (res) {
+          var s = res && res.data && res.data.summary;
+          if (res.error || !s || (s.usableEquity70 == null && s.usableEquity80 == null)) {
+            group.hidden = true;
+            return;
+          }
+          summary = s;
+          group.hidden = false;
+          renderAmount();
+        });
+      }
+      document.addEventListener("pc-auth-change", sync);
+      if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
+    })();
   </script>
   <script src="pc-report.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>

@@ -1440,6 +1440,14 @@ h1, h2, h3 {
 }
 .pc-save-msg.is-ok    { color: var(--accent-2); }
 .pc-save-msg.is-error { color: #e2938c; }
+.pc-save-link { margin: 8px 0 0; font-size: 13.5px; color: var(--muted); }
+.pc-save-link a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.pc-save-link a:hover { text-decoration: underline; }
+
+/* duplicate "Save this calculation" action at the very bottom of the page -
+   see pc-report.js buildSaveUi() */
+.pc-save-bottom { margin-top: clamp(40px, 6vw, 64px); max-width: 60ch; }
+.pc-save-bottom .pc-save-btn { margin-top: 4px; }
 
 /* Pull-a-figure-from-another-saved-report widget (pc-report.js addPuller),
    sits inside the target field, under its own hint */
