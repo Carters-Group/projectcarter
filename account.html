@@ -160,7 +160,6 @@
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
             <div class="acct-profile-row">
               <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap" aria-hidden="true">
-                <img id="acctAvatarImg" alt="" hidden />
                 <span id="acctAvatarInitial">?</span>
               </div>
               <div class="acct-profile-row__text">
@@ -168,11 +167,8 @@
                 <p class="acct-email" id="acctWhoEmail">&mdash;</p>
                 <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
               </div>
-              <label for="avatarFile" class="btn btn-ghost btn-sm acct-profile-row__actions" title="JPG, PNG or a phone photo (HEIC), under 5MB. Shown only to you, on this page.">Change photo</label>
-              <input type="file" id="avatarFile" accept="image/*,.heic,.heif" hidden />
               <button type="button" class="btn btn-ghost btn-sm acct-profile-row__actions" id="signOutBtn">Sign out</button>
             </div>
-            <p class="acct-msg" id="avatarMsg" hidden></p>
 
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your portfolio</h2>
@@ -762,18 +758,9 @@
     }
 
     function renderAvatar(u) {
-      var img = document.getElementById("acctAvatarImg");
       var initial = document.getElementById("acctAvatarInitial");
-      if (!img) return;
-      if (u && u.avatar_url) {
-        img.src = u.avatar_url;
-        img.hidden = false;
-        initial.hidden = true;
-      } else {
-        img.hidden = true;
-        initial.hidden = false;
-        initial.textContent = u ? initials(u) : "?";
-      }
+      if (!initial) return;
+      initial.textContent = u ? initials(u) : "?";
     }
 
     function renderQuickLaunch(rows) {
@@ -857,19 +844,6 @@
         if (res.error) { setMsg(profMsg, res.error.message, "error"); return; }
         setMsg(profMsg, "Saved.", "ok");
         load();
-      });
-    });
-
-    var avatarMsg = document.getElementById("avatarMsg");
-    document.getElementById("avatarFile").addEventListener("change", function (e) {
-      var file = e.target.files && e.target.files[0];
-      if (!file) return;
-      setMsg(avatarMsg, "Uploading…");
-      window.pcAuth.uploadAvatar(file).then(function (res) {
-        e.target.value = "";
-        if (res.error) { setMsg(avatarMsg, res.error.message, "error"); return; }
-        setMsg(avatarMsg, "Photo updated.", "ok");
-        renderAvatar(window.pcAuth.user());
       });
     });
 

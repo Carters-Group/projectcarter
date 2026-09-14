@@ -203,37 +203,3 @@ create trigger on_auth_user_created
   for each row execute function public.pc_handle_new_user();
 
 
--- ---------------------------------------------------------------------------
---  avatars  -  profile photo storage
---  Public bucket (read requires no auth - just a profile picture, nothing
---  sensitive) but writes are restricted to the signed-in owner's own folder,
---  path pc-auth.js uploads to: "<user id>/avatar.<ext>".
--- ---------------------------------------------------------------------------
-insert into storage.buckets (id, name, public)
-values ('avatars', 'avatars', true)
-on conflict (id) do nothing;
-
-drop policy if exists "avatars - insert own" on storage.objects;
-drop policy if exists "avatars - update own" on storage.objects;
-drop policy if exists "avatars - delete own" on storage.objects;
-
-create policy "avatars - insert own"
-  on storage.objects for insert
-  with check (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
-
-create policy "avatars - update own"
-  on storage.objects for update
-  using (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
-
-create policy "avatars - delete own"
-  on storage.objects for delete
-  using (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );

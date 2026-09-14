@@ -1564,21 +1564,19 @@ h1, h2, h3 {
   background: var(--bg-3); border: 1px solid var(--line);
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.acct-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .acct-avatar span { font-family: var(--font-display); font-size: 20px; color: var(--muted); }
 .acct-whoami .acct-avatar + div { flex: 1; }
 .acct-avatar--lg { width: 84px; height: 84px; }
 .acct-avatar--lg span { font-size: 28px; }
 .acct-card .acct-whoami { margin-bottom: 22px; }
 
-/* profile row at the top of the portfolio card - round photo on the left */
+/* profile row at the top of the portfolio card - initials badge on the left */
 .acct-profile-row {
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 16px;
   margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line-soft);
 }
 .acct-profile-row__text { flex: 1; min-width: 160px; }
 .acct-profile-row__actions { flex: none; }
-#avatarHint, #avatarMsg { margin-bottom: 20px; }
 
 .acct-card-head {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;

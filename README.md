@@ -28,9 +28,9 @@ pr-calculator.html              "Portfolio Review (PR)" — a multi-property, si
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
 account.html                    sign in / sign up (magic link) + a profile photo (upload, stored in Supabase Storage) with initials fallback + a "Quick access" grid of one-click calculator cards (resumes each calculator's most recently saved report where one exists) + a "Your portfolio" overview card (adds net rental income and a "Useable equity" block showing both a conservative 70% LVR and a higher-gearing 80% LVR figure side by side, a "See this as an ROI projection" button - saves a new ROI report seeded from the portfolio's combined value/gearing/net rent and its own blended interest rate with sensible placeholder growth/term assumptions and opens it, and a standalone "Debt reduction goal" mini-tool - an extra $/year contribution field with a live payoff-time + interest-saved readout, assuming the portfolio's debt is interest-only as modelled in Portfolio Review; this is a planning figure only, not part of any calculator, report or ROI projection) + a "Recently updated" activity feed + "My saved reports" dashboard + an editable details form (name, phone, occupation, read-only email)
-pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/rename/delete/duplicate report, get/set/clear master report, update profile incl. occupation, uploadAvatar to the "avatars" storage bucket), auth status bar, subscription gate (canSave, always true for now)
+pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/rename/delete/duplicate report, get/set/clear master report, update profile incl. occupation), auth status bar, subscription gate (canSave, always true for now)
 pc-report.js                    shared per-calculator wiring - "Project name or address" field, "Save report" button, ?report=<id> rehydration
-supabase-schema.sql             one-time SQL for the Supabase project: profiles (incl. occupation, avatar_url) + reports tables, row-level security, subscription_status column, one-master-portfolio-per-user constraint, "avatars" public storage bucket with owner-only write policies
+supabase-schema.sql             one-time SQL for the Supabase project: profiles (incl. occupation) + reports tables, row-level security, subscription_status column, one-master-portfolio-per-user constraint
 styles.css                      design system + layout (home, project pages, landing, calculator, account)
 script.js                       header scroll state, mobile nav, scroll reveals
 assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
@@ -176,8 +176,6 @@ and the `pc_can_save()` SQL function are the hooks for a future paywall - today
 
 1. Create a free project at [supabase.com](https://supabase.com).
 2. In the Supabase **SQL editor**, run `supabase-schema.sql` (safe to re-run).
-   This also creates the public `avatars` storage bucket used for profile
-   photos - no separate Storage dashboard step needed.
 3. **Settings - API**: copy the **Project URL** and the **anon / public** key
    into the two placeholders at the top of `pc-auth.js`
    (`PC_SUPABASE_URL`, `PC_SUPABASE_ANON_KEY`). Both are safe to commit - the
