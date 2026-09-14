@@ -790,7 +790,6 @@
         var occEl = document.getElementById("acctWhoOccupation");
         occEl.textContent = u.occupation || "";
         occEl.hidden = !u.occupation;
-        renderAvatar(u);
         document.getElementById("profName").value = u.full_name || "";
         document.getElementById("profEmail").value = u.email || "";
         document.getElementById("profPhone").value = u.phone || "";
