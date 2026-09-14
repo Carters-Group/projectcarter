@@ -277,7 +277,7 @@
             <p class="acct-empty" id="reportsEmpty" hidden>
               No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
             </p>
-            <p class="acct-eyebrow" style="margin-top:22px">Start a new report</p>
+            <p class="acct-eyebrow" style="margin-top:22px">Start a report</p>
             <div class="grid grid-3 acct-quick-grid" id="newReportGrid"></div>
           </div>
 
@@ -789,12 +789,19 @@
       } catch (e) { return null; }
     }
 
-    function renderQuickLaunch(rows) {
-      var grid = document.getElementById("quickLaunchGrid");
+    /* Quick access (top of page) and the "Start a report" grid at the
+       bottom of My saved reports use the same card, and now the same
+       logic: both are per-calculator shortcuts, so both should point at
+       the same saved report when one exists rather than one of them
+       always forcing a blank calculator. */
+    function renderCalcGrid(gridId, rows) {
+      var grid = document.getElementById(gridId);
+      if (!grid) return;
       grid.innerHTML = "";
       CALC_ORDER.forEach(function (calc) {
         var latest = (rows || []).filter(function (r) { return r.calculator === calc; })[0];
         var href = CALC_PAGES[calc] + (latest ? "?report=" + encodeURIComponent(latest.id) : "");
+        var linkText = latest ? "Saved / Edit" : "Start a report";
         var a = document.createElement("a");
         a.className = "card project-card acct-quick-card";
         a.href = href;
@@ -803,34 +810,14 @@
           '<div class="card-body">' +
             '<h3>' + CALC_SHORT[calc] + '</h3>' +
             '<p class="card-meta"></p>' +
-            '<span class="link-arrow">' + (latest ? "Resume" : "Open calculator") + '</span>' +
+            '<span class="link-arrow">' + linkText + '</span>' +
           '</div>';
-        a.querySelector(".card-meta").textContent = latest ? "Resume: " + (latest.title || "Untitled report") : "Start a new report";
+        a.querySelector(".card-meta").textContent = latest ? "Saved: " + (latest.title || "Untitled report") : "Start a report";
         grid.appendChild(a);
       });
     }
-
-    /* same card style as Quick access above, but always a fresh report -
-       this is the "New report" row at the bottom of My saved reports, just
-       rendered as the icon-card grid used everywhere else on the site
-       instead of a plain text link list. */
-    function renderNewReportGrid() {
-      var grid = document.getElementById("newReportGrid");
-      if (!grid || grid.firstChild) return;
-      CALC_ORDER.forEach(function (calc) {
-        var a = document.createElement("a");
-        a.className = "card project-card acct-quick-card";
-        a.href = CALC_PAGES[calc];
-        a.innerHTML =
-          '<div class="card-media has-photo card-media--icon" style="background-image:url(\'' + CALC_ICON[calc] + '\')" data-label="' + calc.toUpperCase() + '"></div>' +
-          '<div class="card-body">' +
-            '<h3>' + CALC_SHORT[calc] + '</h3>' +
-            '<p class="card-meta">Start a new report</p>' +
-            '<span class="link-arrow">Open calculator</span>' +
-          '</div>';
-        grid.appendChild(a);
-      });
-    }
+    function renderQuickLaunch(rows) { renderCalcGrid("quickLaunchGrid", rows); }
+    function renderNewReportGrid(rows) { renderCalcGrid("newReportGrid", rows); }
 
     function load() {
       var u = window.pcAuth.user();
@@ -860,7 +847,6 @@
         document.getElementById("profEmail").value = u.email || "";
         document.getElementById("profPhone").value = u.phone || "";
         document.getElementById("profOccupation").value = u.occupation || "";
-        renderNewReportGrid();
         updatePasswordNudge(u);
         setMsg(reportsMsg, "");
         window.pcAuth.listReports().then(function (res) {
@@ -869,6 +855,7 @@
           renderActivity(res.data);
           renderPortfolio(res.data);
           renderQuickLaunch(res.data);
+          renderNewReportGrid(res.data);
           updateStartHere(res.data);
         });
       } else {
