@@ -1523,6 +1523,10 @@
       wrapLine("Standard", "Architect / design, town planner (SEE), detail survey, civil / stormwater, landscape, BASIX / NatHERS.");
       wrapLine("Likely", likely.length ? likely.join(", ") : "Standard set only.");
       wrapLine("May be needed", possible.length ? possible.join(", ") : "-");
+      y += 4;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(40);
+      doc.text(doc.splitTextToSize("Always hold a pre-lodgement (pre-DA) meeting with the council before you lodge, unless the outcome is already certain.", w - 2 * L), L, y);
+      y += 14;
 
       y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);

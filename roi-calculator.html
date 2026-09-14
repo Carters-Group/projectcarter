@@ -984,7 +984,8 @@
       bigrow("IRR (compound)", m.irr != null ? (m.irr * 100).toFixed(2) + "%" : "-");
 
       if (m.rows.length) {
-        y += 10;
+        doc.addPage();
+        y = 56;
         section("Year by year");
         var cols = ["Yr", "Net rent", "Interest", "Debt cut", "Cash kept", "Loan bal.", "Value", "Equity"];
         var cx = [L, L + 30, L + 108, L + 186, L + 258, L + 330, L + 408, L + 470];

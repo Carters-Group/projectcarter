@@ -1459,7 +1459,8 @@
       row("Peak debt (end of period)", money(m.peakDebt), true);
       row("Cash-on-cash return", m.coc != null ? m.coc.toFixed(2) + "%" : "-", true);
 
-      y += 6;
+      doc.addPage();
+      y = 56;
       section("Finance charges");
       if (!m.financeRows.length) row("None entered", "-");
       m.financeRows.forEach(function (fr) {
