@@ -1696,21 +1696,13 @@
   })();
   </script>
   <script>
-    window.PC_PULLERS = [
-      { fieldId: "daEquity", sourceCalc: "da", summaryKey: "cashEquityRequired", label: "Pull from a saved DA report" },
-      { fieldId: "cashIn", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
-      { fieldId: "cashIn", sourceCalc: "roi", summaryKey: "netSaleProceeds", label: "Pull sale proceeds from a saved ROI report" },
-      { fieldId: "cashIn", sourceCalc: "grv", summaryKey: "equityAtSettlement", label: "Pull settlement proceeds from another saved GRV report" }
-    ];
-
     /* "Use your portfolio equity" - a dedicated shortcut at the top of the
        page for the one thing almost every visitor arriving from Portfolio
        Review wants: their usable equity, at whichever LVR they're planning
-       around, straight into the additional cash contribution field.
-       Deliberately not the generic multi-report picker (addPuller/
-       PC_PULLERS above) - there is only ever one master portfolio, so
-       asking which report to pull from would just be friction for a
-       choice that doesn't exist. */
+       around, straight into the additional cash contribution field. One
+       clean block, not a scattered "Pull from..." link under every field -
+       there is only ever one master portfolio, so asking which report to
+       pull from would just be friction for a choice that doesn't exist. */
     (function () {
       var group = document.getElementById("portfolioFillGroup");
       var amountEl = document.getElementById("portfolioFillAmount");

@@ -1473,12 +1473,6 @@ h1, h2, h3 {
 .pc-save-bottom { margin-top: clamp(40px, 6vw, 64px); max-width: 60ch; }
 .pc-save-bottom .pc-save-btn { margin-top: 4px; }
 
-/* Pull-a-figure-from-another-saved-report widget (pc-report.js addPuller),
-   sits inside the target field, under its own hint */
-.pc-pull { margin-top: 6px; font-size: 12px; line-height: 1.5; }
-.pc-pull[hidden] { display: none; }
-.pc-pull__btn { color: var(--accent); font-weight: 600; }
-
 .calc-lvr-toggle { display: flex; gap: 8px; margin: 10px 0; }
 .calc-lvr-toggle__btn {
   flex: 1; padding: 10px 14px; font: inherit; font-weight: 600; font-size: 13px;
@@ -1487,6 +1481,10 @@ h1, h2, h3 {
 .calc-lvr-toggle__btn.is-active { color: var(--text); border-color: var(--accent); background: var(--bg-2); }
 .calc-lvr-toggle__btn:hover { color: var(--text); }
 .calc-portfolio-amount { font-size: 1.1rem; font-weight: 600; margin: 4px 0 14px; }
+
+/* Styled select used by the top-of-page "use a saved report" shortcuts
+   (e.g. roi-calculator.html's CL picker) and account.html's master-
+   portfolio chooser */
 .pc-pull__select {
   width: 100%; margin-top: 2px; font-size: 16px; padding: 10px 40px 10px 12px;
   appearance: none; -webkit-appearance: none; -moz-appearance: none;
@@ -1501,7 +1499,6 @@ h1, h2, h3 {
   border-radius: 0;
 }
 .pc-pull__select:focus { outline: none; border-color: var(--accent); }
-.pc-pull__note { margin: 0 0 4px; color: var(--muted); }
 
 /* ---- account.html ---- */
 .acct-card { padding: clamp(22px, 3vw, 34px); margin-bottom: 20px; }
