@@ -1348,14 +1348,28 @@
 
     inputs.addEventListener("input", render);
 
-    function setCardCollapsed(id, collapsed) {
+    /* Collapsing an open card can shrink the page by a screen's worth of
+       fields in one go. The browser keeps whatever scroll position it had,
+       which - since everything below (schedule, PDF button, assumptions)
+       just shifted up underneath the visitor - tends to strand them down
+       near the FAQ-style assumptions section with nothing obviously there.
+       Scroll the buttons row back into view on an actual open-to-collapsed
+       transition so the visitor lands back where the action is. Suppressed
+       during a bulk restore (opts.silent), which collapses every card at
+       once right after the page loads. */
+    function setCardCollapsed(id, collapsed, opts) {
       var card = propertyCards.querySelector('[data-prop="' + id + '"]');
       if (!card) return;
+      var wasCollapsed = card.classList.contains("is-collapsed");
       var body = card.querySelector("[data-body]");
       var toggle = card.querySelector("[data-toggle]");
       if (body) body.hidden = collapsed;
       if (toggle) toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
       card.classList.toggle("is-collapsed", collapsed);
+      if (collapsed && !wasCollapsed && !(opts && opts.silent)) {
+        var anchor = document.querySelector(".calc-prop-actions");
+        if (anchor) anchor.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     }
 
     /* once a card has its core numbers in (value, loan, and rent unless it's
@@ -1508,7 +1522,7 @@
        a saved property might have no loan or no rent yet and would never
        meet that bar) so nothing is left open on load */
     document.addEventListener("pc-pr-restored", function () {
-      propIds.forEach(function (id) { setCardCollapsed(id, true); });
+      propIds.forEach(function (id) { setCardCollapsed(id, true, { silent: true }); });
       render();
     });
     document.getElementById("propTemplateUse").addEventListener("click", function () {
