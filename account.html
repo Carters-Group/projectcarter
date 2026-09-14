@@ -264,15 +264,8 @@
             <p class="acct-empty" id="reportsEmpty" hidden>
               No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
             </p>
-            <p class="acct-calc-links">
-              New report:
-              <a href="net-operating-income-calculator">NOI</a> ·
-              <a href="return-on-investment-calculator">ROI</a> ·
-              <a href="development-site-calculator">DA</a> ·
-              <a href="gross-realisation-value-calculator">GRV</a> ·
-              <a href="portfolio-review-calculator">PR</a> ·
-              <a href="commercial-lending-calculator">CL</a>
-            </p>
+            <p class="acct-eyebrow" style="margin-top:22px">Start a new report</p>
+            <div class="grid grid-3 acct-quick-grid" id="newReportGrid"></div>
           </div>
 
           <div class="card acct-card acct-dash-details" id="acctDetailsCard">
@@ -309,6 +302,18 @@
               <button type="submit" class="btn btn-ghost" id="passSaveBtn">Update password</button>
             </form>
             <p class="acct-msg" id="passMsg" hidden></p>
+          </div>
+
+          <div class="card acct-card acct-danger" id="acctDangerCard">
+            <h2 class="calc-subhead">Delete account</h2>
+            <p class="acct-empty">Permanently deletes all your saved reports and clears your name, phone and occupation from your profile, then signs you out. We'll be notified to close your sign-in as well. This can't be undone.</p>
+            <button type="button" class="btn btn-ghost" id="deleteAcctBtn">Delete account</button>
+            <div id="deleteAcctConfirm" hidden>
+              <p class="acct-msg is-error">Are you sure? This deletes all your saved reports right away and can't be undone.</p>
+              <button type="button" class="btn btn-danger" id="deleteAcctConfirmBtn">Yes, delete my account</button>
+              <button type="button" class="linklike" id="deleteAcctCancelBtn">Cancel</button>
+            </div>
+            <p class="acct-msg" id="deleteAcctMsg" hidden></p>
           </div>
         </div>
       </div>
@@ -766,6 +771,28 @@
       });
     }
 
+    /* same card style as Quick access above, but always a fresh report -
+       this is the "New report" row at the bottom of My saved reports, just
+       rendered as the icon-card grid used everywhere else on the site
+       instead of a plain text link list. */
+    function renderNewReportGrid() {
+      var grid = document.getElementById("newReportGrid");
+      if (!grid || grid.firstChild) return;
+      CALC_ORDER.forEach(function (calc) {
+        var a = document.createElement("a");
+        a.className = "card project-card acct-quick-card";
+        a.href = CALC_PAGES[calc];
+        a.innerHTML =
+          '<div class="card-media has-photo card-media--icon" style="background-image:url(\'' + CALC_ICON[calc] + '\')" data-label="' + calc.toUpperCase() + '"></div>' +
+          '<div class="card-body">' +
+            '<h3>' + CALC_SHORT[calc] + '</h3>' +
+            '<p class="card-meta">Start a new report</p>' +
+            '<span class="link-arrow">Open calculator</span>' +
+          '</div>';
+        grid.appendChild(a);
+      });
+    }
+
     function load() {
       var u = window.pcAuth.user();
       var from = fromParam();
@@ -794,6 +821,7 @@
         document.getElementById("profEmail").value = u.email || "";
         document.getElementById("profPhone").value = u.phone || "";
         document.getElementById("profOccupation").value = u.occupation || "";
+        renderNewReportGrid();
         setMsg(reportsMsg, "");
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
@@ -1099,6 +1127,29 @@
 
     document.getElementById("signOutBtn").addEventListener("click", function () {
       window.pcAuth.signOut().then(load);
+    });
+
+    var deleteAcctBtn = document.getElementById("deleteAcctBtn");
+    var deleteAcctConfirm = document.getElementById("deleteAcctConfirm");
+    var deleteAcctMsg = document.getElementById("deleteAcctMsg");
+    deleteAcctBtn.addEventListener("click", function () {
+      deleteAcctBtn.hidden = true;
+      deleteAcctConfirm.hidden = false;
+    });
+    document.getElementById("deleteAcctCancelBtn").addEventListener("click", function () {
+      deleteAcctConfirm.hidden = true;
+      deleteAcctBtn.hidden = false;
+    });
+    document.getElementById("deleteAcctConfirmBtn").addEventListener("click", function () {
+      var btn = document.getElementById("deleteAcctConfirmBtn");
+      btn.disabled = true;
+      setMsg(deleteAcctMsg, "Deleting…");
+      window.pcAuth.requestAccountDeletion().then(function (res) {
+        btn.disabled = false;
+        if (res.error) { setMsg(deleteAcctMsg, res.error.message, "error"); return; }
+        deleteAcctConfirm.hidden = true;
+        setMsg(deleteAcctMsg, "Your saved reports have been deleted and you've been signed out.", "ok");
+      });
     });
 
     document.addEventListener("pc-auth-change", function () { tidyUrl(); load(); });

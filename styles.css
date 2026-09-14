@@ -830,6 +830,12 @@ h1, h2, h3 {
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
 .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
+.btn-danger { background: #e2938c; color: #2a0f0d; border-color: #e2938c; }
+.btn-danger:hover { background: #e8aba5; border-color: #e8aba5; }
+.acct-danger.card { border-color: rgba(226, 147, 140, 0.28); }
+.acct-danger #deleteAcctConfirm { margin-top: 12px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.acct-danger #deleteAcctConfirm .acct-msg { margin: 0; flex-basis: 100%; }
+
 .landing-foot {
   position: relative;
   z-index: 3;

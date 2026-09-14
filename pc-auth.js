@@ -399,6 +399,34 @@
       if (bad) return Promise.resolve(bad);
       return client.from("reports").delete().eq("id", id).eq("user_id", currentUser.id)
         .then(function (res) { return { error: res.error }; });
+    },
+
+    /* Deletes everything the anon key is allowed to touch - all of the
+       visitor's saved reports, then their name/phone/occupation off the
+       profile row - and pings Formspree so Trent closes the actual sign-in
+       (auth.users row) from the Supabase dashboard, since deleting an auth
+       user requires the service-role key, which must never live in
+       client-side code. Signs the visitor out either way. */
+    requestAccountDeletion: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      var email = currentUser.email;
+      var uid = currentUser.id;
+      return client.from("reports").delete().eq("user_id", uid)
+        .then(function () {
+          return client.from("profiles").update({ full_name: null, phone: null, occupation: null }).eq("id", uid);
+        })
+        .then(function () {
+          var body = new FormData();
+          body.append("_subject", "Project Carter - account deletion request");
+          body.append("Email", email || "(unknown)");
+          body.append("User ID", uid);
+          body.append("Source", "Account page - Delete account");
+          return fetch(FORMSPREE_ENDPOINT, { method: "POST", body: body, headers: { Accept: "application/json" } }).catch(function () {});
+        })
+        .then(function () { return api.signOut(); })
+        .then(function () { return { error: null }; })
+        .catch(function (err) { return { error: { message: (err && err.message) || "Something went wrong deleting your data." } }; });
     }
   };
 
