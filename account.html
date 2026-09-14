@@ -116,6 +116,10 @@
                 <label for="signupPassword">Password</label>
                 <input type="password" id="signupPassword" autocomplete="new-password" required placeholder="At least 6 characters" />
               </div>
+              <div class="field">
+                <label for="signupPasswordConfirm">Confirm password</label>
+                <input type="password" id="signupPasswordConfirm" autocomplete="new-password" required placeholder="Type it again" />
+              </div>
               <button type="submit" class="btn btn-accent btn-block" id="signupBtn">Create account</button>
               <p class="form-fineprint">We use your details only to run your account and follow up if you have asked us to.</p>
             </form>
@@ -309,6 +313,10 @@
                 <label for="profPassword">New password</label>
                 <input type="password" id="profPassword" autocomplete="new-password" placeholder="At least 6 characters" />
                 <p class="field-hint">Set this once to sign in with a password next time, instead of waiting on an email link.</p>
+              </div>
+              <div class="field">
+                <label for="profPasswordConfirm">Confirm password</label>
+                <input type="password" id="profPasswordConfirm" autocomplete="new-password" placeholder="Type it again" />
               </div>
               <button type="submit" class="btn btn-ghost" id="passSaveBtn">Update password</button>
             </form>
@@ -1094,6 +1102,7 @@
       e.preventDefault();
       var email    = document.getElementById("signupEmail").value.trim();
       var password = document.getElementById("signupPassword").value;
+      var passwordConfirm = document.getElementById("signupPasswordConfirm").value;
       var name     = document.getElementById("signupName").value.trim();
       var phone    = document.getElementById("signupPhone").value.trim();
       if (!email || !/.+@.+\..+/.test(email)) {
@@ -1102,6 +1111,10 @@
       }
       if (!password || password.length < 6) {
         setMsg(signupMsg, "Choose a password of at least 6 characters.", "error");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        setMsg(signupMsg, "Those passwords don't match.", "error");
         return;
       }
       signupBtn.disabled = true;
@@ -1122,8 +1135,13 @@
     passwordForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var password = document.getElementById("profPassword").value;
+      var passwordConfirm = document.getElementById("profPasswordConfirm").value;
       if (!password || password.length < 6) {
         setMsg(passMsg, "Choose a password of at least 6 characters.", "error");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        setMsg(passMsg, "Those passwords don't match.", "error");
         return;
       }
       passSaveBtn.disabled = true;
@@ -1132,6 +1150,7 @@
         passSaveBtn.disabled = false;
         if (res && res.error) { setMsg(passMsg, res.error.message, "error"); return; }
         document.getElementById("profPassword").value = "";
+        document.getElementById("profPasswordConfirm").value = "";
         setMsg(passMsg, "Password updated. Use it next time you sign in.", "ok");
       });
     });
