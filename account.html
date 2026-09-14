@@ -216,11 +216,11 @@
                   </div>
                   <div class="field">
                     <label for="planCapGrowth">Capital growth <span>(per year)</span></label>
-                    <div class="input-pct"><input type="text" inputmode="decimal" id="planCapGrowth" autocomplete="off" placeholder="3.0" value="3" /></div>
+                    <div class="input-pct"><input type="text" inputmode="decimal" id="planCapGrowth" autocomplete="off" placeholder="5.0" value="5" /></div>
                   </div>
                   <div class="field">
                     <label for="planRentGrowth">Rental growth <span>(per year)</span></label>
-                    <div class="input-pct"><input type="text" inputmode="decimal" id="planRentGrowth" autocomplete="off" placeholder="3.0" value="3" /></div>
+                    <div class="input-pct"><input type="text" inputmode="decimal" id="planRentGrowth" autocomplete="off" placeholder="5.0" value="5" /></div>
                   </div>
                 </div>
                 <p class="field-hint">One blended growth rate applied across the whole portfolio rather than property-by-property, and debt is assumed to reduce the same way Portfolio Review models it - 50% of surplus cash after interest goes to principal, at the blended rate implied by your saved properties. No capital gains tax is included here - whether and when to sell is your call, not this plan's.</p>
@@ -995,9 +995,9 @@
 
       var years = Math.max(1, Math.min(30, Math.round(parseFloat(document.getElementById("planYears").value) || 5)));
       var capGrowthPct = parseFloat((document.getElementById("planCapGrowth").value || "").replace(/[^0-9.\-]/g, ""));
-      if (!isFinite(capGrowthPct)) capGrowthPct = 3;
+      if (!isFinite(capGrowthPct)) capGrowthPct = 5;
       var rentGrowthPct = parseFloat((document.getElementById("planRentGrowth").value || "").replace(/[^0-9.\-]/g, ""));
-      if (!isFinite(rentGrowthPct)) rentGrowthPct = 3;
+      if (!isFinite(rentGrowthPct)) rentGrowthPct = 5;
 
       var btn = document.getElementById("portfolioRoiBtn");
       btn.disabled = true;
