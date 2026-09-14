@@ -149,6 +149,11 @@
           if (el && el.type !== "checkbox" && el.type !== "radio") setField(el, p[key]);
         });
       });
+      /* let the page know a saved portfolio just landed, so it can collapse
+         the restored property cards down to their names instead of leaving
+         a wall of open cards - the page owns that UI behaviour, this file
+         just signals the moment */
+      document.dispatchEvent(new CustomEvent("pc-pr-restored"));
     }
 
     if (CALC === "grv" && data.dyn) {

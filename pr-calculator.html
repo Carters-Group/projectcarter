@@ -1378,19 +1378,23 @@
       propIds.forEach(function (id) { maybeAutoCollapse(id); });
     }
 
-    function doAddProperty() {
+    function doAddProperty(fromUser) {
       /* collapse whatever's already filled in, then save progress on the
          properties already entered before adding a blank card, so nothing
          is lost if the visitor gets interrupted - signed-in members only,
-         since there is nothing to save to for an anonymous visitor */
+         since there is nothing to save to for an anonymous visitor.
+         fromUser gates the cloud save: pc-report.js rebuilds saved cards by
+         clicking this same button programmatically while restoring a
+         report, and saving mid-rebuild would push a still-mostly-blank
+         portfolio over the very report being loaded. */
       collapseFullCards();
-      if (window.pcAuth && window.pcAuth.isMember() && window.pcReport && window.pcReport.save) {
+      if (fromUser && window.pcAuth && window.pcAuth.isMember() && window.pcReport && window.pcReport.save) {
         window.pcReport.save();
       }
       addProperty();
       render();
     }
-    document.getElementById("addProperty").addEventListener("click", doAddProperty);
+    document.getElementById("addProperty").addEventListener("click", function (e) { doAddProperty(e.isTrusted); });
 
     var savePropertyMsg = document.getElementById("savePropertyMsg");
     function flashSaveMsg(text) {
@@ -1412,12 +1416,25 @@
       renderTemplatePicker();
       maybeAutoCollapse(lastId);
       render();
+      /* also push the whole portfolio to the signed-in visitor's saved
+         report, so this property's numbers actually reach the account
+         page - not just this browser's local template list */
+      if (window.pcAuth && window.pcAuth.isMember() && window.pcReport && window.pcReport.save) {
+        window.pcReport.save();
+      }
       flashSaveMsg('Saved "' + label + '" - reuse it any time from "Reuse a saved property" below.');
     }
     document.getElementById("saveProperty").addEventListener("click", doSaveProperty);
     document.getElementById("saveAddProperty").addEventListener("click", function () {
       doSaveProperty();
-      doAddProperty();
+      doAddProperty(true);
+    });
+    /* fired by pc-report.js once a saved portfolio has been rehydrated -
+       collapse the restored cards to just their names rather than leaving
+       every property open */
+    document.addEventListener("pc-pr-restored", function () {
+      collapseFullCards();
+      render();
     });
     document.getElementById("propTemplateUse").addEventListener("click", function () {
       var sel = document.getElementById("propTemplateSelect");
