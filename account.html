@@ -159,9 +159,6 @@
 
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
             <div class="acct-profile-row">
-              <div class="acct-avatar acct-avatar--lg" id="acctAvatarWrap" aria-hidden="true">
-                <span id="acctAvatarInitial">?</span>
-              </div>
               <div class="acct-profile-row__text">
                 <p class="acct-eyebrow">Signed in as</p>
                 <p class="acct-email" id="acctWhoEmail">&mdash;</p>
@@ -746,21 +743,6 @@
         var f = new URL(window.location.href).searchParams.get("from");
         return f && CALC_PAGE_SET[f] ? f : null;
       } catch (e) { return null; }
-    }
-
-    function initials(u) {
-      var name = (u.full_name || "").trim();
-      if (name) {
-        var parts = name.split(/\s+/);
-        return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
-      }
-      return (u.email || "?").charAt(0).toUpperCase();
-    }
-
-    function renderAvatar(u) {
-      var initial = document.getElementById("acctAvatarInitial");
-      if (!initial) return;
-      initial.textContent = u ? initials(u) : "?";
     }
 
     function renderQuickLaunch(rows) {
