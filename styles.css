@@ -22,11 +22,18 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; overflow-x: hidden; }
+/* overflow-x: clip, not hidden - hidden (or any non-"visible" value) forces
+   the UA to also compute overflow-y as "auto", which turns html/body into a
+   scroll container that position: sticky can't stick within (it needs to
+   see the real viewport). clip is the one non-visible overflow value that
+   doesn't drag the other axis along with it, so this still stops the odd
+   wide element from causing horizontal scroll but no longer silently
+   breaks every sticky element on the site (the results sidebar included). */
+html { scroll-behavior: smooth; overflow-x: clip; }
 
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-x: none;
   background: var(--bg);
   color: var(--text);
@@ -1070,13 +1077,21 @@ h1, h2, h3 {
 .calc-intro h1 { font-size: clamp(34px, 6vw, 62px); margin-bottom: 18px; }
 .calc-intro p { color: var(--muted); margin: 0; }
 
+/* .calc-inputs (col 1, row 1), .calc-below (col 1, row 2 - schedule/what-if
+   tables and the assumptions FAQ) and .calc-results (col 2, spanning both
+   rows) are explicit grid items so the results sidebar can stay sticky
+   alongside the *whole* left column, not just .calc-inputs - otherwise it
+   stops sticking and scrolls away the moment the schedule/assumptions
+   below it start. */
 .calc-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  grid-template-rows: auto auto;
   gap: clamp(28px, 5vw, 64px);
   align-items: start;
 }
-.calc-inputs { display: grid; gap: 30px; }
+.calc-inputs { display: grid; gap: 30px; grid-column: 1; grid-row: 1; }
+.calc-below { min-width: 0; grid-column: 1; grid-row: 2; }
 .calc-inputs .field-hint { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
 .calc-inputs .field label span { color: var(--muted); font-weight: 500; }
 .calc-inputs .field label { line-height: 1.4; min-height: 2.8em; }
@@ -1325,6 +1340,11 @@ h1, h2, h3 {
   position: sticky;
   top: 110px;
   margin: 0;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
 }
 .calc-results h2 {
   font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase;
@@ -1404,7 +1424,10 @@ h1, h2, h3 {
 
 @media (max-width: 900px) {
   .calc-grid { grid-template-columns: minmax(0, 1fr); }
-  .calc-results { position: static; }
+  /* single column: fall back to plain DOM order (inputs, then results, then
+     schedule/assumptions below) instead of the desktop grid placement */
+  .calc-inputs, .calc-results, .calc-below { grid-column: 1; grid-row: auto; }
+  .calc-results { position: static; max-height: none; overflow-y: visible; }
 }
 
 /* =========================================================
