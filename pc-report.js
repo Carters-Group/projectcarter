@@ -273,12 +273,7 @@
 
     function pull(row) {
       var val = Math.max(0, row.summary[opts.summaryKey]);
-      /* Most pulled figures are whole-dollar amounts (thousands-separated).
-         A puller can pass decimals > 0 for a non-money figure like an
-         interest rate, where rounding to the nearest whole number would
-         throw away the number that matters (7.63% -> 8%). */
-      var text = opts.decimals ? val.toFixed(opts.decimals) : Math.round(val).toLocaleString("en-AU");
-      setField(field, text);
+      setField(field, Math.round(val).toLocaleString("en-AU"));
       box.innerHTML = "";
       var note = document.createElement("p");
       note.className = "pc-pull__note";

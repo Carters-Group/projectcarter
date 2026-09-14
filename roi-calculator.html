@@ -93,6 +93,14 @@
               <button type="button" class="btn btn-ghost" id="portfolioFillBtn">Use this amount</button>
             </div>
 
+            <div class="calc-group" id="clFillGroup" hidden>
+              <h2 class="calc-subhead">Use a saved Commercial Lending report</h2>
+              <p class="field-hint">Prefill purchase price, loan and interest rate below from a major-bank scenario you've already worked out on the Commercial Lending calculator.</p>
+              <select class="pc-pull__select" id="clFillSelect"></select>
+              <p class="calc-portfolio-amount" id="clFillAmount">&mdash;</p>
+              <button type="button" class="btn btn-ghost" id="clFillBtn">Use these numbers</button>
+            </div>
+
             <div class="calc-group">
               <h2 class="calc-subhead">Report</h2>
               <div class="field">
@@ -1168,11 +1176,7 @@
       { fieldId: "fundsAvailable", sourceCalc: "noi", summaryKey: "usableEquity70", label: "Pull equity from a saved NOI report" },
       { fieldId: "fundsAvailable", sourceCalc: "grv", summaryKey: "equityAtSettlement", label: "Pull sale proceeds from a saved GRV report" },
       { fieldId: "fundsAvailable", sourceCalc: "roi", summaryKey: "netSaleProceeds", label: "Pull sale proceeds from another saved ROI report" },
-      { fieldId: "fundsAvailable", sourceCalc: "cl", summaryKey: "fundsAvailable", label: "Pull your deposit budget from a saved Commercial Lending report" },
-      { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" },
-      { fieldId: "price", sourceCalc: "cl", summaryKey: "price", label: "Pull the price from a saved Commercial Lending report" },
-      { fieldId: "lvr", sourceCalc: "cl", summaryKey: "lvr", label: "Pull the major-bank LVR from a saved Commercial Lending report" },
-      { fieldId: "rate", sourceCalc: "cl", summaryKey: "rateMid", label: "Pull the indicative rate from a saved Commercial Lending report", decimals: 2 }
+      { fieldId: "price", sourceCalc: "noi", summaryKey: "impliedValue", label: "Pull a valuation from a saved NOI report" }
     ];
 
     /* "Use your portfolio equity" - a dedicated shortcut at the top of the
@@ -1238,6 +1242,74 @@
             return;
           }
           summary = s;
+          group.hidden = false;
+          renderAmount();
+        });
+      }
+      document.addEventListener("pc-auth-change", sync);
+      if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
+    })();
+
+    /* "Use a saved Commercial Lending report" - same one-clean-block idea as
+       the portfolio equity shortcut above, for the CL calculator's price /
+       LVR / rate together, rather than four separate "Pull from..." links
+       scattered under four different fields. CL has no single master report
+       the way Portfolio Review does, so this keeps a small picker (a
+       visitor may have explored owner-occ vs SMSF as separate reports) but
+       still lands as one button that fills everything at once. */
+    (function () {
+      var group = document.getElementById("clFillGroup");
+      var sel = document.getElementById("clFillSelect");
+      var amountEl = document.getElementById("clFillAmount");
+      var btn = document.getElementById("clFillBtn");
+      var rows = [];
+
+      function describe(s) {
+        var bits = ["$" + Math.round(s.price).toLocaleString("en-AU") + " at " + s.lvr + "% LVR"];
+        if (s.rateMid != null) bits.push(s.rateMid.toFixed(2) + "% indicative rate");
+        return bits.join(", ") + ".";
+      }
+
+      function renderAmount() {
+        var row = rows.filter(function (r) { return r.id === sel.value; })[0];
+        if (row) { amountEl.textContent = describe(row.summary); btn.disabled = false; }
+        else { amountEl.textContent = "—"; btn.disabled = true; }
+      }
+
+      sel.addEventListener("change", renderAmount);
+
+      btn.addEventListener("click", function () {
+        var row = rows.filter(function (r) { return r.id === sel.value; })[0];
+        if (!row) return;
+        var s = row.summary;
+        function fill(id, val) {
+          if (val == null) return;
+          var field = document.getElementById(id);
+          field.value = (id === "price") ? Math.round(val).toLocaleString("en-AU") : String(val);
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+          field.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        fill("price", s.price);
+        fill("lvr", s.lvr);
+        fill("rate", s.rateMid);
+        document.getElementById("price").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      function sync() {
+        if (!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember())) {
+          group.hidden = true;
+          return;
+        }
+        window.pcAuth.listReports("cl").then(function (res) {
+          rows = (res.data || []).filter(function (r) { return r.summary && r.summary.price != null; });
+          if (res.error || !rows.length) { group.hidden = true; return; }
+          sel.innerHTML = "";
+          rows.forEach(function (r) {
+            var o = document.createElement("option");
+            o.value = r.id;
+            o.textContent = (r.title || "Untitled report") + " (" + new Date(r.updated_at).toLocaleDateString("en-AU") + ")";
+            sel.appendChild(o);
+          });
           group.hidden = false;
           renderAmount();
         });
