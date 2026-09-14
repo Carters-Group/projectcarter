@@ -303,6 +303,23 @@
       });
     },
 
+    /* Supabase sends a confirmation link to the new address before the
+       change actually takes effect (and, if "Secure email change" is on in
+       the project's Auth settings, one to the old address too) - nothing
+       changes here client-side until that's clicked, so profiles.email
+       and currentUser.email are left alone until the next session refresh
+       picks up the confirmed address. */
+    updateEmail: function (newEmail) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.auth.updateUser(
+        { email: newEmail },
+        { emailRedirectTo: window.location.origin + "/account" }
+      ).then(function (res) {
+        return { error: res.error };
+      });
+    },
+
     signOut: function () {
       if (!client) { return Promise.resolve({ error: null }); }
       return client.auth.signOut().then(function (r) {

@@ -188,7 +188,8 @@ and the `pc_can_save()` SQL function are the hooks for a future paywall - today
    link's `redirectTo` is always `<origin>/account`, and Supabase requires an
    exact match, so whitelisting `account.html` instead silently breaks
    sign-in (the visitor never gets a session and just sees the sign-in form
-   again).
+   again). The same redirect covers the "change email" confirmation link
+   used by the Email section on the account page - no separate setup needed.
 5. Optional: **Authentication - Providers - Email** - turn **"Confirm email"**
    off, since the magic link already proves the address.
 
