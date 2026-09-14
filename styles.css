@@ -1101,6 +1101,7 @@ h1, h2, h3 {
 .field-ref:empty { display: none; }
 
 .calc-group { display: grid; gap: 16px; }
+.calc-group[hidden] { display: none; }
 .calc-subhead {
   font-family: var(--font-body);
   font-weight: 600;
