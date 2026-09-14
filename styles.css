@@ -1324,6 +1324,7 @@ h1, h2, h3 {
   margin: 0 0 8px; color: var(--muted);
   font-family: var(--font-body); font-weight: 600;
 }
+.calc-results__acct-link { display: inline-block; margin: 0 0 18px; }
 .result-row {
   display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
   padding: 13px 0;

@@ -355,14 +355,14 @@
       stashDraft();
       var here = window.location.pathname.split("/").pop() || ("" + CALC + "-calculator.html");
       window.location.href = "account?from=" + encodeURIComponent(here);
-      return;
+      return Promise.resolve({ redirected: true });
     }
     saveBtn.disabled = true;
     msg("Saving…");
     var title = projectName() || loadedTitle || defaultTitle();
     var summary = {};
     try { if (window.pcCalcSummary) summary = window.pcCalcSummary() || {}; } catch (e) {}
-    window.pcAuth.saveReport({
+    return window.pcAuth.saveReport({
       calculator: CALC, title: title, inputs: serialize(), summary: summary, id: loadedReportId || undefined
     }).then(function (res) {
       saveBtn.disabled = false;
@@ -390,6 +390,7 @@
           if (!mres.error && !mres.data) window.pcAuth.setMasterReport(res.data.id);
         });
       }
+      return res;
     });
   }
 

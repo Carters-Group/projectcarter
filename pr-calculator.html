@@ -114,6 +114,7 @@
           </div>
 
           <dl class="calc-results" id="calcResults" aria-live="polite">
+            <a href="account#acctPortfolioCard" class="btn btn-ghost btn-sm calc-results__acct-link">View portfolio breakdown in account</a>
             <h2>Portfolio position</h2>
             <div class="result-row is-teaser"><dt>Properties</dt><dd data-out="count">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Portfolio value</dt><dd data-out="value">&mdash;</dd></div>
@@ -1403,11 +1404,17 @@
       window.clearTimeout(flashSaveMsg._t);
       flashSaveMsg._t = window.setTimeout(function () { savePropertyMsg.hidden = true; }, 4000);
     }
-    function doSaveProperty() {
+    /* forceCloud pushes the whole portfolio to the signed-in visitor's saved
+       report even from the plain "Save property" button's flow when asked -
+       "Save property & add to portfolio" always wants this, since its whole
+       point is getting the property into the account page's portfolio, not
+       just this browser's local template list. Returns the save promise (or
+       null if there was nothing to push) so a caller can wait for it. */
+    function doSaveProperty(forceCloud) {
       var lastId = propIds[propIds.length - 1];
-      if (lastId == null) return;
+      if (lastId == null) return null;
       var fields = serializeCard(lastId);
-      if (!fields) return;
+      if (!fields) return null;
       var label = (fields.label || "").trim() || "Saved property";
       var list = loadTemplates();
       list.unshift({ id: "t" + Date.now(), label: label, savedAt: new Date().toISOString(), fields: fields });
@@ -1416,18 +1423,26 @@
       renderTemplatePicker();
       maybeAutoCollapse(lastId);
       render();
-      /* also push the whole portfolio to the signed-in visitor's saved
-         report, so this property's numbers actually reach the account
-         page - not just this browser's local template list */
-      if (window.pcAuth && window.pcAuth.isMember() && window.pcReport && window.pcReport.save) {
-        window.pcReport.save();
-      }
       flashSaveMsg('Saved "' + label + '" - reuse it any time from "Reuse a saved property" below.');
+      var wantsCloud = forceCloud || (window.pcAuth && window.pcAuth.isMember());
+      if (wantsCloud && window.pcReport && window.pcReport.save) {
+        return window.pcReport.save();
+      }
+      return null;
     }
-    document.getElementById("saveProperty").addEventListener("click", doSaveProperty);
+    document.getElementById("saveProperty").addEventListener("click", function () { doSaveProperty(false); });
     document.getElementById("saveAddProperty").addEventListener("click", function () {
-      doSaveProperty();
-      doAddProperty(true);
+      var saved = doSaveProperty(true);
+      if (saved && typeof saved.then === "function") {
+        /* onSave() itself redirects anonymous visitors to account (stashing
+           a draft first) and marks that with { redirected: true } - skip
+           our own navigation then so we don't clobber its ?from= param */
+        saved.then(function (res) {
+          if (!res || !res.redirected) window.location.href = "account";
+        });
+      } else {
+        window.location.href = "account";
+      }
     });
     /* fired by pc-report.js once a saved portfolio has been rehydrated -
        collapse every restored card unconditionally (not just the ones that
