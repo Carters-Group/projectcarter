@@ -194,6 +194,12 @@
                 <div class="input-money"><input type="text" inputmode="numeric" id="otherCost" autocomplete="off" placeholder="10,000" /></div>
                 <p class="field-hint">Due diligence, buyer's agent and adviser fees, and anything else.</p>
               </div>
+
+              <div class="field">
+                <label for="capexCost">Capex / add value investment <span>(optional)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="capexCost" autocomplete="off" placeholder="150,000" /></div>
+                <p class="field-hint">Money spent on works to add value (refurbishment, re-leasing costs, etc.), added to cash required up front alongside the other purchasing costs.</p>
+              </div>
             </div>
 
             <div class="calc-group">
@@ -265,32 +271,6 @@
                   <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="upliftGrowth" autocomplete="off" placeholder="4" /></div>
                 </div>
               </div>
-            </div>
-
-            <div class="calc-group">
-              <h2 class="calc-subhead">Capex / value-add investment</h2>
-
-              <label class="calc-check">
-                <input type="checkbox" id="capexOn" />
-                <span>Is there a capex or value-add spend? (e.g. renovation or re-leasing costs)</span>
-              </label>
-
-              <div class="calc-uplift" id="capexFields" hidden>
-                <div class="field">
-                  <label for="capexYear">Starting year <span>(when the spend begins)</span></label>
-                  <input type="text" inputmode="numeric" id="capexYear" autocomplete="off" placeholder="1" />
-                </div>
-                <div class="field">
-                  <label for="capexAmount">Total amount</label>
-                  <div class="input-money"><input type="text" inputmode="numeric" id="capexAmount" autocomplete="off" placeholder="150,000" /></div>
-                </div>
-                <div class="field">
-                  <label for="capexSpread">Spread over <span>(years)</span></label>
-                  <input type="text" inputmode="numeric" id="capexSpread" autocomplete="off" placeholder="1" />
-                  <p class="field-hint">Divides the total evenly across this many years, starting at the year above. Leave at 1 for a single lump sum.</p>
-                </div>
-              </div>
-              <p class="field-hint">Set on its own year, separate from any value uplift above, so it can land in the months before a rent uplift kicks in &mdash; buy, spend the capex in year 1, and only step the rent up in year 2. Works just as well with no value uplift ticked at all. It comes straight off cash kept (and the IRR cashflow) each year it falls in, not off Total cash required at settlement.</p>
             </div>
 
           </div>
@@ -400,10 +380,9 @@
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
             <li><strong>Loan and deposit.</strong> The loan is the percentage of purchase price you enter. The deposit is the rest.</li>
-            <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan / valuation cost, legal cost, building inspection and other purchasing cost.</li>
+            <li><strong>Total cash required</strong> is the deposit plus stamp duty, loan / valuation cost, legal cost, building inspection, other purchasing cost and any capex / add value investment.</li>
             <li><strong>Stamp duty</strong> can be estimated by state: click the field, pick a state or territory, and tick "commercial" if it applies. It fills from that state's published general transfer duty rates for a company or investor purchase, plus the land-titles-office fees to register the transfer and, when a loan is entered, the mortgage. It is an estimate, not the state revenue office's figure, and excludes surcharges and concessions. Commercial and industrial property is treated differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax.</li>
             <li><strong>Net rent</strong> starts at your Year 1 figure and grows by the rental increase each year. If a value uplift is set, in that year the rent steps to the new base rent and then grows by the new rate from then on.</li>
-            <li><strong>Capex / value-add investment</strong> is its own optional figure with its own starting year, independent of any value uplift above &mdash; so a renovation spend in year 1 can sit ahead of a rent step-up that only lands in year 2, or run entirely on its own with no uplift ticked at all. Set "Spread over" to more than 1 year to split the total evenly across a multi-year works programme instead of a single lump sum. It comes straight off cash kept (and the IRR cashflow) for each year it falls in, not off Total cash required at settlement.</li>
             <li><strong>Property value</strong> depends on the property type you pick. For <strong>commercial</strong>, value is net rent &divide; capitalisation rate: the cap rate runs straight-line from the entry net yield (Year 1 net rent &divide; price) in year 1 to the <strong>exit cap rate</strong> you enter by the final year, so you can model local cap rates, yield compression or market softening on sale (leave it blank to hold the entry yield; a rent uplift lifts value too). For <strong>residential</strong>, value instead compounds the purchase price at the <strong>capital growth rate</strong> you enter, since a home's value is not usually read off its rent.</li>
             <li><strong>Each year:</strong> interest is charged on the opening loan balance; the cash left after interest is split, with your debt-reduction percentage paying down the loan and the remainder kept as cash.</li>
             <li><strong>At sale</strong> (end of the term) the property is sold at its value that year, the loan is repaid, and net sale proceeds plus all rental cash kept, less the cash you put in, is the total profit.</li>
@@ -459,8 +438,6 @@
     var leadForm = document.getElementById("leadForm");
     var upliftOn = document.getElementById("upliftOn");
     var upliftFields = document.getElementById("upliftFields");
-    var capexOn = document.getElementById("capexOn");
-    var capexFields = document.getElementById("capexFields");
     var stampDutyEl = document.getElementById("stampDuty");
     var stampEst = document.getElementById("stampEst");
     var stampState = document.getElementById("stampState");
@@ -678,7 +655,7 @@
       var lvr = num("lvr");
       var loan = price * lvr / 100;
       var deposit = Math.max(price - loan, 0);
-      var acqCosts = num("stampDuty") + num("valuationCost") + num("legalCost") + num("buildingInspection") + num("otherCost");
+      var acqCosts = num("stampDuty") + num("valuationCost") + num("legalCost") + num("buildingInspection") + num("otherCost") + num("capexCost");
       var cashRequired = deposit + acqCosts;
 
       var nr1 = num("rent");
@@ -691,12 +668,6 @@
       var uYear = Math.round(num("upliftYear"));
       var uRent = num("upliftRent");
       var uG = num("upliftGrowth") / 100;
-
-      var capexOnFlag = capexOn.checked;
-      var capexYear = Math.round(num("capexYear"));
-      var capexAmount = num("capexAmount");
-      var capexSpread = Math.max(Math.round(num("capexSpread")) || 1, 1);
-      var capexPerYear = capexAmount / capexSpread;
 
       var isRes = document.getElementById("propType").value === "res";
       var capGrowth = num("capGrowth") / 100;
@@ -723,7 +694,6 @@
           var debtPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
           balance -= debtPay;
           var kept = cashAfterInterest - debtPay;
-          if (capexOnFlag && capexAmount > 0 && capexYear >= 1 && t >= capexYear && t < capexYear + capexSpread) kept -= capexPerYear;
           totalKept += kept;
           var value;
           if (isRes) {
@@ -771,7 +741,6 @@
         fundsAvailable: fundsAvailable, shortfall: shortfall,
         nr1: nr1, g: g, rate: rate, term: term, dr: dr,
         uplift: uplift, uYear: uYear, uRent: uRent, uG: uG,
-        capexOn: capexOnFlag, capexYear: capexYear, capexAmount: capexAmount, capexSpread: capexSpread,
         isRes: isRes, capGrowth: capGrowth,
         entryYield: entryYield, exitCap: exitCap, rows: rows,
         saleValue: saleValue, loanAtSale: loanAtSale, netProceeds: netProceeds,
@@ -857,10 +826,6 @@
       upliftFields.hidden = !upliftOn.checked;
       render();
     });
-    capexOn.addEventListener("change", function () {
-      capexFields.hidden = !capexOn.checked;
-      render();
-    });
 
     var propTypeEl = document.getElementById("propType");
     var exitCapLabelEl = document.getElementById("exitCapLabel");
@@ -894,7 +859,7 @@
     document.getElementById("lvr").addEventListener("input", recalcAutofills);
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "fundsAvailable", "rent", "upliftRent", "capexAmount"].forEach(function (id) {
+    ["price", "stampDuty", "valuationCost", "legalCost", "buildingInspection", "otherCost", "capexCost", "fundsAvailable", "rent", "upliftRent"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -984,6 +949,7 @@
       row("Legal cost", optMoney(num("legalCost")));
       row("Building inspection", optMoney(num("buildingInspection")));
       row("Other purchasing cost", optMoney(num("otherCost")));
+      row("Capex / add value investment", optMoney(num("capexCost")));
       row("Year 1 net rental income", money(m.nr1) + " / year");
       row("Rental increase", (m.g * 100).toFixed(2) + "% / year");
       row("Loan interest", (m.rate * 100).toFixed(2) + "% / year");
@@ -997,11 +963,6 @@
           ", then " + (m.uG * 100).toFixed(2) + "% / year");
       } else {
         row("Value uplift", "None");
-      }
-      if (m.capexOn && m.capexAmount > 0) {
-        row("Capex / value-add investment", m.capexSpread > 1
-          ? money(m.capexAmount) + " spread over years " + m.capexYear + "–" + (m.capexYear + m.capexSpread - 1) + " (" + money(m.capexAmount / m.capexSpread) + "/yr)"
-          : money(m.capexAmount) + " in year " + m.capexYear);
       }
 
       y += 8;
@@ -1071,6 +1032,7 @@
         "Legal cost: " + optMoney(num("legalCost")),
         "Building inspection: " + optMoney(num("buildingInspection")),
         "Other purchasing cost: " + optMoney(num("otherCost")),
+        "Capex / add value investment: " + optMoney(num("capexCost")),
         "Total cash required: " + money(m.cashRequired),
         "Year 1 net rental income: " + money(m.nr1) + "/yr",
         "Rental increase: " + (m.g * 100).toFixed(2) + "%/yr",
@@ -1086,11 +1048,6 @@
           ", then " + (m.uG * 100).toFixed(2) + "%/yr");
       } else {
         lines.push("Value uplift: none");
-      }
-      if (m.capexOn && m.capexAmount > 0) {
-        lines.push("Capex / value-add investment: " + (m.capexSpread > 1
-          ? money(m.capexAmount) + " spread over years " + m.capexYear + "-" + (m.capexYear + m.capexSpread - 1) + " (" + money(m.capexAmount / m.capexSpread) + "/yr)"
-          : money(m.capexAmount) + " in year " + m.capexYear));
       }
       lines.push("----");
       lines.push("Entry net yield: " + (m.entryYield ? (m.entryYield * 100).toFixed(2) + "%" : "n/a"));
