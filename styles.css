@@ -29,7 +29,7 @@
    doesn't drag the other axis along with it, so this still stops the odd
    wide element from causing horizontal scroll but no longer silently
    breaks every sticky element on the site (the results sidebar included). */
-html { scroll-behavior: smooth; overflow-x: clip; }
+html { scroll-behavior: smooth; overflow-x: clip; scroll-padding-top: 120px; }
 
 body {
   margin: 0;
@@ -485,6 +485,7 @@ h1, h2, h3 {
   border: 1px solid var(--line);
   color: var(--text);
   font-family: inherit;
+  text-overflow: ellipsis;
   font-size: 16px;
   padding: 13px 15px;
   border-radius: 0;
@@ -509,7 +510,7 @@ h1, h2, h3 {
   gap: 30px; flex-wrap: wrap;
   padding-block: 50px;
 }
-.footer-nav { display: flex; gap: 28px; }
+.footer-nav { display: flex; flex-wrap: wrap; gap: 12px 28px; }
 .footer-nav a {
   text-decoration: none; text-transform: uppercase;
   font-size: 12px; letter-spacing: 0.14em; color: var(--muted);
