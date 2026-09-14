@@ -726,12 +726,13 @@
         '</div>' +
         '<p class="field-hint">Set the entity that holds this property and its tax rate - a company pays a flat rate, a trust distributes to beneficiaries at theirs, so use whatever rate actually applies once the numbers land. The entity itself is for your report only and does not change the calculation; only the rate does.</p>' +
         '<div data-res-only>' +
-        '<label class="calc-check"><input type="checkbox" id="' + p + 'ngNew" />' +
-          '<span>Bought after the 2026 Federal Budget - post-Budget negative gearing rules apply</span></label>' +
-        '<p class="field-hint">From the 2026 Federal Budget, a rental loss on a property bought after Budget night can no longer be offset against salary or other income. Tick this and any loss on this property is quarantined: no tax refund in the year, and the loss carries forward against future rental profit from this property or the gain on sale. Rental profits are still taxed. Properties held before the Budget are unaffected. This change applies to residential property only - commercial negative gearing is unaffected. Brand-new and off-the-plan dwellings are exempt from the quarantine, so a loss on a new home can still be claimed against other income as normal - tick the box below if this property qualifies. A modelling assumption, not tax advice.</p>' +
-        '<label class="calc-check" id="' + p + 'ngExemptWrap" hidden><input type="checkbox" id="' + p + 'ngExempt" />' +
-          '<span>Brand-new dwelling - exempt from the quarantine</span></label>' +
-        '<p class="field-hint" id="' + p + 'ngExemptHint" hidden>New and off-the-plan dwellings are carved out of the post-Budget change, so a loss on this property still offsets other income as before.</p>' +
+        '<div class="field"><label for="' + p + 'ngstatus">Post-2026 Budget negative gearing</label>' +
+        '<select id="' + p + 'ngstatus">' +
+          '<option value="">Not affected - held before the Budget, or n/a</option>' +
+          '<option value="quarantined">Bought after the Budget</option>' +
+          '<option value="exempt">Bought after the Budget - new / off-the-plan</option>' +
+        '</select></div>' +
+        '<p class="field-hint">A loss on a residential property bought after the 2026 Budget can no longer offset your other income - it carries forward instead, and profits are still taxed. New and off-the-plan dwellings are exempt. A modelling assumption, not tax advice.</p>' +
         '</div>' +
 
         '<p class="dwelling-type__calc" data-invest-only>' +
@@ -761,14 +762,7 @@
         }
         render();
       });
-      card.querySelector("#" + p + "ngNew").addEventListener("change", function () {
-        var on = this.checked;
-        card.querySelector("#" + p + "ngExemptWrap").hidden = !on;
-        card.querySelector("#" + p + "ngExemptHint").hidden = !on;
-        if (!on) card.querySelector("#" + p + "ngExempt").checked = false;
-        render();
-      });
-      card.querySelector("#" + p + "ngExempt").addEventListener("change", render);
+      card.querySelector("#" + p + "ngstatus").addEventListener("change", render);
       card.querySelector("#" + p + "ptype").addEventListener("change", function (e) {
         applyType(id, e.isTrusted);
         positionPct();
@@ -1060,11 +1054,9 @@
 
       /* Post-Budget negative gearing: a rental loss on a property bought after
          the 2026 Budget is quarantined - it no longer offsets other income, so
-         it earns no refund in the year and carries forward instead. Brand-new
-         dwellings are carved out of that change, so a ticked "brand-new"
-         exemption cancels the quarantine even when the post-Budget tick is on. */
-      var ngNew = !isCom && document.getElementById(p + "ngNew").checked &&
-        !document.getElementById(p + "ngExempt").checked;
+         it earns no refund in the year and carries forward instead. New and
+         off-the-plan dwellings are carved out of that change. */
+      var ngNew = !isCom && document.getElementById(p + "ngstatus").value === "quarantined";
 
       /* the sheet's two-step tax treatment: refund the pre-depreciation loss
          (or tax the profit), then add the depreciation credits on top */
