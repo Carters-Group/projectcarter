@@ -895,6 +895,7 @@
       renumber();
       updateRemoveButtons();
       render();
+      scrollToPropActions();
     }
 
     function renumber() {
@@ -1348,15 +1349,30 @@
 
     inputs.addEventListener("input", render);
 
+    /* Removing or collapsing a card - especially one above where the visitor
+       is currently scrolled - shrinks the page by a screen's worth of
+       fields in one go. The browser's own scroll anchoring then kicks in to
+       keep whatever was under the cursor still in view, which fights a
+       scrollIntoView called in the same tick and silently cancels it (this
+       is why the fix looked like it worked in a quick manual test but not
+       on a real, longer portfolio - scroll anchoring only has something to
+       compensate for once there is enough page above the fold). Deferring
+       the scroll a beat, after anchoring has already settled, lets it
+       actually take effect. */
+    function scrollToPropActions() {
+      window.setTimeout(function () {
+        var anchor = document.querySelector(".calc-prop-actions");
+        if (anchor) anchor.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 60);
+    }
+
     /* Collapsing an open card can shrink the page by a screen's worth of
-       fields in one go. The browser keeps whatever scroll position it had,
-       which - since everything below (schedule, PDF button, assumptions)
-       just shifted up underneath the visitor - tends to strand them down
-       near the FAQ-style assumptions section with nothing obviously there.
-       Scroll the buttons row back into view on an actual open-to-collapsed
-       transition so the visitor lands back where the action is. Suppressed
-       during a bulk restore (opts.silent), which collapses every card at
-       once right after the page loads. */
+       fields in one go, stranding the visitor down near the FAQ-style
+       assumptions section with nothing obviously there once everything
+       below has shifted up. Scroll the buttons row back into view on an
+       actual open-to-collapsed transition. Suppressed during a bulk restore
+       (opts.silent), which collapses every card at once right after the
+       page loads. */
     function setCardCollapsed(id, collapsed, opts) {
       var card = propertyCards.querySelector('[data-prop="' + id + '"]');
       if (!card) return;
@@ -1366,10 +1382,7 @@
       if (body) body.hidden = collapsed;
       if (toggle) toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
       card.classList.toggle("is-collapsed", collapsed);
-      if (collapsed && !wasCollapsed && !(opts && opts.silent)) {
-        var anchor = document.querySelector(".calc-prop-actions");
-        if (anchor) anchor.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      if (collapsed && !wasCollapsed && !(opts && opts.silent)) scrollToPropActions();
     }
 
     /* once a card has its core numbers in (value, loan, and rent unless it's
