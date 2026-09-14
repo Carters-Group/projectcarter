@@ -156,6 +156,17 @@
                 <div class="input-money"><input type="text" inputmode="numeric" id="landValue" autocomplete="off" placeholder="0" /></div>
                 <p class="field-hint">The price paid for the land only. Used to estimate GST under the margin scheme. It is not added to costs again; the DA total above already includes it.</p>
               </div>
+
+              <div class="field">
+                <label for="daEquity">Equity invested to reach DA</label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="daEquity" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">The "Cash (equity) required" figure from the <a href="development-site-calculator">DA calculator</a>: the part of the cost to DA you funded yourself rather than with a land loan. It counts as contributed capital here.</p>
+              </div>
+              <div class="field">
+                <label for="cashIn">Additional cash (equity) contribution</label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="cashIn" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">Further equity you put in from DA through to settlement, on top of the DA-stage equity above. The two together are your total contributed capital; the rest of the project cost is the debt required, and the cash-on-cash return is measured on the total.</p>
+              </div>
             </div>
 
             <!-- ===== 2. BUILDING CONTRACT ==================================== -->
@@ -447,19 +458,9 @@
               </div>
             </div>
 
-            <!-- ===== 9. FUNDING & SCENARIOS ============================= -->
+            <!-- ===== 9. WHAT-IF SCENARIOS ============================= -->
             <div class="calc-group">
-              <h2 class="calc-subhead">Funding &amp; scenarios</h2>
-              <div class="field">
-                <label for="daEquity">Equity invested to reach DA</label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="daEquity" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">The "Cash (equity) required" figure from the <a href="development-site-calculator">DA calculator</a>: the part of the cost to DA you funded yourself rather than with a land loan. It counts as contributed capital here.</p>
-              </div>
-              <div class="field">
-                <label for="cashIn">Additional cash (equity) contribution</label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="cashIn" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">Further equity you put in from DA through to settlement, on top of the DA-stage equity above. The two together are your total contributed capital; the rest of the project cost is the debt required, and the cash-on-cash return is measured on the total.</p>
-              </div>
+              <h2 class="calc-subhead">What-if scenarios</h2>
               <div class="field">
                 <label for="whatIfSale">What if sale prices fell by <span>(%)</span></label>
                 <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="whatIfSale" autocomplete="off" placeholder="5" value="5" /></div>
