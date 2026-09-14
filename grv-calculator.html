@@ -128,13 +128,6 @@
               <button type="button" class="btn btn-ghost" id="daFillBtn">Use this report</button>
             </div>
 
-            <div class="calc-group" id="portfolioFillGroup" hidden>
-              <h2 class="calc-subhead">Portfolio equity for construction</h2>
-              <p class="field-hint">Prefill "Additional cash (equity) contribution" below from your saved portfolio's usable equity, capped at 50% LVR and net of the equity already committed to reach DA above &mdash; so the same portfolio equity is not counted at both stages.</p>
-              <p class="calc-portfolio-amount" id="portfolioFillAmount">&mdash;</p>
-              <button type="button" class="btn btn-ghost" id="portfolioFillBtn">Use this amount</button>
-            </div>
-
             <div class="calc-group">
               <h2 class="calc-subhead">Report</h2>
               <div class="field">
@@ -169,7 +162,7 @@
               <div class="field">
                 <label for="cashIn">Additional cash (equity) contribution</label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="cashIn" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">Further equity you put in from DA through to settlement, on top of the DA-stage equity above. The two together are your total contributed capital; the rest of the project cost is the debt required, and the cash-on-cash return is measured on the total.</p>
+                <p class="field-hint">Further equity you put in from DA through to settlement, on top of the DA-stage equity above. The two together are your total contributed capital; the rest of the project cost is the debt required, and the cash-on-cash return is measured on the total. If this site is already one of the properties in your saved portfolio, its equity is already counted there &mdash; check you are not drawing the same equity twice.</p>
               </div>
             </div>
 
@@ -1765,76 +1758,6 @@
             o.textContent = (r.title || "Untitled report") + " (" + new Date(r.updated_at).toLocaleDateString("en-AU") + ")";
             sel.appendChild(o);
           });
-          group.hidden = false;
-          renderAmount();
-        });
-      }
-      document.addEventListener("pc-auth-change", sync);
-      if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(sync);
-    })();
-  </script>
-  <script>
-    /* "Portfolio equity for construction" - usable equity from the saved
-       portfolio, but capped at a more conservative 50% LVR (rather than the
-       70/80% offered elsewhere) and netted against whatever DA-stage equity
-       is currently sitting in "Equity invested to reach DA" above. Without
-       that netting, a visitor who already drew portfolio equity to fund the
-       DA stage could draw the same headroom again here, double counting it
-       as both the DA equity and the additional cash contribution. */
-    (function () {
-      var group = document.getElementById("portfolioFillGroup");
-      var amountEl = document.getElementById("portfolioFillAmount");
-      var btn = document.getElementById("portfolioFillBtn");
-      var daEquityField = document.getElementById("daEquity");
-      var summary = null;
-
-      function parsedDaEquity() {
-        var v = parseFloat((daEquityField.value || "").replace(/[^0-9.-]/g, ""));
-        return isFinite(v) ? v : 0;
-      }
-
-      function available() {
-        if (!summary) return null;
-        return Math.max((summary.usableEquity50 || 0) - parsedDaEquity(), 0);
-      }
-
-      function renderAmount() {
-        var val = available();
-        if (val > 0) {
-          amountEl.textContent = "$" + Math.round(val).toLocaleString("en-AU") +
-            " available at 50% LVR, after netting off " + "$" + Math.round(parsedDaEquity()).toLocaleString("en-AU") +
-            " already committed to reach DA.";
-          btn.disabled = false;
-        } else if (summary) {
-          amountEl.textContent = "No further usable equity at 50% LVR once the DA-stage equity above is netted off.";
-          btn.disabled = true;
-        }
-      }
-
-      daEquityField.addEventListener("input", renderAmount);
-
-      btn.addEventListener("click", function () {
-        var val = available();
-        if (!(val > 0)) return;
-        var field = document.getElementById("cashIn");
-        field.value = Math.round(val).toLocaleString("en-AU");
-        field.dispatchEvent(new Event("input", { bubbles: true }));
-        field.dispatchEvent(new Event("change", { bubbles: true }));
-        field.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
-
-      function sync() {
-        if (!(window.pcAuth && window.pcAuth.configured && window.pcAuth.isMember())) {
-          group.hidden = true;
-          return;
-        }
-        window.pcAuth.getMasterReport().then(function (res) {
-          var s = res && res.data && res.data.summary;
-          if (res.error || !s || s.usableEquity50 == null) {
-            group.hidden = true;
-            return;
-          }
-          summary = s;
           group.hidden = false;
           renderAmount();
         });
