@@ -1003,6 +1003,24 @@
       if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
     });
     scheduleWrap.addEventListener("click", function () { if (!unlocked) openModal(); });
+
+    /* Small labelled snapshot, saved alongside the report so other
+       calculators can pull a figure across (e.g. the price and LVR this
+       loan type supports, straight into a hold-model calculator) without
+       re-running this page's model. See pc-report.js. Only exposed for the
+       "purchase price" loan types (not BTR/BTS, which price off total
+       development cost, not a purchase price a hold model can use) and only
+       for the major-bank tier - the more commonly quoted, conservative
+       figure; tier 2 stays a page-only comparison for now. */
+    window.pcCalcSummary = function () {
+      var m = model();
+      if (!m.valid || !m.major.available || m.type.unit !== "Purchase price") return {};
+      var rateMid = m.major.rate ? (m.major.rate[0] + m.major.rate[1]) / 2 : null;
+      var summary = { price: Math.round(m.price), lvr: m.major.lvr };
+      if (rateMid != null) summary.rateMid = Math.round(rateMid * 100) / 100;
+      if (m.fundsAvailable > 0) summary.fundsAvailable = Math.round(m.fundsAvailable);
+      return summary;
+    };
   })();
   </script>
   <script>
