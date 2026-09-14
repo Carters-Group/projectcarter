@@ -1430,10 +1430,12 @@
       doAddProperty(true);
     });
     /* fired by pc-report.js once a saved portfolio has been rehydrated -
-       collapse the restored cards to just their names rather than leaving
-       every property open */
+       collapse every restored card unconditionally (not just the ones that
+       pass the "looks full" heuristic used while a visitor is still typing -
+       a saved property might have no loan or no rent yet and would never
+       meet that bar) so nothing is left open on load */
     document.addEventListener("pc-pr-restored", function () {
-      collapseFullCards();
+      propIds.forEach(function (id) { setCardCollapsed(id, true); });
       render();
     });
     document.getElementById("propTemplateUse").addEventListener("click", function () {
