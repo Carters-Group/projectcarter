@@ -74,24 +74,76 @@
         <!-- signed out -->
         <div class="card acct-card" id="acctSignedOut" hidden>
           <h2 class="calc-subhead">Sign in or create an account</h2>
-          <form id="magicForm" novalidate>
-            <div class="field">
-              <label for="acctName">Name</label>
-              <input type="text" id="acctName" autocomplete="name" placeholder="Your name" />
-              <p class="field-hint">Only needed the first time you sign in.</p>
-            </div>
-            <div class="field">
-              <label for="acctPhone">Phone</label>
-              <input type="tel" id="acctPhone" autocomplete="tel" placeholder="0400 000 000" />
-            </div>
-            <div class="field">
-              <label for="acctEmail">Email</label>
-              <input type="email" id="acctEmail" autocomplete="email" required placeholder="you@example.com" />
-            </div>
-            <button type="submit" class="btn btn-accent btn-block" id="magicBtn">Email me a sign-in link</button>
-            <p class="form-fineprint">We use your details only to run your account and follow up if you have asked us to.</p>
-          </form>
-          <p class="acct-msg" id="magicMsg" role="status" hidden></p>
+
+          <div class="acct-authtabs" role="tablist" aria-label="Sign in or create an account">
+            <button type="button" class="acct-authtab is-active" id="acctTabSignin" role="tab" aria-selected="true">Sign in</button>
+            <button type="button" class="acct-authtab" id="acctTabSignup" role="tab" aria-selected="false">Create account</button>
+          </div>
+
+          <!-- sign in with password -->
+          <div id="acctPanelSignin">
+            <form id="signinForm" novalidate>
+              <div class="field">
+                <label for="signinEmail">Email</label>
+                <input type="email" id="signinEmail" autocomplete="email" required placeholder="you@example.com" />
+              </div>
+              <div class="field">
+                <label for="signinPassword">Password</label>
+                <input type="password" id="signinPassword" autocomplete="current-password" required placeholder="Your password" />
+              </div>
+              <button type="submit" class="btn btn-accent btn-block" id="signinBtn">Sign in</button>
+            </form>
+            <p class="acct-msg" id="signinMsg" role="status" hidden></p>
+            <p class="acct-authswitch">No password set, or forgotten it? <button type="button" class="linklike" id="acctGoMagic">Email me a sign-in link instead</button></p>
+          </div>
+
+          <!-- create account -->
+          <div id="acctPanelSignup" hidden>
+            <form id="signupForm" novalidate>
+              <div class="field">
+                <label for="signupName">Name</label>
+                <input type="text" id="signupName" autocomplete="name" placeholder="Your name" />
+              </div>
+              <div class="field">
+                <label for="signupPhone">Phone</label>
+                <input type="tel" id="signupPhone" autocomplete="tel" placeholder="0400 000 000" />
+              </div>
+              <div class="field">
+                <label for="signupEmail">Email</label>
+                <input type="email" id="signupEmail" autocomplete="email" required placeholder="you@example.com" />
+              </div>
+              <div class="field">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" autocomplete="new-password" required placeholder="At least 6 characters" />
+              </div>
+              <button type="submit" class="btn btn-accent btn-block" id="signupBtn">Create account</button>
+              <p class="form-fineprint">We use your details only to run your account and follow up if you have asked us to.</p>
+            </form>
+            <p class="acct-msg" id="signupMsg" role="status" hidden></p>
+          </div>
+
+          <!-- magic link fallback -->
+          <div id="acctPanelMagic" hidden>
+            <form id="magicForm" novalidate>
+              <div class="field">
+                <label for="acctName">Name</label>
+                <input type="text" id="acctName" autocomplete="name" placeholder="Your name" />
+                <p class="field-hint">Only needed the first time you sign in.</p>
+              </div>
+              <div class="field">
+                <label for="acctPhone">Phone</label>
+                <input type="tel" id="acctPhone" autocomplete="tel" placeholder="0400 000 000" />
+              </div>
+              <div class="field">
+                <label for="acctEmail">Email</label>
+                <input type="email" id="acctEmail" autocomplete="email" required placeholder="you@example.com" />
+              </div>
+              <button type="submit" class="btn btn-accent btn-block" id="magicBtn">Email me a sign-in link</button>
+              <p class="form-fineprint">We use your details only to run your account and follow up if you have asked us to.</p>
+            </form>
+            <p class="acct-msg" id="magicMsg" role="status" hidden></p>
+            <p class="acct-authswitch"><button type="button" class="linklike" id="acctBackToSignin">Back to sign in</button></p>
+          </div>
         </div>
 
         <!-- signed in -->
@@ -150,7 +202,38 @@
                 &nbsp;&middot;&nbsp;
                 <button type="button" class="linklike" id="portfolioChangeBtn">Choose a different report</button>
               </p>
-              <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn" style="margin-top:14px">See this as an ROI projection</button>
+
+              <div class="acct-debt-goal" id="portfolioPlanInputs">
+                <p class="acct-eyebrow">Portfolio plan</p>
+                <div class="acct-plan__row">
+                  <div class="field">
+                    <label for="planYears">Plan over</label>
+                    <select id="planYears">
+                      <option value="1">1 year</option>
+                      <option value="2">2 years</option>
+                      <option value="3">3 years</option>
+                      <option value="5" selected>5 years</option>
+                      <option value="7">7 years</option>
+                      <option value="10">10 years</option>
+                      <option value="15">15 years</option>
+                      <option value="20">20 years</option>
+                      <option value="25">25 years</option>
+                      <option value="30">30 years</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="planCapGrowth">Capital growth <span>(per year)</span></label>
+                    <div class="input-pct"><input type="text" inputmode="decimal" id="planCapGrowth" autocomplete="off" placeholder="3.0" value="3" /></div>
+                  </div>
+                  <div class="field">
+                    <label for="planRentGrowth">Rental growth <span>(per year)</span></label>
+                    <div class="input-pct"><input type="text" inputmode="decimal" id="planRentGrowth" autocomplete="off" placeholder="3.0" value="3" /></div>
+                  </div>
+                </div>
+                <p class="field-hint">One blended growth rate applied across the whole portfolio rather than property-by-property, and debt is assumed to reduce the same way Portfolio Review models it - 50% of surplus cash after interest goes to principal, at the blended rate implied by your saved properties. No capital gains tax is included here - whether and when to sell is your call, not this plan's.</p>
+              </div>
+
+              <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn">Generate portfolio plan</button>
               <p class="acct-msg" id="portfolioRoiMsg" hidden></p>
               <div id="portfolioRoiResult" hidden>
                 <div class="acct-overview acct-overview--modes" id="portfolioRoiStats"></div>
@@ -222,6 +305,17 @@
               <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
             </form>
             <p class="acct-msg" id="profMsg" hidden></p>
+
+            <h3 class="acct-subhead-sm" style="margin-top:28px">Password</h3>
+            <form id="passwordForm" novalidate>
+              <div class="field">
+                <label for="profPassword">New password</label>
+                <input type="password" id="profPassword" autocomplete="new-password" placeholder="At least 6 characters" />
+                <p class="field-hint">Set this once to sign in with a password next time, instead of waiting on an email link.</p>
+              </div>
+              <button type="submit" class="btn btn-ghost" id="passSaveBtn">Update password</button>
+            </form>
+            <p class="acct-msg" id="passMsg" hidden></p>
           </div>
         </div>
       </div>
@@ -291,6 +385,15 @@
     var magicForm      = document.getElementById("magicForm");
     var magicMsg       = document.getElementById("magicMsg");
     var magicBtn       = document.getElementById("magicBtn");
+    var signinForm     = document.getElementById("signinForm");
+    var signinMsg      = document.getElementById("signinMsg");
+    var signinBtn      = document.getElementById("signinBtn");
+    var signupForm     = document.getElementById("signupForm");
+    var signupMsg      = document.getElementById("signupMsg");
+    var signupBtn      = document.getElementById("signupBtn");
+    var passwordForm   = document.getElementById("passwordForm");
+    var passMsg        = document.getElementById("passMsg");
+    var passSaveBtn    = document.getElementById("passSaveBtn");
     var reportsList    = document.getElementById("reportsList");
     var reportsEmpty   = document.getElementById("reportsEmpty");
     var reportsMsg     = document.getElementById("reportsMsg");
@@ -323,6 +426,39 @@
       node.hidden = !text;
       node.className = "acct-msg" + (kind ? " is-" + kind : "");
     }
+
+    /* three ways in: password sign-in (default), create account, and the
+       original email-link flow kept as a fallback for anyone who signed up
+       before passwords existed, or who has forgotten theirs */
+    var authTabSignin  = document.getElementById("acctTabSignin");
+    var authTabSignup  = document.getElementById("acctTabSignup");
+    var authPanelSignin = document.getElementById("acctPanelSignin");
+    var authPanelSignup = document.getElementById("acctPanelSignup");
+    var authPanelMagic  = document.getElementById("acctPanelMagic");
+
+    function showAuthPanel(which) {
+      hide(authPanelSignin); hide(authPanelSignup); hide(authPanelMagic);
+      authTabSignin.classList.remove("is-active");
+      authTabSignup.classList.remove("is-active");
+      authTabSignin.setAttribute("aria-selected", "false");
+      authTabSignup.setAttribute("aria-selected", "false");
+      if (which === "signup") {
+        show(authPanelSignup);
+        authTabSignup.classList.add("is-active");
+        authTabSignup.setAttribute("aria-selected", "true");
+      } else if (which === "magic") {
+        show(authPanelMagic);
+      } else {
+        show(authPanelSignin);
+        authTabSignin.classList.add("is-active");
+        authTabSignin.setAttribute("aria-selected", "true");
+      }
+    }
+
+    authTabSignin.addEventListener("click", function () { showAuthPanel("signin"); });
+    authTabSignup.addEventListener("click", function () { showAuthPanel("signup"); });
+    document.getElementById("acctGoMagic").addEventListener("click", function () { showAuthPanel("magic"); });
+    document.getElementById("acctBackToSignin").addEventListener("click", function () { showAuthPanel("signin"); });
 
     /* surface a failed magic-link redirect (expired/used link, or a
        misconfigured Supabase Redirect URL) instead of silently discarding it -
@@ -701,6 +837,7 @@
         });
       } else {
         show(elSignedOut); hide(elSignedIn);
+        showAuthPanel("signin");
       }
     }
 
@@ -736,32 +873,73 @@
       });
     });
 
-    /* project the portfolio's combined value forward at the ROI calculator's
-       own "flat cap rate = entry yield" rule (exit cap rate left blank), so
-       the figure shown here matches what the ROI calculator would produce
-       from the same seeded inputs. Kept in sync manually with model() in
-       roi-calculator.html - not shared code, since that page has no exports. */
-    function projectPortfolioRoi(s, term) {
+    /* IRR by bisection on a yearly cashflow vector - same method as irr() in
+       roi-calculator.html, duplicated here since that page has no exports. */
+    function irr(cfs) {
+      function npv(r) {
+        var s = 0;
+        for (var t = 0; t < cfs.length; t++) s += cfs[t] / Math.pow(1 + r, t);
+        return s;
+      }
+      var lo = -0.9, hi = 10, flo = npv(lo), fhi = npv(hi);
+      if (!isFinite(flo) || !isFinite(fhi) || flo * fhi > 0) return null;
+      for (var k = 0; k < 300; k++) {
+        var mid = (lo + hi) / 2, fm = npv(mid);
+        if (Math.abs(fm) < 1e-7) return mid;
+        if (flo * fm < 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+      }
+      return (lo + hi) / 2;
+    }
+
+    /* project the portfolio forward at one blended capital-growth rate and
+       one blended rental-growth rate (deliberately not split by property or
+       residential/commercial - that level of detail lives in the ROI
+       calculator for a single property). Debt reduction assumes the same
+       "50% of after-interest surplus to principal" rule Portfolio Review
+       models. No sale is assumed for the value/equity/debt figures; IRR and
+       cash-on-cash use the projected equity as an unrealised, not-taxed,
+       mark-to-market terminal value - there's no capital gains tax line
+       because nothing here assumes the visitor is actually selling. */
+    function buildPortfolioPlan(s, years, capGrowthPct, rentGrowthPct) {
       var price = s.portfolioValue || 0;
       var rent1 = s.netRentalIncome || 0;
       var rate = s.blendedRate > 0 ? s.blendedRate : 0.065;
-      var g = 0.03, dr = 0.5;
-      var entryYield = price > 0 ? rent1 / price : null;
-      var balance = s.portfolioDebt || 0;
+      var capG = capGrowthPct / 100, rentG = rentGrowthPct / 100, dr = 0.5;
+      var debtNow = s.portfolioDebt || 0;
+      var equityNow = s.portfolioEquity != null ? s.portfolioEquity : (price - debtNow);
+      var balance = debtNow;
       var totalKept = 0;
-      var value = price;
-      var rows = [{ year: 0, value: price, balance: s.portfolioDebt || 0, equity: price - (s.portfolioDebt || 0) }];
-      for (var t = 1; t <= term; t++) {
-        var rent = rent1 * Math.pow(1 + g, t - 1);
+      var rows = [{ year: 0, value: price, balance: debtNow, equity: price - debtNow }];
+      for (var t = 1; t <= years; t++) {
+        var rent = rent1 * Math.pow(1 + rentG, t - 1);
         var interest = balance * rate;
         var cashAfterInterest = rent - interest;
         var debtPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
         balance -= debtPay;
-        totalKept += cashAfterInterest - debtPay;
-        value = entryYield ? rent / entryYield : price;
-        rows.push({ year: t, value: value, balance: balance, equity: value - balance });
+        var kept = cashAfterInterest - debtPay;
+        totalKept += kept;
+        var value = price * Math.pow(1 + capG, t);
+        rows.push({ year: t, value: value, balance: balance, equity: value - balance, kept: kept });
       }
-      return { value: value, loan: balance, equity: value - balance, totalKept: totalKept, rows: rows };
+      var last = rows[rows.length - 1];
+      var lvrNow = price > 0 ? debtNow / price : 0;
+      var lvrThen = last.value > 0 ? last.balance / last.value : 0;
+      var cashOnCash = equityNow > 0 ? (totalKept / years) / equityNow : null;
+
+      var irrVal = null;
+      if (equityNow > 0) {
+        var cfs = [-equityNow];
+        for (var i = 1; i < rows.length; i++) {
+          cfs.push(i === rows.length - 1 ? rows[i].kept + rows[i].equity : rows[i].kept);
+        }
+        irrVal = irr(cfs);
+      }
+
+      return {
+        rows: rows, value: last.value, loan: last.balance, equity: last.equity,
+        debtReductionAmt: debtNow - last.balance, lvrNow: lvrNow, lvrThen: lvrThen,
+        cashOnCash: cashOnCash, irr: irrVal, totalKept: totalKept, equityNow: equityNow
+      };
     }
 
     /* small inline-SVG line chart - value / debt / equity over the hold, so
@@ -811,6 +989,8 @@
         '</div>';
     }
 
+    var seededPlanReportId = null;
+
     document.getElementById("portfolioRoiBtn").addEventListener("click", function () {
       var roiMsg = document.getElementById("portfolioRoiMsg");
       var resultEl = document.getElementById("portfolioRoiResult");
@@ -818,10 +998,16 @@
       if (!currentMasterReport) { setMsg(roiMsg, "Set a master portfolio first.", "error"); return; }
       var s = currentMasterReport.summary || {};
       if (!(s.portfolioValue > 0)) { setMsg(roiMsg, "This portfolio has no combined value to project yet."); return; }
+
+      var years = Math.max(1, Math.min(30, Math.round(parseFloat(document.getElementById("planYears").value) || 5)));
+      var capGrowthPct = parseFloat((document.getElementById("planCapGrowth").value || "").replace(/[^0-9.\-]/g, ""));
+      if (!isFinite(capGrowthPct)) capGrowthPct = 3;
+      var rentGrowthPct = parseFloat((document.getElementById("planRentGrowth").value || "").replace(/[^0-9.\-]/g, ""));
+      if (!isFinite(rentGrowthPct)) rentGrowthPct = 3;
+
       var btn = document.getElementById("portfolioRoiBtn");
       btn.disabled = true;
-      setMsg(roiMsg, "Building your projection…");
-      var term = 5;
+      setMsg(roiMsg, "Building your plan…");
       var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 100)) : 0;
       var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 1000) / 10) : 6.5;
       var title = (currentMasterReport.title || "Your portfolio") + " - ROI projection";
@@ -829,28 +1015,38 @@
         v: 2, calc: "roi", projectName: title,
         fields: {
           pcProjectName: title,
+          propType: "res",
           price: String(Math.round(s.portfolioValue)),
           lvr: String(lvr),
           stampDuty: "0", valuationCost: "0", legalCost: "0", buildingInspection: "0", otherCost: "0",
           fundsAvailable: "0",
           rent: String(Math.round(s.netRentalIncome || 0)),
-          rentGrowth: "3", rate: String(rate), term: String(term),
+          rentGrowth: String(rentGrowthPct), capGrowth: String(capGrowthPct),
+          rate: String(rate), term: String(years),
           debtReduction: "50", exitCap: ""
         },
         dyn: {}
       };
-      window.pcAuth.saveReport({ calculator: "roi", title: title, inputs: inputs, summary: {} }).then(function (res) {
+      window.pcAuth.saveReport({
+        calculator: "roi", title: title, inputs: inputs, summary: {},
+        id: seededPlanReportId || undefined
+      }).then(function (res) {
         btn.disabled = false;
         if (res.error) { setMsg(roiMsg, res.error.message, "error"); return; }
+        seededPlanReportId = res.data.id;
         setMsg(roiMsg, "Saved as “" + title + "”.", "ok");
-        var proj = projectPortfolioRoi(s, term);
+        var plan = buildPortfolioPlan(s, years, capGrowthPct, rentGrowthPct);
         var statsEl = document.getElementById("portfolioRoiStats");
         statsEl.innerHTML =
           '<div class="acct-overview__stat"><dt>Combined value now</dt><dd>' + fmtMoney(s.portfolioValue) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Projected value, Yr ' + term + '</dt><dd>' + fmtMoney(proj.value) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Equity now</dt><dd>' + fmtMoney(s.portfolioEquity) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Projected equity, Yr ' + term + '</dt><dd>' + fmtMoney(proj.equity) + '</dd></div>';
-        renderRoiGrowthChart(proj.rows);
+          '<div class="acct-overview__stat"><dt>Projected value, Yr ' + years + '</dt><dd>' + fmtMoney(plan.value) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Equity now</dt><dd>' + fmtMoney(plan.equityNow) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Projected equity, Yr ' + years + '</dt><dd>' + fmtMoney(plan.equity) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Debt paid down over ' + years + ' yr' + (years > 1 ? "s" : "") + '</dt><dd>' + fmtMoney(plan.debtReductionAmt) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Portfolio LVR, now &rarr; Yr ' + years + '</dt><dd>' + fmtPct(plan.lvrNow * 100) + ' &rarr; ' + fmtPct(plan.lvrThen * 100) + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>Avg. cash-on-cash return</dt><dd>' + (plan.cashOnCash != null ? fmtPct(plan.cashOnCash * 100) + "/yr" : "—") + '</dd></div>' +
+          '<div class="acct-overview__stat"><dt>IRR (compound)</dt><dd>' + (plan.irr != null ? fmtPct(plan.irr * 100) : "—") + '</dd></div>';
+        renderRoiGrowthChart(plan.rows);
         document.getElementById("portfolioRoiOpenLink").href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
         show(resultEl);
       });
@@ -873,6 +1069,76 @@
         magicBtn.disabled = false;
         if (res && res.error) { setMsg(magicMsg, res.error.message, "error"); return; }
         setMsg(magicMsg, "Check your inbox for " + email + " and click the link to finish signing in. You can close this tab.", "ok");
+      });
+    });
+
+    signinForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email    = document.getElementById("signinEmail").value.trim();
+      var password = document.getElementById("signinPassword").value;
+      if (!email || !/.+@.+\..+/.test(email)) {
+        setMsg(signinMsg, "Enter a valid email address.", "error");
+        return;
+      }
+      if (!password) {
+        setMsg(signinMsg, "Enter your password.", "error");
+        return;
+      }
+      signinBtn.disabled = true;
+      setMsg(signinMsg, "Signing in…");
+      window.pcAuth.signInWithPassword(email, password).then(function (res) {
+        signinBtn.disabled = false;
+        if (res && res.error) {
+          setMsg(signinMsg, res.error.message + " If you signed up before passwords existed, or forgot yours, use the link below instead.", "error");
+          return;
+        }
+        setMsg(signinMsg, "", null);
+      });
+    });
+
+    signupForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email    = document.getElementById("signupEmail").value.trim();
+      var password = document.getElementById("signupPassword").value;
+      var name     = document.getElementById("signupName").value.trim();
+      var phone    = document.getElementById("signupPhone").value.trim();
+      if (!email || !/.+@.+\..+/.test(email)) {
+        setMsg(signupMsg, "Enter a valid email address.", "error");
+        return;
+      }
+      if (!password || password.length < 6) {
+        setMsg(signupMsg, "Choose a password of at least 6 characters.", "error");
+        return;
+      }
+      signupBtn.disabled = true;
+      setMsg(signupMsg, "Creating your account…");
+      window.pcAuth.signUpWithPassword(email, password, {
+        full_name: name, phone: phone
+      }).then(function (res) {
+        signupBtn.disabled = false;
+        if (res && res.error) { setMsg(signupMsg, res.error.message, "error"); return; }
+        if (res && res.data && res.data.session) {
+          setMsg(signupMsg, "", null);
+          return;
+        }
+        setMsg(signupMsg, "Check your inbox for " + email + " and click the link to confirm your account, then come back and sign in.", "ok");
+      });
+    });
+
+    passwordForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var password = document.getElementById("profPassword").value;
+      if (!password || password.length < 6) {
+        setMsg(passMsg, "Choose a password of at least 6 characters.", "error");
+        return;
+      }
+      passSaveBtn.disabled = true;
+      setMsg(passMsg, "Updating…");
+      window.pcAuth.setPassword(password).then(function (res) {
+        passSaveBtn.disabled = false;
+        if (res && res.error) { setMsg(passMsg, res.error.message, "error"); return; }
+        document.getElementById("profPassword").value = "";
+        setMsg(passMsg, "Password updated. Use it next time you sign in.", "ok");
       });
     });
 

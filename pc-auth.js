@@ -333,6 +333,37 @@
       });
     },
 
+    signInWithPassword: function (email, password) {
+      if (!CONFIGURED) return Promise.resolve({ error: { message: "Accounts are not set up yet." } });
+      return client.auth.signInWithPassword({ email: email, password: password });
+    },
+
+    signUpWithPassword: function (email, password, opts) {
+      if (!CONFIGURED) return Promise.resolve({ error: { message: "Accounts are not set up yet." } });
+      opts = opts || {};
+      var data = {};
+      if (opts.full_name) data.full_name = opts.full_name;
+      if (opts.phone) data.phone = opts.phone;
+      return client.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          emailRedirectTo: opts.redirectTo || (window.location.origin + "/account"),
+          data: data
+        }
+      });
+    },
+
+    /* lets a signed-in visitor (who may have arrived via a magic link and
+       never set one) add or change their password for next time */
+    setPassword: function (newPassword) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.auth.updateUser({ password: newPassword }).then(function (res) {
+        return { error: res.error };
+      });
+    },
+
     signOut: function () {
       if (!client) { return Promise.resolve({ error: null }); }
       return client.auth.signOut().then(function (r) {
