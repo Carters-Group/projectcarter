@@ -251,11 +251,17 @@
        who has scrolled through their results actually came to see - rather
        than all the way down past the "How the numbers work" assumptions.
        Last of possibly several .calc-schedule-wrap sections (PR has two);
-       .calc-assumptions itself is unreliable as an anchor since DA nests
-       an unrelated same-classed "Reports for this site" block inside its
-       own schedule wrap. */
+       .calc-assumptions itself is unreliable as a "last schedule" anchor
+       since DA nests an unrelated same-classed "Reports for this site"
+       block inside its own schedule wrap. When a calculator has no
+       schedule wrap at all (NOI), fall back to .calc-assumptions but
+       insert BEFORE it instead of after, so "Save this calculation"
+       still comes ahead of the FAQ-style assumptions rather than below
+       everything. */
     var scheduleWraps = document.querySelectorAll(".calc-schedule-wrap");
-    var bottomAnchor = scheduleWraps.length ? scheduleWraps[scheduleWraps.length - 1] : document.querySelector(".calc-assumptions");
+    var assumptions = document.querySelector(".calc-assumptions");
+    var bottomAnchor = scheduleWraps.length ? scheduleWraps[scheduleWraps.length - 1] : assumptions;
+    var insertAfter = scheduleWraps.length > 0;
     if (bottomAnchor && bottomAnchor.parentNode) {
       var bottomGroup = document.createElement("div");
       bottomGroup.className = "calc-group pc-save-bottom";
@@ -268,7 +274,7 @@
       bottomGroup.appendChild(h);
       bottomGroup.appendChild(p);
       makeSaveInstance(bottomGroup, { accent: true });
-      bottomAnchor.parentNode.insertBefore(bottomGroup, bottomAnchor.nextSibling);
+      bottomAnchor.parentNode.insertBefore(bottomGroup, insertAfter ? bottomAnchor.nextSibling : bottomAnchor);
     }
 
     syncUi();
