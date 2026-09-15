@@ -76,11 +76,11 @@
            bar moves in 25% jumps. All fields stay in the DOM and post together
            to Formspree on the final step.
 
-           SETUP: EMAIL_API_KEY (in the <script> below) is a free key from
-           abstractapi.com's Email Reputation API. With it, the form checks
-           the visitor's email is real and deliverable before the lead is
-           sent. Leaving it as the "YOUR_ABSTRACT_API_KEY" placeholder skips
-           that check and the form still works.
+           SETUP: set ABSTRACTAPI_KEY on the Vercel project (Email Reputation
+           API key from abstractapi.com). The form POSTs {email} same-origin
+           to /api/email-reputation, which checks the address is real and
+           deliverable before the lead is sent. If the env var is missing,
+           the check is skipped and the form still works.
       ================================================================== -->
       <form class="landing-form card" id="form"
             action="https://formspree.io/f/xqpkjvkb"
@@ -224,10 +224,10 @@
   (function () {
     "use strict";
 
-    /* Free key from abstractapi.com -> Email Reputation API. Left as the
-       placeholder, the deliverability check is skipped and the form still
-       works. */
-    var EMAIL_API_KEY = "0bffab1abff749038ddb93f8ee58b2df";
+    /* Deliverability check via same-origin POST /api/email-reputation.
+       ABSTRACTAPI_KEY is a Vercel env var, never client code. If the
+       function is missing the key or errors, the check is skipped and the
+       form still works. */
 
     var form = document.getElementById("form");
     var steps = Array.prototype.slice.call(form.querySelectorAll(".form-step"));
@@ -242,10 +242,6 @@
     var current = 0;
 
     var emailCheck = { email: "", ok: null, busy: false };
-
-    function keyReady() {
-      return EMAIL_API_KEY && EMAIL_API_KEY.indexOf("YOUR_") !== 0;
-    }
 
     function setNote(msg, kind) {
       emailNote.textContent = msg || "";
@@ -263,24 +259,24 @@
       return new Promise(function (resolve) {
         var email = emailInput.value.trim();
         if (!email || !emailInput.checkValidity()) { resolve(false); return; }
-        if (!keyReady()) { resolve(true); return; }
         if (emailCheck.email === email && emailCheck.ok !== null) { resolve(emailCheck.ok); return; }
 
         emailCheck.busy = true;
         setNote("Checking your email address…", "checking");
         refresh();
 
-        fetch("https://emailreputation.abstractapi.com/v1/?api_key=" +
-              encodeURIComponent(EMAIL_API_KEY) + "&email=" + encodeURIComponent(email))
-          .then(function (r) { return r.json(); })
-          .then(function (d) {
-            var deliv = d && d.email_deliverability;
-            var quality = d && d.email_quality;
-            var bad = !!d && (
-              (deliv && deliv.is_format_valid === false) ||
-              (quality && quality.is_disposable === true) ||
-              (deliv && deliv.status === "undeliverable")
-            );
+        fetch("/api/email-reputation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ email: email })
+        })
+          .then(function (r) {
+            return r.json().then(function (d) { return { status: r.status, d: d }; }).catch(function () {
+              return { status: r.status, d: {} };
+            });
+          })
+          .then(function (x) {
+            var bad = x.status === 200 && x.d && x.d.ok === false;
             emailCheck = { email: email, ok: !bad, busy: false };
             setNote(bad ? "That email address doesn't look reachable. Please double-check it." : "", bad ? "bad" : "");
             refresh();
@@ -354,7 +350,7 @@
     });
     form.addEventListener("submit", function (e) {
       if (!stepValid(current)) { e.preventDefault(); return; }
-      if (keyReady() && !emailVerified()) {
+      if (!emailVerified()) {
         e.preventDefault();
         verifyEmail().then(function (ok) { if (ok) form.submit(); });
       }
