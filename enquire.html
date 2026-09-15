@@ -76,11 +76,11 @@
            bar moves in 25% jumps. All fields stay in the DOM and post together
            to Formspree on the final step.
 
-           SETUP (one placeholder left to fill in):
-           1. YOUR_ABSTRACT_API_KEY (in the <script> below) - a free key from
-              abstractapi.com Email Validation. With it, the form checks the
-              visitor's email is real and deliverable before the lead is sent.
-              Leave it as-is and that check is simply skipped.
+           SETUP: EMAIL_API_KEY (in the <script> below) is a free key from
+           abstractapi.com's Email Reputation API. With it, the form checks
+           the visitor's email is real and deliverable before the lead is
+           sent. Leaving it as the "YOUR_ABSTRACT_API_KEY" placeholder skips
+           that check and the form still works.
       ================================================================== -->
       <form class="landing-form card" id="form"
             action="https://formspree.io/f/xqpkjvkb"
@@ -224,9 +224,10 @@
   (function () {
     "use strict";
 
-    /* Free key from abstractapi.com -> Email Validation. Left as the placeholder,
-       the deliverability check is skipped and the form still works. */
-    var EMAIL_API_KEY = "YOUR_ABSTRACT_API_KEY";
+    /* Free key from abstractapi.com -> Email Reputation API. Left as the
+       placeholder, the deliverability check is skipped and the form still
+       works. */
+    var EMAIL_API_KEY = "0bffab1abff749038ddb93f8ee58b2df";
 
     var form = document.getElementById("form");
     var steps = Array.prototype.slice.call(form.querySelectorAll(".form-step"));
@@ -269,14 +270,16 @@
         setNote("Checking your email address…", "checking");
         refresh();
 
-        fetch("https://emailvalidation.abstractapi.com/v1/?api_key=" +
+        fetch("https://emailreputation.abstractapi.com/v1/?api_key=" +
               encodeURIComponent(EMAIL_API_KEY) + "&email=" + encodeURIComponent(email))
           .then(function (r) { return r.json(); })
           .then(function (d) {
+            var deliv = d && d.email_deliverability;
+            var quality = d && d.email_quality;
             var bad = !!d && (
-              (d.is_valid_format && d.is_valid_format.value === false) ||
-              (d.is_disposable_email && d.is_disposable_email.value === true) ||
-              d.deliverability === "UNDELIVERABLE"
+              (deliv && deliv.is_format_valid === false) ||
+              (quality && quality.is_disposable === true) ||
+              (deliv && deliv.status === "undeliverable")
             );
             emailCheck = { email: email, ok: !bad, busy: false };
             setNote(bad ? "That email address doesn't look reachable. Please double-check it." : "", bad ? "bad" : "");
