@@ -173,7 +173,7 @@
                     <span>Commercial / non-residential property</span>
                   </label>
                   <p class="field-hint" id="stampEstNote">Pick a state and the field below fills with an estimate from its general transfer duty rates. Edit it if you have the exact figure.</p>
-                  <p class="stamp-disclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. The filled figure also adds the land-titles-office fees to register the transfer, and the mortgage where a loan is entered; the seller pays to discharge their own mortgage, so that is not included. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amounts with the relevant state revenue office and titles registry.</p>
+                  <p class="stamp-disclaimer" id="stampDisclaimer">Estimate only. General duty scales reflect published 2024&ndash;25 rates; the SA and ACT commercial treatment reflects 2025&ndash;26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. The filled figure also adds the land-titles-office fees to register the transfer, and the mortgage where a loan is entered; the seller pays to discharge their own mortgage, so that is not included. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amounts with the relevant state revenue office and titles registry.</p>
                 </div>
                 <div class="input-money"><input type="text" inputmode="numeric" id="stampDuty" autocomplete="off" placeholder="92,000" /></div>
               </div>
@@ -504,6 +504,9 @@
     var stampState = document.getElementById("stampState");
     var stampCommercial = document.getElementById("stampCommercial");
     var stampEstNote = document.getElementById("stampEstNote");
+    var stampDisclaimer = document.getElementById("stampDisclaimer");
+    var STAMP_DISCLAIMER_COM = "Estimate only. General duty scales reflect published 2024–25 rates; the SA and ACT commercial treatment reflects 2025–26 changes. Commercial and industrial property is handled differently in some places: SA has abolished duty on it, the ACT exempts it up to a threshold, and Victoria is moving it to an annual tax. The filled figure also adds the land-titles-office fees to register the transfer, and the mortgage where a loan is entered; the seller pays to discharge their own mortgage, so that is not included. Thresholds in several states index each year, and this excludes foreign purchaser surcharges, landholder / land-rich duty and any concession. Confirm the exact amounts with the relevant state revenue office and titles registry.";
+    var STAMP_DISCLAIMER_RES = "Estimate only. General duty scales reflect published 2024–25 rates and are the standard (non-concessional) rates an investor or owner-occupier pays — they do not include any first-home buyer or owner-occupier concession you may be eligible for. The filled figure also adds the land-titles-office fees to register the transfer, and the mortgage where a loan is entered; the seller pays to discharge their own mortgage, so that is not included. Thresholds in several states index each year, and this excludes foreign purchaser surcharges and landholder / land-rich duty. Confirm the exact amounts with the relevant state revenue office and titles registry.";
     var touched = { stampDuty: false };
 
     /* Keep stamp duty filled from the price + state, unless typed over. The
@@ -731,6 +734,7 @@
     });
     stampCommercial.addEventListener("change", function () {
       touched.stampDuty = false;
+      stampDisclaimer.textContent = stampCommercial.checked ? STAMP_DISCLAIMER_COM : STAMP_DISCLAIMER_RES;
       recalcAutofills();
       render();
     });
