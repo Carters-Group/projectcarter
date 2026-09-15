@@ -121,12 +121,6 @@
                 <div class="input-money"><input type="text" inputmode="numeric" id="otherIncome1" autocomplete="off" placeholder="5,000" /></div>
                 <p class="field-hint">Parking, signage, storage, vending, licence fees and other ancillary income.</p>
               </div>
-
-              <div class="field">
-                <label for="otherIncome2">Other income, additional <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="otherIncome2" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">A spare line for anything not captured above.</p>
-              </div>
             </div>
 
             <div class="calc-group">
@@ -396,8 +390,7 @@
       var price = num("price");
       var rental = num("rental");
       var other1 = num("otherIncome1");
-      var other2 = num("otherIncome2");
-      var gross = rental + other1 + other2;
+      var gross = rental + other1;
 
       var byPct = mgmtPctOn.checked;
       var mgmtPct = num("mgmtPct");
@@ -431,7 +424,7 @@
 
       return {
         price: price,
-        rental: rental, other1: other1, other2: other2, gross: gross,
+        rental: rental, other1: other1, gross: gross,
         byPct: byPct, mgmtPct: mgmtPct, mgmt: mgmtRec ? 0 : mgmtGross, mgmtGross: mgmtGross, mgmtRec: mgmtRec,
         exp: exp, rec: rec, recoveredTotal: recoveredTotal,
         opex: opex, noi: noi, noiPct: noiPct, noiOnPrice: noiOnPrice,
@@ -494,7 +487,7 @@
     });
 
     /* Tidy money fields with thousands separators on blur */
-    ["price", "existingLoan", "rental", "otherIncome1", "otherIncome2", "insurance", "maintenance", "mgmtFee", "councilRates", "strata", "marketing", "landTax", "otherExpense"].forEach(function (id) {
+    ["price", "existingLoan", "rental", "otherIncome1", "insurance", "maintenance", "mgmtFee", "councilRates", "strata", "marketing", "landTax", "otherExpense"].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("blur", function () {
@@ -576,7 +569,6 @@
       if (m.price > 0) row("Property price", money(m.price));
       row("Potential rental income", money(m.rental) + " / year");
       row("Other income", optMoney(m.other1));
-      row("Other income, additional", optMoney(m.other2));
       row("Total gross operating income", money(m.gross), true);
 
       y += 8;
@@ -637,7 +629,6 @@
         "Property price: " + optMoney(m.price),
         "Potential rental income: " + money(m.rental) + "/yr",
         "Other income: " + optMoney(m.other1),
-        "Other income, additional: " + optMoney(m.other2),
         "Total gross operating income: " + money(m.gross),
         "----",
         el("Insurance", "insurance"),
