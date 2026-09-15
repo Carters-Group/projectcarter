@@ -162,7 +162,7 @@
                     <option value="ACT">Australian Capital Territory</option>
                     <option value="NT">Northern Territory</option>
                   </select>
-                  <label class="calc-check">
+                  <label class="calc-check" data-com-only>
                     <input type="checkbox" id="stampCommercial" />
                     <span>Commercial / non-residential property</span>
                   </label>
@@ -834,6 +834,11 @@
       Array.prototype.forEach.call(document.querySelectorAll("[data-com-only]"), function (el) { el.hidden = isRes; });
       Array.prototype.forEach.call(document.querySelectorAll("[data-res-only]"), function (el) { el.hidden = !isRes; });
       exitCapLabelEl.textContent = isRes ? "Capital growth rate" : "Exit cap rate on sale";
+      if (isRes && stampCommercial.checked) {
+        stampCommercial.checked = false;
+        touched.stampDuty = false;
+        recalcAutofills();
+      }
       positionPct();
       render();
     });
