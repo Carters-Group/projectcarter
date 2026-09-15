@@ -4,7 +4,7 @@
    Loaded on every calculator page and on account.html, AFTER the Supabase
    UMD bundle:
 
-     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
      <script src="pc-auth.js"></script>
 
    Fill the two placeholders below with your project's values from
