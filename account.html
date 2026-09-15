@@ -333,12 +333,12 @@
           </div>
 
           <div class="card acct-card acct-danger acct-dash-danger" id="acctDangerCard">
-            <h2 class="calc-subhead">Delete account</h2>
-            <p class="acct-empty">Permanently deletes all your saved reports and clears your name, phone and occupation from your profile, then signs you out. We'll be notified to close your sign-in as well. This can't be undone.</p>
-            <button type="button" class="btn btn-ghost" id="deleteAcctBtn">Delete account</button>
+            <h2 class="calc-subhead">Request account deletion</h2>
+            <p class="acct-empty">This wipes all your saved reports now and clears your name, phone and occupation from your profile, then signs you out. We'll email Trent to close your sign-in. Your login may still work until he does. Wiped reports can't be restored.</p>
+            <button type="button" class="btn btn-ghost" id="deleteAcctBtn">Request deletion</button>
             <div id="deleteAcctConfirm" hidden>
-              <p class="acct-msg is-error">Are you sure? This deletes all your saved reports right away and can't be undone.</p>
-              <button type="button" class="btn btn-danger" id="deleteAcctConfirmBtn">Yes, delete my account</button>
+              <p class="acct-msg is-error">Are you sure? Your saved reports are wiped right away and can't be restored. Your sign-in stays until Trent closes it.</p>
+              <button type="button" class="btn btn-danger" id="deleteAcctConfirmBtn">Yes, request deletion</button>
               <button type="button" class="linklike" id="deleteAcctCancelBtn">Cancel</button>
             </div>
             <p class="acct-msg" id="deleteAcctMsg" hidden></p>
@@ -784,7 +784,8 @@
       }
     }
 
-    var CALC_PAGE_SET = { "net-operating-income-calculator":1, "return-on-investment-calculator":1, "development-site-calculator":1, "gross-realisation-value-calculator":1 };
+    var CALC_PAGE_SET = {};
+    Object.keys(CALC_PAGES).forEach(function (k) { CALC_PAGE_SET[CALC_PAGES[k]] = 1; });
     function fromParam() {
       try {
         var f = new URL(window.location.href).searchParams.get("from");
@@ -1215,12 +1216,12 @@
     document.getElementById("deleteAcctConfirmBtn").addEventListener("click", function () {
       var btn = document.getElementById("deleteAcctConfirmBtn");
       btn.disabled = true;
-      setMsg(deleteAcctMsg, "Deleting…");
+      setMsg(deleteAcctMsg, "Sending request…");
       window.pcAuth.requestAccountDeletion().then(function (res) {
         btn.disabled = false;
         if (res.error) { setMsg(deleteAcctMsg, res.error.message, "error"); return; }
         deleteAcctConfirm.hidden = true;
-        setMsg(deleteAcctMsg, "Your saved reports have been deleted and you've been signed out.", "ok");
+        setMsg(deleteAcctMsg, "Your saved reports have been wiped and you've been signed out. Trent has been asked to close your sign-in — it may still work until he does.", "ok");
       });
     });
 

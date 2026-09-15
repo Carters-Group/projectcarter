@@ -427,12 +427,13 @@
         .then(function (res) { return { error: res.error }; });
     },
 
-    /* Deletes everything the anon key is allowed to touch - all of the
-       visitor's saved reports, then their name/phone/occupation off the
-       profile row - and pings Formspree so Trent closes the actual sign-in
-       (auth.users row) from the Supabase dashboard, since deleting an auth
-       user requires the service-role key, which must never live in
-       client-side code. Signs the visitor out either way. */
+    /* Request, not a full auth wipe: deletes everything the anon key is
+       allowed to touch (saved reports, then name/phone/occupation on the
+       profile row) and pings Formspree so Trent can close the actual
+       sign-in (auth.users) from the dashboard. Deleting an auth user
+       needs the service-role key, which must never live in client-side
+       code. The login may still work until he closes it. Signs the
+       visitor out either way. */
     requestAccountDeletion: function () {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
@@ -447,7 +448,7 @@
           body.append("_subject", "Project Carter - account deletion request");
           body.append("Email", email || "(unknown)");
           body.append("User ID", uid);
-          body.append("Source", "Account page - Delete account");
+          body.append("Source", "Account page - Request account deletion");
           return fetch(FORMSPREE_ENDPOINT, { method: "POST", body: body, headers: { Accept: "application/json" } }).catch(function () {});
         })
         .then(function () { return api.signOut(); })
