@@ -27,7 +27,7 @@ grv-calculator.html             "GRV Calculator" — development feasibility fro
 pr-calculator.html              "Portfolio Review (PR)" — a multi-property, single-year after-tax cash-flow / gearing review, ported from the client's spreadsheet. A portfolio-level marginal tax rate, then repeatable **property cards** (`#propertyCards`, "Add another property", up to 15, at least 1): each has a name, value, LVR % (loan + equity shown), interest rate (interest-only), rent $/week (gross rent + gross yield shown), a "Yearly running costs" block (property management % of rent, letting fee $, council rates, body corporate / strata, land tax $, insurance, maintenance $/week, vacancy allowance in weeks × the weekly rent, annual loan fees, sundry), an optional depreciation block (building at cost × rate, default 2.5%; fittings at cost × rate, default 10%) and an optional "this property is being purchased" toggle that reveals one-off acquisition costs (stamp duty with the shared state estimator — `STAMP`/`REGO`/`stampEstimate`/`regoFees`, per-card state select + commercial tick — plus conveyancing, borrowing costs, an "Other" one-off lump sum for anything else — BA/planning fees, building or pest reports, a QS report, other specialist consultants — and improvements). Each card shows its own net yield, pre-tax cash flow, annual & weekly surplus/(deficit) and the weekly rent needed for neutral gearing (`neutralWk`, solved holding all else equal). Per property: net rent = gross rent − expenses; pre-tax cash flow = net rent − interest; then, matching the spreadsheet's two steps, tax benefit/(cost) before depreciation = −(pre-tax cash flow) × rate (a loss is refunded, a profit taxed) and the depreciation tax credit = depreciation × rate; annual surplus = pre-tax cash flow + that tax benefit + the depreciation credit; weekly = ÷ 52. The `#calcResults` panel sums every property: combined value / debt / equity / portfolio LVR (teaser rows, always shown), blended gross & net yields, combined operating expenses, net rental income, loan interest, pre-tax cash flow, tax benefit, depreciation credit, **combined annual and weekly surplus/(deficit)** (the headline), result vs portfolio value, shortfall to neutral gearing $/week, and — only when a card has acquisition costs — total acquisition costs and cash required to complete. A "Property by property" table under the panel mirrors the schedule on the other pages with a Portfolio total row. Same reveal gate (`pc_pr_unlocked`) and Formspree ping as the other calculators; the one-page jsPDF is laid out as a **plain-English P&L** (Portfolio at a glance, then a Yearly cash flow block: rent collected less each running-cost line that has a value, a subtotal rule to net rent, less interest to cash flow before tax, plus the tax refund and depreciation saving, then a ruled `AFTER-TAX CASH FLOW (PER YEAR)` bold line, the weekly figure, % of value and break-even rent; an "If buying" section only when a card has purchase costs; then the per-property table and disclaimer), with an `ensure()` page-break guard. The **"Portfolio name"** field prefills from the signed-in account (`<surname> Family`, or the full name / email local-part) while it is still empty and untouched and no `?report=` is being opened. Input placeholders are all `0` except the genuine conventions kept as real values (depreciation 2.5% / 10%, tax rate 37%); property management is a grey `4.4` placeholder hint only, not an auto-filled value, since PM fees vary too much to default. A **net lease** auto-ticks the usual recoverable outgoings but never auto-ticks **land tax** — many retail leases can't pass land tax through even on a net lease, so that tick is always left to the user. The **post-Budget negative-gearing tick is residential-only** (hidden on commercial cards and forced off in the model for commercial), since the 2026 Budget change didn't touch commercial negative gearing. Tax rate is capped at 99% to keep the break-even-rent solve finite. The `$` / `%` input affixes were tightened site-wide (`styles.css` `padding-left: 22px`; the `--pct-x` JS offset `+ 3` → `+ 1` in all five calculators).
 enquire.html                    multi-step lead-capture page (full site header, no footer)
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
-account.html                    sign in / sign up (magic link) + a profile photo (upload, stored in Supabase Storage) with initials fallback + a "Quick access" grid of one-click calculator cards (resumes each calculator's most recently saved report where one exists) + a "Your portfolio" overview card (adds net rental income and a "Useable equity" block showing both a conservative 70% LVR and a higher-gearing 80% LVR figure side by side, a "See this as an ROI projection" button - saves a new ROI report seeded from the portfolio's combined value/gearing/net rent and its own blended interest rate with sensible placeholder growth/term assumptions and opens it, and a standalone "Debt reduction goal" mini-tool - an extra $/year contribution field with a live payoff-time + interest-saved readout, assuming the portfolio's debt is interest-only as modelled in Portfolio Review; this is a planning figure only, not part of any calculator, report or ROI projection) + a "Recently updated" activity feed + "My saved reports" dashboard + an editable details form (name, phone, occupation, read-only email)
+account.html                    sign in / sign up (magic link or password) + a "Quick access" grid of one-click calculator cards (resumes each calculator's most recently saved report where one exists) + a "Your portfolio" overview card (adds net rental income and a "Useable equity" block showing both a conservative 70% LVR and a higher-gearing 80% LVR figure side by side, a "See this as an ROI projection" button - saves a new ROI report seeded from the portfolio's combined value/gearing/net rent and its own blended interest rate with sensible placeholder growth/term assumptions and opens it, and a standalone "Debt reduction goal" mini-tool - an extra $/year contribution field with a live payoff-time + interest-saved readout, assuming the portfolio's debt is interest-only as modelled in Portfolio Review; this is a planning figure only, not part of any calculator, report or ROI projection) + a "Recently updated" activity feed + "My saved reports" dashboard + an editable details form (name, phone, occupation, read-only email)
 pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/rename/delete/duplicate report, get/set/clear master report, update profile incl. occupation), auth status bar, subscription gate (canSave, always true for now)
 pc-report.js                    shared per-calculator wiring - "Project name or address" field, "Save report" button, ?report=<id> rehydration
 supabase-schema.sql             one-time SQL for the Supabase project: profiles (incl. occupation) + reports tables, row-level security, subscription_status column, one-master-portfolio-per-user constraint
@@ -35,7 +35,7 @@ styles.css                      design system + layout (home, project pages, lan
 script.js                       header scroll state, mobile nav, scroll reveals
 assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
 assets/images/team/             Trent portrait
-.nojekyll                       serve files as-is on GitHub Pages
+.nojekyll                       leftover GitHub Pages marker (production is Vercel; harmless if kept)
 sitemap.xml                     lists every indexable page (noindex pages excluded) for search engines
 robots.txt                      allows all crawlers, points at sitemap.xml
 ```
@@ -176,11 +176,12 @@ and the `pc_can_save()` SQL function are the hooks for a future paywall - today
 
 1. Create a free project at [supabase.com](https://supabase.com).
 2. In the Supabase **SQL editor**, run `supabase-schema.sql` (safe to re-run).
-3. **Settings - API**: copy the **Project URL** and the **anon / public** key
-   into the two placeholders at the top of `pc-auth.js`
-   (`PC_SUPABASE_URL`, `PC_SUPABASE_ANON_KEY`). Both are safe to commit - the
-   anon key grants nothing without a signed-in user, because row-level security
-   scopes every row to its owner.
+3. **Settings - API**: the live **Project URL** and **anon / public** key are
+   already in `pc-auth.js` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`). Both are
+   safe to commit - the anon key grants nothing without a signed-in user,
+   because row-level security scopes every row to its owner. Clearing those
+   values hides the status bar and Save button and shows a "not switched on
+   yet" note on `account.html`; the calculators still work.
 4. **Authentication - URL Configuration**: set the **Site URL** to your deployed
    origin and add `<origin>/account` (plus `http://localhost:PORT/account` for
    local work) to **Redirect URLs**, exactly matching the clean URL the site
@@ -193,10 +194,6 @@ and the `pc_can_save()` SQL function are the hooks for a future paywall - today
 5. Optional: **Authentication - Providers - Email** - turn **"Confirm email"**
    off, since the magic link already proves the address.
 
-Until step 3 is done the account UI stays dormant: the status bar and Save
-button are hidden and `account.html` shows a "not switched on yet" note. The
-calculators work exactly as before.
-
 ## Run locally
 
 Just open `index.html` in a browser, or serve the folder:
@@ -207,22 +204,50 @@ python -m http.server 8000
 
 Then visit http://localhost:8000
 
-## Deploy — GitHub Pages
+## Deploy — Vercel
 
-1. Push to `main` (already the default branch).
-2. On GitHub: **Settings → Pages → Build and deployment**
-   - Source: **Deploy from a branch**
-   - Branch: **main** / **/ (root)** → **Save**
-3. The site publishes at `https://carters-group.github.io/projectcarter/`
-   within a minute or two.
+Production is a Vercel static deployment of this folder. There is no build
+step, no `package.json`, and no output directory to configure.
 
-### Custom domain (when ready)
+1. Import the GitHub repo in [Vercel](https://vercel.com) (Framework Preset:
+   **Other**, Root Directory: the repo root).
+2. Leave **Build Command** and **Output Directory** empty so Vercel publishes
+   the HTML/CSS/JS as-is.
+3. Attach the production domain in the Vercel project **Domains** settings.
+   `vercel.json` already maps clean URLs (`/about` → `about.html`, and the rest
+   of the redirects/rewrites) and sets security headers.
 
-1. Add a file named `CNAME` at the repo root containing just the domain, e.g.
-   `projectcarter.com.au`
-2. At your DNS provider, point the domain at GitHub Pages
-   ([current IPs / CNAME target](https://docs.github.com/pages/configuring-a-custom-domain-for-your-github-pages-site)).
-3. Back in **Settings → Pages**, enter the domain and enable **Enforce HTTPS**.
+GitHub Pages is obsolete for this site. `.nojekyll` can stay; it is unused on
+Vercel.
+
+### Security headers
+
+`vercel.json` sends `Content-Security-Policy` on every path, plus the existing
+`X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, and
+`Permissions-Policy`. Framing stays denied (`X-Frame-Options` and
+`frame-ancestors 'none'`).
+
+The CSP allows `'unsafe-inline'` in `script-src` and `style-src`. Pages ship
+large inline `<script>` IIFEs (every calculator, enquire, account). Hashing or
+noncing those scripts would mean extracting them into files; a policy without
+`'unsafe-inline'` would black-screen the calculators. That tradeoff is
+intentional until the scripts are externalised.
+
+Third-party allowlist matches what the HTML actually loads:
+
+- Google Fonts (`fonts.googleapis.com` CSS, `fonts.gstatic.com` font files)
+- jsPDF 2.5.1 from cdnjs (`cdnjs.cloudflare.com`)
+- `@supabase/supabase-js@2` from jsDelivr (`cdn.jsdelivr.net`)
+- Formspree (`formspree.io`) for form posts and `fetch`
+- Supabase project host `rqbdumfqucptklmhlskr.supabase.co` (https and wss)
+- Nominatim (`nominatim.openstreetmap.org`) on the DA calculator
+- AbstractAPI email reputation (`emailreputation.abstractapi.com`) on enquire
+- Vercel Web Analytics (`/_vercel/insights/script.js` plus
+  `vitals.vercel-insights.com`)
+
+HSTS is left to Vercel, which already sets it on `.vercel.app` and custom
+domains. Putting our own `Strict-Transport-Security` in `vercel.json` would
+also apply to preview deployments.
 
 ## Content that still needs real input
 
@@ -230,17 +255,17 @@ Everything below is placeholder and should be replaced before the site goes publ
 
 | Item | Where |
 | --- | --- |
-| **Supabase project URL + anon key** (accounts + saved reports) | `pc-auth.js` → `PC_SUPABASE_URL`, `PC_SUPABASE_ANON_KEY` (see "Accounts and saved reports") |
-| Optional email-validation key (abstractapi.com, free tier) | `enquire.html` → `YOUR_ABSTRACT_API_KEY` (skips the deliverability check while unset, everything else on the form still works) |
 | Landing background photo or video | `enquire.html` → `.landing-media` (instructions in the file + `assets/images/README.md`) |
 | Ad conversion tracking (Google Ads / Meta Pixel) | `thanks.html` → `AD CONVERSION TRACKING` comment |
 | About / bio copy | `index.html` → `#about` |
 | Project copy, stats and galleries | `project-*.html` |
 | Contact phone / email | `enquire.html` (currently `0411 940 010` / `trent@cartersinvestments.com.au`) |
 | Royal Terraces / City West Villas renders | placeholder concept images — swap for final renders when available (`assets/images/projects/`) |
-| LinkedIn / Instagram URLs | `index.html` → footer (not yet added) |
-| Privacy Policy link | footer (all pages) |
 | ABN / registered entity details | footer, if required |
+
+Already in place (not placeholders): Supabase URL + anon key in `pc-auth.js`,
+AbstractAPI key on `enquire.html`, LinkedIn / Instagram / Facebook / TikTok
+URLs in the footer, and a Privacy Policy page linked from every footer.
 
 ### Project images
 
@@ -254,18 +279,19 @@ on the City West Villas page are the WIP plans from the current site.
 ## Making the enquiry form email you
 
 The landing page form (`enquire.html`) is wired for [Formspree](https://formspree.io),
-which emails you every submission, no backend needed, works on GitHub Pages, includes
-spam filtering. Already configured, pointing at `https://formspree.io/f/xqpkjvkb`
-across `enquire.html`, all six calculators and `pc-auth.js`. If you ever need to
-change it, update the `action` attribute on each calculator's lead-capture form,
-`enquire.html`'s own form, and `FORMSPREE_ENDPOINT` in `pc-auth.js`. If you haven't
-already, submit the form once yourself and confirm the verification email from
-Formspree so submissions come straight through.
+which emails you every submission, no backend needed, works on this static Vercel
+site, includes spam filtering. Already configured, pointing at
+`https://formspree.io/f/xqpkjvkb` across `enquire.html`, all six calculators and
+`pc-auth.js`. If you ever need to change it, update the `action` attribute on each
+calculator's lead-capture form, `enquire.html`'s own form, and
+`FORMSPREE_ENDPOINT` in `pc-auth.js`. If you haven't already, submit the form once
+yourself and confirm the verification email from Formspree so submissions come
+straight through.
 
 After a successful submit the visitor is sent to `thanks.html` (via the hidden
 `_next` field) — put your Google Ads / Meta conversion tag on that page so a
 conversion only fires on a real enquiry. On Formspree's free plan `_next` needs
-the full URL, e.g. `https://your-domain.com/thanks.html`.
+the full URL, e.g. `https://your-domain.com/thanks`.
 
 Alternatives if you'd rather not use Formspree: [Netlify Forms](https://docs.netlify.com/forms/setup/)
 (only if you host on Netlify) or [Basin](https://usebasin.com) — same idea, swap
