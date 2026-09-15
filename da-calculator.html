@@ -1156,11 +1156,12 @@
     });
 
     /* ---- address check: one lookup when the field loses focus ------------
-       Free, keyless OpenStreetMap geocode. Confirms the suburb and sets the
-       state (which drives stamp duty and demolition). It does not touch the
-       council field: the LGA name has to be exactly right for the LEP / DCP
-       lookup, and map data is not reliable enough, so that stays manual.
-       Fails soft. */
+       Same-origin /api/geocode proxies Nominatim (OSM needs an identifying
+       User-Agent, which the browser cannot set). Confirms the suburb and
+       sets the state (which drives stamp duty and demolition). It does not
+       touch the council field: the LGA name has to be exactly right for the
+       LEP / DCP lookup, and map data is not reliable enough, so that stays
+       manual. Fails soft. */
     var addressEl = document.getElementById("address");
     var addressNote = document.getElementById("addressNote");
     var lastGeocode = "";
@@ -1190,12 +1191,17 @@
       setAddressNote("Checking the address…");
       var ctrl = new AbortController();
       var to = setTimeout(function () { ctrl.abort(); }, 6000);
-      fetch("https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=au&q=" +
-            encodeURIComponent(q), { signal: ctrl.signal, headers: { "Accept": "application/json" } })
-        .then(function (r) { return r.json(); })
+      fetch("/api/geocode?q=" + encodeURIComponent(q), {
+        signal: ctrl.signal,
+        headers: { "Accept": "application/json" }
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error("geocode");
+          return r.json();
+        })
         .then(function (data) {
           clearTimeout(to);
-          if (!data || !data.length) {
+          if (!Array.isArray(data) || !data.length) {
             setAddressNote("Could not verify that address. Pick the state in the stamp duty box below.");
             return;
           }
