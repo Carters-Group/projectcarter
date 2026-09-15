@@ -76,11 +76,12 @@
            bar moves in 25% jumps. All fields stay in the DOM and post together
            to Formspree on the final step.
 
-           SETUP: EMAIL_API_KEY (in the <script> below) is a free key from
-           abstractapi.com's Email Reputation API. With it, the form checks
-           the visitor's email is real and deliverable before the lead is
-           sent. Leaving it as the "YOUR_ABSTRACT_API_KEY" placeholder skips
-           that check and the form still works.
+           SETUP: the email step calls /api/check-email (api/check-email.js),
+           a Vercel serverless function that checks deliverability via
+           abstractapi.com's Email Reputation API. Set ABSTRACT_API_KEY in
+           the Vercel project's Environment Variables to turn it on -
+           nothing to edit in this file. Until it's set, the check is
+           skipped and the form still works.
       ================================================================== -->
       <form class="landing-form card" id="form"
             action="https://formspree.io/f/xqpkjvkb"
@@ -224,11 +225,6 @@
   (function () {
     "use strict";
 
-    /* Free key from abstractapi.com -> Email Reputation API. Left as the
-       placeholder, the deliverability check is skipped and the form still
-       works. */
-    var EMAIL_API_KEY = "0bffab1abff749038ddb93f8ee58b2df";
-
     var form = document.getElementById("form");
     var steps = Array.prototype.slice.call(form.querySelectorAll(".form-step"));
     var fill = document.getElementById("progressFill");
@@ -242,10 +238,6 @@
     var current = 0;
 
     var emailCheck = { email: "", ok: null, busy: false };
-
-    function keyReady() {
-      return EMAIL_API_KEY && EMAIL_API_KEY.indexOf("YOUR_") !== 0;
-    }
 
     function setNote(msg, kind) {
       emailNote.textContent = msg || "";
@@ -263,15 +255,13 @@
       return new Promise(function (resolve) {
         var email = emailInput.value.trim();
         if (!email || !emailInput.checkValidity()) { resolve(false); return; }
-        if (!keyReady()) { resolve(true); return; }
         if (emailCheck.email === email && emailCheck.ok !== null) { resolve(emailCheck.ok); return; }
 
         emailCheck.busy = true;
         setNote("Checking your email address…", "checking");
         refresh();
 
-        fetch("https://emailreputation.abstractapi.com/v1/?api_key=" +
-              encodeURIComponent(EMAIL_API_KEY) + "&email=" + encodeURIComponent(email))
+        fetch("/api/check-email?email=" + encodeURIComponent(email))
           .then(function (r) { return r.json(); })
           .then(function (d) {
             var deliv = d && d.email_deliverability;
@@ -354,7 +344,7 @@
     });
     form.addEventListener("submit", function (e) {
       if (!stepValid(current)) { e.preventDefault(); return; }
-      if (keyReady() && !emailVerified()) {
+      if (!emailVerified()) {
         e.preventDefault();
         verifyEmail().then(function (ok) { if (ok) form.submit(); });
       }
