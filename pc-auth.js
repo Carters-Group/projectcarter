@@ -4,7 +4,7 @@
    Loaded on every calculator page and on account.html, AFTER the Supabase
    UMD bundle:
 
-     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
      <script src="pc-auth.js"></script>
 
    Fill the two placeholders below with your project's values from
@@ -21,6 +21,10 @@
   var SUPABASE_URL      = "https://rqbdumfqucptklmhlskr.supabase.co";
   var SUPABASE_ANON_KEY = "sb_publishable_eUP7BAawFxUJiN_EbCm4Sw_Lk4BCu3o";
   var FORMSPREE_ENDPOINT = "https://formspree.io/f/xqpkjvkb";
+  var AVATAR_BUCKET = "avatars";
+  var AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+  var AVATAR_EXT = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+  var PROFILE_COLS = "id,email,full_name,phone,occupation,avatar_url,has_password,subscription_status";
 
   var CONFIGURED =
     SUPABASE_URL.indexOf("http") === 0 &&
@@ -72,6 +76,7 @@
       full_name: (currentProfile && currentProfile.full_name) || meta.full_name || "",
       phone: (currentProfile && currentProfile.phone) || meta.phone || "",
       occupation: (currentProfile && currentProfile.occupation) || "",
+      avatar_url: (currentProfile && currentProfile.avatar_url) || "",
       has_password: !!(currentProfile && currentProfile.has_password),
       subscription_status: (currentProfile && currentProfile.subscription_status) || "free"
     };
@@ -95,12 +100,32 @@
       .catch(function () {});
   }
 
+  /* ---- profile photo (Storage bucket `avatars`) ------------------------- */
+  function avatarPathFromUrl(url) {
+    if (!url || !SUPABASE_URL || url.indexOf(SUPABASE_URL) !== 0) return null;
+    var marker = "/storage/v1/object/public/" + AVATAR_BUCKET + "/";
+    var i = url.indexOf(marker);
+    if (i === -1) return null;
+    var path = url.slice(i + marker.length).split("?")[0];
+    try { path = decodeURIComponent(path); } catch (e) {}
+    if (!path || path.indexOf("..") !== -1) return null;
+    return path;
+  }
+
+  function removeStoredAvatar(prevUrl, keepPath) {
+    if (!client || !client.storage || !currentUser) return;
+    var path = avatarPathFromUrl(prevUrl);
+    if (!path || path.indexOf(currentUser.id + "/") !== 0) return;
+    if (keepPath && path === keepPath) return;
+    client.storage.from(AVATAR_BUCKET).remove([path]).catch(function () {});
+  }
+
   /* ---- profile ------------------------------------------------------------ */
   function loadProfile() {
     if (!client || !currentUser) { currentProfile = null; return Promise.resolve(null); }
     return client
       .from("profiles")
-      .select("id,email,full_name,phone,occupation,has_password,subscription_status")
+      .select(PROFILE_COLS)
       .eq("id", currentUser.id)
       .maybeSingle()
       .then(function (res) {
@@ -115,7 +140,7 @@
             full_name: meta.full_name || null,
             phone: meta.phone || null,
             has_password: !!meta.has_password
-          }).select("id,email,full_name,phone,occupation,has_password,subscription_status").maybeSingle()
+          }).select(PROFILE_COLS).maybeSingle()
             .then(function (r2) { currentProfile = r2.data || null; return currentProfile; });
         }
         return currentProfile;
@@ -250,12 +275,58 @@
       if (fields.full_name !== undefined) row.full_name = (fields.full_name || "").trim().slice(0, 200) || null;
       if (fields.phone !== undefined) row.phone = (fields.phone || "").trim().slice(0, 40) || null;
       if (fields.occupation !== undefined) row.occupation = (fields.occupation || "").trim().slice(0, 120) || null;
+      if (fields.avatar_url !== undefined) {
+        var avatarUrl = fields.avatar_url || null;
+        if (avatarUrl && avatarUrl.indexOf(SUPABASE_URL) !== 0) {
+          return Promise.resolve({ error: { message: "Invalid photo URL." } });
+        }
+        row.avatar_url = avatarUrl;
+      }
       return client.from("profiles").update(row).eq("id", currentUser.id)
-        .select("id,email,full_name,phone,occupation,subscription_status").maybeSingle()
+        .select(PROFILE_COLS).maybeSingle()
         .then(function (res) {
-          if (!res.error && res.data) currentProfile = res.data;
+          if (!res.error && res.data) {
+            currentProfile = currentProfile ? Object.assign({}, currentProfile, res.data) : res.data;
+          }
           return { data: res.data, error: res.error };
         });
+    },
+
+    uploadAvatar: function (file) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      if (!client.storage || !client.storage.from) {
+        return Promise.resolve({ error: { message: "Photo upload is not available." } });
+      }
+      var ext = file && AVATAR_EXT[file.type];
+      if (!file || !ext) return Promise.resolve({ error: { message: "Use a JPEG, PNG or WebP image." } });
+      if (file.size > AVATAR_MAX_BYTES) return Promise.resolve({ error: { message: "Keep the photo under 2 MB." } });
+      var path = currentUser.id + "/avatar-" + Date.now() + "." + ext;
+      var prev = currentProfile && currentProfile.avatar_url;
+      return client.storage.from(AVATAR_BUCKET).upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+        cacheControl: "3600"
+      }).then(function (res) {
+        if (res.error) return { error: res.error };
+        var pub = client.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+        var url = pub && pub.data && pub.data.publicUrl;
+        if (!url) return { error: { message: "Uploaded, but could not build the photo URL." } };
+        return api.updateProfile({ avatar_url: url }).then(function (upd) {
+          if (!upd.error) removeStoredAvatar(prev, path);
+          return upd;
+        });
+      });
+    },
+
+    removeAvatar: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      var prev = currentProfile && currentProfile.avatar_url;
+      return api.updateProfile({ avatar_url: null }).then(function (upd) {
+        if (!upd.error) removeStoredAvatar(prev, null);
+        return upd;
+      });
     },
 
     signInWithMagicLink: function (email, opts) {
@@ -427,27 +498,36 @@
         .then(function (res) { return { error: res.error }; });
     },
 
-    /* Deletes everything the anon key is allowed to touch - all of the
-       visitor's saved reports, then their name/phone/occupation off the
-       profile row - and pings Formspree so Trent closes the actual sign-in
-       (auth.users row) from the Supabase dashboard, since deleting an auth
-       user requires the service-role key, which must never live in
-       client-side code. Signs the visitor out either way. */
+    /* Request, not a full auth wipe: deletes everything the anon key is
+       allowed to touch (saved reports, then name/phone/occupation/avatar_url
+       on the profile row) and pings Formspree so Trent can close the actual
+       sign-in (auth.users) from the dashboard. Deleting an auth user
+       needs the service-role key, which must never live in client-side
+       code. The login may still work until he does. Signs the
+       visitor out either way. Best-effort: remove the caller's own Storage
+       object while the session is still live; leftovers stay in the
+       avatars bucket until deleted in the dashboard. */
     requestAccountDeletion: function () {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
       var email = currentUser.email;
       var uid = currentUser.id;
+      var prevAvatar = currentProfile && currentProfile.avatar_url;
       return client.from("reports").delete().eq("user_id", uid)
         .then(function () {
-          return client.from("profiles").update({ full_name: null, phone: null, occupation: null }).eq("id", uid);
+          var path = avatarPathFromUrl(prevAvatar);
+          if (!path || path.indexOf(uid + "/") !== 0 || !client.storage) return {};
+          return client.storage.from(AVATAR_BUCKET).remove([path]).catch(function () { return {}; });
+        })
+        .then(function () {
+          return client.from("profiles").update({ full_name: null, phone: null, occupation: null, avatar_url: null }).eq("id", uid);
         })
         .then(function () {
           var body = new FormData();
           body.append("_subject", "Project Carter - account deletion request");
           body.append("Email", email || "(unknown)");
           body.append("User ID", uid);
-          body.append("Source", "Account page - Delete account");
+          body.append("Source", "Account page - Request account deletion");
           return fetch(FORMSPREE_ENDPOINT, { method: "POST", body: body, headers: { Accept: "application/json" } }).catch(function () {});
         })
         .then(function () { return api.signOut(); })
