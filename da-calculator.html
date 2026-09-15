@@ -396,7 +396,7 @@
               <div class="field">
                 <label for="arborist">Arborist / tree works <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="arborist" autocomplete="off" placeholder="0" /></div>
-                <p class="field-hint">Arborist report and impact assessment, plus any approved tree removal or pruning works. One line, so it is not double counted.</p>
+                <p class="field-hint">Arborist report and impact assessment, plus any approved tree removal or pruning works.</p>
                 <p class="report-flag" data-report="arborist"></p>
               </div>
               <div class="field">
@@ -423,11 +423,6 @@
                 <label for="waste">Waste management plan <span>(optional)</span></label>
                 <div class="input-money"><input type="text" inputmode="numeric" id="waste" autocomplete="off" placeholder="0" /></div>
                 <p class="report-flag" data-report="waste"></p>
-              </div>
-              <div class="field">
-                <label for="qs">Quantity surveyor (cost report) <span>(optional)</span></label>
-                <div class="input-money"><input type="text" inputmode="numeric" id="qs" autocomplete="off" placeholder="0" /></div>
-                <p class="report-flag" data-report="qs"></p>
               </div>
               <div class="field">
                 <label for="ecologist">Ecologist / biodiversity <span>(optional)</span></label>
@@ -565,14 +560,14 @@
 
           <h2 class="calc-subhead">Month by month</h2>
           <div class="calc-schedule-scroll">
-            <table class="calc-schedule" id="calcSchedule">
+            <table class="calc-schedule calc-schedule--compact" id="calcSchedule">
               <thead>
                 <tr>
                   <th scope="col">Month</th>
-                  <th scope="col">Costs drawn</th>
-                  <th scope="col">Interest</th>
-                  <th scope="col">Loan balance</th>
-                  <th scope="col">Equity in (to date)</th>
+                  <th scope="col" class="debt-col">Costs drawn</th>
+                  <th scope="col" class="debt-col">Interest</th>
+                  <th scope="col" class="debt-col">Loan balance</th>
+                  <th scope="col" id="equityHeader">Equity in (to date)</th>
                 </tr>
               </thead>
               <tbody id="calcScheduleBody">
@@ -744,7 +739,7 @@
 
     /* cost-line groups, reused for summing, the blur formatter and the PDF */
     var SITE = ["demolition", "asbestos", "clearing", "serviceLoc", "otherSite"];
-    var CONSULT = ["architect", "planner", "surveyor", "civil", "flood", "structural", "geotech", "contamination", "certifier", "access", "traffic", "landscape", "arborist", "basix", "acoustic", "bushfire", "heritage", "waste", "qs", "ecologist", "otherConsult"];
+    var CONSULT = ["architect", "planner", "surveyor", "civil", "flood", "structural", "geotech", "contamination", "certifier", "access", "traffic", "landscape", "arborist", "basix", "acoustic", "bushfire", "heritage", "waste", "ecologist", "otherConsult"];
     var STAT = ["preDA", "daFee", "advertising", "rezoning"];
     var HOLD = ["councilRates", "landTax", "insurances", "utilities", "maintenance", "otherHold"];
     var SC = ["scDemo", "scAsbestos", "scHeritage", "scTrees", "scSlope", "scFlood", "scBushfire", "scAcoustic", "scContam", "scVegetation", "scStormwater", "scNoServices", "scCorner"];
@@ -759,7 +754,7 @@
       geotech: "Geotechnical engineer", contamination: "Contamination assessment (Phase 1 / 2)",
       certifier: "Building surveyor / certifier", access: "Access / DDA consultant", traffic: "Traffic & parking",
       landscape: "Landscape architect", arborist: "Arborist / tree works", basix: "BASIX / NatHERS / ESD", acoustic: "Acoustic",
-      bushfire: "Bushfire (BAL)", heritage: "Heritage", waste: "Waste management plan", qs: "Quantity surveyor",
+      bushfire: "Bushfire (BAL)", heritage: "Heritage", waste: "Waste management plan",
       ecologist: "Ecologist / biodiversity", otherConsult: "Other consultant"
     };
     var STAT_LABELS = {
@@ -830,7 +825,6 @@
       bushfire: function (c) { return c.sc("scBushfire") ? "likely" : "possible"; },
       heritage: function (c) { return c.sc("scHeritage") ? "likely" : "possible"; },
       waste: function (c) { return (c.sc("scDemo") || isBig(c.type)) ? "likely" : "possible"; },
-      qs: function (c) { return isBig(c.type) ? "likely" : "possible"; },
       ecologist: function (c) { return (c.sc("scVegetation") || c.sc("scFlood")) ? "likely" : "possible"; }
     };
     var FLAG_TEXT = {
@@ -1215,17 +1209,29 @@
       put("debtAtDA", m.valid ? money(m.debtAtDA) : "—");
       put("costOnPrice", (m.valid && m.costOnPrice != null) ? pct(m.costOnPrice) : "—");
 
+      /* With no loan at all, and development costs not funded from one
+         either, the balance never moves off zero - "Costs drawn",
+         "Interest" and "Loan balance" would just be a wall of zeroes next
+         to the one column that does move. Drop those three and show a
+         plain running cash total instead. */
+      var hasDebt = m.loan > 0 || (m.costsInLoan && m.devCosts > 0);
+      document.querySelectorAll("#calcSchedule .debt-col").forEach(function (th) { th.hidden = !hasDebt; });
+      document.getElementById("equityHeader").textContent = hasDebt ? "Equity in (to date)" : "Cash contributed (to date)";
+
       var body = document.getElementById("calcScheduleBody");
       if (!m.valid || !m.rows.length) {
-        body.innerHTML = '<tr><td colspan="5" class="calc-schedule-empty">Enter a land price and a DA timeframe in months to see the schedule.</td></tr>';
+        body.innerHTML = '<tr><td colspan="' + (hasDebt ? 5 : 2) + '" class="calc-schedule-empty">Enter a land price and a DA timeframe in months to see the schedule.</td></tr>';
         return;
       }
       var html = "";
       m.rows.forEach(function (r) {
-        var cells = [money(r.draw), money(r.interest), money(r.balance), money(r.equityIn)];
         html += "<tr><td>" + r.month + "</td>";
-        cells.forEach(function (c) { html += "<td>" + (unlocked ? c : mask(c)) + "</td>"; });
-        html += "</tr>";
+        if (hasDebt) {
+          [r.draw, r.interest, r.balance].forEach(function (v) {
+            html += "<td>" + (unlocked ? money(v) : mask(money(v))) + "</td>";
+          });
+        }
+        html += "<td>" + (unlocked ? money(r.equityIn) : mask(money(r.equityIn))) + "</td></tr>";
       });
       body.innerHTML = html;
     }
@@ -1421,12 +1427,22 @@
       doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
 
       y += 88;
+      /* Page-break guard: this report runs to 20+ consultant lines plus
+         reports/holding/result sections, well past one A4 page, so every
+         drawing helper checks first and starts a fresh page rather than
+         bleeding text off the bottom edge. */
+      var PAGE_H = doc.internal.pageSize.getHeight();
+      function ensure(space) {
+        if (y + (space || 0) > PAGE_H - 52) { doc.addPage(); y = 56; }
+      }
       function section(title) {
+        ensure(34);
         doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
         doc.text(title, L, y); y += 7;
         doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 15;
       }
       function row(k, v, strong) {
+        ensure(16);
         doc.setFontSize(9.5);
         doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
         doc.text(k, L, y);
@@ -1435,10 +1451,11 @@
         y += 15;
       }
       function wrapLine(label, text) {
+        var lines = doc.splitTextToSize(text || "-", w - 2 * L - 96);
+        ensure(Math.max(lines.length * 11, 14));
         doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(90);
         doc.text(label, L, y);
         doc.setFont("helvetica", "normal"); doc.setTextColor(40);
-        var lines = doc.splitTextToSize(text || "-", w - 2 * L - 96);
         doc.text(lines, L + 96, y);
         y += Math.max(lines.length * 11, 14);
       }
@@ -1447,6 +1464,7 @@
       /* the one figure this report is building toward - boxed off in brand
          colour so it reads as the answer, not another line in the list */
       function bigrow(k, v) {
+        ensure(40);
         var top = y - 15, h = 32;
         doc.setFillColor(234, 242, 248);
         doc.roundedRect(L, top, w - 2 * L, h, 4, 4, "F");
@@ -1531,14 +1549,18 @@
       wrapLine("Likely", likely.length ? likely.join(", ") : "Standard set only.");
       wrapLine("May be needed", possible.length ? possible.join(", ") : "-");
       y += 4;
+      var preDaLines = doc.splitTextToSize("Always hold a pre-lodgement (pre-DA) meeting with the council before you lodge, unless the outcome is already certain.", w - 2 * L);
+      ensure(preDaLines.length * 11 + 4);
       doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(40);
-      doc.text(doc.splitTextToSize("Always hold a pre-lodgement (pre-DA) meeting with the council before you lodge, unless the outcome is already certain.", w - 2 * L), L, y);
-      y += 14;
+      doc.text(preDaLines, L, y);
+      y += preDaLines.length * 11 + 4;
 
       y += 8;
-      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This estimate is a guide only, generated from the figures entered above. Report tags are derived from the site characteristics you ticked and are not a determination by the council; always confirm the required documents at a pre-lodgement (pre-DA) meeting before lodging, unless the outcome is already certain. Any stamp duty shown is estimated from published state general transfer duty rates plus indicative land-titles-office registration fees, not the state revenue office's or titles registry's figure. Demolition figures are indicative $/m2 ranges from price guides, not quotes, with a minimum job cost. Holding costs are applied for the DA period only. Interest is charged monthly on the loan balance and capitalised. This is a pre-construction view: it excludes GST, the build, construction certificate costs, contributions payable later, finance beyond the DA period, and any holding or selling past approval. It is not financial, tax or planning advice. Speak to Project Carter and a licensed adviser before acting.";
-      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+      var discLines = doc.splitTextToSize(disc, w - 2 * L);
+      ensure(discLines.length * 9.5);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+      doc.text(discLines, L, y);
 
       var totalPages = doc.internal.getNumberOfPages();
       for (var p = 1; p <= totalPages; p++) {
