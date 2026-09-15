@@ -1708,6 +1708,14 @@ h1, h2, h3 {
   .acct-dash-danger    { grid-area: danger; }
 }
 
+/* On mobile the "Recently updated" and "My saved reports" cards (the latter
+   includes its own "Start a report" grid) add too much scroll for what they're
+   worth on a small screen - hide both, they're still on desktop. */
+@media (max-width: 900px) {
+  .acct-dash-activity,
+  .acct-dash-reports { display: none; }
+}
+
 /* portfolio ROI projection - growth chart */
 .acct-chart-wrap { margin: 18px 0 4px; }
 .acct-chart { width: 100%; height: auto; display: block; overflow: visible; }
