@@ -1287,6 +1287,12 @@ h1, h2, h3 {
   text-transform: uppercase;
   border-bottom-color: var(--line);
 }
+/* Narrow comparison tables (3-4 columns) don't need the 720px min-width
+   the many-column year-by-year schedules do, or the no-wrap cells - forcing
+   both just left them needing a horizontal scroll to see the last column,
+   with the extra width showing up as blank padding rather than content. */
+.calc-schedule--compact { min-width: 0; }
+.calc-schedule--compact th, .calc-schedule--compact td { white-space: normal; }
 .calc-schedule tbody td { color: var(--text); }
 .calc-schedule tbody tr:hover td { background: var(--bg-2); }
 .calc-schedule-empty { text-align: center !important; color: var(--muted); padding: 22px 14px; }

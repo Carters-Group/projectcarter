@@ -227,7 +227,7 @@
         <div class="calc-schedule-wrap">
           <h2 class="calc-subhead">Major banks vs tier 2 / non-bank</h2>
           <div class="calc-schedule-scroll">
-            <table class="calc-schedule" id="calcSchedule">
+            <table class="calc-schedule calc-schedule--compact" id="calcSchedule">
               <thead>
                 <tr>
                   <th>Metric</th>
@@ -664,9 +664,18 @@
       document.getElementById("loanTypeHint").textContent = type.hint;
       document.getElementById("priceLabel").textContent = type.unit;
       document.getElementById("priceRowLabel").textContent = type.unit;
-      document.getElementById("priceHint").textContent = type.unit === "Purchase price"
-        ? "Use $2,000,000 if you just want to see how the numbers work."
-        : "Total development cost, not just the land or purchase price. Use $2,000,000 if you just want to see how the numbers work.";
+      var priceHintEl = document.getElementById("priceHint");
+      if (type.unit === "Purchase price" && m.valid && (m.typeKey === "ownerocc" || m.typeKey === "leasedoc")) {
+        var depLo = Math.min(m.major.depositPct, m.tier2.depositPct);
+        var depHi = Math.max(m.major.depositPct, m.tier2.depositPct);
+        var depositRange = depLo === depHi ? pct(depLo) : (pct(depLo) + "–" + pct(depHi));
+        var exampleDeposit = money(m.major.available ? m.major.deposit : m.tier2.deposit);
+        priceHintEl.textContent = "A " + depositRange + " deposit is typical here — about " + exampleDeposit + " on this price — plus purchase costs below.";
+      } else if (type.unit === "Purchase price") {
+        priceHintEl.textContent = "Use $2,000,000 if you just want to see how the numbers work.";
+      } else {
+        priceHintEl.textContent = "Total development cost, not just the land or purchase price. Use $2,000,000 if you just want to see how the numbers work.";
+      }
       document.getElementById("btrRentalField").hidden = m.typeKey !== "btr";
 
       function put(key, str, teaser) {
