@@ -904,15 +904,15 @@
       return lines.filter(Boolean).join("\n");
     }
 
-    function pcPdfFilename(calcName) {
+    function pcPdfFilename(abbr) {
       var el = document.getElementById("pcProjectName") || document.getElementById("address");
       var name = ((el && el.value) || "").trim().replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, " ").trim();
-      return "Project Carter - " + (name ? name + " - " : "") + calcName + ".pdf";
+      return "(" + abbr + ") - " + (name ? name + " - " : "") + "Project Carter.pdf";
     }
 
     function saveDoc() {
       if (!lastDoc) lastDoc = makePDF();
-      if (lastDoc) lastDoc.save(pcPdfFilename("Commercial Lending (CL) Calculator"));
+      if (lastDoc) lastDoc.save(pcPdfFilename("CL"));
     }
 
     leadForm.addEventListener("submit", function (e) {
