@@ -776,7 +776,7 @@
       doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
 
       doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
-      doc.text("Commercial Lending", L, y + 44);
+      doc.text("Commercial Lending (CL) Calculator", L, y + 44);
 
       var name = document.getElementById("leadName").value.trim();
       var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
@@ -904,9 +904,15 @@
       return lines.filter(Boolean).join("\n");
     }
 
+    function pcPdfFilename(calcName) {
+      var el = document.getElementById("pcProjectName") || document.getElementById("address");
+      var name = ((el && el.value) || "").trim().replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, " ").trim();
+      return "Project Carter - " + (name ? name + " - " : "") + calcName + ".pdf";
+    }
+
     function saveDoc() {
       if (!lastDoc) lastDoc = makePDF();
-      if (lastDoc) lastDoc.save("project-carter-commercial-lending-calculator.pdf");
+      if (lastDoc) lastDoc.save(pcPdfFilename("Commercial Lending (CL) Calculator"));
     }
 
     leadForm.addEventListener("submit", function (e) {
