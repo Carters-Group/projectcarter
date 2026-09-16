@@ -1105,6 +1105,7 @@ h1, h2, h3 {
 .calc-inputs { display: grid; gap: 30px; grid-column: 1; grid-row: 1; }
 .calc-below { min-width: 0; grid-column: 1; grid-row: 2; }
 .calc-inputs .field-hint { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
+.calc-inputs .field-hint.field-range { font-style: italic; }
 .calc-inputs .field label span { color: var(--muted); font-weight: 500; }
 .calc-inputs .field label { line-height: 1.4; min-height: 2.8em; }
 .field-ref { font-size: 12px; color: var(--muted); margin: -4px 0 0; }
@@ -1261,6 +1262,7 @@ h1, h2, h3 {
 /* GRV calculator: line items folded into a D&C contract sum */
 .field.is-included .input-money input { text-decoration: line-through; opacity: 0.5; }
 .field.is-included > label { opacity: 0.6; }
+.field.is-included .field-range { display: none; }
 .report-flag.is-included { color: var(--muted); font-style: italic; }
 
 /* ---- year-by-year schedule ---- */
