@@ -55,7 +55,7 @@
   <main id="main">
     <section class="project-hero">
       <div class="project-hero-media" style="background-image:url('assets/images/projects/haig/haig-02.jpg')" aria-hidden="true"></div>
-      <div class="wrap project-hero-inner">
+      <div class="wrap project-hero-inner acct-hero-inner">
         <p class="project-eyebrow">Project Carter</p>
         <h1 class="project-title">Your account</h1>
         <p class="project-locale" style="max-width:56ch">Your home for every figure you've run with Project Carter. Save any calculator's numbers, open them again on any device, and build up a running picture of your portfolio's value, equity and cash flow over time. It is free. Sign in with a one-time link sent to your email, no password to remember.</p>
@@ -171,27 +171,27 @@
           </div>
 
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
-            <div class="acct-profile-row">
-              <div class="acct-profile-row__text">
+            <div class="acct-identity-row">
+              <div class="acct-identity-row__text">
                 <p class="acct-eyebrow">Signed in as</p>
                 <p class="acct-email" id="acctWhoEmail">&mdash;</p>
                 <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
               </div>
-              <button type="button" class="btn btn-ghost btn-sm acct-profile-row__actions" id="signOutBtn">Sign out</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
             </div>
 
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your portfolio</h2>
-              <a href="portfolio-review-calculator" id="portfolioEditBtn" class="btn btn-ghost btn-sm" hidden>Edit portfolio</a>
+              <div class="acct-card-head__actions">
+                <button type="button" class="linklike" id="portfolioRenameBtn" hidden>Rename</button>
+                <a href="portfolio-review-calculator" id="portfolioEditBtn" class="btn btn-ghost btn-sm" hidden>Edit portfolio</a>
+              </div>
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
 
             <div id="portfolioSet" hidden>
               <p class="acct-eyebrow" id="portfolioEyebrow">Master portfolio</p>
-              <div class="acct-title-row">
-                <p class="acct-email" id="portfolioTitle">&mdash;</p>
-                <button type="button" class="linklike" id="portfolioRenameBtn">Rename</button>
-              </div>
+              <p class="acct-email" id="portfolioTitle">&mdash;</p>
               <div class="acct-overview" id="portfolioStats"></div>
               <p class="acct-report__date" id="portfolioUpdated"></p>
               <div class="acct-equity-modes" id="portfolioEquityModes"></div>
@@ -744,7 +744,9 @@
         editBtn.href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
         show(editBtn);
 
-        document.getElementById("portfolioRenameBtn").onclick = function () {
+        var renameBtn = document.getElementById("portfolioRenameBtn");
+        show(renameBtn);
+        renameBtn.onclick = function () {
           var next = window.prompt("Rename your portfolio", master.title || "");
           if (next == null) return;
           next = next.trim();
@@ -815,6 +817,7 @@
       } else {
         hide(setEl); show(unsetEl);
         hide(editBtn);
+        hide(document.getElementById("portfolioRenameBtn"));
         renderPortfolioChooser(rows, false);
       }
     }

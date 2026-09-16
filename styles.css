@@ -1690,22 +1690,22 @@ h1, h2, h3 {
 
 .acct-card .acct-whoami { margin-bottom: 22px; }
 
-/* profile row at the top of the portfolio card - bottom-aligned so the
-   button lines up with the email itself, not the shorter eyebrow line above it */
-.acct-profile-row {
-  display: flex; align-items: flex-end; gap: 16px;
-  margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line-soft);
+/* identity row at the top of the portfolio card - bottom-aligned so the
+   button lines up with the email itself, not the shorter eyebrow line above
+   it. It and the "Your portfolio" heading below share this one card's
+   background, split only by a single thin break - not two separate boxes. */
+.acct-identity-row {
+  display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line);
 }
-.acct-profile-row__text { flex: 1; min-width: 160px; }
-.acct-profile-row__actions { flex: none; }
-
-.acct-title-row { display: flex; align-items: baseline; gap: 12px; }
+.acct-identity-row__text { flex: 1; min-width: 160px; }
 
 .acct-card-head {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   margin-bottom: 18px;
 }
-.acct-card-head h2 { margin: 0; }
+.acct-card-head h2 { margin: 0; border-bottom: none; padding-bottom: 0; }
+.acct-card-head__actions { display: flex; align-items: center; gap: 16px; }
 .acct-subhead-sm {
   font-family: var(--font-body); font-weight: 600; font-size: 12px;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
@@ -1714,16 +1714,29 @@ h1, h2, h3 {
 
 .btn-sm { padding: 9px 16px; font-size: 13px; display: inline-block; cursor: pointer; }
 
+/* every card in the grid stretches to the row's tallest by default (CSS
+   grid), but without this the "Saved / Edit" link floats at a different
+   height on each card depending on how long its title or saved-report name
+   is - clamping the meta text and pinning the link to the bottom keeps
+   every card reading at the same levels regardless of content length. */
 .acct-quick-grid { margin-top: 16px; }
 .acct-quick-card .card-media { aspect-ratio: 16 / 7; }
-.acct-quick-card .card-body { padding: 18px 20px; }
+.acct-quick-card .card-body { padding: 18px 20px; display: flex; flex-direction: column; flex: 1; }
 .acct-quick-card .card-body h3 { font-size: 19px; margin-bottom: 4px; }
-.acct-quick-card .card-meta { margin: 0 0 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 13px; }
+.acct-quick-card .card-meta {
+  margin: 0 0 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-size: 13px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.acct-quick-card .link-arrow { margin-top: auto; }
 
 /* signed-in dashboard layout - desktop only. Below the breakpoint everything
    falls back to the plain stacked flow (DOM order) it always had, so mobile
    is untouched. */
 #acctWrap.is-signedin { max-width: 1180px; }
+/* the hero heading/copy use the site's default (wider) max-width, which
+   otherwise sits ~30px further left than the signed-in dashboard below it
+   at wide viewports - match it so both line up on the same left edge. */
+.acct-hero-inner { max-width: 1180px; }
 @media (min-width: 901px) {
   .acct-dashboard:not([hidden]) {
     display: grid;
