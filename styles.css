@@ -1680,6 +1680,8 @@ h1, h2, h3 {
 .acct-profile-row__text { flex: 1; min-width: 160px; }
 .acct-profile-row__actions { flex: none; }
 
+.acct-title-row { display: flex; align-items: baseline; gap: 12px; }
+
 .acct-card-head {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   margin-bottom: 18px;
@@ -1728,33 +1730,28 @@ h1, h2, h3 {
   .acct-dash-danger    { grid-area: danger; }
 }
 
-/* "Recently updated" and "My saved reports" sit side by side in the right
-   column, each collapsed by default (native <details>, closed until
-   clicked) so they don't dominate the page just for a glance at the
-   portfolio. Below the two-column breakpoint they stack instead. */
-.acct-dash-side {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
+/* "Recently updated" and "My saved reports" are folded away behind a
+   single accent toggle button ("Recently saved calculations") - one click
+   unfolds both side by side, rather than each taking up space (or needing
+   its own click) by default. Below the two-column breakpoint they stack
+   instead, and on mobile the whole thing is hidden - see below. */
+.acct-dash-side > summary {
+  cursor: pointer; list-style: none; width: fit-content;
+  display: inline-flex; align-items: center; gap: 10px;
 }
-@media (max-width: 640px) {
-  .acct-dash-side { grid-template-columns: 1fr; }
-}
-.acct-collapsible > summary {
-  cursor: pointer;
-  list-style: none;
-}
-.acct-collapsible > summary::-webkit-details-marker { display: none; }
-.acct-collapsible > summary::after {
-  content: "+"; float: right; color: var(--muted); font-size: 15px; line-height: 1;
-}
-.acct-collapsible[open] > summary::after { content: "\2212"; }
-.acct-collapsible[open] > summary { margin-bottom: 16px; }
+.acct-dash-side > summary::-webkit-details-marker { display: none; }
+.acct-dash-side > summary::after { content: "+"; font-size: 16px; line-height: 1; }
+.acct-dash-side[open] > summary::after { content: "\2212"; }
+.acct-dash-side[open] > summary { margin-bottom: 20px; }
 
-/* On mobile the "Recently updated" and "My saved reports" cards (the latter
-   includes its own "Start a report" grid) add too much scroll for what they're
-   worth on a small screen - hide both, they're still on desktop. */
+.acct-recent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 640px) {
+  .acct-recent-grid { grid-template-columns: 1fr; }
+}
+
+/* On mobile "Recently updated" and "My saved reports" (the latter includes
+   its own "Start a report" grid) add too much scroll for what they're worth
+   on a small screen - hide the whole toggle, they're still on desktop. */
 @media (max-width: 900px) {
   .acct-dash-side { display: none; }
 }
