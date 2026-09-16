@@ -1710,8 +1710,8 @@ h1, h2, h3 {
     grid-template-areas:
       "start      start"
       "pwnudge    pwnudge"
-      "portfolio  portfolio"
-      "quick      side"
+      "portfolio  quick"
+      "portfolio  side"
       "details    details"
       "danger     danger";
     align-items: start;
