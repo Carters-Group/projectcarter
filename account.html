@@ -696,15 +696,20 @@
       var noteEl = document.getElementById("portfolioRiskNote");
       var hasYieldData = s.investmentValue > 0 && s.blendedYield > 0;
       gridEl.innerHTML = "";
+      var hasVacancyData = s.grossRentalIncome != null && s.grossRentalIncome > 0;
       RISK_SCENARIOS.forEach(function (sc) {
         var extraInterest = (s.portfolioDebt || 0) * sc.rate;
-        var vacancyLoss = s.grossRentalIncome != null ? s.grossRentalIncome * (sc.vacWeeks / 52) : 0;
         var cashFlowIfRates = (s.annualSurplus || 0) - extraInterest;
-        var cashFlowIfVacancy = (s.annualSurplus || 0) - vacancyLoss;
 
         var rows =
-          '<div class="acct-overview__stat"><dt>Cash flow if rates rise</dt><dd>' + fmtSignedMoney(cashFlowIfRates) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Cash flow if vacancy hits</dt><dd>' + fmtSignedMoney(cashFlowIfVacancy) + '</dd></div>';
+          '<div class="acct-overview__stat"><dt>Cash flow if rates rise</dt><dd>' + fmtSignedMoney(cashFlowIfRates) + '</dd></div>';
+
+        if (hasVacancyData) {
+          var vacancyLoss = s.grossRentalIncome * (sc.vacWeeks / 52);
+          var cashFlowIfVacancy = (s.annualSurplus || 0) - vacancyLoss;
+          rows +=
+            '<div class="acct-overview__stat"><dt>Cash flow if vacancy hits</dt><dd>' + fmtSignedMoney(cashFlowIfVacancy) + '</dd></div>';
+        }
 
         if (hasYieldData) {
           var newYield = s.blendedYield + sc.yield;
@@ -721,15 +726,16 @@
         card.className = "acct-risk-card is-" + sc.tone;
         card.innerHTML =
           '<p class="acct-risk-card__title">' + sc.label + '</p>' +
-          '<p class="acct-risk-card__assumptions">+' + (sc.rate * 100).toFixed(1) + '% rates OR +' + sc.vacWeeks + ' wks vacancy' +
+          '<p class="acct-risk-card__assumptions">+' + (sc.rate * 100).toFixed(1) + '% rates' +
+            (hasVacancyData ? ' OR +' + sc.vacWeeks + ' wks vacancy' : '') +
             (hasYieldData ? ' &middot; +' + Math.round(sc.yield * 10000) + 'bps yield' : '') + '</p>' +
           '<div class="acct-overview acct-overview--modes">' + rows + '</div>';
         gridEl.appendChild(card);
       });
       if (noteEl) {
-        noteEl.textContent = hasYieldData
+        noteEl.textContent = (hasVacancyData && hasYieldData)
           ? "Approximate: uses your portfolio's blended rate and yield rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall exposure, not a precise forecast."
-          : "Approximate, and showing cash-flow exposure only - re-open and save your Portfolio Review to also see value and gearing exposure to yield movements.";
+          : "Approximate, and showing rate-rise cash-flow exposure only - re-open and save your Portfolio Review to also see vacancy exposure and value/gearing exposure to yield movements.";
       }
     }
 
