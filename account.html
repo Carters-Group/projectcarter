@@ -680,21 +680,20 @@
     /* Three fixed stress scenarios read across the whole portfolio at once -
        a "how exposed am I" read, not a precision forecast. Rate rise and
        vacancy are shown as separate cash-flow rows rather than summed,
-       since both landing in the same year is unlikely. Rate and vacancy
-       stress only need fields every master portfolio already has; the
-       yield/value stress needs the newer investmentValue/grossRentalIncome/
-       blendedYield fields, so it quietly drops off that row for a report
-       saved before this shipped, until the visitor re-saves Portfolio
-       Review. */
+       since both landing in the same year is unlikely, and a rate rise or a
+       vacancy hit doesn't itself say anything about value, so neither row
+       implies anything about the other. Vacancy needs grossRentalIncome,
+       added to the summary after this shipped, so it quietly drops off that
+       row for a report saved before then, until the visitor re-saves
+       Portfolio Review. */
     var RISK_SCENARIOS = [
-      { label: "Mild",     tone: "mild",     rate: 0.005, vacWeeks: 4,  yield: 0.0025 },
-      { label: "Moderate", tone: "moderate", rate: 0.015, vacWeeks: 8,  yield: 0.005 },
-      { label: "Severe",   tone: "severe",   rate: 0.03,  vacWeeks: 16, yield: 0.01 }
+      { label: "Mild",     tone: "mild",     rate: 0.005, vacWeeks: 4 },
+      { label: "Moderate", tone: "moderate", rate: 0.015, vacWeeks: 8 },
+      { label: "Severe",   tone: "severe",   rate: 0.03,  vacWeeks: 16 }
     ];
     function renderPortfolioRisk(s) {
       var gridEl = document.getElementById("portfolioRiskGrid");
       var noteEl = document.getElementById("portfolioRiskNote");
-      var hasYieldData = s.investmentValue > 0 && s.blendedYield > 0;
       gridEl.innerHTML = "";
       var hasVacancyData = s.grossRentalIncome != null && s.grossRentalIncome > 0;
       RISK_SCENARIOS.forEach(function (sc) {
@@ -711,31 +710,19 @@
             '<div class="acct-overview__stat"><dt>Cash flow if vacancy hits</dt><dd>' + fmtSignedMoney(cashFlowIfVacancy) + '</dd></div>';
         }
 
-        if (hasYieldData) {
-          var newYield = s.blendedYield + sc.yield;
-          var newInvestmentValue = s.investmentValue * (s.blendedYield / newYield);
-          var valueDelta = newInvestmentValue - s.investmentValue;
-          var newPortfolioValue = s.portfolioValue + valueDelta;
-          var newLvr = newPortfolioValue > 0 ? (s.portfolioDebt / newPortfolioValue * 100) : null;
-          rows +=
-            '<div class="acct-overview__stat"><dt>Value impact</dt><dd>' + fmtSignedMoney(valueDelta) + '</dd></div>' +
-            '<div class="acct-overview__stat"><dt>Portfolio LVR</dt><dd>' + fmtPct(newLvr) + '</dd></div>';
-        }
-
         var card = document.createElement("div");
         card.className = "acct-risk-card is-" + sc.tone;
         card.innerHTML =
           '<p class="acct-risk-card__title">' + sc.label + '</p>' +
           '<p class="acct-risk-card__assumptions">+' + (sc.rate * 100).toFixed(1) + '% rates' +
-            (hasVacancyData ? ' OR +' + sc.vacWeeks + ' wks vacancy' : '') +
-            (hasYieldData ? ' &middot; +' + Math.round(sc.yield * 10000) + 'bps yield' : '') + '</p>' +
+            (hasVacancyData ? ' OR +' + sc.vacWeeks + ' wks vacancy' : '') + '</p>' +
           '<div class="acct-overview acct-overview--modes">' + rows + '</div>';
         gridEl.appendChild(card);
       });
       if (noteEl) {
-        noteEl.textContent = (hasVacancyData && hasYieldData)
-          ? "Approximate: uses your portfolio's blended rate and yield rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall exposure, not a precise forecast."
-          : "Approximate, and showing rate-rise cash-flow exposure only - re-open and save your Portfolio Review to also see vacancy exposure and value/gearing exposure to yield movements.";
+        noteEl.textContent = hasVacancyData
+          ? "Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast."
+          : "Approximate, and showing rate-rise cash-flow exposure only - re-open and save your Portfolio Review to also see vacancy exposure.";
       }
     }
 

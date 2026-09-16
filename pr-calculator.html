@@ -2033,9 +2033,7 @@
         annualSurplus: Math.round(I.annual),
         weeklySurplus: Math.round(I.weekly),
         propertyCount: m.live.length,
-        investmentValue: Math.round(I.value),
-        grossRentalIncome: Math.round(I.grossRent),
-        blendedYield: I.value > 0 ? I.grossRent / I.value : null
+        grossRentalIncome: Math.round(I.grossRent)
       };
     };
   })();
