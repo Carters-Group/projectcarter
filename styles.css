@@ -1604,6 +1604,8 @@ h1, h2, h3 {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 12px 0; border-bottom: 1px solid var(--line-soft);
 }
+.acct-report[hidden] { display: none; }
+.acct-reports-more { margin-top: 14px; }
 .acct-report__main { display: grid; gap: 2px; min-width: 0; }
 .acct-report__title { color: var(--text); font-weight: 600; text-decoration: none; }
 .acct-report__title:hover { color: var(--accent); text-decoration: underline; }

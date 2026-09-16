@@ -275,7 +275,7 @@
               <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
             </div>
 
-            <details class="acct-collapsible" id="acctRecentGroup">
+            <details class="acct-collapsible" id="acctRecentGroup" open>
               <summary class="btn btn-accent btn-block">Recently saved calculations</summary>
               <div class="card acct-card">
                 <p class="acct-msg" id="reportsMsg" hidden></p>
@@ -527,17 +527,27 @@
       var groups = {};
       visible.forEach(function (r) { (groups[r.calculator] = groups[r.calculator] || []).push(r); });
 
+      /* Only the first REPORTS_CAP reports show up front - the rest render
+         straight away (so no second fetch, no layout jump) but stay hidden
+         behind a "Load more" button, since a long list here would otherwise
+         dominate a page that's meant to lead with the portfolio. */
+      var REPORTS_CAP = 6;
+      var shown = 0;
+      var hiddenCount = 0;
+
       CALC_ORDER.forEach(function (calc) {
         if (!groups[calc]) return;
         var h = document.createElement("h3");
         h.className = "acct-group-head";
         h.textContent = CALC_NAMES[calc];
+        if (shown >= REPORTS_CAP) h.hidden = true;
         reportsList.appendChild(h);
 
         groups[calc].forEach(function (r) {
           var row = document.createElement("div");
           row.className = "acct-report";
           row.setAttribute("data-id", r.id);
+          if (shown >= REPORTS_CAP) { row.hidden = true; hiddenCount++; } else { shown++; }
           var masterBtn = calc === "pr"
             ? '<button type="button" class="linklike" data-act="master">Make this my portfolio</button>'
             : "";
@@ -603,6 +613,18 @@
           reportsList.appendChild(row);
         });
       });
+
+      if (hiddenCount > 0) {
+        var moreBtn = document.createElement("button");
+        moreBtn.type = "button";
+        moreBtn.className = "btn btn-ghost btn-sm acct-reports-more";
+        moreBtn.textContent = "Load " + hiddenCount + " more";
+        moreBtn.addEventListener("click", function () {
+          reportsList.querySelectorAll("[hidden]").forEach(function (el) { el.hidden = false; });
+          moreBtn.remove();
+        });
+        reportsList.appendChild(moreBtn);
+      }
     }
 
     /* the "Start here" bar only makes sense before a visitor has entered
