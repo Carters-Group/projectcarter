@@ -1648,6 +1648,23 @@ h1, h2, h3 {
 .acct-debt-goal { margin: 20px 0; padding-top: 18px; border-top: 1px solid var(--line-soft); }
 .acct-debt-goal .field { margin: 8px 0 12px; }
 
+/* raised above the other portfolio sub-sections (debt goal, plan) with its
+   own tinted panel and a bolder title, since this is the "how exposed am I"
+   read the portfolio card is meant to lead a visitor to. */
+.acct-health-section {
+  background: linear-gradient(135deg, rgba(95, 161, 208, 0.14), rgba(95, 161, 208, 0.02)), var(--bg-2);
+  border: 1px solid rgba(95, 161, 208, 0.35);
+  border-radius: 8px;
+  padding: 20px 22px;
+}
+.acct-health-section__title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent-2);
+}
+
 .acct-plan__row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .acct-plan__row .field { margin: 8px 0 12px; }
 .acct-plan__row .field label { line-height: 1.4; min-height: 2.8em; }
