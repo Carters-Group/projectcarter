@@ -1651,13 +1651,13 @@ h1, h2, h3 {
 /* raised above the other portfolio sub-sections (debt goal, plan) with its
    own tinted panel and a bolder title, since this is the "how exposed am I"
    read the portfolio card is meant to lead a visitor to. */
-.acct-health-section {
+.acct-risk-section {
   background: linear-gradient(135deg, rgba(95, 161, 208, 0.14), rgba(95, 161, 208, 0.02)), var(--bg-2);
   border: 1px solid rgba(95, 161, 208, 0.35);
   border-radius: 8px;
   padding: 20px 22px;
 }
-.acct-health-section__title {
+.acct-risk-section__title {
   margin: 0 0 4px;
   font-family: var(--font-display);
   font-size: 1.15rem;
@@ -1672,20 +1672,20 @@ h1, h2, h3 {
   .acct-plan__row { grid-template-columns: 1fr; }
 }
 
-.acct-health-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 14px 0 4px; }
-.acct-health-card {
+.acct-risk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 14px 0 4px; }
+.acct-risk-card {
   border: 1px solid var(--line-soft); border-radius: 6px; padding: 14px 16px;
   background: var(--bg-2);
 }
-.acct-health-card.is-mild     { background: linear-gradient(135deg, rgba(224, 196, 60, 0.16), rgba(224, 196, 60, 0.03)), var(--bg-2); border-color: rgba(224, 196, 60, 0.35); }
-.acct-health-card.is-moderate { background: linear-gradient(135deg, rgba(224, 140, 55, 0.18), rgba(224, 140, 55, 0.03)), var(--bg-2); border-color: rgba(224, 140, 55, 0.4); }
-.acct-health-card.is-severe   { background: linear-gradient(135deg, rgba(224, 90, 90, 0.2), rgba(224, 90, 90, 0.03)), var(--bg-2); border-color: rgba(224, 90, 90, 0.45); }
-.acct-health-card__title { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text); }
-.acct-health-card__assumptions { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
-.acct-health-card .acct-overview { grid-template-columns: 1fr; margin: 12px 0 0; }
-.acct-health-card .acct-overview__stat { padding: 10px 12px; }
+.acct-risk-card.is-mild     { background: linear-gradient(135deg, rgba(224, 196, 60, 0.16), rgba(224, 196, 60, 0.03)), var(--bg-2); border-color: rgba(224, 196, 60, 0.35); }
+.acct-risk-card.is-moderate { background: linear-gradient(135deg, rgba(224, 140, 55, 0.18), rgba(224, 140, 55, 0.03)), var(--bg-2); border-color: rgba(224, 140, 55, 0.4); }
+.acct-risk-card.is-severe   { background: linear-gradient(135deg, rgba(224, 90, 90, 0.2), rgba(224, 90, 90, 0.03)), var(--bg-2); border-color: rgba(224, 90, 90, 0.45); }
+.acct-risk-card__title { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text); }
+.acct-risk-card__assumptions { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+.acct-risk-card .acct-overview { grid-template-columns: 1fr; margin: 12px 0 0; }
+.acct-risk-card .acct-overview__stat { padding: 10px 12px; }
 @media (max-width: 640px) {
-  .acct-health-grid { grid-template-columns: 1fr; }
+  .acct-risk-grid { grid-template-columns: 1fr; }
 }
 
 .acct-card .acct-whoami { margin-bottom: 22px; }
