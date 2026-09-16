@@ -1713,7 +1713,6 @@ h1, h2, h3 {
       "start      start"
       "pwnudge    pwnudge"
       "portfolio  quick"
-      "portfolio  side"
       "details    details"
       "danger     danger";
     align-items: start;
@@ -1725,35 +1724,31 @@ h1, h2, h3 {
   .acct-dash-pwnudge   { grid-area: pwnudge; }
   .acct-dash-portfolio { grid-area: portfolio; }
   .acct-dash-quick     { grid-area: quick; }
-  .acct-dash-side       { grid-area: side; }
   .acct-dash-details   { grid-area: details; }
   .acct-dash-danger    { grid-area: danger; }
 }
 
-/* "Recently updated" and "My saved reports" are folded away behind a
-   single accent toggle button ("Recently saved calculations") - one click
-   unfolds both side by side, rather than each taking up space (or needing
-   its own click) by default. Below the two-column breakpoint they stack
-   instead, and on mobile the whole thing is hidden - see below. */
-.acct-dash-side > summary {
-  cursor: pointer; list-style: none; width: fit-content;
-  display: inline-flex; align-items: center; gap: 10px;
-}
-.acct-dash-side > summary::-webkit-details-marker { display: none; }
-.acct-dash-side > summary::after { content: "+"; font-size: 16px; line-height: 1; }
-.acct-dash-side[open] > summary::after { content: "\2212"; }
-.acct-dash-side[open] > summary { margin-bottom: 20px; }
+/* Quick access and the "Recently saved calculations" toggle stack in the
+   same right-hand column, in that order, so the toggle always sits
+   directly under Quick access regardless of how tall the portfolio card
+   next to them is. */
+.acct-dash-quick { display: flex; flex-direction: column; gap: 20px; }
 
-.acct-recent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-@media (max-width: 640px) {
-  .acct-recent-grid { grid-template-columns: 1fr; }
+/* "My saved reports" is folded away behind a single accent toggle button
+   ("Recently saved calculations") rather than always taking up space. */
+.acct-collapsible > summary {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
 }
+.acct-collapsible > summary::-webkit-details-marker { display: none; }
+.acct-collapsible > summary::after { content: "+"; font-size: 16px; line-height: 1; }
+.acct-collapsible[open] > summary::after { content: "\2212"; }
+.acct-collapsible[open] > summary { margin-bottom: 20px; }
 
-/* On mobile "Recently updated" and "My saved reports" (the latter includes
-   its own "Start a report" grid) add too much scroll for what they're worth
-   on a small screen - hide the whole toggle, they're still on desktop. */
+/* On mobile "My saved reports" adds too much scroll for what it's worth on
+   a small screen - hide the whole toggle, it's still on desktop. */
 @media (max-width: 900px) {
-  .acct-dash-side { display: none; }
+  .acct-collapsible { display: none; }
 }
 
 /* portfolio ROI projection - growth chart */

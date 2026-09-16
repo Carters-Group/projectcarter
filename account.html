@@ -268,33 +268,24 @@
             </div>
           </div>
 
-          <div class="card acct-card acct-dash-quick" id="acctQuickCard">
-            <h2 class="calc-subhead">Quick access</h2>
-            <p class="acct-empty">Once you've saved a Portfolio Review, these calculators connect to it - each one can pull your equity, value and cash flow straight in to prefill its own figures. Jump into any of them below; resumes your most recently saved report where you have one.</p>
-            <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
-          </div>
+          <div class="acct-dash-quick" id="acctQuickCol">
+            <div class="card acct-card" id="acctQuickCard">
+              <h2 class="calc-subhead">Quick access</h2>
+              <p class="acct-empty">Once you've saved a Portfolio Review, these calculators connect to it - each one can pull your equity, value and cash flow straight in to prefill its own figures. Jump into any of them below; resumes your most recently saved report where you have one.</p>
+              <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
+            </div>
 
-          <details class="acct-dash-side" id="acctRecentGroup">
-            <summary class="btn btn-accent">Recently saved calculations</summary>
-            <div class="acct-recent-grid">
+            <details class="acct-collapsible" id="acctRecentGroup">
+              <summary class="btn btn-accent btn-block">Recently saved calculations</summary>
               <div class="card acct-card">
-                <h3 class="calc-subhead">Recently updated</h3>
-                <div id="activityList" class="acct-reports"></div>
-                <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
-              </div>
-
-              <div class="card acct-card">
-                <h3 class="calc-subhead">My saved reports</h3>
                 <p class="acct-msg" id="reportsMsg" hidden></p>
                 <div id="reportsList" class="acct-reports"></div>
                 <p class="acct-empty" id="reportsEmpty" hidden>
                   No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
                 </p>
-                <p class="acct-eyebrow" style="margin-top:22px">Start a report</p>
-                <div class="grid grid-3 acct-quick-grid" id="newReportGrid"></div>
               </div>
-            </div>
-          </details>
+            </details>
+          </div>
 
           <div class="card acct-card acct-dash-details" id="acctDetailsCard">
             <h2 class="calc-subhead">Your details</h2>
@@ -614,29 +605,6 @@
       });
     }
 
-    function renderActivity(rows) {
-      var list = document.getElementById("activityList");
-      var empty = document.getElementById("activityEmpty");
-      list.innerHTML = "";
-      /* the master portfolio report already leads the page as "Your
-         portfolio" - leave it out here too, same reasoning as the reports
-         list below. */
-      var visible = (rows || []).filter(function (r) { return !r.is_master; });
-      if (!visible.length) { show(empty); return; }
-      hide(empty);
-      visible.slice(0, 5).forEach(function (r) {
-        var row = document.createElement("div");
-        row.className = "acct-report";
-        row.innerHTML =
-          '<div class="acct-report__main">' +
-            '<a class="acct-report__title" href="' + CALC_PAGES[r.calculator] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
-            '<span class="acct-report__date">' + (CALC_NAMES[r.calculator] || r.calculator) + ' &middot; updated ' + fmtDate(r.updated_at) + '</span>' +
-          '</div>';
-        row.querySelector(".acct-report__title").textContent = r.title || "Untitled report";
-        list.appendChild(row);
-      });
-    }
-
     /* the "Start here" bar only makes sense before a visitor has entered
        their first property - once any saved Portfolio Review has at least
        one property in it, hide the prompt so the portfolio card can sit
@@ -885,11 +853,9 @@
       } catch (e) { return null; }
     }
 
-    /* Quick access (top of page) and the "Start a report" grid at the
-       bottom of My saved reports use the same card, and now the same
-       logic: both are per-calculator shortcuts, so both should point at
-       the same saved report when one exists rather than one of them
-       always forcing a blank calculator. */
+    /* Quick access: one card per calculator, pointing at its most recently
+       saved report when one exists rather than always forcing a blank
+       calculator. */
     function renderCalcGrid(gridId, rows) {
       var grid = document.getElementById(gridId);
       if (!grid) return;
@@ -913,7 +879,6 @@
       });
     }
     function renderQuickLaunch(rows) { renderCalcGrid("quickLaunchGrid", rows); }
-    function renderNewReportGrid(rows) { renderCalcGrid("newReportGrid", rows); }
 
     function load() {
       var u = window.pcAuth.user();
@@ -948,10 +913,8 @@
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
           renderReports(res.data);
-          renderActivity(res.data);
           renderPortfolio(res.data);
           renderQuickLaunch(res.data);
-          renderNewReportGrid(res.data);
           updateStartHere(res.data);
         });
       } else {
