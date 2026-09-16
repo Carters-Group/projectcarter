@@ -15,6 +15,36 @@ var ABSTRACT_URL = "https://emailreputation.abstractapi.com/v1/";
 var TIMEOUT_MS = 4000;
 var MAX_BODY = 2048;
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+var WINDOW_MS = 60000;
+var MAX_PER_WINDOW = 10;
+
+/* Best-effort per-instance rate limit, same shape as api/geocode.js:
+   resets on cold start, not shared across instances. Enough to stop a
+   dumb loop from burning the AbstractAPI quota. */
+var ipHits = Object.create(null);
+
+function clientIp(req) {
+  var xff = req.headers["x-forwarded-for"];
+  if (xff) return String(xff).split(",")[0].trim() || "unknown";
+  return (req.socket && req.socket.remoteAddress) || "unknown";
+}
+
+function pruneHits(now) {
+  Object.keys(ipHits).forEach(function (ip) {
+    if (now - ipHits[ip].start > WINDOW_MS) delete ipHits[ip];
+  });
+}
+
+function rateLimited(ip, now) {
+  pruneHits(now);
+  var bucket = ipHits[ip];
+  if (!bucket || now - bucket.start > WINDOW_MS) {
+    ipHits[ip] = { start: now, count: 1 };
+    return false;
+  }
+  bucket.count += 1;
+  return bucket.count > MAX_PER_WINDOW;
+}
 
 function hostOf(value) {
   if (!value) return "";
@@ -99,6 +129,10 @@ module.exports = async function (req, res) {
     }
     if (!sameOrigin(req)) {
       send(res, 403, { ok: false, reason: "origin" });
+      return;
+    }
+    if (rateLimited(clientIp(req), Date.now())) {
+      send(res, 429, { ok: true, reason: "rate" });
       return;
     }
 

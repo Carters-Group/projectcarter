@@ -55,7 +55,7 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "geolocation=(), camera=(), microphone=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://formspree.io https://rqbdumfqucptklmhlskr.supabase.co wss://rqbdumfqucptklmhlskr.supabase.co https://nominatim.openstreetmap.org https://emailreputation.abstractapi.com https://vitals.vercel-insights.com; form-action 'self' https://formspree.io; frame-ancestors 'none'; base-uri 'self'; object-src 'none'" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://rqbdumfqucptklmhlskr.supabase.co; connect-src 'self' https://formspree.io https://rqbdumfqucptklmhlskr.supabase.co wss://rqbdumfqucptklmhlskr.supabase.co https://nominatim.openstreetmap.org https://emailreputation.abstractapi.com https://vitals.vercel-insights.com; form-action 'self' https://formspree.io; frame-ancestors 'none'; base-uri 'self'; object-src 'none'" }
       ]
     }
   ]
