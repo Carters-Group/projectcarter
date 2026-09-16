@@ -1653,6 +1653,19 @@ h1, h2, h3 {
   .acct-plan__row { grid-template-columns: 1fr; }
 }
 
+.acct-health-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 14px 0 4px; }
+.acct-health-card {
+  border: 1px solid var(--line-soft); border-radius: 6px; padding: 14px 16px;
+  background: var(--bg-2);
+}
+.acct-health-card__title { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text); }
+.acct-health-card__assumptions { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+.acct-health-card .acct-overview { grid-template-columns: 1fr; margin: 12px 0 0; }
+.acct-health-card .acct-overview__stat { padding: 10px 12px; }
+@media (max-width: 640px) {
+  .acct-health-grid { grid-template-columns: 1fr; }
+}
+
 .acct-card .acct-whoami { margin-bottom: 22px; }
 
 /* profile row at the top of the portfolio card - bottom-aligned so the

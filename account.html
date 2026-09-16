@@ -246,6 +246,13 @@
                 <div id="portfolioRoiChart" class="acct-chart-wrap"></div>
                 <p class="acct-calc-links"><a id="portfolioRoiOpenLink" href="#">Open and fine-tune in the ROI calculator</a></p>
               </div>
+
+              <div class="acct-debt-goal" id="portfolioHealth" hidden>
+                <p class="acct-eyebrow">Check your portfolio health</p>
+                <p class="field-hint">How your cash flow, gearing and value would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
+                <div class="acct-health-grid" id="portfolioHealthGrid"></div>
+                <p class="field-hint" id="portfolioHealthNote">Approximate: uses your portfolio's blended rate and yield rather than each property's own terms, and treats lost rent from vacancy as a straight dollar-for-dollar hit to cash flow. A guide to overall exposure, not a precise forecast.</p>
+              </div>
             </div>
 
             <div id="portfolioUnset" hidden>
@@ -666,6 +673,58 @@
       recalc();
     }
 
+    /* Three fixed stress scenarios applied together across the whole
+       portfolio at once - a "how exposed am I" read, not a precision
+       forecast. Rate and vacancy stress only need fields every master
+       portfolio already has; the yield/value stress needs the newer
+       investmentValue/grossRentalIncome/blendedYield fields, so it quietly
+       drops off that row for a report saved before this shipped, until the
+       visitor re-saves Portfolio Review. */
+    var HEALTH_SCENARIOS = [
+      { label: "Mild",     rate: 0.005, vacWeeks: 2, yield: 0.0025 },
+      { label: "Moderate", rate: 0.015, vacWeeks: 4, yield: 0.005 },
+      { label: "Severe",   rate: 0.03,  vacWeeks: 8, yield: 0.01 }
+    ];
+    function renderPortfolioHealth(s) {
+      var gridEl = document.getElementById("portfolioHealthGrid");
+      var noteEl = document.getElementById("portfolioHealthNote");
+      var hasYieldData = s.investmentValue > 0 && s.blendedYield > 0;
+      gridEl.innerHTML = "";
+      HEALTH_SCENARIOS.forEach(function (sc) {
+        var extraInterest = (s.portfolioDebt || 0) * sc.rate;
+        var vacancyLoss = s.grossRentalIncome != null ? s.grossRentalIncome * (sc.vacWeeks / 52) : 0;
+        var newAnnual = (s.annualSurplus || 0) - extraInterest - vacancyLoss;
+
+        var rows =
+          '<div class="acct-overview__stat"><dt>Cash flow / yr</dt><dd>' + fmtSignedMoney(newAnnual) + '</dd></div>';
+
+        if (hasYieldData) {
+          var newYield = s.blendedYield + sc.yield;
+          var newInvestmentValue = s.investmentValue * (s.blendedYield / newYield);
+          var valueDelta = newInvestmentValue - s.investmentValue;
+          var newPortfolioValue = s.portfolioValue + valueDelta;
+          var newLvr = newPortfolioValue > 0 ? (s.portfolioDebt / newPortfolioValue * 100) : null;
+          rows +=
+            '<div class="acct-overview__stat"><dt>Value impact</dt><dd>' + fmtSignedMoney(valueDelta) + '</dd></div>' +
+            '<div class="acct-overview__stat"><dt>Portfolio LVR</dt><dd>' + fmtPct(newLvr) + '</dd></div>';
+        }
+
+        var card = document.createElement("div");
+        card.className = "acct-health-card";
+        card.innerHTML =
+          '<p class="acct-health-card__title">' + sc.label + '</p>' +
+          '<p class="acct-health-card__assumptions">+' + (sc.rate * 100).toFixed(1) + '% rates &middot; +' + sc.vacWeeks + ' wks vacancy' +
+            (hasYieldData ? ' &middot; +' + Math.round(sc.yield * 10000) + 'bps yield' : '') + '</p>' +
+          '<div class="acct-overview acct-overview--modes">' + rows + '</div>';
+        gridEl.appendChild(card);
+      });
+      if (noteEl) {
+        noteEl.textContent = hasYieldData
+          ? "Approximate: uses your portfolio's blended rate and yield rather than each property's own terms, and treats lost rent from vacancy as a straight dollar-for-dollar hit to cash flow. A guide to overall exposure, not a precise forecast."
+          : "Approximate, and showing cash-flow exposure only - re-open and save your Portfolio Review to also see value and gearing exposure to yield movements.";
+      }
+    }
+
     function renderPortfolio(rows) {
       var setEl = document.getElementById("portfolioSet");
       var unsetEl = document.getElementById("portfolioUnset");
@@ -726,6 +785,14 @@
           renderDebtGoal(s.portfolioDebt, s.blendedRate);
         } else {
           hide(goalEl);
+        }
+
+        var healthEl = document.getElementById("portfolioHealth");
+        if (s.portfolioValue > 0 && (s.portfolioDebt > 0 || s.annualSurplus != null)) {
+          show(healthEl);
+          renderPortfolioHealth(s);
+        } else {
+          hide(healthEl);
         }
 
         document.getElementById("portfolioChangeBtn").onclick = function () { renderPortfolioChooser(rows, true); };

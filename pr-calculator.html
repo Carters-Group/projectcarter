@@ -2032,7 +2032,10 @@
         portfolioLvr: T.lvr != null ? Math.round(T.lvr * 10) / 10 : null,
         annualSurplus: Math.round(I.annual),
         weeklySurplus: Math.round(I.weekly),
-        propertyCount: m.live.length
+        propertyCount: m.live.length,
+        investmentValue: Math.round(I.value),
+        grossRentalIncome: Math.round(I.grossRent),
+        blendedYield: I.value > 0 ? I.grossRent / I.value : null
       };
     };
   })();
