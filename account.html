@@ -271,21 +271,23 @@
             <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
           </div>
 
-          <div class="card acct-card acct-dash-activity" id="acctActivityCard">
-            <h2 class="calc-subhead">Recently updated</h2>
-            <div id="activityList" class="acct-reports"></div>
-            <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
-          </div>
+          <div class="acct-dash-side" id="acctSideBySide">
+            <details class="card acct-card acct-collapsible" id="acctActivityCard">
+              <summary class="calc-subhead">Recently updated</summary>
+              <div id="activityList" class="acct-reports"></div>
+              <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
+            </details>
 
-          <div class="card acct-card acct-dash-reports" id="acctReportsCard">
-            <h2 class="calc-subhead">My saved reports</h2>
-            <p class="acct-msg" id="reportsMsg" hidden></p>
-            <div id="reportsList" class="acct-reports"></div>
-            <p class="acct-empty" id="reportsEmpty" hidden>
-              No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
-            </p>
-            <p class="acct-eyebrow" style="margin-top:22px">Start a report</p>
-            <div class="grid grid-3 acct-quick-grid" id="newReportGrid"></div>
+            <details class="card acct-card acct-collapsible" id="acctReportsCard">
+              <summary class="calc-subhead">My saved reports</summary>
+              <p class="acct-msg" id="reportsMsg" hidden></p>
+              <div id="reportsList" class="acct-reports"></div>
+              <p class="acct-empty" id="reportsEmpty" hidden>
+                No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
+              </p>
+              <p class="acct-eyebrow" style="margin-top:22px">Start a report</p>
+              <div class="grid grid-3 acct-quick-grid" id="newReportGrid"></div>
+            </details>
           </div>
 
           <div class="card acct-card acct-dash-details" id="acctDetailsCard">
@@ -531,6 +533,13 @@
         h.textContent = CALC_NAMES[calc];
         reportsList.appendChild(h);
 
+        /* the master portfolio report always leads its group - it's the
+           one designated starting point, so it shouldn't get lost among
+           other saved Portfolio Reviews */
+        groups[calc].sort(function (a, b) {
+          return (b.is_master ? 1 : 0) - (a.is_master ? 1 : 0);
+        });
+
         groups[calc].forEach(function (r) {
           var row = document.createElement("div");
           row.className = "acct-report";
@@ -538,6 +547,12 @@
           var masterBtn = calc === "pr"
             ? '<button type="button" class="linklike" data-act="master">' + (r.is_master ? "Your portfolio ★" : "Make this my portfolio") + '</button>'
             : "";
+          /* the master portfolio is the one designated starting point for
+             every "pull a figure" and portfolio-overview feature - branching
+             it via Duplicate would create a second, un-synced copy that
+             looks the same in the list, so it can only be opened and edited
+             in place, never duplicated. */
+          var duplicateBtn = r.is_master ? "" : '<button type="button" class="linklike" data-act="duplicate">Duplicate</button>';
           row.innerHTML =
             '<div class="acct-report__main">' +
               '<a class="acct-report__title" href="' + CALC_PAGES[calc] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
@@ -546,7 +561,7 @@
             '</div>' +
             '<div class="acct-report__actions">' +
               masterBtn +
-              '<button type="button" class="linklike" data-act="duplicate">Duplicate</button>' +
+              duplicateBtn +
               '<button type="button" class="linklike" data-act="rename">Rename</button>' +
               '<button type="button" class="linklike" data-act="delete">Delete</button>' +
             '</div>';
@@ -572,19 +587,22 @@
             });
           });
 
-          row.querySelector('[data-act="duplicate"]').addEventListener("click", function () {
-            setMsg(reportsMsg, "Duplicating…");
-            window.pcAuth.saveReport({
-              calculator: calc,
-              title: "Copy of " + (r.title || "Untitled report"),
-              inputs: r.inputs || {},
-              summary: r.summary || {}
-            }).then(function (res) {
-              if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
-              setMsg(reportsMsg, "");
-              load();
+          var duplicateEl = row.querySelector('[data-act="duplicate"]');
+          if (duplicateEl) {
+            duplicateEl.addEventListener("click", function () {
+              setMsg(reportsMsg, "Duplicating…");
+              window.pcAuth.saveReport({
+                calculator: calc,
+                title: "Copy of " + (r.title || "Untitled report"),
+                inputs: r.inputs || {},
+                summary: r.summary || {}
+              }).then(function (res) {
+                if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
+                setMsg(reportsMsg, "");
+                load();
+              });
             });
-          });
+          }
 
           var masterEl = row.querySelector('[data-act="master"]');
           if (masterEl) {

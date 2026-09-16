@@ -1710,9 +1710,8 @@ h1, h2, h3 {
     grid-template-areas:
       "start      start"
       "pwnudge    pwnudge"
-      "portfolio  quick"
-      "portfolio  activity"
-      "reports    reports"
+      "portfolio  portfolio"
+      "quick      side"
       "details    details"
       "danger     danger";
     align-items: start;
@@ -1724,18 +1723,40 @@ h1, h2, h3 {
   .acct-dash-pwnudge   { grid-area: pwnudge; }
   .acct-dash-portfolio { grid-area: portfolio; }
   .acct-dash-quick     { grid-area: quick; }
-  .acct-dash-activity  { grid-area: activity; }
-  .acct-dash-reports   { grid-area: reports; }
+  .acct-dash-side       { grid-area: side; }
   .acct-dash-details   { grid-area: details; }
   .acct-dash-danger    { grid-area: danger; }
 }
+
+/* "Recently updated" and "My saved reports" sit side by side in the right
+   column, each collapsed by default (native <details>, closed until
+   clicked) so they don't dominate the page just for a glance at the
+   portfolio. Below the two-column breakpoint they stack instead. */
+.acct-dash-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .acct-dash-side { grid-template-columns: 1fr; }
+}
+.acct-collapsible > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.acct-collapsible > summary::-webkit-details-marker { display: none; }
+.acct-collapsible > summary::after {
+  content: "+"; float: right; color: var(--muted); font-size: 15px; line-height: 1;
+}
+.acct-collapsible[open] > summary::after { content: "\2212"; }
+.acct-collapsible[open] > summary { margin-bottom: 16px; }
 
 /* On mobile the "Recently updated" and "My saved reports" cards (the latter
    includes its own "Start a report" grid) add too much scroll for what they're
    worth on a small screen - hide both, they're still on desktop. */
 @media (max-width: 900px) {
-  .acct-dash-activity,
-  .acct-dash-reports { display: none; }
+  .acct-dash-side { display: none; }
 }
 
 /* portfolio ROI projection - growth chart */
