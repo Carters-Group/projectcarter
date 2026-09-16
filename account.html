@@ -681,9 +681,9 @@
        drops off that row for a report saved before this shipped, until the
        visitor re-saves Portfolio Review. */
     var HEALTH_SCENARIOS = [
-      { label: "Mild",     rate: 0.005, vacWeeks: 2, yield: 0.0025 },
-      { label: "Moderate", rate: 0.015, vacWeeks: 4, yield: 0.005 },
-      { label: "Severe",   rate: 0.03,  vacWeeks: 8, yield: 0.01 }
+      { label: "Mild",     tone: "mild",     rate: 0.005, vacWeeks: 4,  yield: 0.0025 },
+      { label: "Moderate", tone: "moderate", rate: 0.015, vacWeeks: 8,  yield: 0.005 },
+      { label: "Severe",   tone: "severe",   rate: 0.03,  vacWeeks: 16, yield: 0.01 }
     ];
     function renderPortfolioHealth(s) {
       var gridEl = document.getElementById("portfolioHealthGrid");
@@ -710,7 +710,7 @@
         }
 
         var card = document.createElement("div");
-        card.className = "acct-health-card";
+        card.className = "acct-health-card is-" + sc.tone;
         card.innerHTML =
           '<p class="acct-health-card__title">' + sc.label + '</p>' +
           '<p class="acct-health-card__assumptions">+' + (sc.rate * 100).toFixed(1) + '% rates &middot; +' + sc.vacWeeks + ' wks vacancy' +
