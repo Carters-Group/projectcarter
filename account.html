@@ -282,6 +282,26 @@
             </div>
           </div>
 
+          <div class="card acct-card acct-dash-leases" id="acctLeaseCard">
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Lease register</h2>
+              <button type="button" class="btn btn-ghost btn-sm" id="leaseAddPropertyBtn">Add a property</button>
+            </div>
+            <p class="field-hint">Track tenants, expiries, market reviews and option periods across your portfolio - update it here as leases move.</p>
+            <p class="acct-msg" id="leaseMsg" hidden></p>
+
+            <div id="leaseSummary" hidden>
+              <div class="acct-overview" id="leaseStats"></div>
+              <div id="leaseTimeline" class="acct-lease-timeline"></div>
+            </div>
+
+            <div id="leaseProperties"></div>
+
+            <p class="acct-empty" id="leaseEmpty" hidden>
+              No properties yet. Add one to start tracking its lease (or leases, for a multi-tenant commercial asset).
+            </p>
+          </div>
+
           <div class="acct-dash-quick" id="acctQuickCol">
             <div class="card acct-card" id="acctQuickCard">
               <h2 class="calc-subhead">Quick access</h2>
@@ -928,6 +948,331 @@
       }
     }
 
+    /* ---- Lease register (WALE tracker) ----------------------------------
+       Standalone from the portfolio card above - a signed-in visitor's own
+       list of properties, each carrying zero or more leases. Purely a
+       record people update by hand; nothing here feeds any calculator. */
+    var REVIEW_FREQUENCIES = [
+      ["", "Not set"], ["annual", "Annual"], ["2-yearly", "2-yearly"],
+      ["3-yearly", "3-yearly"], ["market", "Market review"], ["other", "Other"]
+    ];
+    var MAX_PROPERTIES = 40;
+    var MAX_LEASES_PER_PROPERTY = 12;
+    var leaseProperties = [];
+    var leaseRowSeq = 0;
+    var leaseMsgEl = document.getElementById("leaseMsg");
+
+    function daysUntil(dateStr) {
+      if (!dateStr) return null;
+      var d = new Date(dateStr + "T00:00:00");
+      if (isNaN(d.getTime())) return null;
+      var today = new Date(); today.setHours(0, 0, 0, 0);
+      return Math.round((d - today) / 86400000);
+    }
+
+    function leaseEvents(property, lease) {
+      var events = [];
+      if (lease.lease_expiry) events.push({ date: lease.lease_expiry, type: "Lease expiry", property: property.name, tenant: lease.tenant_name });
+      if (lease.next_review_date) events.push({ date: lease.next_review_date, type: "Market review", property: property.name, tenant: lease.tenant_name });
+      if (lease.option_exercise_by) events.push({ date: lease.option_exercise_by, type: "Option exercise-by", property: property.name, tenant: lease.tenant_name });
+      return events;
+    }
+
+    /* Income-weighted when every currently active lease has a rent figure
+       entered, otherwise falls back to an equal-weight (by lease count)
+       figure rather than mixing unknown and known rents on one scale. */
+    function computeWale(properties) {
+      var active = [];
+      (properties || []).forEach(function (p) {
+        (p.leases || []).forEach(function (l) {
+          var d = daysUntil(l.lease_expiry);
+          if (d != null && d >= 0) active.push(l);
+        });
+      });
+      if (!active.length) return null;
+      var incomeCapable = active.every(function (l) { return l.annual_rent != null && l.annual_rent > 0; });
+      var sumWeighted = 0, sumWeight = 0;
+      active.forEach(function (l) {
+        var years = daysUntil(l.lease_expiry) / 365.25;
+        var weight = incomeCapable ? l.annual_rent : 1;
+        sumWeighted += years * weight;
+        sumWeight += weight;
+      });
+      return { years: sumWeighted / sumWeight, basis: incomeCapable ? "income" : "count" };
+    }
+
+    function renderLeaseStats(properties) {
+      var summaryEl = document.getElementById("leaseSummary");
+      var statsEl = document.getElementById("leaseStats");
+      var timelineEl = document.getElementById("leaseTimeline");
+
+      var totalLeases = 0, expiringSoon = 0, allEvents = [];
+      (properties || []).forEach(function (p) {
+        (p.leases || []).forEach(function (l) {
+          totalLeases++;
+          var d = daysUntil(l.lease_expiry);
+          if (d != null && d >= 0 && d <= 365) expiringSoon++;
+          allEvents = allEvents.concat(leaseEvents(p, l).filter(function (ev) {
+            var dd = daysUntil(ev.date);
+            return dd != null && dd >= 0;
+          }));
+        });
+      });
+
+      if (!totalLeases) { hide(summaryEl); return; }
+      show(summaryEl);
+
+      var wale = computeWale(properties);
+      allEvents.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+      var next = allEvents[0];
+
+      var stats = [
+        ["WALE" + (wale ? (wale.basis === "income" ? " (by income)" : " (by lease count)") : ""), wale ? wale.years.toFixed(1) + " yrs" : "—"],
+        ["Total leases", String(totalLeases)],
+        ["Expiring within 12 months", String(expiringSoon)],
+        ["Next event", next ? fmtDate(next.date) : "—"]
+      ];
+      statsEl.innerHTML = "";
+      stats.forEach(function (pair) {
+        var d = document.createElement("div");
+        d.className = "acct-overview__stat";
+        d.innerHTML = "<dt>" + pair[0] + "</dt><dd>" + pair[1] + "</dd>";
+        statsEl.appendChild(d);
+      });
+
+      timelineEl.innerHTML = "";
+      allEvents.slice(0, 8).forEach(function (ev) {
+        var row = document.createElement("div");
+        row.className = "acct-lease-event";
+        row.innerHTML =
+          '<span class="acct-lease-event__date"></span>' +
+          '<span class="acct-lease-event__main"><strong></strong></span>';
+        row.querySelector(".acct-lease-event__date").textContent = fmtDate(ev.date);
+        var main = row.querySelector(".acct-lease-event__main");
+        main.querySelector("strong").textContent = ev.property || "Untitled property";
+        main.appendChild(document.createTextNode(" — " + ev.type + (ev.tenant ? " (" + ev.tenant + ")" : "")));
+        timelineEl.appendChild(row);
+      });
+    }
+
+    function leaseRowHTML() {
+      return (
+        '<div class="acct-lease-row">' +
+          '<div class="acct-lease-row__head">' +
+            '<span class="acct-lease-row__title"></span>' +
+            '<button type="button" class="linklike" data-act="remove-lease">Remove</button>' +
+          '</div>' +
+          '<div class="acct-plan__row">' +
+            '<div class="field"><label>Tenant name</label><input type="text" data-f="tenant_name" autocomplete="off" /></div>' +
+            '<div class="field"><label>Lease start</label><input type="date" data-f="lease_start" /></div>' +
+            '<div class="field"><label>Lease expiry</label><input type="date" data-f="lease_expiry" /></div>' +
+          '</div>' +
+          '<div class="acct-plan__row">' +
+            '<div class="field"><label>Term <span>(e.g. "5 years" or "3+3+3")</span></label><input type="text" data-f="term_label" autocomplete="off" /></div>' +
+            '<div class="field"><label>In occupation since <span>(optional, if renewed)</span></label><input type="date" data-f="in_occupation_since" /></div>' +
+            '<div class="field"><label>Annual rent <span>(optional - sharpens the WALE figure)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
+          '</div>' +
+          '<div class="acct-plan__row">' +
+            '<div class="field"><label>Next market review</label><input type="date" data-f="next_review_date" /></div>' +
+            '<div class="field"><label>Review frequency</label><select data-f="review_frequency"></select></div>' +
+            '<div class="field"><label>Option exercise-by</label><input type="date" data-f="option_exercise_by" /></div>' +
+          '</div>' +
+          '<div class="acct-plan__row">' +
+            '<div class="field"><label>Number of options</label><input type="text" inputmode="numeric" data-f="option_count" autocomplete="off" /></div>' +
+            '<div class="field"><label>Length of each option <span>(years)</span></label><input type="text" inputmode="decimal" data-f="option_length_years" autocomplete="off" /></div>' +
+            '<div class="field"><label>Notes</label><input type="text" data-f="notes" autocomplete="off" /></div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function renumberLeaseRows(container) {
+      container.querySelectorAll(".acct-lease-row").forEach(function (row, i) {
+        row.querySelector(".acct-lease-row__title").textContent = "Lease " + (i + 1);
+      });
+    }
+
+    function addLeaseRowEl(container, lease) {
+      lease = lease || {};
+      var wrap = document.createElement("div");
+      wrap.innerHTML = leaseRowHTML();
+      var row = wrap.firstElementChild;
+      if (lease.id) row.dataset.leaseId = lease.id;
+      else row.dataset.leaseKey = "new-" + (++leaseRowSeq);
+
+      row.querySelectorAll("[data-f]").forEach(function (input) {
+        var key = input.getAttribute("data-f");
+        if (input.tagName === "SELECT") {
+          input.innerHTML = "";
+          REVIEW_FREQUENCIES.forEach(function (pair) {
+            var o = document.createElement("option");
+            o.value = pair[0]; o.textContent = pair[1];
+            input.appendChild(o);
+          });
+          input.value = lease[key] || "";
+          return;
+        }
+        var v = lease[key];
+        input.value = v == null ? "" : v;
+      });
+
+      row.querySelector('[data-act="remove-lease"]').addEventListener("click", function () {
+        if (row.dataset.leaseId) {
+          if (!window.confirm("Remove this lease? This can't be undone.")) return;
+          window.pcAuth.deleteLease(row.dataset.leaseId).then(function (res) {
+            if (res.error) { window.alert(res.error.message); return; }
+            loadLeaseRegister();
+          });
+        } else {
+          row.remove();
+          renumberLeaseRows(container);
+        }
+      });
+
+      container.appendChild(row);
+      renumberLeaseRows(container);
+      return row;
+    }
+
+    function propertyCardHTML() {
+      return (
+        '<summary>' +
+          '<span class="acct-property__name"></span>' +
+          '<span class="acct-tag"></span>' +
+          '<span class="acct-property__meta"></span>' +
+          '<span class="acct-property__caret" aria-hidden="true"></span>' +
+        '</summary>' +
+        '<div class="acct-property__body">' +
+          '<div class="acct-plan__row">' +
+            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" /></div>' +
+            '<div class="field"><label>Type</label><select data-f="property_type"><option value="residential">Residential</option><option value="commercial">Commercial</option></select></div>' +
+          '</div>' +
+          '<div class="field"><label>Notes <span>(optional)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
+          '<p class="field-hint" data-res-hint>Residential properties usually have a single lease, but you can add more (e.g. a granny flat).</p>' +
+          '<div data-lease-rows></div>' +
+          '<button type="button" class="linklike" data-act="add-lease">+ Add a lease</button>' +
+          '<div class="acct-property__actions">' +
+            '<button type="button" class="btn btn-accent btn-sm" data-act="save">Save changes</button>' +
+            '<button type="button" class="linklike" data-act="delete-property">Delete property</button>' +
+          '</div>' +
+          '<p class="acct-msg" data-msg hidden></p>' +
+        '</div>'
+      );
+    }
+
+    function renderPropertySummary(details, property) {
+      details.querySelector(".acct-property__name").textContent = property.name || "Untitled property";
+      var tag = details.querySelector(".acct-tag");
+      var isCommercial = property.property_type === "commercial";
+      tag.textContent = isCommercial ? "Commercial" : "Residential";
+      tag.className = "acct-tag " + (isCommercial ? "is-commercial" : "is-residential");
+      var wale = computeWale([property]);
+      var leaseCount = (property.leases || []).length;
+      details.querySelector(".acct-property__meta").textContent =
+        leaseCount + (leaseCount === 1 ? " lease" : " leases") + (wale ? " · WALE " + wale.years.toFixed(1) + " yrs" : "");
+    }
+
+    function buildPropertyEl(property) {
+      var details = document.createElement("details");
+      details.className = "acct-property";
+      details.dataset.propertyId = property.id;
+      details.innerHTML = propertyCardHTML();
+
+      var nameInput = details.querySelector('[data-f="name"]');
+      var typeSelect = details.querySelector('[data-f="property_type"]');
+      var notesInput = details.querySelector('[data-f="notes"]');
+      var resHint = details.querySelector('[data-res-hint]');
+      var rowsWrap = details.querySelector('[data-lease-rows]');
+      var msgEl = details.querySelector('[data-msg]');
+
+      nameInput.value = property.name || "";
+      typeSelect.value = property.property_type === "commercial" ? "commercial" : "residential";
+      notesInput.value = property.notes || "";
+      function syncHint() { resHint.hidden = typeSelect.value !== "residential"; }
+      typeSelect.addEventListener("change", syncHint);
+      syncHint();
+
+      (property.leases || []).forEach(function (lease) { addLeaseRowEl(rowsWrap, lease); });
+
+      renderPropertySummary(details, property);
+
+      details.querySelector('[data-act="add-lease"]').addEventListener("click", function () {
+        if (rowsWrap.children.length >= MAX_LEASES_PER_PROPERTY) return;
+        addLeaseRowEl(rowsWrap, {});
+        details.open = true;
+      });
+
+      details.querySelector('[data-act="delete-property"]').addEventListener("click", function () {
+        if (!window.confirm('Delete "' + (property.name || "this property") + '" and all its leases? This cannot be undone.')) return;
+        window.pcAuth.deleteProperty(property.id).then(function (res) {
+          if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
+          loadLeaseRegister();
+        });
+      });
+
+      details.querySelector('[data-act="save"]').addEventListener("click", function () {
+        setMsg(msgEl, "Saving…");
+        window.pcAuth.saveProperty({
+          id: property.id,
+          name: nameInput.value.trim() || "Untitled property",
+          property_type: typeSelect.value,
+          notes: notesInput.value
+        }).then(function (res) {
+          if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
+          var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
+          var saves = leaseRows.map(function (row) {
+            var lease = { id: row.dataset.leaseId || undefined, property_id: property.id };
+            row.querySelectorAll("[data-f]").forEach(function (input) {
+              lease[input.getAttribute("data-f")] = input.value;
+            });
+            return window.pcAuth.saveLease(lease);
+          });
+          Promise.all(saves).then(function (results) {
+            var failed = results.filter(function (r) { return r && r.error; })[0];
+            if (failed) { setMsg(msgEl, failed.error.message, "error"); return; }
+            setMsg(msgEl, "Saved.", "ok");
+            loadLeaseRegister();
+          });
+        });
+      });
+
+      return details;
+    }
+
+    function renderLeaseProperties(properties) {
+      var wrap = document.getElementById("leaseProperties");
+      var emptyEl = document.getElementById("leaseEmpty");
+      var openIds = {};
+      wrap.querySelectorAll(".acct-property[open]").forEach(function (d) { openIds[d.dataset.propertyId] = true; });
+
+      wrap.innerHTML = "";
+      if (!properties || !properties.length) { show(emptyEl); return; }
+      hide(emptyEl);
+      properties.forEach(function (property) {
+        var el = buildPropertyEl(property);
+        if (openIds[property.id]) el.open = true;
+        wrap.appendChild(el);
+      });
+    }
+
+    function loadLeaseRegister() {
+      window.pcAuth.listProperties().then(function (res) {
+        if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
+        leaseProperties = res.data || [];
+        setMsg(leaseMsgEl, "");
+        renderLeaseStats(leaseProperties);
+        renderLeaseProperties(leaseProperties);
+      });
+    }
+
+    document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () {
+      if (leaseProperties.length >= MAX_PROPERTIES) return;
+      window.pcAuth.saveProperty({ name: "Untitled property", property_type: "residential" }).then(function (res) {
+        if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
+        loadLeaseRegister();
+      });
+    });
+
     var CALC_PAGE_SET = {};
     Object.keys(CALC_PAGES).forEach(function (k) { CALC_PAGE_SET[CALC_PAGES[k]] = 1; });
     function fromParam() {
@@ -1002,6 +1347,7 @@
           renderQuickLaunch(res.data);
           updateStartHere(res.data);
         });
+        loadLeaseRegister();
       } else {
         show(elSignedOut); hide(elSignedIn);
         showAuthPanel("signup");

@@ -160,6 +160,100 @@ create policy "reports - delete own"
 
 
 -- ---------------------------------------------------------------------------
+--  properties + leases  -  the lease register / WALE tracker on account.html
+--  Standalone from `reports` - not tied to any Portfolio Review card, so a
+--  visitor can track leases even without a saved PR report.
+-- ---------------------------------------------------------------------------
+create table if not exists public.properties (
+  id             uuid primary key default gen_random_uuid(),
+  user_id        uuid        not null references auth.users (id) on delete cascade,
+  name           text        not null default 'Untitled property',
+  property_type  text        not null default 'residential' check (property_type in ('residential', 'commercial')),
+  notes          text,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
+);
+
+create index if not exists properties_user_idx
+  on public.properties (user_id, name);
+
+alter table public.properties enable row level security;
+
+drop policy if exists "properties - read own"   on public.properties;
+drop policy if exists "properties - insert own" on public.properties;
+drop policy if exists "properties - update own" on public.properties;
+drop policy if exists "properties - delete own" on public.properties;
+
+create policy "properties - read own"
+  on public.properties for select
+  using ( auth.uid() = user_id );
+
+create policy "properties - insert own"
+  on public.properties for insert
+  with check ( auth.uid() = user_id );
+
+create policy "properties - update own"
+  on public.properties for update
+  using ( auth.uid() = user_id )
+  with check ( auth.uid() = user_id );
+
+create policy "properties - delete own"
+  on public.properties for delete
+  using ( auth.uid() = user_id );
+
+
+-- user_id is denormalized here (rather than joining through properties) so
+-- RLS stays a flat auth.uid() = user_id check, same shape as every other
+-- table. The client always sets it to the owning property's user_id.
+create table if not exists public.leases (
+  id                    uuid primary key default gen_random_uuid(),
+  property_id           uuid        not null references public.properties (id) on delete cascade,
+  user_id               uuid        not null references auth.users (id) on delete cascade,
+  tenant_name           text,
+  lease_start           date,
+  lease_expiry          date,
+  term_label            text,
+  in_occupation_since   date,
+  next_review_date      date,
+  review_frequency      text,
+  option_count          integer,
+  option_length_years   numeric,
+  option_exercise_by    date,
+  annual_rent           numeric,
+  notes                 text,
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now()
+);
+
+create index if not exists leases_property_idx
+  on public.leases (property_id, lease_expiry);
+
+alter table public.leases enable row level security;
+
+drop policy if exists "leases - read own"   on public.leases;
+drop policy if exists "leases - insert own" on public.leases;
+drop policy if exists "leases - update own" on public.leases;
+drop policy if exists "leases - delete own" on public.leases;
+
+create policy "leases - read own"
+  on public.leases for select
+  using ( auth.uid() = user_id );
+
+create policy "leases - insert own"
+  on public.leases for insert
+  with check ( auth.uid() = user_id );
+
+create policy "leases - update own"
+  on public.leases for update
+  using ( auth.uid() = user_id )
+  with check ( auth.uid() = user_id );
+
+create policy "leases - delete own"
+  on public.leases for delete
+  using ( auth.uid() = user_id );
+
+
+-- ---------------------------------------------------------------------------
 --  keep updated_at fresh
 -- ---------------------------------------------------------------------------
 create or replace function public.pc_touch_updated_at()
@@ -180,6 +274,16 @@ create trigger profiles_touch
 drop trigger if exists reports_touch on public.reports;
 create trigger reports_touch
   before update on public.reports
+  for each row execute function public.pc_touch_updated_at();
+
+drop trigger if exists properties_touch on public.properties;
+create trigger properties_touch
+  before update on public.properties
+  for each row execute function public.pc_touch_updated_at();
+
+drop trigger if exists leases_touch on public.leases;
+create trigger leases_touch
+  before update on public.leases
   for each row execute function public.pc_touch_updated_at();
 
 

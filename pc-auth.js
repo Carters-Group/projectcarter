@@ -498,6 +498,80 @@
         .then(function (res) { return { error: res.error }; });
     },
 
+    /* ---- lease register (properties + leases) --------------------------
+       Standalone from `reports` - a signed-in visitor's own portfolio of
+       properties, each carrying zero or more leases, surfaced on
+       account.html as the WALE / lease-expiry tracker. */
+
+    /* every property for this user, each with its leases nested in one
+       round trip (no separate listLeases call needed for the WALE/timeline
+       calc, which needs every lease anyway) */
+    listProperties: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.from("properties").select("*, leases(*)")
+        .eq("user_id", currentUser.id).order("name")
+        .then(function (res) { return { data: res.data || [], error: res.error }; });
+    },
+
+    saveProperty: function (property) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      var row = {
+        user_id: currentUser.id,
+        name: (property.name || "Untitled property").slice(0, 200),
+        property_type: property.property_type === "commercial" ? "commercial" : "residential",
+        notes: (property.notes || "").slice(0, 2000) || null
+      };
+      var q = property.id
+        ? client.from("properties").update(row).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
+        : client.from("properties").insert(row).select().maybeSingle();
+      return q.then(function (res) { return { data: res.data, error: res.error }; });
+    },
+
+    /* leases cascade-delete with the property (FK on_delete cascade) */
+    deleteProperty: function (id) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.from("properties").delete().eq("id", id).eq("user_id", currentUser.id)
+        .then(function (res) { return { error: res.error }; });
+    },
+
+    saveLease: function (lease) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      if (!lease.property_id) return Promise.resolve({ error: { message: "Missing property." } });
+      var num = function (v) { v = parseFloat(v); return isFinite(v) ? v : null; };
+      var date = function (v) { return v || null; };
+      var row = {
+        user_id: currentUser.id,
+        property_id: lease.property_id,
+        tenant_name: (lease.tenant_name || "").slice(0, 200) || null,
+        lease_start: date(lease.lease_start),
+        lease_expiry: date(lease.lease_expiry),
+        term_label: (lease.term_label || "").slice(0, 100) || null,
+        in_occupation_since: date(lease.in_occupation_since),
+        next_review_date: date(lease.next_review_date),
+        review_frequency: (lease.review_frequency || "").slice(0, 40) || null,
+        option_count: lease.option_count === "" || lease.option_count == null ? null : Math.max(0, Math.round(num(lease.option_count) || 0)),
+        option_length_years: num(lease.option_length_years),
+        option_exercise_by: date(lease.option_exercise_by),
+        annual_rent: num(lease.annual_rent),
+        notes: (lease.notes || "").slice(0, 2000) || null
+      };
+      var q = lease.id
+        ? client.from("leases").update(row).eq("id", lease.id).eq("user_id", currentUser.id).select().maybeSingle()
+        : client.from("leases").insert(row).select().maybeSingle();
+      return q.then(function (res) { return { data: res.data, error: res.error }; });
+    },
+
+    deleteLease: function (id) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.from("leases").delete().eq("id", id).eq("user_id", currentUser.id)
+        .then(function (res) { return { error: res.error }; });
+    },
+
     /* Request, not a full auth wipe: deletes everything the anon key is
        allowed to touch (saved reports, then name/phone/occupation/avatar_url
        on the profile row) and pings Formspree so Trent can close the actual
@@ -514,6 +588,7 @@
       var uid = currentUser.id;
       var prevAvatar = currentProfile && currentProfile.avatar_url;
       return client.from("reports").delete().eq("user_id", uid)
+        .then(function () { return client.from("properties").delete().eq("user_id", uid); })
         .then(function () {
           var path = avatarPathFromUrl(prevAvatar);
           if (!path || path.indexOf(uid + "/") !== 0 || !client.storage) return {};
