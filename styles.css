@@ -1836,6 +1836,15 @@ h1, h2, h3 {
 .acct-rent-combo .input-money { flex: 1; }
 .acct-rent-combo select { width: 110px; flex: none; }
 .acct-lease-row .calc-check { margin-top: 14px; font-size: 13px; }
+.acct-periodic-check span { line-height: 1.4; }
+
+.acct-type-toggle { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.acct-type-toggle button {
+  flex: 1; padding: 12px 14px; font-size: 13px; font-weight: 600;
+  background: var(--bg-2); color: var(--muted); border: none; cursor: pointer;
+}
+.acct-type-toggle button + button { border-left: 1px solid var(--line); }
+.acct-type-toggle button.is-active { background: var(--accent); color: #141210; }
 
 /* portfolio ROI projection - growth chart */
 .acct-chart-wrap { margin: 18px 0 4px; }

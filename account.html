@@ -961,6 +961,10 @@
     var leaseProperties = [];
     var leaseRowSeq = 0;
     var leaseMsgEl = document.getElementById("leaseMsg");
+    /* Set right before a reload when a brand-new property needs to land
+       open with a blank lease row already in it, instead of a collapsed
+       card the visitor has to expand and then add a lease into. */
+    var pendingOpenPropertyId = null;
 
     function daysUntil(dateStr) {
       if (!dateStr) return null;
@@ -1106,7 +1110,7 @@
             '<div class="field" data-expiry-field><label>Lease expiry <span>(or renewal date)</span></label><input type="date" data-f="lease_expiry" /></div>' +
             '<div class="field"><label>Rent</label><div class="acct-rent-combo"><div class="input-money"><input type="text" inputmode="numeric" data-f="rent_amount" placeholder="0" /></div><select data-f="rent_frequency"><option value="weekly">per week</option><option value="monthly">per month</option></select></div></div>' +
           '</div>' +
-          '<label class="calc-check"><input type="checkbox" data-f="is_periodic" /> Now on a periodic (month-to-month) lease - no fixed end date</label>' +
+          '<label class="calc-check acct-periodic-check"><input type="checkbox" data-f="is_periodic" /><span>Periodic lease (month-to-month, no fixed end date)</span></label>' +
         '</div>'
       );
     }
@@ -1192,8 +1196,15 @@
         '</summary>' +
         '<div class="acct-property__body">' +
           '<div class="acct-plan__row">' +
-            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" /></div>' +
-            '<div class="field"><label>Type</label><select data-f="property_type"><option value="residential">Residential</option><option value="commercial">Commercial</option></select></div>' +
+            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>' +
+            '<div class="field">' +
+              '<label>Type</label>' +
+              '<div class="acct-type-toggle" role="group">' +
+                '<button type="button" data-type-btn="residential">Residential</button>' +
+                '<button type="button" data-type-btn="commercial">Commercial</button>' +
+              '</div>' +
+              '<select data-f="property_type" hidden><option value="residential">Residential</option><option value="commercial">Commercial</option></select>' +
+            '</div>' +
           '</div>' +
           '<div class="field"><label>Notes <span>(optional)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
           '<p class="field-hint" data-res-hint>Residential properties usually have a single lease, but you can add more (e.g. a granny flat).</p>' +
@@ -1235,12 +1246,30 @@
       var rowsWrap = details.querySelector('[data-lease-rows]');
       var msgEl = details.querySelector('[data-msg]');
 
+      var typeButtons = Array.prototype.slice.call(details.querySelectorAll("[data-type-btn]"));
+
       nameInput.value = property.name || "";
       typeSelect.value = property.property_type === "commercial" ? "commercial" : "residential";
       notesInput.value = property.notes || "";
+
       function syncHint() { resHint.hidden = typeSelect.value !== "residential"; }
+      function syncTypeButtons() {
+        typeButtons.forEach(function (btn) {
+          btn.classList.toggle("is-active", btn.getAttribute("data-type-btn") === typeSelect.value);
+        });
+      }
+      function setType(value) {
+        if (typeSelect.value === value) return;
+        typeSelect.value = value;
+        typeSelect.dispatchEvent(new Event("change"));
+      }
+      typeButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () { setType(btn.getAttribute("data-type-btn")); });
+      });
       typeSelect.addEventListener("change", syncHint);
+      typeSelect.addEventListener("change", syncTypeButtons);
       syncHint();
+      syncTypeButtons();
 
       (property.leases || []).forEach(function (lease) { addLeaseRowEl(rowsWrap, lease, typeSelect.value); });
 
@@ -1261,6 +1290,19 @@
         addLeaseRowEl(rowsWrap, {}, typeSelect.value);
         details.open = true;
       });
+
+      /* A brand-new property (no leases yet, just created) lands already
+         open with one blank lease row ready to fill in - no separate
+         "expand this, then add a lease" steps first. */
+      if (property.id === pendingOpenPropertyId) {
+        pendingOpenPropertyId = null;
+        details.open = true;
+        if (!rowsWrap.children.length) addLeaseRowEl(rowsWrap, {}, typeSelect.value);
+        setTimeout(function () {
+          details.scrollIntoView({ block: "center", behavior: "smooth" });
+          nameInput.focus();
+        }, 0);
+      }
 
       details.querySelector('[data-act="delete-property"]').addEventListener("click", function () {
         if (!window.confirm('Delete "' + (property.name || "this property") + '" and all its leases? This cannot be undone.')) return;
@@ -1295,9 +1337,15 @@
           });
           Promise.all(saves).then(function (results) {
             var failed = results.filter(function (r) { return r && r.error; })[0];
-            if (failed) { setMsg(msgEl, failed.error.message, "error"); return; }
-            setMsg(msgEl, "Saved.", "ok");
-            loadLeaseRegister();
+            /* Reload either way - the property itself did save even if a
+               lease row failed, and leaving the stale pre-save state on
+               screen after an error is what made this look like nothing
+               had saved at all. keepMsg so the reload doesn't clear the
+               result message before the visitor sees it. */
+            loadLeaseRegister(true).then(function () {
+              if (failed) setMsg(leaseMsgEl, "Property saved, but a lease didn't: " + failed.error.message, "error");
+              else setMsg(leaseMsgEl, "Saved.", "ok");
+            });
           });
         });
       });
@@ -1321,11 +1369,11 @@
       });
     }
 
-    function loadLeaseRegister() {
-      window.pcAuth.listProperties().then(function (res) {
+    function loadLeaseRegister(keepMsg) {
+      return window.pcAuth.listProperties().then(function (res) {
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         leaseProperties = res.data || [];
-        setMsg(leaseMsgEl, "");
+        if (!keepMsg) setMsg(leaseMsgEl, "");
         renderLeaseStats(leaseProperties);
         renderLeaseProperties(leaseProperties);
       });
@@ -1333,8 +1381,9 @@
 
     document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () {
       if (leaseProperties.length >= MAX_PROPERTIES) return;
-      window.pcAuth.saveProperty({ name: "Untitled property", property_type: "residential" }).then(function (res) {
+      window.pcAuth.saveProperty({ name: "", property_type: "residential" }).then(function (res) {
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
+        pendingOpenPropertyId = res.data && res.data.id;
         loadLeaseRegister();
       });
     });

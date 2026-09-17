@@ -187,9 +187,18 @@
       var changed = (!!nextUser) !== (!!currentUser) || (nextUser && currentUser && nextUser.id !== currentUser.id);
       currentUser = nextUser;
       setMemberCache(!!currentUser);
+      /* Only re-render the page when who's signed in actually changed. A
+         token refresh (automatic every ~55 min) or a tab regaining focus
+         re-fires this callback with the SAME user and event name as an
+         earlier sign-in - if every page listening for "pc-auth-change"
+         reacted to that by rebuilding its DOM (as account.html's lease
+         register does), a visitor mid-edit on a long-lived form could see
+         their unsaved typing wiped out by a background refresh they never
+         noticed. */
+      if (!changed) return;
       loadProfile().then(function () {
         if (currentUser) maybePingLead();
-        if (changed || _event === "SIGNED_IN" || _event === "SIGNED_OUT") emitChange();
+        emitChange();
       });
     });
   }
