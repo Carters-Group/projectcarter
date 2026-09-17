@@ -7,6 +7,7 @@
 --  What it creates
 --    profiles   one row per signed-up user (name, phone, email, plan)
 --    reports    saved calculator runs - the input values only, as JSON
+--    avatars    Storage bucket for profile photos (path {auth.uid()}/...)
 --
 --  Security
 --    Row Level Security is on for both tables. A signed-in user can only
@@ -211,5 +212,73 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.pc_handle_new_user();
+
+
+-- ---------------------------------------------------------------------------
+--  avatars  -  profile photos in Supabase Storage
+-- ---------------------------------------------------------------------------
+--  Path: {auth.uid()}/avatar-{unix}.{jpg|png|webp}
+--  The bucket is public so the URL stored on profiles.avatar_url works as
+--  an <img src>. RLS still limits list / upload / overwrite / delete to the
+--  caller's own folder. No service-role key is involved.
+--
+--  If this insert is blocked in the SQL editor, create the bucket in
+--  Dashboard - Storage - New bucket:
+--    name: avatars
+--    public: yes
+--    file size limit: 2 MB
+--    allowed MIME types: image/jpeg, image/png, image/webp
+--  then re-run this file so the policies apply.
+-- ---------------------------------------------------------------------------
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'avatars',
+  'avatars',
+  true,
+  2097152,
+  array['image/jpeg', 'image/png', 'image/webp']::text[]
+)
+on conflict (id) do nothing;
+
+drop policy if exists "avatars - read own"   on storage.objects;
+drop policy if exists "avatars - insert own" on storage.objects;
+drop policy if exists "avatars - update own" on storage.objects;
+drop policy if exists "avatars - delete own" on storage.objects;
+
+create policy "avatars - read own"
+  on storage.objects for select
+  to authenticated
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = (select auth.uid()::text)
+  );
+
+create policy "avatars - insert own"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = (select auth.uid()::text)
+  );
+
+create policy "avatars - update own"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = (select auth.uid()::text)
+  )
+  with check (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = (select auth.uid()::text)
+  );
+
+create policy "avatars - delete own"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = (select auth.uid()::text)
+  );
 
 

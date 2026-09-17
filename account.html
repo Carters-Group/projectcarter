@@ -13,6 +13,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .acct-identity-row { align-items: center; }
+    .acct-avatar {
+      flex: none; width: 56px; height: 56px; border-radius: 50%;
+      background: var(--bg-3); border: 1px solid var(--line-soft);
+      display: grid; place-items: center; overflow: hidden;
+      font-family: var(--font-display, inherit); font-weight: 600;
+      font-size: 18px; letter-spacing: 0.04em; color: var(--text);
+      text-transform: uppercase;
+    }
+    .acct-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .acct-avatar-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -172,6 +185,7 @@
 
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
             <div class="acct-identity-row">
+              <div class="acct-avatar" id="acctWhoAvatar" aria-hidden="true"></div>
               <div class="acct-identity-row__text">
                 <p class="acct-eyebrow">Signed in as</p>
                 <p class="acct-email" id="acctWhoEmail">&mdash;</p>
@@ -291,6 +305,19 @@
             <h2 class="calc-subhead">Your details</h2>
             <form id="profileForm">
               <div class="field">
+                <label for="profAvatarFile">Photo</label>
+                <div class="acct-avatar-controls">
+                  <div class="acct-avatar" id="profAvatar" aria-hidden="true"></div>
+                  <div>
+                    <input type="file" id="profAvatarFile" accept="image/jpeg,image/png,image/webp" hidden />
+                    <button type="button" class="btn btn-ghost btn-sm" id="profAvatarPick">Choose photo</button>
+                    <button type="button" class="linklike" id="profAvatarRemove" hidden>Remove photo</button>
+                    <p class="field-hint">JPEG, PNG or WebP. 2 MB max.</p>
+                  </div>
+                </div>
+                <p class="acct-msg" id="avatarMsg" hidden></p>
+              </div>
+              <div class="field">
                 <label for="profName">Name</label>
                 <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
               </div>
@@ -339,12 +366,12 @@
           </div>
 
           <div class="card acct-card acct-danger acct-dash-danger" id="acctDangerCard">
-            <h2 class="calc-subhead">Delete account</h2>
-            <p class="acct-empty">Permanently deletes all your saved reports and clears your name, phone and occupation from your profile, then signs you out. We'll be notified to close your sign-in as well. This can't be undone.</p>
-            <button type="button" class="btn btn-ghost" id="deleteAcctBtn">Delete account</button>
+            <h2 class="calc-subhead">Request account deletion</h2>
+            <p class="acct-empty">This wipes all your saved reports now and clears your name, phone and occupation from your profile, then signs you out. We'll email Trent to close your sign-in. Your login may still work until he does. Wiped reports can't be restored.</p>
+            <button type="button" class="btn btn-ghost" id="deleteAcctBtn">Request deletion</button>
             <div id="deleteAcctConfirm" hidden>
-              <p class="acct-msg is-error">Are you sure? This deletes all your saved reports right away and can't be undone.</p>
-              <button type="button" class="btn btn-danger" id="deleteAcctConfirmBtn">Yes, delete my account</button>
+              <p class="acct-msg is-error">Are you sure? Your saved reports are wiped right away and can't be restored. Your sign-in stays until Trent closes it.</p>
+              <button type="button" class="btn btn-danger" id="deleteAcctConfirmBtn">Yes, request deletion</button>
               <button type="button" class="linklike" id="deleteAcctCancelBtn">Cancel</button>
             </div>
             <p class="acct-msg" id="deleteAcctMsg" hidden></p>
@@ -388,7 +415,7 @@
   </footer>
 
   <script src="script.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="pc-auth.js"></script>
   <script>
   (function () {
@@ -460,6 +487,40 @@
       node.textContent = text || "";
       node.hidden = !text;
       node.className = "acct-msg" + (kind ? " is-" + kind : "");
+    }
+
+    function initialsOf(u) {
+      var n = ((u && u.full_name) || "").trim();
+      if (n) {
+        var parts = n.split(/\s+/);
+        var a = parts[0].charAt(0);
+        var b = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
+        return (a + b).toUpperCase();
+      }
+      var e = ((u && u.email) || "?").trim();
+      return e.charAt(0).toUpperCase();
+    }
+
+    function paintAvatar(el, u) {
+      if (!el) return;
+      el.textContent = "";
+      var url = u && u.avatar_url;
+      if (url) {
+        var img = document.createElement("img");
+        img.alt = "";
+        img.src = url;
+        img.addEventListener("error", function () { el.textContent = initialsOf(u); });
+        el.appendChild(img);
+      } else {
+        el.textContent = initialsOf(u);
+      }
+    }
+
+    function paintAvatars(u) {
+      paintAvatar(document.getElementById("acctWhoAvatar"), u);
+      paintAvatar(document.getElementById("profAvatar"), u);
+      var rm = document.getElementById("profAvatarRemove");
+      if (rm) rm.hidden = !(u && u.avatar_url);
     }
 
     /* three ways in: password sign-in (default), create account, and the
@@ -867,7 +928,8 @@
       }
     }
 
-    var CALC_PAGE_SET = { "net-operating-income-calculator":1, "return-on-investment-calculator":1, "development-site-calculator":1, "gross-realisation-value-calculator":1 };
+    var CALC_PAGE_SET = {};
+    Object.keys(CALC_PAGES).forEach(function (k) { CALC_PAGE_SET[CALC_PAGES[k]] = 1; });
     function fromParam() {
       try {
         var f = new URL(window.location.href).searchParams.get("from");
@@ -926,6 +988,7 @@
         var occEl = document.getElementById("acctWhoOccupation");
         occEl.textContent = u.occupation || "";
         occEl.hidden = !u.occupation;
+        paintAvatars(u);
         document.getElementById("profName").value = u.full_name || "";
         document.getElementById("profEmail").value = u.email || "";
         document.getElementById("profPhone").value = u.phone || "";
@@ -947,6 +1010,30 @@
 
     var profileForm = document.getElementById("profileForm");
     var profMsg = document.getElementById("profMsg");
+    var avatarMsg = document.getElementById("avatarMsg");
+    var profAvatarFile = document.getElementById("profAvatarFile");
+    document.getElementById("profAvatarPick").addEventListener("click", function () {
+      profAvatarFile.click();
+    });
+    profAvatarFile.addEventListener("change", function () {
+      var file = profAvatarFile.files && profAvatarFile.files[0];
+      profAvatarFile.value = "";
+      if (!file) return;
+      setMsg(avatarMsg, "Uploading…");
+      window.pcAuth.uploadAvatar(file).then(function (res) {
+        if (res.error) { setMsg(avatarMsg, res.error.message, "error"); return; }
+        setMsg(avatarMsg, "Photo saved.", "ok");
+        load();
+      });
+    });
+    document.getElementById("profAvatarRemove").addEventListener("click", function () {
+      setMsg(avatarMsg, "Removing…");
+      window.pcAuth.removeAvatar().then(function (res) {
+        if (res.error) { setMsg(avatarMsg, res.error.message, "error"); return; }
+        setMsg(avatarMsg, "Photo removed.", "ok");
+        load();
+      });
+    });
     profileForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var btn = document.getElementById("profSaveBtn");
@@ -1293,12 +1380,12 @@
     document.getElementById("deleteAcctConfirmBtn").addEventListener("click", function () {
       var btn = document.getElementById("deleteAcctConfirmBtn");
       btn.disabled = true;
-      setMsg(deleteAcctMsg, "Deleting…");
+      setMsg(deleteAcctMsg, "Sending request…");
       window.pcAuth.requestAccountDeletion().then(function (res) {
         btn.disabled = false;
         if (res.error) { setMsg(deleteAcctMsg, res.error.message, "error"); return; }
         deleteAcctConfirm.hidden = true;
-        setMsg(deleteAcctMsg, "Your saved reports have been deleted and you've been signed out.", "ok");
+        setMsg(deleteAcctMsg, "Your saved reports have been wiped and you've been signed out. Trent has been asked to close your sign-in — it may still work until he does.", "ok");
       });
     });
 
