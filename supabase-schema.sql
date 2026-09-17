@@ -5,9 +5,11 @@
 --  It is safe to re-run: every statement guards against "already exists".
 --
 --  What it creates
---    profiles   one row per signed-up user (name, phone, email, plan)
---    reports    saved calculator runs - the input values only, as JSON
---    avatars    Storage bucket for profile photos (path {auth.uid()}/...)
+--    profiles    one row per signed-up user (name, phone, email, plan)
+--    reports     saved calculator runs - the input values only, as JSON
+--    properties  a signed-in user's lease register - one row per property
+--    leases      one or more leases per property (WALE tracker)
+--    avatars     Storage bucket for profile photos (path {auth.uid()}/...)
 --
 --  Security
 --    Row Level Security is on for both tables. A signed-in user can only
