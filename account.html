@@ -1199,7 +1199,7 @@
         '</summary>' +
         '<div class="acct-property__body">' +
           '<div class="acct-plan__row">' +
-            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /><div data-puller></div></div>' +
+            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>' +
             '<div class="field">' +
               '<label>Type</label>' +
               '<div class="acct-type-toggle" role="group">' +
@@ -1209,10 +1209,11 @@
               '<select data-f="property_type" hidden><option value="residential">Residential</option><option value="commercial">Commercial</option></select>' +
             '</div>' +
           '</div>' +
-          '<div class="field"><label>Notes <span>(optional)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
-          '<p class="field-hint" data-res-hint>Residential properties usually have a single lease, but you can add more (e.g. a granny flat).</p>' +
           '<div data-lease-rows></div>' +
           '<button type="button" class="linklike" data-act="add-lease">+ Add a lease</button>' +
+          '<p class="field-hint" data-res-hint>Residential properties usually have a single lease, but you can add more (e.g. a granny flat).</p>' +
+          '<div class="acct-property__link" data-puller></div>' +
+          '<div class="field"><label>Notes <span>(optional)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
           '<div class="acct-property__actions">' +
             '<button type="button" class="btn btn-accent btn-sm" data-act="save">Save changes</button>' +
             '<button type="button" class="linklike" data-act="delete-property">Delete property</button>' +
@@ -1285,10 +1286,16 @@
             });
           });
         });
-        if (!options.length) return;
+        if (!options.length) {
+          var emptyHint = document.createElement("p");
+          emptyHint.className = "field-hint";
+          emptyHint.textContent = "Save a Portfolio Review with at least one property to link this property to it.";
+          wrap.appendChild(emptyHint);
+          return;
+        }
 
         var btn = document.createElement("button");
-        btn.type = "button"; btn.className = "linklike"; btn.textContent = "Assign to a property card";
+        btn.type = "button"; btn.className = "btn btn-accent btn-sm"; btn.textContent = "Assign to a property card";
         var sel = document.createElement("select");
         sel.className = "pc-pull__select"; sel.hidden = true;
         var opt0 = document.createElement("option");

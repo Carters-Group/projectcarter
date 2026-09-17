@@ -1822,6 +1822,10 @@ h1, h2, h3 {
 .acct-property__meta { font-size: 12.5px; color: var(--muted); }
 .acct-property__body { padding: 0 18px 20px; border-top: 1px solid var(--line-soft); }
 .acct-property__body > .field, .acct-property__body > .acct-plan__row { margin-top: 16px; }
+.acct-property__body > [data-act="add-lease"] { margin-top: 14px; display: inline-block; }
+.acct-property__body > [data-res-hint] { margin-top: 6px; }
+.acct-property__link { margin-top: 18px; }
+.acct-property__link .pc-pull__select { margin-top: 10px; }
 
 .acct-lease-row {
   border: 1px solid var(--line-soft); border-radius: 6px; padding: 14px 16px 4px;
