@@ -1055,7 +1055,42 @@
       });
     }
 
-    function leaseRowHTML() {
+    /* Residential and commercial leases ask genuinely different questions -
+       a standard residential tenancy has no market reviews or option
+       periods, and is often periodic (month-to-month) rather than having a
+       hard expiry, so it gets its own short row rather than a cut-down
+       version of the commercial one. */
+    function leaseRowHTML(propertyType) {
+      if (propertyType === "commercial") {
+        return (
+          '<div class="acct-lease-row">' +
+            '<div class="acct-lease-row__head">' +
+              '<span class="acct-lease-row__title"></span>' +
+              '<button type="button" class="linklike" data-act="remove-lease">Remove</button>' +
+            '</div>' +
+            '<div class="acct-plan__row">' +
+              '<div class="field"><label>Tenant name</label><input type="text" data-f="tenant_name" autocomplete="off" /></div>' +
+              '<div class="field"><label>Lease start</label><input type="date" data-f="lease_start" /></div>' +
+              '<div class="field"><label>Lease expiry</label><input type="date" data-f="lease_expiry" /></div>' +
+            '</div>' +
+            '<div class="acct-plan__row">' +
+              '<div class="field"><label>Term <span>(e.g. "5 years" or "3+3+3")</span></label><input type="text" data-f="term_label" autocomplete="off" /></div>' +
+              '<div class="field"><label>In occupation since <span>(optional, if renewed)</span></label><input type="date" data-f="in_occupation_since" /></div>' +
+              '<div class="field"><label>Annual rent <span>(optional - sharpens the WALE figure)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
+            '</div>' +
+            '<div class="acct-plan__row">' +
+              '<div class="field"><label>Next market review</label><input type="date" data-f="next_review_date" /></div>' +
+              '<div class="field"><label>Review frequency</label><select data-f="review_frequency"></select></div>' +
+              '<div class="field"><label>Option exercise-by</label><input type="date" data-f="option_exercise_by" /></div>' +
+            '</div>' +
+            '<div class="acct-plan__row">' +
+              '<div class="field"><label>Number of options</label><input type="text" inputmode="numeric" data-f="option_count" autocomplete="off" /></div>' +
+              '<div class="field"><label>Length of each option <span>(years)</span></label><input type="text" inputmode="decimal" data-f="option_length_years" autocomplete="off" /></div>' +
+              '<div class="field"><label>Notes</label><input type="text" data-f="notes" autocomplete="off" /></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
       return (
         '<div class="acct-lease-row">' +
           '<div class="acct-lease-row__head">' +
@@ -1064,24 +1099,14 @@
           '</div>' +
           '<div class="acct-plan__row">' +
             '<div class="field"><label>Tenant name</label><input type="text" data-f="tenant_name" autocomplete="off" /></div>' +
+            '<div class="field"><label>First move-in date</label><input type="date" data-f="in_occupation_since" /></div>' +
             '<div class="field"><label>Lease start</label><input type="date" data-f="lease_start" /></div>' +
-            '<div class="field"><label>Lease expiry</label><input type="date" data-f="lease_expiry" /></div>' +
           '</div>' +
           '<div class="acct-plan__row">' +
-            '<div class="field"><label>Term <span>(e.g. "5 years" or "3+3+3")</span></label><input type="text" data-f="term_label" autocomplete="off" /></div>' +
-            '<div class="field"><label>In occupation since <span>(optional, if renewed)</span></label><input type="date" data-f="in_occupation_since" /></div>' +
-            '<div class="field"><label>Annual rent <span>(optional - sharpens the WALE figure)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
+            '<div class="field" data-expiry-field><label>Lease expiry <span>(or renewal date)</span></label><input type="date" data-f="lease_expiry" /></div>' +
+            '<div class="field"><label>Rent</label><div class="acct-rent-combo"><div class="input-money"><input type="text" inputmode="numeric" data-f="rent_amount" placeholder="0" /></div><select data-f="rent_frequency"><option value="weekly">per week</option><option value="monthly">per month</option></select></div></div>' +
           '</div>' +
-          '<div class="acct-plan__row">' +
-            '<div class="field"><label>Next market review</label><input type="date" data-f="next_review_date" /></div>' +
-            '<div class="field"><label>Review frequency</label><select data-f="review_frequency"></select></div>' +
-            '<div class="field"><label>Option exercise-by</label><input type="date" data-f="option_exercise_by" /></div>' +
-          '</div>' +
-          '<div class="acct-plan__row">' +
-            '<div class="field"><label>Number of options</label><input type="text" inputmode="numeric" data-f="option_count" autocomplete="off" /></div>' +
-            '<div class="field"><label>Length of each option <span>(years)</span></label><input type="text" inputmode="decimal" data-f="option_length_years" autocomplete="off" /></div>' +
-            '<div class="field"><label>Notes</label><input type="text" data-f="notes" autocomplete="off" /></div>' +
-          '</div>' +
+          '<label class="calc-check"><input type="checkbox" data-f="is_periodic" /> Now on a periodic (month-to-month) lease - no fixed end date</label>' +
         '</div>'
       );
     }
@@ -1092,17 +1117,31 @@
       });
     }
 
-    function addLeaseRowEl(container, lease) {
+    /* Reads every data-f field back out of a lease row, checkboxes included,
+       so a property-type switch can rebuild the row list under the new
+       template without losing whatever the visitor already typed into the
+       fields both templates share (tenant name, dates, notes). */
+    function serializeLeaseRow(row) {
+      var lease = { id: row.dataset.leaseId || undefined };
+      row.querySelectorAll("[data-f]").forEach(function (input) {
+        var key = input.getAttribute("data-f");
+        lease[key] = input.type === "checkbox" ? input.checked : input.value;
+      });
+      return lease;
+    }
+
+    function addLeaseRowEl(container, lease, propertyType) {
       lease = lease || {};
       var wrap = document.createElement("div");
-      wrap.innerHTML = leaseRowHTML();
+      wrap.innerHTML = leaseRowHTML(propertyType);
       var row = wrap.firstElementChild;
       if (lease.id) row.dataset.leaseId = lease.id;
       else row.dataset.leaseKey = "new-" + (++leaseRowSeq);
 
       row.querySelectorAll("[data-f]").forEach(function (input) {
         var key = input.getAttribute("data-f");
-        if (input.tagName === "SELECT") {
+        if (key === "is_periodic") { input.checked = !!lease[key]; return; }
+        if (key === "review_frequency") {
           input.innerHTML = "";
           REVIEW_FREQUENCIES.forEach(function (pair) {
             var o = document.createElement("option");
@@ -1112,9 +1151,18 @@
           input.value = lease[key] || "";
           return;
         }
+        if (key === "rent_frequency") { input.value = lease[key] || "weekly"; return; }
         var v = lease[key];
         input.value = v == null ? "" : v;
       });
+
+      var periodicBox = row.querySelector('[data-f="is_periodic"]');
+      var expiryField = row.querySelector('[data-expiry-field]');
+      if (periodicBox && expiryField) {
+        var syncExpiry = function () { expiryField.hidden = periodicBox.checked; };
+        periodicBox.addEventListener("change", syncExpiry);
+        syncExpiry();
+      }
 
       row.querySelector('[data-act="remove-lease"]').addEventListener("click", function () {
         if (row.dataset.leaseId) {
@@ -1168,8 +1216,10 @@
       tag.className = "acct-tag " + (isCommercial ? "is-commercial" : "is-residential");
       var wale = computeWale([property]);
       var leaseCount = (property.leases || []).length;
+      var hasPeriodic = (property.leases || []).some(function (l) { return l.is_periodic; });
+      var tail = wale ? " · WALE " + wale.years.toFixed(1) + " yrs" : (hasPeriodic ? " · on a periodic lease" : "");
       details.querySelector(".acct-property__meta").textContent =
-        leaseCount + (leaseCount === 1 ? " lease" : " leases") + (wale ? " · WALE " + wale.years.toFixed(1) + " yrs" : "");
+        leaseCount + (leaseCount === 1 ? " lease" : " leases") + tail;
     }
 
     function buildPropertyEl(property) {
@@ -1192,13 +1242,23 @@
       typeSelect.addEventListener("change", syncHint);
       syncHint();
 
-      (property.leases || []).forEach(function (lease) { addLeaseRowEl(rowsWrap, lease); });
+      (property.leases || []).forEach(function (lease) { addLeaseRowEl(rowsWrap, lease, typeSelect.value); });
 
       renderPropertySummary(details, property);
 
+      /* Residential and commercial leases ask different questions (see
+         leaseRowHTML) - switching type rebuilds every row under the new
+         template, carrying over whatever's already typed into the fields
+         both templates share. */
+      typeSelect.addEventListener("change", function () {
+        var snapshot = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row")).map(serializeLeaseRow);
+        rowsWrap.innerHTML = "";
+        snapshot.forEach(function (lease) { addLeaseRowEl(rowsWrap, lease, typeSelect.value); });
+      });
+
       details.querySelector('[data-act="add-lease"]').addEventListener("click", function () {
         if (rowsWrap.children.length >= MAX_LEASES_PER_PROPERTY) return;
-        addLeaseRowEl(rowsWrap, {});
+        addLeaseRowEl(rowsWrap, {}, typeSelect.value);
         details.open = true;
       });
 
@@ -1221,10 +1281,16 @@
           if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
           var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
-            var lease = { id: row.dataset.leaseId || undefined, property_id: property.id };
-            row.querySelectorAll("[data-f]").forEach(function (input) {
-              lease[input.getAttribute("data-f")] = input.value;
-            });
+            var lease = serializeLeaseRow(row);
+            lease.property_id = property.id;
+            if (lease.is_periodic) lease.lease_expiry = null;
+            /* annual_rent is the one figure WALE weights by, whichever
+               template built this row - residential enters a weekly/monthly
+               amount, so annualise it here before saving. */
+            if (lease.rent_amount !== undefined) {
+              var amt = parseFloat((lease.rent_amount || "").toString().replace(/[^0-9.]/g, ""));
+              lease.annual_rent = isFinite(amt) ? amt * (lease.rent_frequency === "monthly" ? 12 : 52) : null;
+            }
             return window.pcAuth.saveLease(lease);
           });
           Promise.all(saves).then(function (results) {

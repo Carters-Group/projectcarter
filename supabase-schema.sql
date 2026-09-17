@@ -227,6 +227,14 @@ create table if not exists public.leases (
   updated_at            timestamptz not null default now()
 );
 
+-- Residential leases ask different questions to commercial ones (rent
+-- quoted weekly/monthly rather than per annum, often periodic/month-to-month
+-- rather than a hard expiry) - these three are residential-specific, added
+-- on a table that may already exist (re-run safe).
+alter table public.leases add column if not exists is_periodic boolean not null default false;
+alter table public.leases add column if not exists rent_amount numeric;
+alter table public.leases add column if not exists rent_frequency text check (rent_frequency in ('weekly', 'monthly'));
+
 create index if not exists leases_property_idx
   on public.leases (property_id, lease_expiry);
 

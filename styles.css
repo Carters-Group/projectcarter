@@ -1832,6 +1832,11 @@ h1, h2, h3 {
 
 .acct-property__actions { display: flex; align-items: center; gap: 18px; margin-top: 18px; }
 
+.acct-rent-combo { display: flex; gap: 8px; }
+.acct-rent-combo .input-money { flex: 1; }
+.acct-rent-combo select { width: 110px; flex: none; }
+.acct-lease-row .calc-check { margin-top: 14px; font-size: 13px; }
+
 /* portfolio ROI projection - growth chart */
 .acct-chart-wrap { margin: 18px 0 4px; }
 .acct-chart { width: 100%; height: auto; display: block; overflow: visible; }

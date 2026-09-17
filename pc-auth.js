@@ -557,6 +557,9 @@
         option_length_years: num(lease.option_length_years),
         option_exercise_by: date(lease.option_exercise_by),
         annual_rent: num(lease.annual_rent),
+        is_periodic: !!lease.is_periodic,
+        rent_amount: num(lease.rent_amount),
+        rent_frequency: lease.rent_frequency === "monthly" ? "monthly" : (lease.rent_frequency === "weekly" ? "weekly" : null),
         notes: (lease.notes || "").slice(0, 2000) || null
       };
       var q = lease.id
