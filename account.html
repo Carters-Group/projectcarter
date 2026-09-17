@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-    .acct-profile-row { align-items: center; }
+    .acct-identity-row { align-items: center; }
     .acct-avatar {
       flex: none; width: 56px; height: 56px; border-radius: 50%;
       background: var(--bg-3); border: 1px solid var(--line-soft);
@@ -68,7 +68,7 @@
   <main id="main">
     <section class="project-hero">
       <div class="project-hero-media" style="background-image:url('assets/images/projects/haig/haig-02.jpg')" aria-hidden="true"></div>
-      <div class="wrap project-hero-inner">
+      <div class="wrap project-hero-inner acct-hero-inner">
         <p class="project-eyebrow">Project Carter</p>
         <h1 class="project-title">Your account</h1>
         <p class="project-locale" style="max-width:56ch">Your home for every figure you've run with Project Carter. Save any calculator's numbers, open them again on any device, and build up a running picture of your portfolio's value, equity and cash flow over time. It is free. Sign in with a one-time link sent to your email, no password to remember.</p>
@@ -184,19 +184,22 @@
           </div>
 
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
-            <div class="acct-profile-row">
+            <div class="acct-identity-row">
               <div class="acct-avatar" id="acctWhoAvatar" aria-hidden="true"></div>
-              <div class="acct-profile-row__text">
+              <div class="acct-identity-row__text">
                 <p class="acct-eyebrow">Signed in as</p>
                 <p class="acct-email" id="acctWhoEmail">&mdash;</p>
                 <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
               </div>
-              <button type="button" class="btn btn-ghost btn-sm acct-profile-row__actions" id="signOutBtn">Sign out</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
             </div>
 
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your portfolio</h2>
-              <a href="portfolio-review-calculator" id="portfolioEditBtn" class="btn btn-ghost btn-sm" hidden>Edit portfolio</a>
+              <div class="acct-card-head__actions">
+                <button type="button" class="linklike" id="portfolioRenameBtn" hidden>Rename</button>
+                <a href="portfolio-review-calculator" id="portfolioEditBtn" class="btn btn-ghost btn-sm" hidden>Edit portfolio</a>
+              </div>
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
 
@@ -260,6 +263,13 @@
                 <div id="portfolioRoiChart" class="acct-chart-wrap"></div>
                 <p class="acct-calc-links"><a id="portfolioRoiOpenLink" href="#">Open and fine-tune in the ROI calculator</a></p>
               </div>
+
+              <div class="acct-debt-goal acct-risk-section" id="portfolioRisk" hidden>
+                <p class="acct-risk-section__title">Check your portfolio risk</p>
+                <p class="field-hint">How your cash flow, gearing and value would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
+                <div class="acct-risk-grid" id="portfolioRiskGrid"></div>
+                <p class="field-hint" id="portfolioRiskNote">Approximate: uses your portfolio's blended rate and yield rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall exposure, not a precise forecast.</p>
+              </div>
             </div>
 
             <div id="portfolioUnset" hidden>
@@ -272,27 +282,23 @@
             </div>
           </div>
 
-          <div class="card acct-card acct-dash-quick" id="acctQuickCard">
-            <h2 class="calc-subhead">Quick access</h2>
-            <p class="acct-empty">Once you've saved a Portfolio Review, these calculators connect to it - each one can pull your equity, value and cash flow straight in to prefill its own figures. Jump into any of them below; resumes your most recently saved report where you have one.</p>
-            <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
-          </div>
+          <div class="acct-dash-quick" id="acctQuickCol">
+            <div class="card acct-card" id="acctQuickCard">
+              <h2 class="calc-subhead">Quick access</h2>
+              <p class="acct-empty">Once you've saved a Portfolio Review, these calculators connect to it - each one can pull your equity, value and cash flow straight in to prefill its own figures. Jump into any of them below; resumes your most recently saved report where you have one.</p>
+              <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
+            </div>
 
-          <div class="card acct-card acct-dash-activity" id="acctActivityCard">
-            <h2 class="calc-subhead">Recently updated</h2>
-            <div id="activityList" class="acct-reports"></div>
-            <p class="acct-empty" id="activityEmpty" hidden>Nothing saved yet.</p>
-          </div>
-
-          <div class="card acct-card acct-dash-reports" id="acctReportsCard">
-            <h2 class="calc-subhead">My saved reports</h2>
-            <p class="acct-msg" id="reportsMsg" hidden></p>
-            <div id="reportsList" class="acct-reports"></div>
-            <p class="acct-empty" id="reportsEmpty" hidden>
-              No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
-            </p>
-            <p class="acct-eyebrow" style="margin-top:22px">Start a report</p>
-            <div class="grid grid-3 acct-quick-grid" id="newReportGrid"></div>
+            <details class="acct-collapsible" id="acctRecentGroup" open>
+              <summary class="btn btn-accent btn-block">Recently saved calculations</summary>
+              <div class="card acct-card">
+                <p class="acct-msg" id="reportsMsg" hidden></p>
+                <div id="reportsList" class="acct-reports"></div>
+                <p class="acct-empty" id="reportsEmpty" hidden>
+                  No saved reports yet. Open a calculator, enter your figures, and press <strong>Save report</strong>.
+                </p>
+              </div>
+            </details>
           </div>
 
           <div class="card acct-card acct-dash-details" id="acctDetailsCard">
@@ -572,30 +578,43 @@
 
     function renderReports(rows) {
       reportsList.innerHTML = "";
-      if (!rows || !rows.length) { show(reportsEmpty); return; }
+      /* the master portfolio report already has its own place at the top of
+         the page (the "Your portfolio" card, with its own Rename), so it's
+         left out here to avoid showing the same report twice. */
+      var visible = (rows || []).filter(function (r) { return !r.is_master; });
+      if (!visible.length) { show(reportsEmpty); return; }
       hide(reportsEmpty);
 
       var groups = {};
-      rows.forEach(function (r) { (groups[r.calculator] = groups[r.calculator] || []).push(r); });
+      visible.forEach(function (r) { (groups[r.calculator] = groups[r.calculator] || []).push(r); });
+
+      /* Only the first REPORTS_CAP reports show up front - the rest render
+         straight away (so no second fetch, no layout jump) but stay hidden
+         behind a "Load more" button, since a long list here would otherwise
+         dominate a page that's meant to lead with the portfolio. */
+      var REPORTS_CAP = 6;
+      var shown = 0;
+      var hiddenCount = 0;
 
       CALC_ORDER.forEach(function (calc) {
         if (!groups[calc]) return;
         var h = document.createElement("h3");
         h.className = "acct-group-head";
         h.textContent = CALC_NAMES[calc];
+        if (shown >= REPORTS_CAP) h.hidden = true;
         reportsList.appendChild(h);
 
         groups[calc].forEach(function (r) {
           var row = document.createElement("div");
           row.className = "acct-report";
           row.setAttribute("data-id", r.id);
+          if (shown >= REPORTS_CAP) { row.hidden = true; hiddenCount++; } else { shown++; }
           var masterBtn = calc === "pr"
-            ? '<button type="button" class="linklike" data-act="master">' + (r.is_master ? "Your portfolio ★" : "Make this my portfolio") + '</button>'
+            ? '<button type="button" class="linklike" data-act="master">Make this my portfolio</button>'
             : "";
           row.innerHTML =
             '<div class="acct-report__main">' +
               '<a class="acct-report__title" href="' + CALC_PAGES[calc] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
-              (r.is_master ? '<span class="acct-badge">Master portfolio</span>' : "") +
               '<span class="acct-report__date">Updated ' + fmtDate(r.updated_at) + '</span>' +
             '</div>' +
             '<div class="acct-report__actions">' +
@@ -643,7 +662,6 @@
           var masterEl = row.querySelector('[data-act="master"]');
           if (masterEl) {
             masterEl.addEventListener("click", function () {
-              if (r.is_master) return;
               setMsg(reportsMsg, "Setting your portfolio…");
               window.pcAuth.setMasterReport(r.id).then(function (res) {
                 if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
@@ -656,25 +674,18 @@
           reportsList.appendChild(row);
         });
       });
-    }
 
-    function renderActivity(rows) {
-      var list = document.getElementById("activityList");
-      var empty = document.getElementById("activityEmpty");
-      list.innerHTML = "";
-      if (!rows || !rows.length) { show(empty); return; }
-      hide(empty);
-      rows.slice(0, 5).forEach(function (r) {
-        var row = document.createElement("div");
-        row.className = "acct-report";
-        row.innerHTML =
-          '<div class="acct-report__main">' +
-            '<a class="acct-report__title" href="' + CALC_PAGES[r.calculator] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
-            '<span class="acct-report__date">' + (CALC_NAMES[r.calculator] || r.calculator) + ' &middot; updated ' + fmtDate(r.updated_at) + '</span>' +
-          '</div>';
-        row.querySelector(".acct-report__title").textContent = r.title || "Untitled report";
-        list.appendChild(row);
-      });
+      if (hiddenCount > 0) {
+        var moreBtn = document.createElement("button");
+        moreBtn.type = "button";
+        moreBtn.className = "btn btn-ghost btn-sm acct-reports-more";
+        moreBtn.textContent = "Load " + hiddenCount + " more";
+        moreBtn.addEventListener("click", function () {
+          reportsList.querySelectorAll("[hidden]").forEach(function (el) { el.hidden = false; });
+          moreBtn.remove();
+        });
+        reportsList.appendChild(moreBtn);
+      }
     }
 
     /* the "Start here" bar only makes sense before a visitor has entered
@@ -727,6 +738,55 @@
       recalc();
     }
 
+    /* Three fixed stress scenarios read across the whole portfolio at once -
+       a "how exposed am I" read, not a precision forecast. Rate rise and
+       vacancy are shown as separate cash-flow rows rather than summed,
+       since both landing in the same year is unlikely, and a rate rise or a
+       vacancy hit doesn't itself say anything about value, so neither row
+       implies anything about the other. Vacancy needs grossRentalIncome,
+       added to the summary after this shipped, so it quietly drops off that
+       row for a report saved before then, until the visitor re-saves
+       Portfolio Review. */
+    var RISK_SCENARIOS = [
+      { label: "Mild",     tone: "mild",     rate: 0.005, vacWeeks: 4 },
+      { label: "Moderate", tone: "moderate", rate: 0.015, vacWeeks: 8 },
+      { label: "Severe",   tone: "severe",   rate: 0.03,  vacWeeks: 16 }
+    ];
+    function renderPortfolioRisk(s) {
+      var gridEl = document.getElementById("portfolioRiskGrid");
+      var noteEl = document.getElementById("portfolioRiskNote");
+      gridEl.innerHTML = "";
+      var hasVacancyData = s.grossRentalIncome != null && s.grossRentalIncome > 0;
+      RISK_SCENARIOS.forEach(function (sc) {
+        var extraInterest = (s.portfolioDebt || 0) * sc.rate;
+        var cashFlowIfRates = (s.annualSurplus || 0) - extraInterest;
+
+        var rows =
+          '<div class="acct-overview__stat"><dt>Cash flow if rates rise</dt><dd>' + fmtSignedMoney(cashFlowIfRates) + '</dd></div>';
+
+        if (hasVacancyData) {
+          var vacancyLoss = s.grossRentalIncome * (sc.vacWeeks / 52);
+          var cashFlowIfVacancy = (s.annualSurplus || 0) - vacancyLoss;
+          rows +=
+            '<div class="acct-overview__stat"><dt>Cash flow if vacancy hits</dt><dd>' + fmtSignedMoney(cashFlowIfVacancy) + '</dd></div>';
+        }
+
+        var card = document.createElement("div");
+        card.className = "acct-risk-card is-" + sc.tone;
+        card.innerHTML =
+          '<p class="acct-risk-card__title">' + sc.label + '</p>' +
+          '<p class="acct-risk-card__assumptions">+' + (sc.rate * 100).toFixed(1) + '% rates' +
+            (hasVacancyData ? ' OR +' + sc.vacWeeks + ' wks vacancy' : '') + '</p>' +
+          '<div class="acct-overview acct-overview--modes">' + rows + '</div>';
+        gridEl.appendChild(card);
+      });
+      if (noteEl) {
+        noteEl.textContent = hasVacancyData
+          ? "Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast."
+          : "Approximate, and showing rate-rise cash-flow exposure only - re-open and save your Portfolio Review to also see vacancy exposure.";
+      }
+    }
+
     function renderPortfolio(rows) {
       var setEl = document.getElementById("portfolioSet");
       var unsetEl = document.getElementById("portfolioUnset");
@@ -741,6 +801,20 @@
         document.getElementById("portfolioOpenLink").href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
         editBtn.href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
         show(editBtn);
+
+        var renameBtn = document.getElementById("portfolioRenameBtn");
+        show(renameBtn);
+        renameBtn.onclick = function () {
+          var next = window.prompt("Rename your portfolio", master.title || "");
+          if (next == null) return;
+          next = next.trim();
+          if (!next || next === master.title) return;
+          window.pcAuth.renameReport(master.id, next).then(function (res) {
+            if (res.error) { setMsg(document.getElementById("portfolioMsg"), res.error.message, "error"); return; }
+            master.title = next;
+            document.getElementById("portfolioTitle").textContent = next;
+          });
+        };
 
         var s = master.summary || {};
         var stats = [
@@ -789,10 +863,19 @@
           hide(goalEl);
         }
 
+        var riskEl = document.getElementById("portfolioRisk");
+        if (s.portfolioValue > 0 && (s.portfolioDebt > 0 || s.annualSurplus != null)) {
+          show(riskEl);
+          renderPortfolioRisk(s);
+        } else {
+          hide(riskEl);
+        }
+
         document.getElementById("portfolioChangeBtn").onclick = function () { renderPortfolioChooser(rows, true); };
       } else {
         hide(setEl); show(unsetEl);
         hide(editBtn);
+        hide(document.getElementById("portfolioRenameBtn"));
         renderPortfolioChooser(rows, false);
       }
     }
@@ -854,11 +937,9 @@
       } catch (e) { return null; }
     }
 
-    /* Quick access (top of page) and the "Start a report" grid at the
-       bottom of My saved reports use the same card, and now the same
-       logic: both are per-calculator shortcuts, so both should point at
-       the same saved report when one exists rather than one of them
-       always forcing a blank calculator. */
+    /* Quick access: one card per calculator, pointing at its most recently
+       saved report when one exists rather than always forcing a blank
+       calculator. */
     function renderCalcGrid(gridId, rows) {
       var grid = document.getElementById(gridId);
       if (!grid) return;
@@ -882,7 +963,6 @@
       });
     }
     function renderQuickLaunch(rows) { renderCalcGrid("quickLaunchGrid", rows); }
-    function renderNewReportGrid(rows) { renderCalcGrid("newReportGrid", rows); }
 
     function load() {
       var u = window.pcAuth.user();
@@ -918,10 +998,8 @@
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
           renderReports(res.data);
-          renderActivity(res.data);
           renderPortfolio(res.data);
           renderQuickLaunch(res.data);
-          renderNewReportGrid(res.data);
           updateStartHere(res.data);
         });
       } else {
