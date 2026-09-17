@@ -530,7 +530,9 @@
         user_id: currentUser.id,
         name: (property.name || "Untitled property").slice(0, 200),
         property_type: property.property_type === "commercial" ? "commercial" : "residential",
-        notes: (property.notes || "").slice(0, 2000) || null
+        notes: (property.notes || "").slice(0, 2000) || null,
+        linked_pr_report_id: property.linked_pr_report_id || null,
+        linked_pr_property_name: property.linked_pr_property_name ? property.linked_pr_property_name.slice(0, 200) : null
       };
       var q = property.id
         ? client.from("properties").update(row).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()

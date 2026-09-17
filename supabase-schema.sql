@@ -176,6 +176,17 @@ create table if not exists public.properties (
   updated_at     timestamptz not null default now()
 );
 
+-- Optional link to one property card inside a saved Portfolio Review
+-- report - lets the lease register's "Assign to a property card" action
+-- keep a property's name/type in step with that report instead of a
+-- frozen one-time copy. `on delete set null` so deleting the PR report
+-- later doesn't take the lease-register property down with it, it just
+-- unlinks. Matched by name (PR cards have no stable id of their own -
+-- see pr-calculator.html's pcCalcSummary()), so renaming a card in the PR
+-- report will need re-linking.
+alter table public.properties add column if not exists linked_pr_report_id uuid references public.reports (id) on delete set null;
+alter table public.properties add column if not exists linked_pr_property_name text;
+
 create index if not exists properties_user_idx
   on public.properties (user_id, name);
 

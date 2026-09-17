@@ -1222,49 +1222,99 @@
       );
     }
 
-    /* One-time pull of a property's name/type from a saved Portfolio
-       Review, the same "copy a figure across, don't live-link it"
-       philosophy already used elsewhere on this page (see [[accounts-saved-reports]]
-       pc-report.js pullers). Only shows once there's actually something to
-       pull from. */
-    function renderPropertyPuller(details, nameInput, setType) {
+    /* Assigns this lease-register property to one property card inside a
+       saved Portfolio Review report - unlike the rest of the site's
+       "pull a figure once" pattern, this stays linked: picking a card
+       saves immediately (one action, no separate Save click needed) and
+       the link is carried on every later Save too, so it isn't lost.
+       Matched by name (PR cards have no id of their own), so renaming the
+       card in PR needs a re-assign. Returns {getLink} so the property's
+       own Save button can include the current link state. */
+    function renderPropertyLink(details, property, nameInput, setType, msgEl) {
       var wrap = details.querySelector("[data-puller]");
-      if (!wrap) return;
-      wrap.innerHTML = "";
-      var options = [];
-      leasePrReports.forEach(function (r) {
-        ((r.summary && r.summary.properties) || []).forEach(function (p) {
-          options.push({
-            label: (r.title || "Portfolio Review") + " — " + p.name + (p.value ? " (" + fmtMoney(p.value) + ")" : ""),
-            name: p.name,
-            propertyType: p.propertyType
+      if (!wrap) return { getLink: function () { return {}; } };
+      var linkedReportId = property.linked_pr_report_id || null;
+      var linkedName = property.linked_pr_property_name || null;
+
+      function currentFields() {
+        return {
+          id: property.id,
+          name: nameInput.value.trim() || "Untitled property",
+          property_type: (details.querySelector('[data-f="property_type"]') || {}).value,
+          notes: (details.querySelector('[data-f="notes"]') || {}).value
+        };
+      }
+      function saveLink() {
+        setMsg(msgEl, "Saving…");
+        var row = currentFields();
+        row.linked_pr_report_id = linkedReportId;
+        row.linked_pr_property_name = linkedName;
+        window.pcAuth.saveProperty(row).then(function (res) {
+          if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
+          loadLeaseRegister(true).then(function () { setMsg(leaseMsgEl, "Saved.", "ok"); });
+        });
+      }
+
+      function render() {
+        wrap.innerHTML = "";
+        if (linkedReportId && linkedName) {
+          var report = leasePrReports.filter(function (r) { return r.id === linkedReportId; })[0];
+          var note = document.createElement("p");
+          note.className = "field-hint";
+          note.appendChild(document.createTextNode(
+            "Linked to “" + linkedName + "” in " + (report ? (report.title || "Portfolio Review") : "your Portfolio Review") + ". "
+          ));
+          var unlinkBtn = document.createElement("button");
+          unlinkBtn.type = "button"; unlinkBtn.className = "linklike";
+          unlinkBtn.textContent = "Unlink";
+          unlinkBtn.addEventListener("click", function () {
+            linkedReportId = null; linkedName = null;
+            saveLink();
+          });
+          note.appendChild(unlinkBtn);
+          wrap.appendChild(note);
+          return;
+        }
+
+        var options = [];
+        leasePrReports.forEach(function (r) {
+          ((r.summary && r.summary.properties) || []).forEach(function (p) {
+            options.push({
+              reportId: r.id, reportTitle: r.title, name: p.name,
+              propertyType: p.propertyType, value: p.value
+            });
           });
         });
-      });
-      if (!options.length) return;
+        if (!options.length) return;
 
-      var btn = document.createElement("button");
-      btn.type = "button"; btn.className = "linklike pc-pull__btn"; btn.textContent = "Pull from your Portfolio Review";
-      var sel = document.createElement("select");
-      sel.className = "pc-pull__select"; sel.hidden = true;
-      var opt0 = document.createElement("option");
-      opt0.value = ""; opt0.textContent = "Choose a property…";
-      sel.appendChild(opt0);
-      options.forEach(function (o, i) {
-        var op = document.createElement("option");
-        op.value = String(i); op.textContent = o.label;
-        sel.appendChild(op);
-      });
-      btn.addEventListener("click", function () { btn.hidden = true; sel.hidden = false; });
-      sel.addEventListener("change", function () {
-        var o = options[Number(sel.value)];
-        if (!o) return;
-        nameInput.value = o.name;
-        setType(o.propertyType === "commercial" ? "commercial" : "residential");
-        wrap.innerHTML = "";
-      });
-      wrap.appendChild(btn);
-      wrap.appendChild(sel);
+        var btn = document.createElement("button");
+        btn.type = "button"; btn.className = "linklike"; btn.textContent = "Assign to a property card";
+        var sel = document.createElement("select");
+        sel.className = "pc-pull__select"; sel.hidden = true;
+        var opt0 = document.createElement("option");
+        opt0.value = ""; opt0.textContent = "Choose a property…";
+        sel.appendChild(opt0);
+        options.forEach(function (o, i) {
+          var op = document.createElement("option");
+          op.value = String(i);
+          op.textContent = (o.reportTitle || "Portfolio Review") + " — " + o.name + (o.value ? " (" + fmtMoney(o.value) + ")" : "");
+          sel.appendChild(op);
+        });
+        btn.addEventListener("click", function () { btn.hidden = true; sel.hidden = false; });
+        sel.addEventListener("change", function () {
+          var o = options[Number(sel.value)];
+          if (!o) return;
+          nameInput.value = o.name;
+          setType(o.propertyType === "commercial" ? "commercial" : "residential");
+          linkedReportId = o.reportId; linkedName = o.name;
+          saveLink();
+        });
+        wrap.appendChild(btn);
+        wrap.appendChild(sel);
+      }
+
+      render();
+      return { getLink: function () { return { linked_pr_report_id: linkedReportId, linked_pr_property_name: linkedName }; } };
     }
 
     function renderPropertySummary(details, property) {
@@ -1348,7 +1398,7 @@
         if (details.open && !rowsWrap.children.length) addLeaseRowEl(rowsWrap, {}, typeSelect.value);
       });
 
-      renderPropertyPuller(details, nameInput, setType);
+      var linkState = renderPropertyLink(details, property, nameInput, setType, msgEl);
 
       /* A brand-new property (just created) lands already open, focused
          and ready to fill in, rather than a collapsed card the visitor
@@ -1373,12 +1423,12 @@
 
       details.querySelector('[data-act="save"]').addEventListener("click", function () {
         setMsg(msgEl, "Saving…");
-        window.pcAuth.saveProperty({
+        window.pcAuth.saveProperty(Object.assign({
           id: property.id,
           name: nameInput.value.trim() || "Untitled property",
           property_type: typeSelect.value,
           notes: notesInput.value
-        }).then(function (res) {
+        }, linkState.getLink())).then(function (res) {
           if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
           var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
