@@ -965,6 +965,10 @@
        open with a blank lease row already in it, instead of a collapsed
        card the visitor has to expand and then add a lease into. */
     var pendingOpenPropertyId = null;
+    /* Saved Portfolio Review reports, fetched alongside the properties list
+       purely so a property card can offer a one-time pull of a property's
+       name/type from the visitor's portfolio (see renderPropertyPuller). */
+    var leasePrReports = [];
 
     function daysUntil(dateStr) {
       if (!dateStr) return null;
@@ -1102,15 +1106,14 @@
             '<button type="button" class="linklike" data-act="remove-lease">Remove</button>' +
           '</div>' +
           '<div class="acct-plan__row">' +
-            '<div class="field"><label>Tenant name</label><input type="text" data-f="tenant_name" autocomplete="off" /></div>' +
             '<div class="field"><label>First move-in date</label><input type="date" data-f="in_occupation_since" /></div>' +
             '<div class="field"><label>Lease start</label><input type="date" data-f="lease_start" /></div>' +
+            '<div class="field" data-expiry-field><label>Lease expiry <span>(or renewal date)</span></label><input type="date" data-f="lease_expiry" /></div>' +
           '</div>' +
           '<div class="acct-plan__row">' +
-            '<div class="field" data-expiry-field><label>Lease expiry <span>(or renewal date)</span></label><input type="date" data-f="lease_expiry" /></div>' +
-            '<div class="field"><label>Rent</label><div class="acct-rent-combo"><div class="input-money"><input type="text" inputmode="numeric" data-f="rent_amount" placeholder="0" /></div><select data-f="rent_frequency"><option value="weekly">per week</option><option value="monthly">per month</option></select></div></div>' +
+            '<div class="field"><label>Rent</label><div class="acct-rent-combo"><div class="input-money"><input type="text" inputmode="numeric" data-f="rent_amount" placeholder="0" /></div><select data-f="rent_frequency"><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div></div>' +
+            '<div class="field"><label>&nbsp;</label><label class="acct-periodic-check"><input type="checkbox" data-f="is_periodic" /> Periodic (month-to-month, no fixed end date)</label></div>' +
           '</div>' +
-          '<label class="calc-check acct-periodic-check"><input type="checkbox" data-f="is_periodic" /><span>Periodic lease (month-to-month, no fixed end date)</span></label>' +
         '</div>'
       );
     }
@@ -1196,7 +1199,7 @@
         '</summary>' +
         '<div class="acct-property__body">' +
           '<div class="acct-plan__row">' +
-            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>' +
+            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /><div data-puller></div></div>' +
             '<div class="field">' +
               '<label>Type</label>' +
               '<div class="acct-type-toggle" role="group">' +
@@ -1217,6 +1220,51 @@
           '<p class="acct-msg" data-msg hidden></p>' +
         '</div>'
       );
+    }
+
+    /* One-time pull of a property's name/type from a saved Portfolio
+       Review, the same "copy a figure across, don't live-link it"
+       philosophy already used elsewhere on this page (see [[accounts-saved-reports]]
+       pc-report.js pullers). Only shows once there's actually something to
+       pull from. */
+    function renderPropertyPuller(details, nameInput, setType) {
+      var wrap = details.querySelector("[data-puller]");
+      if (!wrap) return;
+      wrap.innerHTML = "";
+      var options = [];
+      leasePrReports.forEach(function (r) {
+        ((r.summary && r.summary.properties) || []).forEach(function (p) {
+          options.push({
+            label: (r.title || "Portfolio Review") + " — " + p.name + (p.value ? " (" + fmtMoney(p.value) + ")" : ""),
+            name: p.name,
+            propertyType: p.propertyType
+          });
+        });
+      });
+      if (!options.length) return;
+
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "linklike pc-pull__btn"; btn.textContent = "Pull from your Portfolio Review";
+      var sel = document.createElement("select");
+      sel.className = "pc-pull__select"; sel.hidden = true;
+      var opt0 = document.createElement("option");
+      opt0.value = ""; opt0.textContent = "Choose a property…";
+      sel.appendChild(opt0);
+      options.forEach(function (o, i) {
+        var op = document.createElement("option");
+        op.value = String(i); op.textContent = o.label;
+        sel.appendChild(op);
+      });
+      btn.addEventListener("click", function () { btn.hidden = true; sel.hidden = false; });
+      sel.addEventListener("change", function () {
+        var o = options[Number(sel.value)];
+        if (!o) return;
+        nameInput.value = o.name;
+        setType(o.propertyType === "commercial" ? "commercial" : "residential");
+        wrap.innerHTML = "";
+      });
+      wrap.appendChild(btn);
+      wrap.appendChild(sel);
     }
 
     function renderPropertySummary(details, property) {
@@ -1291,9 +1339,20 @@
         details.open = true;
       });
 
-      /* A brand-new property (no leases yet, just created) lands already
-         open with one blank lease row ready to fill in - no separate
-         "expand this, then add a lease" steps first. */
+      /* Opening a property that has no leases yet drops a blank lease row
+         in straight away - filling it in is then one action (open ->
+         type), not two (open, then separately click "Add a lease"). This
+         covers a brand-new property AND an existing one that's simply
+         never had a lease added. */
+      details.addEventListener("toggle", function () {
+        if (details.open && !rowsWrap.children.length) addLeaseRowEl(rowsWrap, {}, typeSelect.value);
+      });
+
+      renderPropertyPuller(details, nameInput, setType);
+
+      /* A brand-new property (just created) lands already open, focused
+         and ready to fill in, rather than a collapsed card the visitor
+         has to find and click into first. */
       if (property.id === pendingOpenPropertyId) {
         pendingOpenPropertyId = null;
         details.open = true;
@@ -1370,9 +1429,14 @@
     }
 
     function loadLeaseRegister(keepMsg) {
-      return window.pcAuth.listProperties().then(function (res) {
+      return Promise.all([
+        window.pcAuth.listProperties(),
+        window.pcAuth.listReports("pr")
+      ]).then(function (results) {
+        var res = results[0], prRes = results[1];
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         leaseProperties = res.data || [];
+        leasePrReports = (prRes && !prRes.error && prRes.data) || [];
         if (!keepMsg) setMsg(leaseMsgEl, "");
         renderLeaseStats(leaseProperties);
         renderLeaseProperties(leaseProperties);

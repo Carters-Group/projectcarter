@@ -1919,7 +1919,17 @@
         annualSurplus: Math.round(I.annual),
         weeklySurplus: Math.round(I.weekly),
         propertyCount: m.live.length,
-        grossRentalIncome: Math.round(I.grossRent)
+        grossRentalIncome: Math.round(I.grossRent),
+        /* per-property identity, not just portfolio totals - lets other
+           pages (the account page's lease register) offer a one-time pull
+           of a property's name/type rather than retyping it */
+        properties: m.live.map(function (p) {
+          return {
+            name: p.label || "Untitled property",
+            value: Math.round(p.value || 0),
+            propertyType: p.isCom ? "commercial" : "residential"
+          };
+        })
       };
     };
   })();

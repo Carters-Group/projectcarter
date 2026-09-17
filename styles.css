@@ -1834,9 +1834,18 @@ h1, h2, h3 {
 
 .acct-rent-combo { display: flex; gap: 8px; }
 .acct-rent-combo .input-money { flex: 1; }
-.acct-rent-combo select { width: 110px; flex: none; }
-.acct-lease-row .calc-check { margin-top: 14px; font-size: 13px; }
-.acct-periodic-check span { line-height: 1.4; }
+.acct-rent-combo select { width: 130px; flex: none; }
+
+/* Deliberately plain block markup, not flex - a checkbox label sitting in
+   a narrow grid column has previously collapsed to an unreadable sliver
+   under flex sizing quirks; block + inline elements can't do that. */
+.acct-periodic-check {
+  display: block; margin-top: 13px; font-size: 13px; line-height: 1.4;
+  color: var(--text); cursor: pointer;
+}
+.acct-periodic-check input {
+  margin-right: 8px; vertical-align: middle; accent-color: var(--accent);
+}
 
 .acct-type-toggle { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
 .acct-type-toggle button {
