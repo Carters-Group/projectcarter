@@ -298,6 +298,10 @@
             </div>
             <p class="field-hint">Track tenants, expiries, market reviews and option periods across your portfolio - update it here as leases move.</p>
             <p class="acct-msg" id="leaseMsg" hidden></p>
+            <p class="acct-empty" id="leaseGate" hidden>
+              The lease register links each lease to a property in your portfolio, and you don't have one yet.
+              <a href="portfolio-review-calculator">Add a property in Portfolio Review</a> and save it, then come back.
+            </p>
 
             <div id="leaseSummary" hidden>
               <div class="acct-overview" id="leaseStats"></div>
@@ -979,6 +983,48 @@
        purely so a property card can offer a one-time pull of a property's
        name/type from the visitor's portfolio (see renderPropertyPuller). */
     var leasePrReports = [];
+    /* The properties a lease-register entry can link to: every property in
+       the visitor's master portfolio (or, with no master set, in any saved
+       Portfolio Review). Rebuilt on every load. */
+    var leasePortfolioOptions = [];
+
+    /* Properties in a saved Portfolio Review. Reads the report's own saved
+       inputs, so a report saved before its summary carried a property list
+       still works without being re-saved. */
+    function prPropertiesOf(report) {
+      var fromSummary = report.summary && report.summary.properties;
+      if (fromSummary && fromSummary.length) return fromSummary;
+      var props = (report.inputs && report.inputs.dyn && report.inputs.dyn.props) || [];
+      return props.map(function (p) {
+        return {
+          name: (p.label || "").trim() || "Untitled property",
+          value: parseFloat(String(p.value || "").replace(/[^0-9.]/g, "")) || 0,
+          propertyType: p.ptype === "com" ? "commercial" : "residential"
+        };
+      }).filter(function (p) { return p.value > 0; });
+    }
+
+    function buildPortfolioOptions() {
+      var master = leasePrReports.filter(function (r) { return r.is_master; })[0];
+      var source = master ? [master] : leasePrReports;
+      var out = [];
+      source.forEach(function (r) {
+        prPropertiesOf(r).forEach(function (p) {
+          out.push({ reportId: r.id, name: p.name, propertyType: p.propertyType, value: p.value });
+        });
+      });
+      return out;
+    }
+
+    /* No property in the portfolio = nothing to attach a lease to, so the
+       register is switched off until there is one. */
+    function syncLeaseGate() {
+      var blocked = !leasePortfolioOptions.length;
+      var addBtn = document.getElementById("leaseAddPropertyBtn");
+      var gate = document.getElementById("leaseGate");
+      addBtn.disabled = blocked;
+      gate.hidden = !blocked;
+    }
 
     function daysUntil(dateStr) {
       if (!dateStr) return null;
@@ -1208,6 +1254,7 @@
           '<span class="acct-property__caret" aria-hidden="true"></span>' +
         '</summary>' +
         '<div class="acct-property__body">' +
+          '<div class="field acct-property__link" data-puller></div>' +
           '<div class="acct-plan__row">' +
             '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>' +
             '<div class="field">' +
@@ -1222,7 +1269,6 @@
           '<div data-lease-rows></div>' +
           '<button type="button" class="linklike" data-act="add-lease">+ Add a lease</button>' +
           '<p class="field-hint" data-res-hint>Residential properties usually have a single lease, but you can add more (e.g. a granny flat).</p>' +
-          '<div class="acct-property__link" data-puller></div>' +
           '<div class="field"><label>Notes <span>(optional)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
           '<div class="acct-property__actions">' +
             '<button type="button" class="btn btn-accent btn-sm" data-act="save">Save changes</button>' +
@@ -1266,68 +1312,64 @@
         });
       }
 
+      /* One dropdown at the top of the card: every property in the visitor's
+         portfolio, plus "Not linked". Picking one fills the name/type and
+         links + saves in a single step; picking "Not linked" unlinks. */
       function render() {
         wrap.innerHTML = "";
-        if (linkedReportId && linkedName) {
-          var report = leasePrReports.filter(function (r) { return r.id === linkedReportId; })[0];
-          var note = document.createElement("p");
-          note.className = "field-hint";
-          note.appendChild(document.createTextNode(
-            "Linked to “" + linkedName + "” in " + (report ? (report.title || "Portfolio Review") : "your Portfolio Review") + ". "
-          ));
-          var unlinkBtn = document.createElement("button");
-          unlinkBtn.type = "button"; unlinkBtn.className = "linklike";
-          unlinkBtn.textContent = "Unlink";
-          unlinkBtn.addEventListener("click", function () {
-            linkedReportId = null; linkedName = null;
-            saveLink();
-          });
-          note.appendChild(unlinkBtn);
-          wrap.appendChild(note);
-          return;
-        }
-
-        var options = [];
-        leasePrReports.forEach(function (r) {
-          ((r.summary && r.summary.properties) || []).forEach(function (p) {
-            options.push({
-              reportId: r.id, reportTitle: r.title, name: p.name,
-              propertyType: p.propertyType, value: p.value
-            });
-          });
-        });
-        if (!options.length) {
-          var emptyHint = document.createElement("p");
-          emptyHint.className = "field-hint";
-          emptyHint.textContent = "Save a Portfolio Review with at least one property to link this property to it.";
-          wrap.appendChild(emptyHint);
-          return;
-        }
-
-        var btn = document.createElement("button");
-        btn.type = "button"; btn.className = "btn btn-accent btn-sm"; btn.textContent = "Assign to a property card";
+        var label = document.createElement("label");
+        label.textContent = "Link to a property in your portfolio";
         var sel = document.createElement("select");
-        sel.className = "pc-pull__select"; sel.hidden = true;
-        var opt0 = document.createElement("option");
-        opt0.value = ""; opt0.textContent = "Choose a property…";
-        sel.appendChild(opt0);
-        options.forEach(function (o, i) {
+        var none = document.createElement("option");
+        none.value = ""; none.textContent = "Not linked - enter details manually";
+        sel.appendChild(none);
+        leasePortfolioOptions.forEach(function (o, i) {
           var op = document.createElement("option");
           op.value = String(i);
-          op.textContent = (o.reportTitle || "Portfolio Review") + " — " + o.name + (o.value ? " (" + fmtMoney(o.value) + ")" : "");
+          op.textContent = o.name + (o.value ? " (" + fmtMoney(o.value) + ")" : "");
           sel.appendChild(op);
         });
-        btn.addEventListener("click", function () { btn.hidden = true; sel.hidden = false; });
+
+        var selected = "";
+        if (linkedReportId && linkedName) {
+          var idx = -1;
+          leasePortfolioOptions.forEach(function (o, i) {
+            if (idx === -1 && o.reportId === linkedReportId && o.name === linkedName) idx = i;
+          });
+          if (idx >= 0) selected = String(idx);
+          else {
+            var gone = document.createElement("option");
+            gone.value = "gone";
+            gone.textContent = "Linked: " + linkedName + " (no longer in your portfolio)";
+            sel.appendChild(gone);
+            selected = "gone";
+          }
+        }
+        sel.value = selected;
+
         sel.addEventListener("change", function () {
-          var o = options[Number(sel.value)];
+          if (sel.value === "gone") return;
+          if (sel.value === "") {
+            linkedReportId = null; linkedName = null;
+            saveLink();
+            return;
+          }
+          var o = leasePortfolioOptions[Number(sel.value)];
           if (!o) return;
           nameInput.value = o.name;
           setType(o.propertyType === "commercial" ? "commercial" : "residential");
           linkedReportId = o.reportId; linkedName = o.name;
           saveLink();
         });
-        wrap.appendChild(btn);
+
+        wrap.appendChild(label);
         wrap.appendChild(sel);
+        if (!leasePortfolioOptions.length) {
+          var hint = document.createElement("p");
+          hint.className = "field-hint";
+          hint.textContent = "No properties in your portfolio yet - add one in Portfolio Review and save it to link here.";
+          wrap.appendChild(hint);
+        }
       }
 
       render();
@@ -1486,7 +1528,7 @@
       wrap.querySelectorAll(".acct-property[open]").forEach(function (d) { openIds[d.dataset.propertyId] = true; });
 
       wrap.innerHTML = "";
-      if (!properties || !properties.length) { show(emptyEl); return; }
+      if (!properties || !properties.length) { emptyEl.hidden = !leasePortfolioOptions.length; return; }
       hide(emptyEl);
       properties.forEach(function (property) {
         var el = buildPropertyEl(property);
@@ -1504,6 +1546,8 @@
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         leaseProperties = res.data || [];
         leasePrReports = (prRes && !prRes.error && prRes.data) || [];
+        leasePortfolioOptions = buildPortfolioOptions();
+        syncLeaseGate();
         if (!keepMsg) setMsg(leaseMsgEl, "");
         renderLeaseStats(leaseProperties);
         renderLeaseProperties(leaseProperties);
@@ -1511,7 +1555,7 @@
     }
 
     document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () {
-      if (leaseProperties.length >= MAX_PROPERTIES) return;
+      if (leaseProperties.length >= MAX_PROPERTIES || !leasePortfolioOptions.length) return;
       window.pcAuth.saveProperty({ name: "", property_type: "residential" }).then(function (res) {
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         pendingOpenPropertyId = res.data && res.data.id;
