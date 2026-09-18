@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://projectcarter.com.au/sitemap.xml
+Sitemap: https://www.projectcarter.com.au/sitemap.xml
