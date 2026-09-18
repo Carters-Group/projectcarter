@@ -97,6 +97,8 @@
         <div class="card acct-card" id="acctSignedOut" hidden>
           <h2 class="calc-subhead">Sign in or create an account</h2>
 
+          <p class="acct-returning" id="acctReturning" hidden>Been here before? <button type="button" class="linklike" id="acctReturningGo">Sign in to your account</button></p>
+
           <div class="acct-authtabs" role="tablist" aria-label="Sign in or create an account">
             <button type="button" class="acct-authtab" id="acctTabSignin" role="tab" aria-selected="false">Sign in</button>
             <button type="button" class="acct-authtab is-active" id="acctTabSignup" role="tab" aria-selected="true">Create account</button>
@@ -587,6 +589,12 @@
 
     authTabSignin.addEventListener("click", function () { showAuthPanel("signin"); });
     authTabSignup.addEventListener("click", function () { showAuthPanel("signup"); });
+    /* the page opens on Create account; anyone who has signed in here before gets a one-tap way to the sign-in form */
+    var returningBar = document.getElementById("acctReturning");
+    var returningSeen = false;
+    try { returningSeen = window.localStorage.getItem("pc_returning") === "1"; } catch (e) {}
+    if (returningSeen) show(returningBar);
+    document.getElementById("acctReturningGo").addEventListener("click", function () { showAuthPanel("signin"); hide(returningBar); });
     document.getElementById("acctGoMagic").addEventListener("click", function () { showAuthPanel("magic"); });
     document.getElementById("acctBackToSignin").addEventListener("click", function () { showAuthPanel("signin"); });
 
@@ -1629,6 +1637,7 @@
         document.getElementById("profPhone").value = u.phone || "";
         document.getElementById("profOccupation").value = u.occupation || "";
         updatePasswordNudge(u);
+        try { window.localStorage.setItem("pc_returning", "1"); } catch (e) {}
         setMsg(reportsMsg, "");
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }

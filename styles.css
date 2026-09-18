@@ -1974,3 +1974,5 @@ h1, h2, h3 {
   /* with both dropdowns open the menu is taller than a small phone - let it scroll */
   .nav { max-height: calc(100vh - 84px); max-height: calc(100dvh - 84px); overflow-y: auto; overscroll-behavior: contain; }
 }
+.acct-returning { margin: -4px 0 16px; font-size: 14px; color: var(--muted); }
+.acct-returning[hidden] { display: none; }
