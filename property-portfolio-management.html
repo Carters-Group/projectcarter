@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Property Portfolio Management Australia | Project Carter</title>
+  <meta name="description" content="Manage every investment property in one place. Track cash flow, equity, lease expiries and WALE, stress-test rate rises and vacancy. Free for residential and commercial owners." />
+  <meta name="theme-color" content="#0c1016" />
+  <link rel="canonical" href="https://www.projectcarter.com.au/property-portfolio-management" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Property Portfolio Management Australia | Project Carter" />
+  <meta property="og:description" content="One dashboard for multiple investment properties: cash flow, usable equity, lease expiries, WALE and risk. For residential and commercial owners." />
+  <meta property="og:url" content="https://www.projectcarter.com.au/property-portfolio-management" />
+  <meta property="og:image" content="assets/images/projects/haig/haig-aerial-drone.jpg" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": "Property Portfolio Management Australia",
+        "url": "https://www.projectcarter.com.au/property-portfolio-management",
+        "description": "Track cash flow, equity, lease expiries and WALE across every residential and commercial investment property in one free account.",
+        "isPartOf": { "@type": "WebSite", "name": "Project Carter", "url": "https://www.projectcarter.com.au/" },
+        "about": "Property portfolio management for Australian investors",
+        "publisher": { "@type": "ProfessionalService", "name": "Project Carter", "areaServed": "AU", "founder": { "@type": "Person", "name": "Trent Macartney" } }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is property portfolio management?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Property portfolio management is tracking and steering every property you own as one combined position: total value, debt, equity, rental income, running costs, tax, lease dates and risk. The aim is to know your numbers across the whole portfolio, not just one property at a time." }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I manage multiple investment properties?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Put every property in one place with its value, loan, rent and costs so you can see the combined weekly cash flow, portfolio LVR and equity. Then track lease expiries and rent reviews, and stress-test the result against a rate rise or a vacancy. A Project Carter account does this in one dashboard, free." }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I work out how much equity I can use to buy another property?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Multiply your combined property value by the LVR a lender will lend to (commonly 70% to 80%) and subtract your existing debt. The result is your useable equity. The portfolio dashboard shows this at both 70% and 80% so you can see a conservative and a higher-gearing figure side by side. Your lender's own valuation and policy always decide the final number." }
+          },
+          {
+            "@type": "Question",
+            "name": "What is WALE and why does it matter for commercial property?",
+            "acceptedAnswer": { "@type": "Answer", "text": "WALE is the weighted average lease expiry: the average time remaining on your leases, usually weighted by rent. A longer WALE means more secure income and generally better valuations and lending terms. A short WALE means more re-leasing risk. The lease register calculates it for you and shows it by income when rent figures are entered." }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I track residential and commercial properties in the same account?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Residential properties get a simple lease form (tenant, rent, periodic or fixed term), while commercial properties get the full set of fields including market reviews, option periods and multiple tenants per property." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is the portfolio dashboard free?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Creating an account, saving reports, the portfolio overview and the lease register are free. Sign-in is by email link, so there is no password to remember." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is this financial or tax advice?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. The dashboard and calculators are planning tools that model the figures you enter. They are not financial, tax or legal advice, and results are estimates. Speak to your accountant, broker or adviser before acting." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER (shared) ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="/" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+        <span class="brand-sub">CARTERS INVESTMENT GROUP</span>
+      </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <a href="about">About</a>
+        <div class="nav-dropdown" id="workDropdown">
+          <a href="approach" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="workDropdownMenu">
+            Our Work
+            <svg class="nav-caret" viewBox="0 0 9 6" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          </a>
+          <div class="nav-dropdown-menu" id="workDropdownMenu">
+            <a href="approach">Approach</a>
+            <a href="/#projects">Projects</a>
+            <a href="property-portfolio-management">Portfolio Management</a>
+          </div>
+        </div>
+        <div class="nav-dropdown" id="calcDropdown">
+          <a href="commercial-calculators" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="calcDropdownMenu">
+            Calculators
+            <svg class="nav-caret" viewBox="0 0 9 6" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          </a>
+          <div class="nav-dropdown-menu" id="calcDropdownMenu">
+            <a href="portfolio-review-calculator">Portfolio Review (PR)</a>
+            <a href="commercial-lending-calculator">Commercial Lending (CL)</a>
+            <a href="return-on-investment-calculator">Return on Investment (ROI)</a>
+            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
+            <a href="development-site-calculator">Development Site (DA)</a>
+            <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
+          </div>
+        </div>
+        <a href="account">Account</a>
+        <a href="enquire" class="btn btn-accent nav-cta-mobile">Contact</a>
+      </nav>
+      <a href="enquire" class="btn btn-accent header-cta">Contact</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ HERO ============ -->
+    <section class="project-hero">
+      <div class="project-hero-media" style="background-image:url('assets/images/projects/haig/haig-aerial-drone.jpg')" aria-hidden="true"></div>
+      <div class="wrap project-hero-inner">
+        <p class="project-eyebrow">Free account <span class="sep">/</span> Residential &amp; commercial</p>
+        <h1 class="project-title">Property Portfolio Management</h1>
+        <p class="project-locale">One dashboard for every property you own: cash flow, equity, lease dates and risk, built for Australian investors with more than one moving part.</p>
+        <p class="pm-hero-actions">
+          <a href="account" class="btn btn-accent">Create your free account</a>
+          <a href="#questions" class="btn btn-ghost">What you can answer</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ INTRO + DASHBOARD PREVIEW ============ -->
+    <section class="section reveal">
+      <div class="wrap pm-intro">
+        <div>
+          <p class="kicker">Portfolio tracker</p>
+          <h2 class="intro-head">Stop running a portfolio out of spreadsheets.</h2>
+          <div class="intro-body">
+            <p>Once you own several properties, the questions change. It stops being "is this one property a good buy" and becomes "what is the whole portfolio doing, and what should I do next". Cash flow after tax across every loan. How much equity is genuinely usable. Which lease expires next. What a rate rise or a vacant tenancy would do to the weekly result.</p>
+            <p>A free Project Carter account puts those answers in one place, for residential landlords, commercial owners, SMSF and family-office investors alike.</p>
+          </div>
+        </div>
+
+        <figure class="pm-figure">
+          <div class="pm-mock" aria-hidden="true">
+            <div class="pm-mock__bar"><span></span><span></span><span></span><em>Your portfolio</em></div>
+            <div class="pm-mock__body">
+              <div class="pm-mock__stats">
+                <div><small>Portfolio value</small><strong>$8.4M</strong></div>
+                <div><small>Total debt</small><strong>$4.1M</strong></div>
+                <div><small>Portfolio LVR</small><strong>48.8%</strong></div>
+                <div><small>Cash flow / week</small><strong class="is-pos">+$1,240</strong></div>
+              </div>
+              <div class="pm-mock__equity">
+                <p>Useable equity</p>
+                <div class="pm-bar"><span style="width:62%"></span></div>
+                <div class="pm-mock__equity-row"><span>At 70% LVR <b>$1.78M</b></span><span>At 80% LVR <b>$2.62M</b></span></div>
+              </div>
+              <div class="pm-mock__wale">
+                <div class="pm-mock__wale-head"><p>Lease register</p><span>WALE 4.2 yrs (by income)</span></div>
+                <ul>
+                  <li><time>Mar 2027</time><span>Lease expiry</span><em>Shop 2</em></li>
+                  <li><time>Aug 2027</time><span>Market review</span><em>Suite 4</em></li>
+                  <li><time>Nov 2028</time><span>Option exercise-by</span><em>Warehouse</em></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <figcaption>Illustrative example only. Your dashboard shows your own figures.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ QUESTIONS OWNERS ASK ============ -->
+    <section class="section band reveal" id="questions">
+      <div class="wrap">
+        <header class="section-head">
+          <h2>The questions multi-property owners ask</h2>
+          <p>These are the things investors search for once a portfolio outgrows one spreadsheet. Each has a tool behind it.</p>
+        </header>
+
+        <div class="grid grid-3">
+          <article class="card service-card">
+            <h3>How do I manage multiple investment properties?</h3>
+            <p>Add each property with its value, loan, rent and running costs, then read the combined position: total value, debt, portfolio LVR and equity, with a property-by-property breakdown.</p>
+            <a class="link-arrow" href="portfolio-review-calculator">Portfolio Review</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>Is my portfolio cash flow positive after tax?</h3>
+            <p>See combined annual and weekly surplus or deficit after interest, tax benefit and depreciation, plus the rent each property needs to reach neutral gearing.</p>
+            <a class="link-arrow" href="portfolio-review-calculator">Check after-tax cash flow</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>How much equity can I use to buy another property?</h3>
+            <p>Useable equity shown at both 70% and 80% LVR, side by side, so you can see a conservative figure and a higher-gearing one before you talk to a lender.</p>
+            <a class="link-arrow" href="commercial-lending-calculator">Test the deposit</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>When do my leases expire, and what is my WALE?</h3>
+            <p>A lease register for residential and commercial properties: tenants, expiries, market reviews and option dates on one timeline, with weighted average lease expiry worked out for you.</p>
+            <a class="link-arrow" href="#lease-register">See the lease register</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>What if interest rates rise or a tenant leaves?</h3>
+            <p>Mild, moderate and severe stress scenarios show your cash flow under a rate rise and under weeks of vacancy, so you know your buffer before it is tested.</p>
+            <a class="link-arrow" href="#risk">How the stress test works</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>How fast can I pay down my investment debt?</h3>
+            <p>Enter an extra amount per year and see the payoff time and interest saved across the whole portfolio. It is a planning figure kept separate from your saved reports.</p>
+            <a class="link-arrow" href="account">Try it in your account</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>What is my commercial property worth?</h3>
+            <p>Take income and outgoings down to net operating income, then apply a cap rate for an implied value and the equity it supports. Recoverable outgoings are handled properly.</p>
+            <a class="link-arrow" href="net-operating-income-calculator">NOI calculator</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>Will this property stack up as a hold?</h3>
+            <p>Model a purchase through to sale: loan, buying costs, rent growth, debt reduction and value uplift, down to total ROI, equity multiple and IRR.</p>
+            <a class="link-arrow" href="return-on-investment-calculator">ROI calculator</a>
+          </article>
+
+          <article class="card service-card">
+            <h3>Does a development site actually work?</h3>
+            <p>Cost a site to development approval, then run full feasibility to settled sales. Figures carry from one calculator to the next so nothing is re-typed.</p>
+            <a class="link-arrow" href="development-site-calculator">DA and GRV calculators</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WHAT'S INSIDE ============ -->
+    <section class="section reveal">
+      <div class="wrap project-layout">
+        <div class="prose">
+          <h2>What's inside your account</h2>
+          <p>Everything below is free, and everything is scoped to you. Only the signed-in owner can see their own portfolio and reports.</p>
+
+          <h2>Portfolio overview</h2>
+          <p>Mark one Portfolio Review as your master portfolio and the account page turns it into a headline overview: property count, combined value, debt, portfolio LVR, net rental income and after-tax cash flow, per year and per week. It only changes when you deliberately edit it, so it stays a stable starting point.</p>
+
+          <h2 id="lease-register">Lease register and WALE tracker</h2>
+          <p>Add each property and its leases. Residential properties use a short form (tenant, rent, periodic or fixed term). Commercial properties carry the full detail: multiple tenants, lease expiry, market review dates and option exercise-by dates. The register rolls up total leases, WALE and a timeline of what is coming next, so a review date never slips past unnoticed.</p>
+
+          <h2 id="risk">Portfolio risk check</h2>
+          <p>Three fixed scenarios (mild, moderate and severe) re-run your portfolio against a rate rise and against weeks of vacancy. The two results are shown separately on purpose: a rate rise says nothing about property values, and vacancy says nothing about your rate, so they are never blended into one misleading number.</p>
+
+          <h2>Saved reports, carried across calculators</h2>
+          <p>Save any calculation and open it again later, duplicate it to test a different scenario, or pull a figure from one report into another. Useable equity from your portfolio can feed a lending or ROI calculation, a valuation from an NOI can become a purchase price, and cash equity to reach a DA can carry into a full GRV feasibility.</p>
+
+          <p><a href="account" class="link-arrow">Create your free account</a></p>
+        </div>
+
+        <aside class="stat-panel">
+          <h2>At a glance</h2>
+          <dl class="stat-list">
+            <div><dt>Cost</dt><dd>Free</dd></div>
+            <div><dt>Sign-in</dt><dd>Email link, no password</dd></div>
+            <div><dt>Suits</dt><dd>Residential &amp; commercial</dd></div>
+            <div><dt></dt><dd>SMSF &amp; family offices</dd></div>
+            <div><dt></dt><dd>Developers</dd></div>
+            <div><dt>Tracks</dt><dd>Cash flow &amp; equity</dd></div>
+            <div><dt></dt><dd>Leases &amp; WALE</dd></div>
+            <div><dt></dt><dd>Rate &amp; vacancy risk</dd></div>
+            <div><dt>Coverage</dt><dd>Australia-wide</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ WHO IT'S FOR ============ -->
+    <section class="section band reveal">
+      <div class="wrap">
+        <header class="section-head">
+          <h2>Built for owners with moving parts</h2>
+        </header>
+        <div class="grid grid-3">
+          <article class="card service-card">
+            <h3>Residential investors</h3>
+            <p>Several houses, units or townhouses across different lenders and states. See total cash flow after tax, your real equity position and where the next property could come from.</p>
+          </article>
+          <article class="card service-card">
+            <h3>Commercial owners</h3>
+            <p>Retail, office, industrial and mixed-use assets with multiple tenants, reviews and options. Track lease expiry, WALE and outgoings recovery, and value the asset off net income.</p>
+          </article>
+          <article class="card service-card">
+            <h3>SMSFs, family offices and developers</h3>
+            <p>Mixed holdings and live projects. Keep the hold portfolio, the lending position and the development feasibility side by side, with figures that flow between them.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CALCULATORS ============ -->
+    <section class="section reveal">
+      <div class="wrap">
+        <header class="section-head">
+          <h2>Six calculators behind it</h2>
+          <p>Every calculator runs free, with or without an account. Sign in to save your work and carry figures from one to the next.</p>
+        </header>
+        <div class="grid grid-3">
+          <a class="card project-card" href="portfolio-review-calculator">
+            <div class="card-media has-photo card-media--icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" data-label="PR"></div>
+            <div class="card-body">
+              <h3>Portfolio Review</h3>
+              <p class="card-meta">Portfolio &amp; gearing</p>
+              <p>Combined after-tax cash flow, equity and useable equity across every property.</p>
+              <span class="link-arrow">Open calculator</span>
+            </div>
+          </a>
+          <a class="card project-card" href="commercial-lending-calculator">
+            <div class="card-media has-photo card-media--icon" style="background-image:url('assets/images/calculators/cl-icon.svg')" data-label="CL"></div>
+            <div class="card-body">
+              <h3>Commercial Lending</h3>
+              <p class="card-meta">Finance &amp; lending</p>
+              <p>Deposit and total cash required by loan type, major bank against tier 2.</p>
+              <span class="link-arrow">Open calculator</span>
+            </div>
+          </a>
+          <a class="card project-card" href="return-on-investment-calculator">
+            <div class="card-media has-photo card-media--icon" style="background-image:url('assets/images/calculators/roi-icon.svg')" data-label="ROI"></div>
+            <div class="card-body">
+              <h3>Return on Investment</h3>
+              <p class="card-meta">Property hold</p>
+              <p>Purchase to sale: total ROI, equity multiple and IRR.</p>
+              <span class="link-arrow">Open calculator</span>
+            </div>
+          </a>
+          <a class="card project-card" href="net-operating-income-calculator">
+            <div class="card-media has-photo card-media--icon" style="background-image:url('assets/images/calculators/noi-icon.svg')" data-label="NOI"></div>
+            <div class="card-body">
+              <h3>Net Operating Income</h3>
+              <p class="card-meta">Income &amp; valuation</p>
+              <p>Income less outgoings, an implied value at your cap rate, and usable equity.</p>
+              <span class="link-arrow">Open calculator</span>
+            </div>
+          </a>
+          <a class="card project-card" href="development-site-calculator">
+            <div class="card-media has-photo card-media--icon" style="background-image:url('assets/images/calculators/da-icon.svg')" data-label="DA"></div>
+            <div class="card-body">
+              <h3>Development Site (DA)</h3>
+              <p class="card-meta">Development feasibility</p>
+              <p>The full cost of taking a site to development approval.</p>
+              <span class="link-arrow">Open calculator</span>
+            </div>
+          </a>
+          <a class="card project-card" href="gross-realisation-value-calculator">
+            <div class="card-media has-photo card-media--icon" style="background-image:url('assets/images/calculators/grv-icon.svg')" data-label="GRV"></div>
+            <div class="card-body">
+              <h3>Gross Realisation Value</h3>
+              <p class="card-meta">Construction &amp; feasibility</p>
+              <p>From DA to settled sales: expected profit, profit on cost and per dwelling.</p>
+              <span class="link-arrow">Open calculator</span>
+            </div>
+          </a>
+        </div>
+        <p class="section-more"><a href="commercial-calculators" class="link-arrow">See the full calculator suite</a></p>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section band reveal">
+      <div class="wrap narrow">
+        <header class="section-head">
+          <h2>Portfolio management FAQs</h2>
+        </header>
+        <div class="pm-faq">
+          <details>
+            <summary>What is property portfolio management?</summary>
+            <p>Tracking and steering every property you own as one combined position: total value, debt, equity, rental income, running costs, tax, lease dates and risk. The aim is to know your numbers across the whole portfolio, not just one property at a time.</p>
+          </details>
+          <details>
+            <summary>How do I manage multiple investment properties?</summary>
+            <p>Put every property in one place with its value, loan, rent and costs so you can see the combined weekly cash flow, portfolio LVR and equity. Then track lease expiries and rent reviews, and stress-test the result against a rate rise or a vacancy. A Project Carter account does this in one dashboard, free.</p>
+          </details>
+          <details>
+            <summary>How do I work out how much equity I can use to buy another property?</summary>
+            <p>Multiply your combined property value by the LVR a lender will lend to (commonly 70% to 80%) and subtract your existing debt. The dashboard shows this at both 70% and 80% so you can see a conservative and a higher-gearing figure side by side. Your lender's own valuation and policy always decide the final number.</p>
+          </details>
+          <details>
+            <summary>What is WALE and why does it matter for commercial property?</summary>
+            <p>WALE is the weighted average lease expiry: the average time remaining on your leases, usually weighted by rent. A longer WALE means more secure income and generally better valuations and lending terms. A short WALE means more re-leasing risk. The lease register calculates it for you, by income when rent figures are entered.</p>
+          </details>
+          <details>
+            <summary>Can I track residential and commercial properties in the same account?</summary>
+            <p>Yes. Residential properties get a simple lease form (tenant, rent, periodic or fixed term). Commercial properties get the full set of fields, including market reviews, option periods and multiple tenants per property.</p>
+          </details>
+          <details>
+            <summary>Is the portfolio dashboard free?</summary>
+            <p>Yes. Creating an account, saving reports, the portfolio overview and the lease register are free. Sign-in is by email link, so there is no password to remember.</p>
+          </details>
+          <details>
+            <summary>Is this financial or tax advice?</summary>
+            <p>No. The dashboard and calculators are planning tools that model the figures you enter. They are not financial, tax or legal advice, and results are estimates. Speak to your accountant, broker or adviser before acting.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="project-cta">
+      <div class="wrap">
+        <h2>Put the whole portfolio in one place.</h2>
+        <a href="account" class="btn btn-accent">Create your free account</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="/" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="about">About</a>
+        <a href="/#projects">Projects</a>
+        <a href="approach">Approach</a>
+        <a href="property-portfolio-management">Portfolio Management</a>
+        <a href="commercial-calculators">Calculators</a>
+        <a href="account">Account</a>
+        <a href="enquire">Contact</a>
+      </nav>
+    </div>
+    <div class="wrap footer-legal">
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <div class="footer-social">
+        <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/trent-macartney-793a8a37b/" aria-label="Trent Macartney on LinkedIn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4v15h-4V8zm7.5 0h3.8v2.05h.05c.53-.95 1.83-2.05 3.77-2.05C20.6 8 22 10.02 22 13.6V23h-4v-8.15c0-1.94-.03-4.44-2.7-4.44-2.7 0-3.12 2.11-3.12 4.29V23H8V8z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/trent.macartney/" aria-label="Trent Macartney on Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@trentmacartney" aria-label="Trent Macartney on TikTok">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.2 2h-3.2v13.9c0 1.7-1.4 3.1-3.1 3.1s-3.1-1.4-3.1-3.1c0-1.6 1.2-2.9 2.8-3.1V9.5c-3.4.2-6 3-6 6.3 0 3.5 2.8 6.3 6.3 6.3s6.3-2.8 6.3-6.3V8.9c1.5.9 3.2 1.4 5 1.4V7c-1.2 0-2.3-.3-3.3-.9-1.4-.8-2.3-2.2-2.5-3.8V2h-.2z"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
