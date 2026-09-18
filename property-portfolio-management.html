@@ -88,18 +88,18 @@
         <span class="brand-sub">CARTERS INVESTMENT GROUP</span>
       </a>
       <nav class="nav" id="primaryNav" aria-label="Primary">
-        <a href="about">About</a>
-        <div class="nav-dropdown" id="workDropdown">
-          <a href="approach" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="workDropdownMenu">
-            Our Work
+        <div class="nav-dropdown" id="aboutDropdown">
+          <a href="about" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="aboutDropdownMenu">
+            About
             <svg class="nav-caret" viewBox="0 0 9 6" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
           </a>
-          <div class="nav-dropdown-menu" id="workDropdownMenu">
+          <div class="nav-dropdown-menu" id="aboutDropdownMenu">
+            <a href="about">About Trent</a>
             <a href="approach">Approach</a>
             <a href="/#projects">Projects</a>
-            <a href="property-portfolio-management">Portfolio Management</a>
           </div>
         </div>
+        <a href="property-portfolio-management">Portfolio Management</a>
         <div class="nav-dropdown" id="calcDropdown">
           <a href="commercial-calculators" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="calcDropdownMenu">
             Calculators
@@ -128,27 +128,21 @@
     <!-- ============ HERO ============ -->
     <section class="project-hero">
       <div class="project-hero-media" style="background-image:url('assets/images/projects/haig/haig-aerial-drone.jpg')" aria-hidden="true"></div>
-      <div class="wrap project-hero-inner">
-        <p class="project-eyebrow">Free account <span class="sep">/</span> Residential &amp; commercial</p>
-        <h1 class="project-title">Property Portfolio Management</h1>
-        <p class="project-locale">One dashboard for every property you own: cash flow, equity, lease dates and risk, built for Australian investors with more than one moving part.</p>
-        <p class="pm-hero-actions">
-          <a href="account" class="btn btn-accent">Create your free account</a>
-          <a href="#questions" class="btn btn-ghost">What you can answer</a>
-        </p>
-      </div>
-    </section>
-
-    <!-- ============ INTRO + DASHBOARD PREVIEW ============ -->
-    <section class="section reveal">
-      <div class="wrap pm-intro">
-        <div>
-          <p class="kicker">Portfolio tracker</p>
-          <h2 class="intro-head">Stop running a portfolio out of spreadsheets.</h2>
-          <div class="intro-body">
-            <p>Once you own several properties, the questions change. It stops being "is this one property a good buy" and becomes "what is the whole portfolio doing, and what should I do next". Cash flow after tax across every loan. How much equity is genuinely usable. Which lease expires next. What a rate rise or a vacant tenancy would do to the weekly result.</p>
-            <p>A free Project Carter account puts those answers in one place, for residential landlords, commercial owners, SMSF and family-office investors alike.</p>
-          </div>
+      <div class="wrap project-hero-inner pm-hero-grid">
+        <div class="pm-hero-copy">
+          <p class="project-eyebrow">Free account <span class="sep">/</span> Residential &amp; commercial</p>
+          <h1 class="project-title">Property Portfolio Management</h1>
+          <p class="project-locale">One dashboard for every property you own: cash flow, equity, lease dates and risk, built for Australian investors with more than one moving part.</p>
+          <ul class="pm-punch">
+            <li><strong>Portfolio risk.</strong> Rate rise or vacancy, in dollars.</li>
+            <li><strong>Land tax.</strong> Built into every property's cash flow.</li>
+            <li><strong>ROI forecasts.</strong> Purchase to sale, with IRR.</li>
+            <li><strong>Six calculators.</strong> One set of figures, carried across.</li>
+          </ul>
+          <p class="pm-hero-actions">
+            <a href="account" class="btn btn-accent">Create your free account</a>
+            <a href="#questions" class="btn btn-ghost">What you can answer</a>
+          </p>
         </div>
 
         <figure class="pm-figure">
@@ -166,18 +160,46 @@
                 <div class="pm-bar"><span style="width:62%"></span></div>
                 <div class="pm-mock__equity-row"><span>At 70% LVR <b>$1.78M</b></span><span>At 80% LVR <b>$2.62M</b></span></div>
               </div>
+              <div class="pm-mock__rows">
+                <p>Portfolio risk</p>
+                <ul>
+                  <li><span>Rates +1.0%</span><b class="is-neg">-$790 / wk</b></li>
+                  <li><span>8 weeks vacant</span><b class="is-neg">-$18,600</b></li>
+                </ul>
+              </div>
+              <div class="pm-mock__rows">
+                <p>Costs &amp; forecast</p>
+                <ul>
+                  <li><span>Land tax (all properties)</span><b>$14,200 / yr</b></li>
+                  <li><span>10-year ROI forecast</span><b class="is-pos">IRR 9.4%</b></li>
+                </ul>
+              </div>
               <div class="pm-mock__wale">
                 <div class="pm-mock__wale-head"><p>Lease register</p><span>WALE 4.2 yrs (by income)</span></div>
                 <ul>
                   <li><time>Mar 2027</time><span>Lease expiry</span><em>Shop 2</em></li>
                   <li><time>Aug 2027</time><span>Market review</span><em>Suite 4</em></li>
-                  <li><time>Nov 2028</time><span>Option exercise-by</span><em>Warehouse</em></li>
                 </ul>
               </div>
+              <div class="pm-mock__chips"><span>PR</span><span>CL</span><span>ROI</span><span>NOI</span><span>DA</span><span>GRV</span><em>connected</em></div>
             </div>
           </div>
           <figcaption>Illustrative example only. Your dashboard shows your own figures.</figcaption>
         </figure>
+      </div>
+    </section>
+
+    <!-- ============ INTRO + DASHBOARD PREVIEW ============ -->
+    <section class="section reveal">
+      <div class="wrap">
+        <div>
+          <p class="kicker">Portfolio tracker</p>
+          <h2 class="intro-head">Stop running a portfolio out of spreadsheets.</h2>
+          <div class="intro-body">
+            <p>Once you own several properties, the questions change. It stops being "is this one property a good buy" and becomes "what is the whole portfolio doing, and what should I do next". Cash flow after tax across every loan. How much equity is genuinely usable. Which lease expires next. What a rate rise or a vacant tenancy would do to the weekly result.</p>
+            <p>A free Project Carter account puts those answers in one place, for residential landlords, commercial owners, SMSF and family-office investors alike.</p>
+          </div>
+        </div>
       </div>
     </section>
 

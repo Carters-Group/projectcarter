@@ -1919,3 +1919,29 @@ h1, h2, h3 {
 @media (max-width: 900px) {
   .pm-intro { grid-template-columns: 1fr; }
 }
+
+/* portfolio page: mock lives in the hero */
+.pm-hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(32px, 5vw, 72px); align-items: end; }
+.pm-hero-grid .project-locale { max-width: 52ch; }
+.pm-hero-grid .project-title { font-size: clamp(40px, 6.4vw, 88px); }
+.pm-punch { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 8px; }
+.pm-punch li { position: relative; padding-left: 20px; color: var(--muted); font-size: 0.98rem; }
+.pm-punch li::before { content: "\2192"; position: absolute; left: 0; color: var(--accent); }
+.pm-punch strong { color: var(--text); font-weight: 600; }
+.pm-hero-grid .pm-figure { margin: 0; }
+.pm-hero-grid .pm-mock { background: rgba(20, 26, 36, 0.92); backdrop-filter: blur(6px); }
+.pm-hero-grid .pm-mock__body { gap: 16px; padding: 18px; }
+.pm-hero-grid .pm-mock__stats strong { font-size: 24px; }
+.pm-hero-grid .pm-figure figcaption { color: var(--text); opacity: 0.7; }
+.pm-mock .is-neg { color: #e2938c; }
+.pm-mock__rows p { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.pm-mock__rows ul { list-style: none; margin: 0; padding: 0; }
+.pm-mock__rows li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; }
+.pm-mock__rows li span { color: var(--muted); }
+.pm-mock__rows li b { font-weight: 600; }
+.pm-mock__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 4px; }
+.pm-mock__chips span { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; padding: 5px 9px; border: 1px solid rgba(95, 161, 208, 0.5); color: var(--accent-2); }
+.pm-mock__chips em { font-style: normal; font-size: 11px; color: var(--muted); margin-left: 4px; letter-spacing: 0.06em; }
+@media (max-width: 960px) {
+  .pm-hero-grid { grid-template-columns: 1fr; align-items: start; }
+}
