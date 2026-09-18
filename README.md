@@ -31,8 +31,9 @@ api/geocode.js                  Vercel serverless function - same-origin proxy f
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
 account.html                    sign in / sign up (magic link or password) + a profile photo (upload, stored in Supabase Storage) with initials fallback + a "Quick access" grid of one-click calculator cards (resumes each calculator's most recently saved report where one exists) + a "Your portfolio" overview card (adds net rental income and a "Useable equity" block showing both a conservative 70% LVR and a higher-gearing 80% LVR figure side by side, a "See this as an ROI projection" button - saves a new ROI report seeded from the portfolio's combined value/gearing/net rent and its own blended interest rate with sensible placeholder growth/term assumptions and opens it, and a standalone "Debt reduction goal" mini-tool - an extra $/year contribution field with a live payoff-time + interest-saved readout, assuming the portfolio's debt is interest-only as modelled in Portfolio Review; this is a planning figure only, not part of any calculator, report or ROI projection, and a "Check your portfolio risk" block below the portfolio plan - three fixed stress scenarios (Mild/Moderate/Severe: rate rise, weeks of vacancy) recomputed from the master report's summary snapshot, showing cash flow under a rate-rise scenario and under a vacancy scenario as two separate rows only (never summed, and a rate rise says nothing about value or vice versa, so no derived LVR/value row either); the vacancy row needs `grossRentalIncome` in the summary (added to `pcCalcSummary()` in `pr-calculator.html`) so a report saved before this shipped only shows the rate-rise row until re-saved; the block sits in its own tinted, bordered panel with a bolder display-font title (`.acct-risk-section`) so it reads as the important one, distinct from the plain "Debt reduction goal" / "Portfolio plan" sections around it, while the Mild/Moderate/Severe scenario cards keep their own yellow/orange/red tint), the "Your portfolio" card sits first on the page as one continuous box - the "Signed in as" identity row (email + Sign out) and the "Your portfolio" heading (with Rename and Edit portfolio actions together in its header row) share the same card background, split only by a single thin divider rather than two separately-bordered sections; the hero heading/copy above the dashboard (`.acct-hero-inner`) is pinned to the same 1180px max-width as the signed-in dashboard so both share a left edge instead of the hero sitting ~30px further left at wide viewports; Quick access cards clamp their "Saved: <title>" text to 2 lines and pin the "Saved / Edit" or "Start a report" link to the bottom of the card (`margin-top:auto`) so every card in the grid reads at the same levels regardless of how long a saved report's title is; below "Quick access" (same column, so it always sits directly under it) is a single accent "Recently saved calculations" toggle (native `<details>`, open by default so it's visible without a click) that unfolds one merged, calculator-grouped list of every other saved report (Rename/Duplicate/Delete, and "Make this my portfolio" on Portfolio Review reports) - no separate "Recently updated" feed and no second per-calculator launch grid, since Quick access above already covers that; only the first 6 reports render un-hidden, with a "Load N more" button revealing the rest already in the DOM (no second fetch) if there are more; the master portfolio report is left out of this list entirely, since it already has its place at the top of the page, and (being the master) can only be opened and edited in place, never duplicated. The whole dashboard (portfolio card, quick access, this list) only re-fetches on page load, sign-in state change, or an action taken in the list itself (Delete/Duplicate/Make this my portfolio) - saving a report from a calculator page does not push a live update to an already-open account tab; revisiting or reloading account.html picks it up + an editable details form (name, phone, occupation, read-only email)
 pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/rename/delete/duplicate report, get/set/clear master report, update profile incl. occupation), auth status bar, subscription gate (canSave, always true for now)
+tax.js                          land tax + capital gains tax estimators (window.pcTax, pure functions, unit-tested in tax.test.js) used by the account page's Tax position card - see "Property register and tax position" below
 pc-report.js                    shared per-calculator wiring - "Project name or address" field, "Save report" button, ?report=<id> rehydration
-supabase-schema.sql             one-time SQL for the Supabase project: profiles (incl. occupation) + reports tables, row-level security, subscription_status column, one-master-portfolio-per-user constraint
+supabase-schema.sql             one-time SQL for the Supabase project: profiles (incl. occupation, tax_settings) + reports + properties/leases tables (properties carry the land tax / CGT fields), row-level security, subscription_status column, one-master-portfolio-per-user constraint
 styles.css                      design system + layout (home, project pages, landing, calculator, account)
 script.js                       header scroll state, mobile nav, scroll reveals
 assets/images/projects/         project photography (scraped from cartersinvestments.com.au)
@@ -168,6 +169,45 @@ the 5 most recently updated reports across every calculator ("Recently
 updated"), and every saved report can be **duplicated** ("Save as new" via the
 report list's Duplicate action) to branch a scenario without touching the
 original.
+
+### Property register and tax position
+
+Below the portfolio card, `account.html` has a **Property register** (formerly
+"Lease register"): one accordion per property, backed by the `properties` /
+`leases` tables, tracking tenants, expiries, reviews and options (with a
+portfolio WALE and an upcoming-dates timeline). Each property also has a
+**Tax details** sub-panel (state, owner type, unimproved land value; purchase
+date/price, buying costs, improvements, capital works claimed, new-build tick,
+planned sale date, expected sale price, optional 1 July 2027 value). A
+**Tax position** card underneath rolls those up, live from the saved data:
+
+- **Land tax.** Grouped per state per owner type (thresholds do not stack across
+  states), tax worked out on the aggregated unimproved value and split back to
+  each property pro-rata by land value. "Other taxable land you hold in your own
+  name" per state (in the settings box) joins the individual group. Schedules
+  (`LAND` in `tax.js`): NSW (2026, frozen thresholds, special-trust rates),
+  VIC (2024-2033 general + trust tables from the SRO), QLD (individual vs
+  company/trust, from the Queensland Revenue Office), WA (plus the Perth-metro
+  MRIT tick), SA, TAS. ACT and NT are flagged "not modelled". SMSFs are taxed at
+  general rates outside QLD; foreign-owner/absentee surcharges and exemptions
+  (own home) are left out.
+- **Capital gains tax if sold.** Current law: 50% discount (individual/trust,
+  held over 12 months), one-third (super fund, taxed at 15%), none (company,
+  30%), tax taken as the extra tax on top of "other taxable income" using the
+  resident scale plus Medicare. For a sale on or after 1 July 2027 it also shows
+  the **announced 2026-27 Budget reform** (announced, not yet confirmed as law):
+  cost-base indexation by an editable CPI assumption plus a 30% minimum tax,
+  with a split-gain transition (gain to 1 July 2027 keeps the 50% discount, the
+  1 July 2027 value being the visitor's figure or a steady-growth estimate) and a
+  new-build election that takes the cheaper regime. Rates and dates live in one
+  config block at the top of `tax.js` so a legislated change is a small edit.
+- **Settings** (`profiles.tax_settings`, jsonb): other taxable income, CPI,
+  selling-cost %, other land per state. Read/written on their own, not through
+  `PROFILE_COLS`, so a missing migration only disables this card, never sign-in.
+
+Re-run `supabase-schema.sql` after deploying this (adds the property tax
+columns and `profiles.tax_settings`); until then the card shows a prompt to do
+so. Run `node --test tax.test.js stamp.test.js` for the estimator tests.
 
 Everything is **free**. `profiles.subscription_status` (defaults to `'free'`)
 and the `pc_can_save()` SQL function are the hooks for a future paywall - today

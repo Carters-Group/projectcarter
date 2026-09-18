@@ -24,7 +24,9 @@
   var AVATAR_BUCKET = "avatars";
   var AVATAR_MAX_BYTES = 2 * 1024 * 1024;
   var AVATAR_EXT = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
-  var PROFILE_COLS = "id,email,full_name,phone,occupation,avatar_url,has_password,subscription_status";
+  var TAX_STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
+  var TAX_OWNERS = ["individual", "trust", "company", "super"];
+  var PROFILE_COLS ="id,email,full_name,phone,occupation,avatar_url,has_password,subscription_status";
 
   var CONFIGURED =
     SUPABASE_URL.indexOf("http") === 0 &&
@@ -534,10 +536,63 @@
         linked_pr_report_id: property.linked_pr_report_id || null,
         linked_pr_property_name: property.linked_pr_property_name ? property.linked_pr_property_name.slice(0, 200) : null
       };
+      /* Tax details (land tax + CGT). Only written when the caller supplies
+         them, so the flows that save just a name/type/link (e.g. "Assign to
+         a property card") never blank a property's tax fields. */
+      var has = function (k) { return Object.prototype.hasOwnProperty.call(property, k); };
+      var money = function (v) { v = parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, "")); return isFinite(v) && v >= 0 ? v : null; };
+      var day = function (v) { return /^\d{4}-\d{2}-\d{2}$/.test(v || "") ? v : null; };
+      if (has("state")) row.state = TAX_STATES.indexOf(property.state) >= 0 ? property.state : null;
+      if (has("ownership_type")) row.ownership_type = TAX_OWNERS.indexOf(property.ownership_type) >= 0 ? property.ownership_type : "individual";
+      if (has("land_value")) row.land_value = money(property.land_value);
+      if (has("wa_metro")) row.wa_metro = !!property.wa_metro;
+      if (has("purchase_date")) row.purchase_date = day(property.purchase_date);
+      if (has("purchase_price")) row.purchase_price = money(property.purchase_price);
+      if (has("acquisition_costs")) row.acquisition_costs = money(property.acquisition_costs);
+      if (has("improvements")) row.improvements = money(property.improvements);
+      if (has("capital_works_claimed")) row.capital_works_claimed = money(property.capital_works_claimed);
+      if (has("is_new_build")) row.is_new_build = !!property.is_new_build;
+      if (has("planned_sale_date")) row.planned_sale_date = day(property.planned_sale_date);
+      if (has("expected_sale_price")) row.expected_sale_price = money(property.expected_sale_price);
+      if (has("value_at_jul_2027")) row.value_at_jul_2027 = money(property.value_at_jul_2027);
       var q = property.id
         ? client.from("properties").update(row).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
         : client.from("properties").insert(row).select().maybeSingle();
       return q.then(function (res) { return { data: res.data, error: res.error }; });
+    },
+
+    /* Portfolio-level tax settings live in profiles.tax_settings (jsonb).
+       Read/written on their own, never through PROFILE_COLS, so a missing
+       migration only disables the Tax position card instead of sign-in. */
+    getTaxSettings: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.from("profiles").select("tax_settings").eq("id", currentUser.id).maybeSingle()
+        .then(function (res) {
+          return { data: (res.data && res.data.tax_settings) || {}, error: res.error };
+        });
+    },
+
+    saveTaxSettings: function (s) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      var clamp = function (v, lo, hi) {
+        v = parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, ""));
+        return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null;
+      };
+      var otherLand = {};
+      Object.keys(s.other_land || {}).forEach(function (st) {
+        var v = clamp(s.other_land[st], 0, 1e10);
+        if (TAX_STATES.indexOf(st) >= 0 && v) otherLand[st] = v;
+      });
+      var clean = {
+        other_income: clamp(s.other_income, 0, 1e9),
+        cpi_pct: clamp(s.cpi_pct, 0, 15),
+        selling_cost_pct: clamp(s.selling_cost_pct, 0, 10),
+        other_land: otherLand
+      };
+      return client.from("profiles").update({ tax_settings: clean }).eq("id", currentUser.id)
+        .then(function (res) { return { data: clean, error: res.error }; });
     },
 
     /* leases cascade-delete with the property (FK on_delete cascade) */
@@ -603,6 +658,7 @@
       var prevAvatar = currentProfile && currentProfile.avatar_url;
       return client.from("reports").delete().eq("user_id", uid)
         .then(function () { return client.from("properties").delete().eq("user_id", uid); })
+        .then(function () { return client.from("profiles").update({ tax_settings: null }).eq("id", uid).then(function () { return {}; }, function () { return {}; }); })
         .then(function () {
           var path = avatarPathFromUrl(prevAvatar);
           if (!path || path.indexOf(uid + "/") !== 0 || !client.storage) return {};

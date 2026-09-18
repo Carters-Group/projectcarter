@@ -7,7 +7,8 @@
 --  What it creates
 --    profiles    one row per signed-up user (name, phone, email, plan)
 --    reports     saved calculator runs - the input values only, as JSON
---    properties  a signed-in user's lease register - one row per property
+--    properties  a signed-in user's property register - one row per property
+--                (lease details plus land tax / capital gains tax details)
 --    leases      one or more leases per property (WALE tracker)
 --    avatars     Storage bucket for profile photos (path {auth.uid()}/...)
 --
@@ -186,6 +187,34 @@ create table if not exists public.properties (
 -- report will need re-linking.
 alter table public.properties add column if not exists linked_pr_report_id uuid references public.reports (id) on delete set null;
 alter table public.properties add column if not exists linked_pr_property_name text;
+
+-- Tax details on the property register: land tax (state + ownership + the
+-- unimproved land value off the council rates / land tax notice) and a
+-- capital gains estimate (cost base + expected sale). All optional; the
+-- account page's "Tax position" card only counts a property once it has
+-- the fields it needs. `state` and `ownership_type` are also what the land
+-- tax aggregation groups by.
+alter table public.properties add column if not exists state text
+  check (state in ('NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'));
+alter table public.properties add column if not exists ownership_type text not null default 'individual'
+  check (ownership_type in ('individual', 'trust', 'company', 'super'));
+alter table public.properties add column if not exists land_value numeric;
+alter table public.properties add column if not exists wa_metro boolean not null default false;
+alter table public.properties add column if not exists purchase_date date;
+alter table public.properties add column if not exists purchase_price numeric;
+alter table public.properties add column if not exists acquisition_costs numeric;
+alter table public.properties add column if not exists improvements numeric;
+alter table public.properties add column if not exists capital_works_claimed numeric;
+alter table public.properties add column if not exists is_new_build boolean not null default false;
+alter table public.properties add column if not exists planned_sale_date date;
+alter table public.properties add column if not exists expected_sale_price numeric;
+alter table public.properties add column if not exists value_at_jul_2027 numeric;
+
+-- Portfolio-level tax settings (other taxable income, CPI assumption,
+-- selling-cost %, taxable land held outside the register per state). One
+-- small JSON blob per user; deliberately NOT in pc-auth.js's PROFILE_COLS so
+-- sign-in still works if this migration hasn't been run yet.
+alter table public.profiles add column if not exists tax_settings jsonb;
 
 create index if not exists properties_user_idx
   on public.properties (user_id, name);
