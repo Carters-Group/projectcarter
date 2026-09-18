@@ -1748,6 +1748,7 @@ h1, h2, h3 {
       "pwnudge    pwnudge"
       "portfolio  quick"
       "leases     leases"
+      "tax        tax"
       "details    details"
       "danger     danger";
     align-items: start;
@@ -1760,6 +1761,7 @@ h1, h2, h3 {
   .acct-dash-portfolio { grid-area: portfolio; }
   .acct-dash-quick     { grid-area: quick; }
   .acct-dash-leases    { grid-area: leases; }
+  .acct-dash-tax       { grid-area: tax; }
   .acct-dash-details   { grid-area: details; }
   .acct-dash-danger    { grid-area: danger; }
 }
@@ -1860,6 +1862,71 @@ h1, h2, h3 {
 .acct-periodic-check__text small { font-size: 12px; color: var(--muted); }
 .field .acct-periodic-check:has(input:checked) {
   border-color: var(--accent); background: rgba(95, 161, 208, 0.1);
+}
+
+/* ---- Tax details (per property) + Tax position card ------------------ */
+.acct-subdetails {
+  border: 1px solid var(--line-soft); border-radius: 6px; margin-top: 18px;
+}
+.acct-subdetails > summary {
+  cursor: pointer; list-style: none; padding: 13px 16px;
+  font-weight: 600; font-size: 14px; color: var(--text);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.acct-subdetails > summary::-webkit-details-marker { display: none; }
+.acct-subdetails > summary::after { content: "+"; margin-left: auto; color: var(--muted); font-size: 16px; }
+.acct-subdetails[open] > summary::after { content: "\2212"; }
+.acct-subdetails__hint { font-weight: 400; font-size: 12.5px; color: var(--muted); }
+.acct-subdetails__body { padding: 0 16px 16px; border-top: 1px solid var(--line-soft); }
+.acct-subdetails__body > .field { margin-top: 10px; }
+.acct-subhead {
+  margin: 18px 0 2px; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-2);
+}
+.acct-tax-preview {
+  margin: 8px 0 0; padding: 10px 14px; font-size: 13.5px; line-height: 1.5;
+  color: var(--muted); background: var(--bg); border-left: 3px solid var(--accent);
+}
+.acct-taxland { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.acct-taxland .field label { min-height: 0; }
+@media (max-width: 640px) { .acct-taxland { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.acct-tax-section { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+.acct-tax-section:first-child { border-top: 0; padding-top: 0; margin-top: 18px; }
+.acct-tax-title {
+  margin: 0 0 4px; font-family: var(--font-display); font-size: 1.15rem;
+  font-weight: 700; color: var(--accent-2);
+}
+.acct-taxgroup { margin-top: 18px; }
+.acct-taxgroup__head {
+  display: flex; align-items: baseline; gap: 6px 18px; flex-wrap: wrap;
+  font-size: 13.5px; color: var(--muted); margin-bottom: 8px;
+}
+.acct-taxgroup__head strong { color: var(--text); font-size: 14.5px; }
+.acct-taxgroup__tax { margin-left: auto; color: var(--text); font-weight: 600; }
+.acct-taxtable {
+  width: 100%; border-collapse: collapse; font-size: 13.5px;
+  border: 1px solid var(--line-soft);
+}
+.acct-taxtable th, .acct-taxtable td {
+  padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+.acct-taxtable thead th {
+  font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted); background: var(--bg-2);
+}
+.acct-taxtable tbody tr:last-child td { border-bottom: 0; }
+.acct-taxtable .is-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.acct-taxtable td:first-child, .acct-taxtable th:first-child { min-width: 160px; }
+.acct-taxtable td:nth-child(2) { white-space: nowrap; }
+.acct-taxtable__sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.acct-tax-basis { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+.acct-tax-notes { margin: 14px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
+.acct-tax-notes li { margin: 4px 0; }
+.acct-tax-fine { margin: 14px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+@media (max-width: 640px) {
+  .acct-taxtable { display: block; overflow-x: auto; }
 }
 
 .acct-type-toggle { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
@@ -1976,3 +2043,25 @@ h1, h2, h3 {
 }
 .acct-returning { margin: -4px 0 16px; font-size: 14px; color: var(--muted); }
 .acct-returning[hidden] { display: none; }
+
+/* portfolio page: highlight boxes over a photo backdrop */
+.pm-backdrop { position: relative; overflow: hidden; padding-block: clamp(72px, 11vw, 130px); border-block: 1px solid var(--line-soft); background: var(--bg-2); }
+.pm-backdrop__media { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.pm-backdrop__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12, 16, 22, 0.9), rgba(12, 16, 22, 0.72) 50%, rgba(12, 16, 22, 0.92)); }
+.pm-backdrop__inner { position: relative; }
+.pm-boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.pm-box {
+  padding: clamp(24px, 2.6vw, 34px);
+  background: rgba(20, 26, 36, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--accent);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  display: flex; flex-direction: column;
+}
+.pm-box h3 { font-size: 26px; margin-bottom: 12px; }
+.pm-box p { color: var(--muted); font-size: 0.97rem; margin: 0 0 22px; }
+.pm-box .link-arrow { margin-top: auto; align-self: flex-start; }
+@media (max-width: 1080px) { .pm-boxes { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .pm-boxes { grid-template-columns: 1fr; } }

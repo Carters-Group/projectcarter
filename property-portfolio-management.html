@@ -64,7 +64,7 @@
           {
             "@type": "Question",
             "name": "Is the portfolio dashboard free?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Creating an account, saving reports, the portfolio overview and the lease register are free. Sign-in is by email link, so there is no password to remember." }
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Creating an account, saving reports, the portfolio overview and the lease register are free. You can sign in with a password or a one-time link sent to your email." }
           },
           {
             "@type": "Question",
@@ -133,15 +133,8 @@
           <p class="project-eyebrow">Free account <span class="sep">/</span> Residential &amp; commercial</p>
           <h1 class="project-title">Property Portfolio Management</h1>
           <p class="project-locale">One dashboard for every property you own: cash flow, equity, lease dates and risk, built for Australian investors with more than one moving part.</p>
-          <ul class="pm-punch">
-            <li><strong>Portfolio risk.</strong> Rate rise or vacancy, in dollars.</li>
-            <li><strong>Land tax.</strong> Built into every property's cash flow.</li>
-            <li><strong>ROI forecasts.</strong> Purchase to sale, with IRR.</li>
-            <li><strong>Six calculators.</strong> One set of figures, carried across.</li>
-          </ul>
           <p class="pm-hero-actions">
             <a href="account" class="btn btn-accent">Create your free account</a>
-            <a href="#questions" class="btn btn-ghost">What you can answer</a>
           </p>
         </div>
 
@@ -203,67 +196,33 @@
       </div>
     </section>
 
-    <!-- ============ QUESTIONS OWNERS ASK ============ -->
-    <section class="section band reveal" id="questions">
-      <div class="wrap">
+    <!-- ============ HIGHLIGHTS ============ -->
+    <section class="pm-backdrop reveal">
+      <div class="pm-backdrop__media" style="background-image:url('assets/images/projects/haig/haig-aerial-drone.jpg')" aria-hidden="true"></div>
+      <div class="wrap pm-backdrop__inner">
         <header class="section-head">
-          <h2>The questions multi-property owners ask</h2>
-          <p>These are the things investors search for once a portfolio outgrows one spreadsheet. Each has a tool behind it.</p>
+          <h2>Everything moving in your portfolio, in one view</h2>
         </header>
-
-        <div class="grid grid-3">
-          <article class="card service-card">
-            <h3>How do I manage multiple investment properties?</h3>
-            <p>Add each property with its value, loan, rent and running costs, then read the combined position: total value, debt, portfolio LVR and equity, with a property-by-property breakdown.</p>
+        <div class="pm-boxes">
+          <article class="pm-box">
+            <h3>Portfolio risk</h3>
+            <p>Rate rise or vacancy, shown in dollars. Mild, moderate and severe stress tests on your real numbers.</p>
+            <a class="link-arrow" href="account">See your risk</a>
+          </article>
+          <article class="pm-box">
+            <h3>Land tax</h3>
+            <p>Built into every property's cash flow, so the weekly result reflects what you actually pay.</p>
             <a class="link-arrow" href="portfolio-review-calculator">Portfolio Review</a>
           </article>
-
-          <article class="card service-card">
-            <h3>Is my portfolio cash flow positive after tax?</h3>
-            <p>See combined annual and weekly surplus or deficit after interest, tax benefit and depreciation, plus the rent each property needs to reach neutral gearing.</p>
-            <a class="link-arrow" href="portfolio-review-calculator">Check after-tax cash flow</a>
-          </article>
-
-          <article class="card service-card">
-            <h3>How much equity can I use to buy another property?</h3>
-            <p>Useable equity shown at both 70% and 80% LVR, side by side, so you can see a conservative figure and a higher-gearing one before you talk to a lender.</p>
-            <a class="link-arrow" href="commercial-lending-calculator">Test the deposit</a>
-          </article>
-
-          <article class="card service-card">
-            <h3>When do my leases expire, and what is my WALE?</h3>
-            <p>A lease register for residential and commercial properties: tenants, expiries, market reviews and option dates on one timeline, with weighted average lease expiry worked out for you.</p>
-            <a class="link-arrow" href="#lease-register">See the lease register</a>
-          </article>
-
-          <article class="card service-card">
-            <h3>What if interest rates rise or a tenant leaves?</h3>
-            <p>Mild, moderate and severe stress scenarios show your cash flow under a rate rise and under weeks of vacancy, so you know your buffer before it is tested.</p>
-            <a class="link-arrow" href="#risk">How the stress test works</a>
-          </article>
-
-          <article class="card service-card">
-            <h3>How fast can I pay down my investment debt?</h3>
-            <p>Enter an extra amount per year and see the payoff time and interest saved across the whole portfolio. It is a planning figure kept separate from your saved reports.</p>
-            <a class="link-arrow" href="account">Try it in your account</a>
-          </article>
-
-          <article class="card service-card">
-            <h3>What is my commercial property worth?</h3>
-            <p>Take income and outgoings down to net operating income, then apply a cap rate for an implied value and the equity it supports. Recoverable outgoings are handled properly.</p>
-            <a class="link-arrow" href="net-operating-income-calculator">NOI calculator</a>
-          </article>
-
-          <article class="card service-card">
-            <h3>Will this property stack up as a hold?</h3>
-            <p>Model a purchase through to sale: loan, buying costs, rent growth, debt reduction and value uplift, down to total ROI, equity multiple and IRR.</p>
+          <article class="pm-box">
+            <h3>ROI forecasts</h3>
+            <p>Purchase to sale, with total ROI, equity multiple and IRR, seeded straight from your portfolio.</p>
             <a class="link-arrow" href="return-on-investment-calculator">ROI calculator</a>
           </article>
-
-          <article class="card service-card">
-            <h3>Does a development site actually work?</h3>
-            <p>Cost a site to development approval, then run full feasibility to settled sales. Figures carry from one calculator to the next so nothing is re-typed.</p>
-            <a class="link-arrow" href="development-site-calculator">DA and GRV calculators</a>
+          <article class="pm-box">
+            <h3>Six calculators</h3>
+            <p>Lending, NOI, DA and GRV feasibility too. One set of figures, carried from one to the next.</p>
+            <a class="link-arrow" href="commercial-calculators">All calculators</a>
           </article>
         </div>
       </div>
@@ -295,7 +254,7 @@
           <h2>At a glance</h2>
           <dl class="stat-list">
             <div><dt>Cost</dt><dd>Free</dd></div>
-            <div><dt>Sign-in</dt><dd>Email link, no password</dd></div>
+            <div><dt>Sign-in</dt><dd>Password or email link</dd></div>
             <div><dt>Suits</dt><dd>Residential &amp; commercial</dd></div>
             <div><dt></dt><dd>SMSF &amp; family offices</dd></div>
             <div><dt></dt><dd>Developers</dd></div>
@@ -427,7 +386,7 @@
           </details>
           <details>
             <summary>Is the portfolio dashboard free?</summary>
-            <p>Yes. Creating an account, saving reports, the portfolio overview and the lease register are free. Sign-in is by email link, so there is no password to remember.</p>
+            <p>Yes. Creating an account, saving reports, the portfolio overview and the lease register are free. You can sign in with a password or a one-time link sent to your email.</p>
           </details>
           <details>
             <summary>Is this financial or tax advice?</summary>
