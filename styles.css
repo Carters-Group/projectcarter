@@ -1670,6 +1670,10 @@ h1, h2, h3 {
 .acct-plan__row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .acct-plan__row .field { margin: 8px 0 12px; }
 .acct-plan__row .field label { line-height: 1.4; min-height: 2.8em; }
+/* inputs share one baseline however many lines each label wraps to */
+.acct-plan__row--aligned { align-items: end; }
+.acct-plan__row--aligned .field { display: flex; flex-direction: column; justify-content: flex-end; }
+.acct-plan__row--aligned .field label { min-height: 0; margin-bottom: 6px; }
 @media (max-width: 640px) {
   .acct-plan__row { grid-template-columns: 1fr; }
 }
@@ -1901,10 +1905,7 @@ h1, h2, h3 {
 
 .acct-tax-section { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
 .acct-tax-section:first-child { border-top: 0; padding-top: 0; margin-top: 18px; }
-.acct-tax-title {
-  margin: 0 0 4px; font-family: var(--font-display); font-size: 1.15rem;
-  font-weight: 700; color: var(--accent-2);
-}
+.acct-tax-title { margin: 0 0 12px; }
 .acct-taxgroup { margin-top: 18px; }
 .acct-taxgroup__head {
   display: flex; align-items: baseline; gap: 6px 18px; flex-wrap: wrap;

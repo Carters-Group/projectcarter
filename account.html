@@ -328,7 +328,7 @@
             <details class="acct-subdetails" id="taxSettingsBox">
               <summary>Your tax settings <span class="acct-subdetails__hint">income, inflation, other land</span></summary>
               <div class="acct-subdetails__body">
-                <div class="acct-plan__row">
+                <div class="acct-plan__row acct-plan__row--aligned">
                   <div class="field"><label>Your other taxable income per year <span>(excluding these gains, used to tax a sale)</span></label><div class="input-money"><input type="text" inputmode="numeric" id="taxOtherIncome" autocomplete="off" placeholder="0" /></div></div>
                   <div class="field"><label>Inflation (CPI) assumption <span>(indexation after 1 July 2027)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxCpi" autocomplete="off" placeholder="2.5" /></div></div>
                   <div class="field"><label>Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
@@ -1620,7 +1620,7 @@
 
     function renderLandTaxSection() {
       var sec = tEl("div", "acct-tax-section");
-      sec.appendChild(tEl("p", "acct-tax-title", "Land tax"));
+      sec.appendChild(tEl("h3", "calc-subhead acct-tax-title", "Land tax"));
 
       var props = leaseProperties.map(function (p) {
         return {
@@ -1781,7 +1781,7 @@
 
     function renderCgtSection() {
       var sec = tEl("div", "acct-tax-section");
-      sec.appendChild(tEl("p", "acct-tax-title", "Capital gains tax if sold"));
+      sec.appendChild(tEl("h3", "calc-subhead acct-tax-title", "Capital gains tax if sold"));
 
       var rows = leaseProperties.map(function (p, i) {
         var m = portfolio.props[i];
