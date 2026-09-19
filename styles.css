@@ -1743,30 +1743,24 @@ h1, h2, h3 {
 /* same width as the site header and every other page (.wrap), so the hero,
    the password bar and the cards all share the header's left edge */
 #acctWrap.is-signedin { max-width: var(--maxw); }
-@media (min-width: 901px) {
+@media (min-width: 1100px) {
+  /* a twelve-column grid so cards pair up into even rows; narrower screens stack */
   .acct-dashboard:not([hidden]) {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    grid-template-areas:
-      "nav        nav"
-      "start      start"
-      "pwnudge    pwnudge"
-      "portfolio  side"
-      "leases     leases"
-      "tax        tax"
-      "danger     danger";
-    align-items: start;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: stretch;
     gap: 20px;
   }
+  .acct-dashboard > * { grid-column: 1 / -1; }
+  .acct-dash-portfolio, .acct-dash-risk { grid-column: span 6; }
+  .acct-dash-props { grid-column: span 7; }
+  .acct-dash-leases { grid-column: span 5; align-self: start; position: sticky; top: 110px; }
+  .acct-dash-tax, .acct-dash-exit { grid-column: span 6; }
+  .acct-dash-details, .acct-dash-security { grid-column: span 6; }
+  /* no risk card yet (no properties): the portfolio card takes the full row */
+  .acct-dash-portfolio:has(+ .acct-dash-risk[hidden]) { grid-column: 1 / -1; }
   .acct-dashboard .acct-card,
   .acct-dashboard .acct-starthere-bar { margin-bottom: 0; }
-  .acct-dash-start     { grid-area: start; }
-  .acct-dash-pwnudge   { grid-area: pwnudge; }
-  .acct-dash-portfolio { grid-area: portfolio; }
-  .acct-dash-side      { grid-area: side; }
-  .acct-dash-tax       { grid-area: tax; }
-  .acct-dash-danger    { grid-area: danger; }
-  .acct-dash-leases    { grid-area: leases; }
 }
 
 /* Quick access and the "Recently saved calculations" toggle stack in the
@@ -2183,7 +2177,16 @@ h1, h2, h3 {
 /* The dashboard cards have no visible edge (same colour as the page), so their
    inner padding pushed every heading in from the hero's left edge. Drop the
    sideways padding so headings and content sit flush with "Your account". */
-.acct-dashboard .acct-card { padding-left: 0; padding-right: 0; }
+.acct-dashboard .acct-card {
+  padding: clamp(20px, 2.4vw, 30px);
+  background: var(--bg-2); border: 1px solid var(--line-soft); border-radius: 8px;
+}
+.acct-dashboard .acct-card .acct-property,
+.acct-dashboard .acct-card .acct-lease-group { background: var(--bg); }
+.acct-dashboard .acct-dash-quick { display: flex; flex-direction: column; gap: 20px; }
+.acct-dashboard .acct-dash-quick .acct-card { margin-bottom: 0; }
+.acct-dashboard .acct-danger { background: var(--bg-2); }
+@media (max-width: 1099px) { .acct-dashboard .acct-card { margin-bottom: 20px; } }
 
 /* ---- Leases overview: one placeholder per property ---------------------- */
 .acct-lease-groups { display: grid; gap: 10px; margin: 6px 0 18px; }
@@ -2217,8 +2220,6 @@ h1, h2, h3 {
 @keyframes acctFlash { 0%, 60% { box-shadow: 0 0 0 2px var(--accent); } 100% { box-shadow: 0 0 0 2px transparent; } }
 
 /* ---- Right-hand column: quick access, saved calculations, details, deletion */
-.acct-dash-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.acct-dash-side .acct-card { margin-bottom: 0; }
 
 /* ---- Section navigation ------------------------------------------------ */
 .acct-nav a { text-decoration: none; }
@@ -2227,7 +2228,7 @@ h1, h2, h3 {
 
 /* phones and tablets: a slim bar that stays under the site header */
 .acct-nav {
-  grid-area: nav; position: sticky; top: 84px; z-index: 60;
+  position: sticky; top: 84px; z-index: 60;
   display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
   margin: 0 0 16px; padding: 10px 0;
   background: rgba(12, 16, 22, 0.94); backdrop-filter: blur(8px);
@@ -2274,3 +2275,15 @@ h1, h2, h3 {
 @media (min-width: 1500px) {
   .acct-nav__label { position: static; opacity: 1; padding: 0; background: none; border: 0; color: inherit; }
 }
+
+/* half-width cards: let the three-up grids reflow instead of squeezing */
+.acct-risk-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.acct-dash-risk .acct-debt-goal, .acct-dash-portfolio .acct-debt-goal { margin-top: 22px; }
+
+/* the gains table is one column too wide for a half-width card: drop the
+   sale date (it is in each property's workings) and let it scroll if it must */
+.acct-dash-exit .acct-tax-section > .acct-taxtable { display: block; overflow-x: auto; }
+.acct-dash-exit .acct-tax-section > .acct-taxtable th:nth-child(2),
+.acct-dash-exit .acct-tax-section > .acct-taxtable td:nth-child(2) { display: none; }
+.acct-dash-exit .acct-tax-section > .acct-taxtable td:first-child,
+.acct-dash-exit .acct-tax-section > .acct-taxtable th:first-child { min-width: 120px; }

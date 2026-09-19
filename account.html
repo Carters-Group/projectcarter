@@ -232,15 +232,28 @@
                 <p class="field-hint">Rent from your current leases, less the running costs and loan interest you have entered. Tax on that income is not included.</p>
               </div>
 
-              <div class="acct-debt-goal" id="portfolioIfSold" hidden>
-                <p class="acct-eyebrow">If you sold everything</p>
-                <div class="acct-overview acct-overview--modes" id="portfolioIfSoldStats"></div>
-                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are under Tax and land tax below.</p>
-              </div>
-
-
               <div id="portfolioGaps" hidden></div>
+            </div>
 
+            <div id="portfolioUnset" hidden>
+              <p class="acct-empty">
+                Add your properties below, once each: what you paid, what it is worth, what you owe and what it earns.
+                Your equity, cash flow, land tax and what you would walk away with if you sold are all worked out from that,
+                and the calculators can pull your equity straight in.
+              </p>
+            </div>
+          </div>
+
+          <div class="card acct-card acct-dash-risk" id="acctRiskCard" hidden>
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Risk and debt</h2>
+            </div>
+              <div class="acct-debt-goal acct-risk-section" id="portfolioRisk" hidden>
+                <p class="acct-risk-section__title">Check your portfolio risk</p>
+                <p class="field-hint">How your cash flow would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
+                <div class="acct-risk-grid" id="portfolioRiskGrid"></div>
+                <p class="field-hint" id="portfolioRiskNote">Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast.</p>
+              </div>
               <div class="acct-debt-goal" id="portfolioDebtGoal" hidden>
                 <p class="acct-eyebrow">Debt reduction goal</p>
                 <div class="field">
@@ -251,6 +264,13 @@
                 <p class="field-hint">A simple planning figure that is not saved anywhere. Assumes your debt is interest-only, so every dollar contributed goes straight to principal, at the blended rate across your properties.</p>
               </div>
 
+          </div>
+
+          <div class="card acct-card acct-dash-plan" id="acctPlanCard" hidden>
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Portfolio plan</h2>
+            </div>
+            <p class="acct-empty" id="portfolioPlanNote" hidden>The plan needs a current value, loan balance, interest rate and rent on every property. Fill in what is missing under Your properties and it appears here.</p>
               <div class="acct-debt-goal" id="portfolioPlanInputs">
                 <p class="acct-eyebrow">Portfolio plan</p>
                 <div class="acct-plan__row">
@@ -289,24 +309,9 @@
                 <p class="acct-calc-links"><a id="portfolioRoiOpenLink" href="#">Open and fine-tune in the ROI calculator</a></p>
               </div>
 
-              <div class="acct-debt-goal acct-risk-section" id="portfolioRisk" hidden>
-                <p class="acct-risk-section__title">Check your portfolio risk</p>
-                <p class="field-hint">How your cash flow would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
-                <div class="acct-risk-grid" id="portfolioRiskGrid"></div>
-                <p class="field-hint" id="portfolioRiskNote">Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast.</p>
-              </div>
-            </div>
-
-            <div id="portfolioUnset" hidden>
-              <p class="acct-empty">
-                Add your properties below, once each: what you paid, what it is worth, what you owe and what it earns.
-                Your equity, cash flow, land tax and what you would walk away with if you sold are all worked out from that,
-                and the calculators can pull your equity straight in.
-              </p>
-            </div>
           </div>
 
-          <div class="card acct-card acct-dash-leases" id="acctLeaseCard">
+          <div class="card acct-card acct-dash-props" id="acctLeaseCard">
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your properties</h2>
             </div>
@@ -332,6 +337,15 @@
               No properties yet. Add your first one to see your portfolio, land tax and sale position.
             </p>
 
+            <div class="acct-property__actions acct-addprop">
+              <button type="button" class="btn btn-accent btn-sm" id="leaseAddPropertyBtn">Add a property</button>
+            </div>
+          </div>
+
+          <div class="card acct-card acct-dash-leases" id="acctLeasesCard">
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Your leases</h2>
+            </div>
             <datalist id="yearsList"><option value="0.5"></option><option value="1"></option><option value="2"></option><option value="3"></option><option value="4"></option><option value="5"></option><option value="6"></option><option value="7"></option><option value="8"></option><option value="9"></option><option value="10"></option><option value="15"></option><option value="20"></option></datalist>
 
             <div id="leaseSummary" hidden>
@@ -340,9 +354,7 @@
               <div id="leaseTimeline" class="acct-lease-timeline"></div>
             </div>
 
-            <div class="acct-property__actions acct-addprop">
-              <button type="button" class="btn btn-accent btn-sm" id="leaseAddPropertyBtn">Add a property</button>
-            </div>
+            <p class="acct-empty" id="leaseSummaryEmpty">Add a lease to a property and its rent, term and key dates are summarised here.</p>
           </div>
 
           <div class="card acct-card acct-dash-tax" id="acctTaxCard">
@@ -363,7 +375,21 @@
             </div>
           </div>
 
-          <div class="acct-dash-side" id="acctSide">
+          <div class="card acct-card acct-dash-exit" id="acctExitCard">
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Exit strategy</h2>
+            </div>
+            <p class="field-hint">What selling would leave you with, and the capital gains tax behind it. Estimates only, not tax advice.</p>
+              <div class="acct-debt-goal" id="portfolioIfSold" hidden>
+                <p class="acct-eyebrow">If you sold everything</p>
+                <div class="acct-overview acct-overview--modes" id="portfolioIfSoldStats"></div>
+                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are further down this card.</p>
+              </div>
+
+
+            <div id="exitBody"></div>
+          </div>
+
           <div class="acct-dash-quick" id="acctQuickCol">
             <div class="card acct-card" id="acctQuickCard">
               <h2 class="calc-subhead">Quick access</h2>
@@ -406,7 +432,7 @@
               <div class="field">
                 <label for="profEmail">Email</label>
                 <input type="email" id="profEmail" disabled />
-                <p class="field-hint">Your sign-in email. Change it below.</p>
+                <p class="field-hint">Your sign-in email. Change it under Sign-in and security.</p>
               </div>
               <div class="field">
                 <label for="profPhone">Phone</label>
@@ -419,8 +445,11 @@
               <button type="submit" class="btn btn-ghost" id="profSaveBtn">Save details</button>
             </form>
             <p class="acct-msg" id="profMsg" hidden></p>
+          </div>
 
-            <h3 class="acct-subhead-sm" style="margin-top:28px">Email</h3>
+          <div class="card acct-card acct-dash-security" id="acctSecurityCard">
+            <h2 class="calc-subhead">Sign-in and security</h2>
+            <h3 class="acct-subhead-sm">Email</h3>
             <form id="emailForm" novalidate>
               <div class="field">
                 <label for="profNewEmail">New email</label>
@@ -445,8 +474,6 @@
               <button type="submit" class="btn btn-ghost" id="passSaveBtn">Update password</button>
             </form>
             <p class="acct-msg" id="passMsg" hidden></p>
-          </div>
-
           </div>
 
           <div class="card acct-card acct-danger acct-dash-danger" id="acctDangerCard">
@@ -879,8 +906,10 @@
     function renderPortfolio() {
       var setEl = document.getElementById("portfolioSet");
       var unsetEl = document.getElementById("portfolioUnset");
-      if (!leaseProperties.length || !portfolio) { hide(setEl); show(unsetEl); return; }
-      show(setEl); hide(unsetEl);
+      var riskCardEl = document.getElementById("acctRiskCard");
+      var planCardEl = document.getElementById("acctPlanCard");
+      if (!leaseProperties.length || !portfolio) { hide(setEl); show(unsetEl); hide(riskCardEl); hide(planCardEl); return; }
+      show(setEl); hide(unsetEl); show(planCardEl);
       var t = portfolio.totals, m = portfolio.missing;
       var ready = t.counted > 0;
 
@@ -967,6 +996,7 @@
          sense once every counted property has its rent and interest */
       var planOk = t.complete;
       ["portfolioPlanInputs", "portfolioRoiBtn"].forEach(function (id) { document.getElementById(id).hidden = !planOk; });
+      document.getElementById("portfolioPlanNote").hidden = planOk;
       if (!planOk) hide(document.getElementById("portfolioRoiResult"));
 
       var riskEl = document.getElementById("portfolioRisk");
@@ -974,6 +1004,8 @@
         show(riskEl);
         renderPortfolioRisk({ portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent });
       } else { hide(riskEl); }
+      /* the risk card holds the stress test and the debt goal; only show it when one of them applies */
+      if (riskEl.hidden && goalEl.hidden) hide(riskCardEl); else show(riskCardEl);
     }
 
     /* ---- Your properties (the register) ---------------------------------
@@ -1066,8 +1098,9 @@
         });
       });
 
-      if (!totalLeases) { hide(summaryEl); return; }
-      show(summaryEl);
+      var leaseEmptyEl = document.getElementById("leaseSummaryEmpty");
+      if (!totalLeases) { hide(summaryEl); show(leaseEmptyEl); return; }
+      show(summaryEl); hide(leaseEmptyEl);
 
       var wale = computeWale(properties);
       allEvents.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
@@ -2070,12 +2103,15 @@
     function renderTaxPosition() {
       var body = document.getElementById("taxBody");
       body.innerHTML = "";
+      var exitBody = document.getElementById("exitBody");
+      exitBody.innerHTML = "";
       if (!leaseProperties.length) {
-        body.appendChild(tEl("p", "acct-empty", "Add a property above and fill in its state, land value and purchase details to see your land tax and capital gains estimates here."));
+        body.appendChild(tEl("p", "acct-empty", "Add a property and fill in its state and land value to see your land tax here."));
+        exitBody.appendChild(tEl("p", "acct-empty", "Add a property with a purchase date and price to see what selling would leave you with."));
         return;
       }
       body.appendChild(renderLandTaxSection());
-      body.appendChild(renderCgtSection());
+      exitBody.appendChild(renderCgtSection());
     }
 
     function refreshAllLive() {
