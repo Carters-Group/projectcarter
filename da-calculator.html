@@ -743,6 +743,8 @@
   <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
+  <script src="tax.js"></script>
+  <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
   <script src="stamp.js"></script>
   <script>
@@ -1714,8 +1716,9 @@
        Review wants: their usable equity, at whichever LVR they're planning
        around, straight into "Funds you have available". One clean block,
        not a scattered "Pull from..." link under every field - there is
-       only ever one master portfolio, so asking which report to pull from
-       would just be friction for a choice that doesn't exist. */
+       only ever one portfolio (the visitor's property register on the
+       account page), so asking which one to pull from would just be
+       friction for a choice that doesn't exist. */
     (function () {
       var connectGroup = document.getElementById("connectGroup");
       var connectToggle = document.getElementById("connectToggle");
@@ -1788,8 +1791,8 @@
           group.hidden = true;
           return;
         }
-        window.pcAuth.getMasterReport().then(function (res) {
-          var s = res && res.data && res.data.summary;
+        window.pcAuth.getPortfolioSummary().then(function (res) {
+          var s = res && res.data;
           if (res.error || !s || (s.usableEquity70 == null && s.usableEquity80 == null)) {
             window.pcConnect.setAvailable("portfolio", false);
             group.hidden = true;

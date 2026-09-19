@@ -1818,6 +1818,14 @@ h1, h2, h3 {
 }
 .acct-property > summary::-webkit-details-marker { display: none; }
 .acct-property__caret { margin-left: auto; color: var(--muted); font-size: 16px; }
+/* the at-a-glance line under each property's name, visible while collapsed */
+.acct-property__strip {
+  flex: 0 0 100%; display: flex; flex-wrap: wrap; gap: 4px 20px;
+  font-size: 13.5px; font-weight: 600; color: var(--text);
+}
+.acct-strip__item em { font-style: normal; font-weight: 400; color: var(--muted); margin-right: 2px; }
+.acct-strip__empty { font-weight: 400; color: var(--muted); }
+.acct-property__body > .acct-subhead:first-child { margin-top: 18px; }
 .acct-property[open] .acct-property__caret::before { content: "\2212"; }
 .acct-property:not([open]) .acct-property__caret::before { content: "+"; }
 .acct-property__name { font-weight: 600; color: var(--text); }

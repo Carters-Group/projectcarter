@@ -162,6 +162,30 @@ test("held 12 months or less: no discount", function () {
   assert.equal(r.reform, null);
 });
 
+test("12 months excludes both the purchase day and the sale day", function () {
+  var mk = function (sale) {
+    return T.cgtEstimate(Object.assign({}, base, { purchaseDate: "2025-06-20", saleDate: sale }), settings);
+  };
+  assert.equal(mk("2026-06-20").currentLaw.discountPct, 0, "exactly on the anniversary is still short");
+  assert.equal(mk("2026-06-21").currentLaw.discountPct, 50, "the day after the anniversary qualifies");
+});
+
+test("an asset bought before 20 September 1985 is outside CGT today", function () {
+  var r = T.cgtEstimate(Object.assign({}, base, { purchaseDate: "1984-01-01" }), settings);
+  assert.equal(r.preCgt, true);
+  assert.equal(r.currentLaw.tax, 0);
+  assert.equal(T.cgtEstimate(base, settings).preCgt, false);
+});
+
+test("the result carries its inputs so the page can show the workings", function () {
+  var r = T.cgtEstimate(Object.assign({}, base, { improvements: 20000, worksClaimed: 10000 }), settings);
+  assert.equal(r.inputs.purchasePrice, 800000);
+  assert.equal(r.inputs.acqCosts, 40000);
+  assert.equal(r.inputs.improvements, 20000);
+  assert.equal(r.inputs.worksClaimed, 10000);
+  assert.equal(r.costBase, 800000 + 40000 + 20000 - 10000);
+});
+
 test("company: no discount, 30% flat, no reform column", function () {
   var r = T.cgtEstimate(Object.assign({}, base, { owner: "company", saleDate: "2028-01-01" }), settings);
   near(r.currentLaw.tax, 360000 * 0.30, 0.01);
@@ -214,11 +238,17 @@ test("estimated 1 July 2027 value sits between purchase price and sale price", f
 
 test("minimum 30% tax floors a low-income holder's tax", function () {
   var r = T.cgtEstimate(
-    { owner: "individual", purchaseDate: "2027-08-01", purchasePrice: 1000000, saleDate: "2028-08-01", salePrice: 1050000 },
+    { owner: "individual", purchaseDate: "2027-08-01", purchasePrice: 1000000, saleDate: "2028-08-02", salePrice: 1050000 },
     { otherIncome: 0, cpiPct: 2.5, sellingCostPct: 0 }
   );
-  near(r.reform.postGain, 24960, 60);
+  near(r.reform.postGain, 24900, 150);
   near(r.reform.tax, r.reform.postGain * 0.30 + r.reform.postGain * 0.02, 0.5);
+  assert.equal(r.reform.floorApplied, true);
+});
+
+test("the minimum tax is not flagged when the normal scale already exceeds it", function () {
+  var r = T.cgtEstimate(Object.assign({}, base, { saleDate: "2028-01-01", v27: 1000000 }), settings);
+  assert.equal(r.reform.floorApplied, false);
 });
 
 test("indexation cannot turn a gain into a loss", function () {

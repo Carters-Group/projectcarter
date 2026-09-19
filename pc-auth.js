@@ -555,10 +555,31 @@
       if (has("planned_sale_date")) row.planned_sale_date = day(property.planned_sale_date);
       if (has("expected_sale_price")) row.expected_sale_price = money(property.expected_sale_price);
       if (has("value_at_jul_2027")) row.value_at_jul_2027 = money(property.value_at_jul_2027);
+      if (has("current_value")) row.current_value = money(property.current_value);
+      if (has("loan_balance")) row.loan_balance = money(property.loan_balance);
+      if (has("interest_rate")) { var r = money(property.interest_rate); row.interest_rate = r != null && r <= 100 ? r : null; }
+      if (has("annual_running_costs")) row.annual_running_costs = money(property.annual_running_costs);
       var q = property.id
         ? client.from("properties").update(row).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
         : client.from("properties").insert(row).select().maybeSingle();
       return q.then(function (res) { return { data: res.data, error: res.error }; });
+    },
+
+    /* The portfolio summary the calculators pull "funds available" from
+       (usableEquity70 / usableEquity80), computed live from the property
+       register by pcPortfolio (portfolio.js, which each page loads before
+       this file). {data: summary | null}: null until at least one property
+       has both a current value and a loan balance. */
+    getPortfolioSummary: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      if (typeof pcPortfolio === "undefined") return Promise.resolve({ data: null, error: null });
+      return Promise.all([api.listProperties(), api.getTaxSettings()]).then(function (res) {
+        var props = res[0], settings = res[1];
+        if (props.error) return { data: null, error: props.error };
+        var built = pcPortfolio.build(props.data || [], (settings && settings.data) || {});
+        return { data: built.totals.counted > 0 ? built.summary : null, error: null };
+      });
     },
 
     /* Portfolio-level tax settings live in profiles.tax_settings (jsonb).

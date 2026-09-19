@@ -176,13 +176,13 @@
 
         <!-- signed in -->
         <div id="acctSignedIn" class="acct-dashboard" hidden>
-          <a class="acct-starthere-bar acct-dash-start" id="acctStartHere" href="portfolio-review-calculator" hidden>
+          <a class="acct-starthere-bar acct-dash-start" id="acctStartHere" href="#acctLeaseCard" hidden>
             <span class="acct-starthere-bar__icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" aria-hidden="true"></span>
             <span class="acct-starthere-bar__text">
-              <strong>Start here - Portfolio Review</strong>
-              <span>This is the foundation calculator. Save it once and every other calculator can pull your equity, value and cash flow straight from it.</span>
+              <strong>Start here - add your first property</strong>
+              <span>Enter each property once and your equity, cash flow, land tax and sale position are worked out for you. Every calculator can then pull your equity straight from it.</span>
             </span>
-            <span class="link-arrow">Open</span>
+            <span class="link-arrow">Add</span>
           </a>
 
           <div class="acct-starthere-bar acct-dash-pwnudge" id="acctPasswordNudge" hidden>
@@ -208,18 +208,29 @@
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your portfolio</h2>
               <div class="acct-card-head__actions">
-                <button type="button" class="linklike" id="portfolioRenameBtn" hidden>Rename</button>
-                <a href="portfolio-review-calculator" id="portfolioEditBtn" class="btn btn-ghost btn-sm" hidden>Edit portfolio</a>
+                <button type="button" class="btn btn-ghost btn-sm" id="portfolioAddBtn">Add a property</button>
               </div>
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
 
             <div id="portfolioSet" hidden>
-              <p class="acct-eyebrow" id="portfolioEyebrow">Master portfolio</p>
-              <p class="acct-email" id="portfolioTitle">&mdash;</p>
+              <p class="acct-report__date" id="portfolioBasis"></p>
               <div class="acct-overview" id="portfolioStats"></div>
-              <p class="acct-report__date" id="portfolioUpdated"></p>
               <div class="acct-equity-modes" id="portfolioEquityModes"></div>
+
+              <div class="acct-debt-goal" id="portfolioCashFlow" hidden>
+                <p class="acct-eyebrow">Cash flow before tax</p>
+                <div class="acct-overview acct-overview--modes" id="portfolioCashFlowStats"></div>
+                <p class="field-hint">Rent from your current leases, less the running costs and loan interest you have entered. Tax on that income is not included.</p>
+              </div>
+
+              <div class="acct-debt-goal" id="portfolioIfSold" hidden>
+                <p class="acct-eyebrow">If you sold everything</p>
+                <div class="acct-overview acct-overview--modes" id="portfolioIfSoldStats"></div>
+                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are under Tax position below.</p>
+              </div>
+
+              <div id="portfolioGaps" hidden></div>
 
               <div class="acct-debt-goal" id="portfolioDebtGoal" hidden>
                 <p class="acct-eyebrow">Debt reduction goal</p>
@@ -228,14 +239,8 @@
                   <div class="input-money"><input type="text" inputmode="numeric" id="debtGoalExtra" autocomplete="off" placeholder="0" /></div>
                 </div>
                 <div class="acct-overview acct-overview--modes" id="debtGoalStats" hidden></div>
-                <p class="field-hint">A simple planning figure - not part of any calculator or saved report, and it has no effect on any ROI projection. Assumes your portfolio debt is interest-only (as modelled in Portfolio Review) so every dollar contributed goes straight to principal, at the blended rate implied by your saved properties.</p>
+                <p class="field-hint">A simple planning figure that is not saved anywhere. Assumes your debt is interest-only, so every dollar contributed goes straight to principal, at the blended rate across your properties.</p>
               </div>
-
-              <p class="acct-calc-links">
-                <a id="portfolioOpenLink" href="portfolio-review-calculator">Open in Portfolio Review</a>
-                &nbsp;&middot;&nbsp;
-                <button type="button" class="linklike" id="portfolioChangeBtn">Choose a different report</button>
-              </p>
 
               <div class="acct-debt-goal" id="portfolioPlanInputs">
                 <p class="acct-eyebrow">Portfolio plan</p>
@@ -264,7 +269,7 @@
                     <div class="input-pct"><input type="text" inputmode="decimal" id="planRentGrowth" autocomplete="off" placeholder="5.0" value="5" /></div>
                   </div>
                 </div>
-                <p class="field-hint">One blended growth rate applied across the whole portfolio rather than property-by-property, and debt is assumed to reduce the same way Portfolio Review models it - 50% of surplus cash after interest goes to principal, at the blended rate implied by your saved properties. No capital gains tax is included here - whether and when to sell is your call, not this plan's.</p>
+                <p class="field-hint">One blended growth rate applied across the whole portfolio rather than property by property. Debt is assumed to reduce the way the ROI calculator models it: 50% of surplus cash after interest goes to principal, at your blended rate. No capital gains tax is included, since nothing here assumes you are selling.</p>
               </div>
 
               <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn">Generate portfolio plan</button>
@@ -277,35 +282,31 @@
 
               <div class="acct-debt-goal acct-risk-section" id="portfolioRisk" hidden>
                 <p class="acct-risk-section__title">Check your portfolio risk</p>
-                <p class="field-hint">How your cash flow, gearing and value would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
+                <p class="field-hint">How your cash flow would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
                 <div class="acct-risk-grid" id="portfolioRiskGrid"></div>
-                <p class="field-hint" id="portfolioRiskNote">Approximate: uses your portfolio's blended rate and yield rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall exposure, not a precise forecast.</p>
+                <p class="field-hint" id="portfolioRiskNote">Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast.</p>
               </div>
             </div>
 
             <div id="portfolioUnset" hidden>
-              <p class="acct-empty" id="portfolioUnsetMsg">
-                Set one of your Portfolio Review reports as your master portfolio and its combined figures
-                will show here. Other calculators can still pull a figure from it, but saving them never
-                changes it back.
+              <p class="acct-empty">
+                Add your properties below, once each: what you paid, what it is worth, what you owe and what it earns.
+                Your equity, cash flow, land tax and what you would walk away with if you sold are all worked out from that,
+                and the calculators can pull your equity straight in.
               </p>
-              <div id="portfolioChooser"></div>
             </div>
           </div>
 
           <div class="card acct-card acct-dash-leases" id="acctLeaseCard">
             <div class="acct-card-head">
-              <h2 class="calc-subhead">Property register</h2>
+              <h2 class="calc-subhead">Your properties</h2>
               <button type="button" class="btn btn-ghost btn-sm" id="leaseAddPropertyBtn">Add a property</button>
             </div>
-            <p class="field-hint">Track tenants, expiries, market reviews and option periods across your portfolio, and add each property's tax details for the land tax and capital gains estimates below.</p>
+            <p class="field-hint">Enter each property once. Your portfolio figures, land tax and sale position above and below are all worked out from what you put in here, and the calculators can pull your equity from it.</p>
             <p class="acct-msg" id="leaseMsg" hidden></p>
-            <p class="acct-empty" id="leaseGate" hidden>
-              The property register links each property to one in your portfolio, and you don't have one yet.
-              <a href="portfolio-review-calculator">Add a property in Portfolio Review</a> and save it, then come back.
-            </p>
 
             <div id="leaseSummary" hidden>
+              <p class="acct-eyebrow">Leases</p>
               <div class="acct-overview" id="leaseStats"></div>
               <div id="leaseTimeline" class="acct-lease-timeline"></div>
             </div>
@@ -313,7 +314,7 @@
             <div id="leaseProperties"></div>
 
             <p class="acct-empty" id="leaseEmpty" hidden>
-              No properties yet. Add one to start tracking its lease (or leases, for a multi-tenant commercial asset).
+              No properties yet. Add your first one to see your portfolio, land tax and sale position.
             </p>
           </div>
 
@@ -347,7 +348,7 @@
           <div class="acct-dash-quick" id="acctQuickCol">
             <div class="card acct-card" id="acctQuickCard">
               <h2 class="calc-subhead">Quick access</h2>
-              <p class="acct-empty">Once you've saved a Portfolio Review, these calculators connect to it - each one can pull your equity, value and cash flow straight in to prefill its own figures. Jump into any of them below; resumes your most recently saved report where you have one.</p>
+              <p class="acct-empty">Once you've added a property with a value and loan balance, the lending, ROI and development calculators can pull your useable equity straight in as your funds available. Jump into any of them below; each resumes your most recently saved report where you have one.</p>
               <div class="grid grid-3 acct-quick-grid" id="quickLaunchGrid"></div>
             </div>
 
@@ -480,6 +481,7 @@
   <script src="script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="tax.js"></script>
+  <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
   <script>
   (function () {
@@ -648,10 +650,7 @@
 
     function renderReports(rows) {
       reportsList.innerHTML = "";
-      /* the master portfolio report already has its own place at the top of
-         the page (the "Your portfolio" card, with its own Rename), so it's
-         left out here to avoid showing the same report twice. */
-      var visible = (rows || []).filter(function (r) { return !r.is_master; });
+      var visible = rows || [];
       if (!visible.length) { show(reportsEmpty); return; }
       hide(reportsEmpty);
 
@@ -679,16 +678,12 @@
           row.className = "acct-report";
           row.setAttribute("data-id", r.id);
           if (shown >= REPORTS_CAP) { row.hidden = true; hiddenCount++; } else { shown++; }
-          var masterBtn = calc === "pr"
-            ? '<button type="button" class="linklike" data-act="master">Make this my portfolio</button>'
-            : "";
           row.innerHTML =
             '<div class="acct-report__main">' +
               '<a class="acct-report__title" href="' + CALC_PAGES[calc] + '?report=' + encodeURIComponent(r.id) + '"></a>' +
               '<span class="acct-report__date">Updated ' + fmtDate(r.updated_at) + '</span>' +
             '</div>' +
             '<div class="acct-report__actions">' +
-              masterBtn +
               '<button type="button" class="linklike" data-act="duplicate">Duplicate</button>' +
               '<button type="button" class="linklike" data-act="rename">Rename</button>' +
               '<button type="button" class="linklike" data-act="delete">Delete</button>' +
@@ -729,18 +724,6 @@
             });
           });
 
-          var masterEl = row.querySelector('[data-act="master"]');
-          if (masterEl) {
-            masterEl.addEventListener("click", function () {
-              setMsg(reportsMsg, "Setting your portfolio…");
-              window.pcAuth.setMasterReport(r.id).then(function (res) {
-                if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
-                setMsg(reportsMsg, "");
-                load();
-              });
-            });
-          }
-
           reportsList.appendChild(row);
         });
       });
@@ -758,16 +741,12 @@
       }
     }
 
-    /* the "Start here" bar only makes sense before a visitor has entered
-       their first property - once any saved Portfolio Review has at least
-       one property in it, hide the prompt so the portfolio card can sit
-       straight under the hero instead */
-    function updateStartHere(rows) {
+    /* the "Start here" bar only makes sense before a visitor has added
+       their first property - once there is one, hide the prompt so the
+       portfolio card can sit straight under the hero instead */
+    function updateStartHere(propertyCount) {
       var bar = document.getElementById("acctStartHere");
-      var hasProperty = (rows || []).some(function (r) {
-        return r.calculator === "pr" && r.summary && r.summary.propertyCount > 0;
-      });
-      if (hasProperty) hide(bar); else show(bar);
+      if (propertyCount > 0) hide(bar); else show(bar);
     }
 
     /* nudges a magic-link-only visitor to set a password, once - stays gone
@@ -780,8 +759,6 @@
       try { dismissed = window.localStorage.getItem(passwordNudgeDismissedKey(u)) === "1"; } catch (e) {}
       if (u.has_password || dismissed) hide(bar); else show(bar);
     }
-
-    var currentMasterReport = null;
 
     /* Purely a planning figure on this page - not tied to any calculator or
        saved report, and it never touches an ROI projection's IRR. Portfolio
@@ -853,155 +830,134 @@
       if (noteEl) {
         noteEl.textContent = hasVacancyData
           ? "Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast."
-          : "Approximate, and showing rate-rise cash-flow exposure only - re-open and save your Portfolio Review to also see vacancy exposure.";
+          : "Approximate, and showing rate-rise cash-flow exposure only - add a lease with a rent figure to each property to also see vacancy exposure.";
       }
     }
 
-    function renderPortfolio(rows) {
+    function fillStats(el, pairs) {
+      el.innerHTML = "";
+      pairs.forEach(function (pair) {
+        var d = document.createElement("div");
+        d.className = "acct-overview__stat";
+        d.appendChild(tEl("dt", null, pair[0]));
+        d.appendChild(tEl("dd", null, pair[1]));
+        el.appendChild(d);
+      });
+    }
+
+    function gapLine(prefix, names) {
+      if (!names.length) return null;
+      return prefix + names.slice(0, 3).join(", ") + (names.length > 3 ? " and " + (names.length - 3) + " more" : "") + ".";
+    }
+
+    /* The portfolio card, derived entirely from the property register via
+       pcPortfolio.build() (see portfolio.js). Totals only count properties
+       that have what each figure needs, and the gaps list names who is
+       missing what - it never guesses. */
+    function renderPortfolio() {
       var setEl = document.getElementById("portfolioSet");
       var unsetEl = document.getElementById("portfolioUnset");
-      var master = (rows || []).filter(function (r) { return r.calculator === "pr" && r.is_master; })[0];
-      currentMasterReport = master || null;
+      if (!leaseProperties.length || !portfolio) { hide(setEl); show(unsetEl); return; }
+      show(setEl); hide(unsetEl);
+      var t = portfolio.totals, m = portfolio.missing;
+      var ready = t.counted > 0;
 
-      var editBtn = document.getElementById("portfolioEditBtn");
-      if (master) {
-        show(setEl); hide(unsetEl);
-        document.getElementById("portfolioTitle").textContent = master.title || "Untitled report";
-        document.getElementById("portfolioUpdated").textContent = "Updated " + fmtDate(master.updated_at);
-        document.getElementById("portfolioOpenLink").href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
-        editBtn.href = "portfolio-review-calculator?report=" + encodeURIComponent(master.id);
-        show(editBtn);
+      document.getElementById("portfolioBasis").textContent = ready
+        ? (t.counted === t.count
+          ? "All " + t.count + (t.count === 1 ? " property" : " properties") + " counted."
+          : "Based on " + t.counted + " of " + t.count + " properties that have a current value and loan balance.")
+        : "Add a current value and loan balance to a property below to see your position.";
 
-        var renameBtn = document.getElementById("portfolioRenameBtn");
-        show(renameBtn);
-        renameBtn.onclick = function () {
-          var next = window.prompt("Rename your portfolio", master.title || "");
-          if (next == null) return;
-          next = next.trim();
-          if (!next || next === master.title) return;
-          window.pcAuth.renameReport(master.id, next).then(function (res) {
-            if (res.error) { setMsg(document.getElementById("portfolioMsg"), res.error.message, "error"); return; }
-            master.title = next;
-            document.getElementById("portfolioTitle").textContent = next;
-          });
-        };
-
-        var s = master.summary || {};
+      var statsEl = document.getElementById("portfolioStats");
+      var modesEl = document.getElementById("portfolioEquityModes");
+      modesEl.innerHTML = "";
+      if (ready) {
         var stats = [
-          ["Properties", s.propertyCount != null ? String(s.propertyCount) : "—"],
-          ["Combined value", fmtMoney(s.portfolioValue)],
-          ["Current equity position", fmtMoney(s.portfolioEquity)],
-          ["Combined debt", fmtMoney(s.portfolioDebt)],
-          ["Portfolio LVR", fmtPct(s.portfolioLvr)],
-          ["Investment income (net rent)", fmtMoney(s.netRentalIncome)],
-          ["After-tax cash flow / yr", fmtSignedMoney(s.annualSurplus)],
-          ["After-tax cash flow / wk", fmtSignedMoney(s.weeklySurplus)]
+          ["Properties", String(t.count)],
+          ["Combined value", fmtMoney(t.value)],
+          ["Combined debt", fmtMoney(t.debt)],
+          ["Equity", fmtMoney(t.equity)],
+          ["Portfolio LVR", fmtPct(t.lvr)]
         ];
-        var statsEl = document.getElementById("portfolioStats");
-        statsEl.innerHTML = "";
-        stats.forEach(function (pair) {
-          var d = document.createElement("div");
-          d.className = "acct-overview__stat";
-          d.innerHTML = '<dt>' + pair[0] + '</dt><dd>' + pair[1] + '</dd>';
-          statsEl.appendChild(d);
-        });
+        if (t.landTax > 0) stats.push(["Land tax / yr", fmtMoney(t.landTax)]);
+        fillStats(statsEl, stats);
+        show(statsEl);
 
-        var modesEl = document.getElementById("portfolioEquityModes");
-        modesEl.innerHTML = "";
-        if (s.usableEquity70 != null || s.usableEquity80 != null) {
-          var head = document.createElement("p");
-          head.className = "acct-eyebrow";
-          head.textContent = "Useable equity";
-          modesEl.appendChild(head);
-          var wrap = document.createElement("div");
-          wrap.className = "acct-overview acct-overview--modes";
-          wrap.innerHTML =
-            '<div class="acct-overview__stat"><dt>Conservative (70% LVR)</dt><dd>' + fmtMoney(s.usableEquity70) + '</dd></div>' +
-            '<div class="acct-overview__stat"><dt>Higher gearing (80% LVR)</dt><dd>' + fmtMoney(s.usableEquity80) + '</dd></div>';
-          modesEl.appendChild(wrap);
-          var note = document.createElement("p");
-          note.className = "field-hint";
-          note.textContent = "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs.";
-          modesEl.appendChild(note);
-        }
-
-        var goalEl = document.getElementById("portfolioDebtGoal");
-        if (s.portfolioDebt > 0 && s.blendedRate > 0) {
-          show(goalEl);
-          renderDebtGoal(s.portfolioDebt, s.blendedRate);
-        } else {
-          hide(goalEl);
-        }
-
-        var riskEl = document.getElementById("portfolioRisk");
-        if (s.portfolioValue > 0 && (s.portfolioDebt > 0 || s.annualSurplus != null)) {
-          show(riskEl);
-          renderPortfolioRisk(s);
-        } else {
-          hide(riskEl);
-        }
-
-        document.getElementById("portfolioChangeBtn").onclick = function () { renderPortfolioChooser(rows, true); };
+        modesEl.appendChild(tEl("p", "acct-eyebrow", "Useable equity"));
+        var wrap = tEl("div", "acct-overview acct-overview--modes");
+        fillStats(wrap, [
+          ["Conservative (70% LVR)", fmtMoney(t.usable70)],
+          ["Higher gearing (80% LVR)", fmtMoney(t.usable80)]
+        ]);
+        modesEl.appendChild(wrap);
+        modesEl.appendChild(tEl("p", "field-hint", "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs."));
       } else {
-        hide(setEl); show(unsetEl);
-        hide(editBtn);
-        hide(document.getElementById("portfolioRenameBtn"));
-        renderPortfolioChooser(rows, false);
+        hide(statsEl);
       }
+
+      var cfEl = document.getElementById("portfolioCashFlow");
+      if (t.cashFlowCount > 0) {
+        var cf = [
+          ["Rent / yr", fmtMoney(t.rent)],
+          ["Running costs / yr", fmtMoney(t.runningCosts)],
+          ["Loan interest / yr", fmtMoney(t.interest)],
+          ["Cash flow / yr", fmtSignedMoney(t.cashFlow)],
+          ["Cash flow / wk", fmtSignedMoney(t.cashFlowWeekly)]
+        ];
+        if (t.grossYield != null) cf.push(["Gross yield", fmtPct(t.grossYield)]);
+        fillStats(document.getElementById("portfolioCashFlowStats"), cf);
+        show(cfEl);
+      } else { hide(cfEl); }
+
+      var soldEl = document.getElementById("portfolioIfSold");
+      if (t.soldCount > 0) {
+        var sold = [
+          ["Properties counted", t.soldCount + " of " + t.count],
+          ["Cash in hand", fmtMoney(t.cashIfSold)],
+          ["Capital gains tax", fmtMoney(t.cgtCurrent)]
+        ];
+        if (t.cgtReform != null && Math.abs(t.cgtReform - t.cgtCurrent) > 0.5) sold.push(["Tax under announced 2027 rules", fmtMoney(t.cgtReform)]);
+        fillStats(document.getElementById("portfolioIfSoldStats"), sold);
+        show(soldEl);
+      } else { hide(soldEl); }
+
+      var gapsEl = document.getElementById("portfolioGaps");
+      var noPurchase = portfolio.props.filter(function (p) { return p.value != null && p.sale.cgt && !p.sale.cgt.ready; }).map(function (p) { return p.name; });
+      var gaps = [
+        gapLine("Add a current value: ", m.value),
+        gapLine("Add a loan balance (0 if none): ", m.loan),
+        gapLine("Add an interest rate: ", m.rate),
+        gapLine("Add a lease with a rent figure: ", m.rent),
+        gapLine("Add the purchase date and price to work out capital gains tax: ", noPurchase),
+        t.cgtNeedsIncome ? "Add your other taxable income under Tax position to include capital gains tax." : null
+      ].filter(Boolean);
+      gapsEl.innerHTML = "";
+      if (gaps.length) {
+        gapsEl.appendChild(tEl("p", "acct-eyebrow", "To complete your picture"));
+        gapsEl.appendChild(tNotes(gaps));
+        show(gapsEl);
+      } else { hide(gapsEl); }
+
+      var goalEl = document.getElementById("portfolioDebtGoal");
+      if (t.debt > 0 && t.blendedRate > 0) { show(goalEl); renderDebtGoal(t.debt, t.blendedRate); } else { hide(goalEl); }
+
+      /* the plan projects value, rent and debt together, so it only makes
+         sense once every counted property has its rent and interest */
+      var planOk = t.complete;
+      ["portfolioPlanInputs", "portfolioRoiBtn"].forEach(function (id) { document.getElementById(id).hidden = !planOk; });
+      if (!planOk) hide(document.getElementById("portfolioRoiResult"));
+
+      var riskEl = document.getElementById("portfolioRisk");
+      if (t.cashFlowCount > 0) {
+        show(riskEl);
+        renderPortfolioRisk({ portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent });
+      } else { hide(riskEl); }
     }
 
-    function renderPortfolioChooser(rows, isChange) {
-      var chooser = document.getElementById("portfolioChooser");
-      var unsetMsg = document.getElementById("portfolioUnsetMsg");
-      var prReports = (rows || []).filter(function (r) { return r.calculator === "pr"; });
-
-      if (isChange) { show(document.getElementById("portfolioUnset")); hide(document.getElementById("portfolioSet")); }
-
-      if (!prReports.length) {
-        unsetMsg.innerHTML = 'Start a <a href="portfolio-review-calculator">Portfolio Review</a> and save it to build your portfolio overview here.';
-        chooser.innerHTML = "";
-        return;
-      }
-      unsetMsg.textContent = "Choose which saved Portfolio Review is your master portfolio:";
-      chooser.innerHTML = "";
-      var sel = document.createElement("select");
-      sel.className = "pc-pull__select";
-      var opt0 = document.createElement("option");
-      opt0.value = "";
-      opt0.textContent = "Choose a saved Portfolio Review…";
-      sel.appendChild(opt0);
-      prReports.forEach(function (r) {
-        var o = document.createElement("option");
-        o.value = r.id;
-        o.textContent = (r.title || "Untitled report") + " (updated " + fmtDate(r.updated_at) + ")";
-        sel.appendChild(o);
-      });
-      sel.addEventListener("change", function () {
-        if (!sel.value) return;
-        setMsg(document.getElementById("portfolioMsg"), "Setting your portfolio…");
-        window.pcAuth.setMasterReport(sel.value).then(function (res) {
-          if (res.error) { setMsg(document.getElementById("portfolioMsg"), res.error.message, "error"); return; }
-          setMsg(document.getElementById("portfolioMsg"), "");
-          load();
-        });
-      });
-      chooser.appendChild(sel);
-
-      if (isChange) {
-        var cancel = document.createElement("button");
-        cancel.type = "button";
-        cancel.className = "linklike";
-        cancel.textContent = "Cancel";
-        cancel.style.marginLeft = "12px";
-        cancel.addEventListener("click", function () { load(); });
-        chooser.appendChild(cancel);
-      }
-    }
-
-    /* ---- Lease register (WALE tracker) ----------------------------------
-       Standalone from the portfolio card above - a signed-in visitor's own
-       list of properties, each carrying zero or more leases. Purely a
-       record people update by hand; nothing here feeds any calculator. */
+    /* ---- Your properties (the register) ---------------------------------
+       The single source of truth for the portfolio: one record per property,
+       each carrying zero or more leases. Everything on the portfolio card
+       and the Tax position card is derived from these (see portfolio.js). */
     var REVIEW_FREQUENCIES = [
       ["", "Not set"], ["annual", "Annual"], ["2-yearly", "2-yearly"],
       ["3-yearly", "3-yearly"], ["market", "Market review"], ["other", "Other"]
@@ -1015,52 +971,6 @@
        open with a blank lease row already in it, instead of a collapsed
        card the visitor has to expand and then add a lease into. */
     var pendingOpenPropertyId = null;
-    /* Saved Portfolio Review reports, fetched alongside the properties list
-       purely so a property card can offer a one-time pull of a property's
-       name/type from the visitor's portfolio (see renderPropertyPuller). */
-    var leasePrReports = [];
-    /* The properties a lease-register entry can link to: every property in
-       the visitor's master portfolio (or, with no master set, in any saved
-       Portfolio Review). Rebuilt on every load. */
-    var leasePortfolioOptions = [];
-
-    /* Properties in a saved Portfolio Review. Reads the report's own saved
-       inputs, so a report saved before its summary carried a property list
-       still works without being re-saved. */
-    function prPropertiesOf(report) {
-      var fromSummary = report.summary && report.summary.properties;
-      if (fromSummary && fromSummary.length) return fromSummary;
-      var props = (report.inputs && report.inputs.dyn && report.inputs.dyn.props) || [];
-      return props.map(function (p) {
-        return {
-          name: (p.label || "").trim() || "Untitled property",
-          value: parseFloat(String(p.value || "").replace(/[^0-9.]/g, "")) || 0,
-          propertyType: p.ptype === "com" ? "commercial" : "residential"
-        };
-      }).filter(function (p) { return p.value > 0; });
-    }
-
-    function buildPortfolioOptions() {
-      var master = leasePrReports.filter(function (r) { return r.is_master; })[0];
-      var source = master ? [master] : leasePrReports;
-      var out = [];
-      source.forEach(function (r) {
-        prPropertiesOf(r).forEach(function (p) {
-          out.push({ reportId: r.id, name: p.name, propertyType: p.propertyType, value: p.value });
-        });
-      });
-      return out;
-    }
-
-    /* No property in the portfolio = nothing to attach a lease to, so the
-       register is switched off until there is one. */
-    function syncLeaseGate() {
-      var blocked = !leasePortfolioOptions.length;
-      var addBtn = document.getElementById("leaseAddPropertyBtn");
-      var gate = document.getElementById("leaseGate");
-      addBtn.disabled = blocked;
-      gate.hidden = !blocked;
-    }
 
     function daysUntil(dateStr) {
       if (!dateStr) return null;
@@ -1281,11 +1191,35 @@
       return row;
     }
 
-    /* ---- Tax details (land tax + capital gains), per property ----------
-       Everything here is optional; the Tax position card only counts a
-       property once it has the fields each estimate needs. Fields use
-       data-t (not data-f) so they never mix with the lease rows. */
-    function taxDetailsHTML() {
+    /* ---- One property, in the order an owner thinks about it -------------
+       The property, what was paid, what has been put in, what it is worth
+       and owed today, what it earns (the leases above), and a "what if I
+       sold" scenario. Each property is entered once here; every portfolio
+       figure (see portfolio.js) is derived from these fields. Tax fields
+       use data-t (not data-f) so they never mix with the lease rows. */
+    var TAX_DEFAULTS = { other_income: null, cpi_pct: 2.5, selling_cost_pct: 2, other_land: {} };
+    var taxSettings = Object.assign({}, TAX_DEFAULTS);
+    var taxSettingsProblem = "";
+    /* the latest pcPortfolio.build() result - rebuilt whenever the register
+       or the tax settings change */
+    var portfolio = null;
+
+    function fLabel(label, hint) { return label + (hint ? ' <span>(' + hint + ')</span>' : ''); }
+    function fMoney(key, label, hint) {
+      return '<div class="field"><label>' + fLabel(label, hint) + '</label><div class="input-money"><input type="text" inputmode="numeric" data-t="' + key + '" autocomplete="off" placeholder="0" /></div></div>';
+    }
+    function fPct(key, label, hint) {
+      return '<div class="field"><label>' + fLabel(label, hint) + '</label><div class="input-pct"><input type="text" inputmode="decimal" data-t="' + key + '" autocomplete="off" placeholder="0" /></div></div>';
+    }
+    function fDate(key, label, hint) {
+      return '<div class="field"><label>' + fLabel(label, hint) + '</label><input type="date" data-t="' + key + '" /></div>';
+    }
+    function fTick(key, head, title, small, attrs) {
+      return '<div class="field"' + (attrs || "") + '><label>' + head + '</label><label class="acct-periodic-check"><input type="checkbox" data-t="' + key + '" /><span class="acct-periodic-check__text"><strong>' + title + '</strong><small>' + small + '</small></span></label></div>';
+    }
+    function fRow() { return '<div class="acct-plan__row">' + Array.prototype.join.call(arguments, "") + '</div>'; }
+
+    function propertyCardHTML() {
       var stateOpts = '<option value="">Select a state</option>' + pcTax.STATES.map(function (s) {
         return '<option value="' + s + '">' + s + (pcTax.LAND[s] ? "" : " (land tax not modelled)") + "</option>";
       }).join("");
@@ -1293,41 +1227,80 @@
         return '<option value="' + k + '">' + pcTax.OWNERS[k] + "</option>";
       }).join("");
       return (
-        '<details class="acct-subdetails" data-tax-details>' +
-          '<summary>Tax details <span class="acct-subdetails__hint">land tax and capital gains</span></summary>' +
-          '<div class="acct-subdetails__body">' +
-            '<p class="acct-subhead">Land tax</p>' +
-            '<div class="acct-plan__row">' +
-              '<div class="field"><label>State</label><select data-t="state">' + stateOpts + '</select></div>' +
-              '<div class="field"><label>Owned by</label><select data-t="ownership_type">' + ownerOpts + '</select></div>' +
-              '<div class="field"><label>Unimproved land value <span>(from your council rates or land tax notice)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-t="land_value" autocomplete="off" placeholder="0" /></div></div>' +
-            '</div>' +
-            '<div class="field" data-wa-metro hidden><label class="acct-periodic-check"><input type="checkbox" data-t="wa_metro" /><span class="acct-periodic-check__text"><strong>Perth metropolitan region</strong><small>Adds the Metropolitan Region Improvement Tax</small></span></label></div>' +
-            '<p class="acct-subhead">Capital gains if sold</p>' +
-            '<div class="acct-plan__row">' +
-              '<div class="field"><label>Purchase date</label><input type="date" data-t="purchase_date" /></div>' +
-              '<div class="field"><label>Purchase price</label><div class="input-money"><input type="text" inputmode="numeric" data-t="purchase_price" autocomplete="off" placeholder="0" /></div></div>' +
-              '<div class="field"><label>Buying costs <span>(stamp duty, legals, other)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-t="acquisition_costs" autocomplete="off" placeholder="0" /></div></div>' +
-            '</div>' +
-            '<div class="acct-plan__row">' +
-              '<div class="field"><label>Capital improvements <span>(total spent since buying)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-t="improvements" autocomplete="off" placeholder="0" /></div></div>' +
-              '<div class="field"><label>Capital works deductions claimed <span>(depreciation, reduces cost base)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-t="capital_works_claimed" autocomplete="off" placeholder="0" /></div></div>' +
-              '<div class="field"><label>Type of purchase</label><label class="acct-periodic-check"><input type="checkbox" data-t="is_new_build" /><span class="acct-periodic-check__text"><strong>New residential build</strong><small>May choose the better of the old discount or the new rules</small></span></label></div>' +
-            '</div>' +
-            '<div class="acct-plan__row">' +
-              '<div class="field"><label>Planned sale date <span>(blank = today)</span></label><input type="date" data-t="planned_sale_date" /></div>' +
-              '<div class="field"><label>Expected sale price <span>(or current value)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-t="expected_sale_price" autocomplete="off" placeholder="0" /></div></div>' +
-              '<div class="field"><label>Value on 1 July 2027 <span>(optional, else estimated)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-t="value_at_jul_2027" autocomplete="off" placeholder="0" /></div></div>' +
-            '</div>' +
-            '<p class="acct-tax-preview" data-tax-preview></p>' +
+        '<summary>' +
+          '<span class="acct-property__name"></span>' +
+          '<span class="acct-tag"></span>' +
+          '<span class="acct-property__meta"></span>' +
+          '<span class="acct-property__caret" aria-hidden="true"></span>' +
+          '<span class="acct-property__strip" data-strip></span>' +
+        '</summary>' +
+        '<div class="acct-property__body">' +
+          '<p class="acct-subhead">The property</p>' +
+          fRow(
+            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>',
+            '<div class="field"><label>Type</label>' +
+              '<div class="acct-type-toggle" role="group">' +
+                '<button type="button" data-type-btn="residential">Residential</button>' +
+                '<button type="button" data-type-btn="commercial">Commercial</button>' +
+              '</div>' +
+              '<select data-f="property_type" hidden><option value="residential">Residential</option><option value="commercial">Commercial</option></select>' +
+            '</div>',
+            '<div class="field"><label>State</label><select data-t="state">' + stateOpts + '</select></div>'
+          ) +
+          fRow(
+            '<div class="field"><label>Owned by</label><select data-t="ownership_type">' + ownerOpts + '</select></div>',
+            fTick("is_new_build", "Type of purchase", "New residential build", "May choose the better of the old discount or the new rules"),
+            fTick("wa_metro", "Location", "Perth metropolitan region", "Adds the Metropolitan Region Improvement Tax", " data-wa-metro hidden")
+          ) +
+
+          '<p class="acct-subhead">What you paid</p>' +
+          fRow(
+            fDate("purchase_date", "Purchase contract date", "date you signed"),
+            fMoney("purchase_price", "Purchase price"),
+            fMoney("acquisition_costs", "Buying costs", "stamp duty, legals, valuation, inspections")
+          ) +
+
+          '<p class="acct-subhead">What you have put in</p>' +
+          fRow(
+            fMoney("improvements", "Capital improvements", "renovations, extensions; not repairs"),
+            fMoney("capital_works_claimed", "Building write-off (Division 43)", "claimed or claimable, not plant and equipment")
+          ) +
+
+          '<p class="acct-subhead">Worth and owed today</p>' +
+          fRow(
+            fMoney("current_value", "Current value"),
+            fMoney("land_value", "Unimproved land value", "from your council rates or land tax notice"),
+            fMoney("loan_balance", "Loan balance", "enter 0 if none")
+          ) +
+          fRow(
+            fPct("interest_rate", "Interest rate"),
+            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs")
+          ) +
+
+          '<p class="acct-subhead">What it earns</p>' +
+          '<div data-lease-rows></div>' +
+          '<button type="button" class="linklike" data-act="add-lease">+ Add another lease</button>' +
+          '<p class="field-hint" data-res-hint>A single house usually has one lease. For a duplex, unit block, townhouses or a granny flat, add a lease for each unit or dwelling.</p>' +
+
+          '<p class="acct-subhead">If you sold</p>' +
+          fRow(
+            fDate("planned_sale_date", "Sale contract date", "blank = today"),
+            fMoney("expected_sale_price", "Sale price", "blank = current value"),
+            fMoney("value_at_jul_2027", "Value on 1 July 2027", "optional, else estimated")
+          ) +
+          '<p class="field-hint">Your cost base is the purchase price plus buying costs and capital improvements, less the building write-off (Division 43), which reduces it whether or not you claimed it. ' +
+            'Plant and equipment depreciation (Division 40) is handled separately by your accountant when you sell. The tax clock (12 months, and which financial year) runs from the contract dates, not settlement.</p>' +
+          '<p class="acct-tax-preview" data-sale-preview></p>' +
+
+          '<div class="field"><label>Notes <span>(optional)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
+          '<div class="acct-property__actions">' +
+            '<button type="button" class="btn btn-accent btn-sm" data-act="save">Save changes</button>' +
+            '<button type="button" class="linklike" data-act="delete-property">Delete property</button>' +
           '</div>' +
-        '</details>'
+          '<p class="acct-msg" data-msg hidden></p>' +
+        '</div>'
       );
     }
-
-    var TAX_FIELDS = ["state", "ownership_type", "land_value", "wa_metro", "purchase_date", "purchase_price",
-      "acquisition_costs", "improvements", "capital_works_claimed", "is_new_build", "planned_sale_date",
-      "expected_sale_price", "value_at_jul_2027"];
 
     function taxNum(v) {
       var n = parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, ""));
@@ -1352,196 +1325,72 @@
       });
     }
 
-    function cgtInputOf(r) {
-      return {
-        owner: r.ownership_type || "individual",
-        purchaseDate: r.purchase_date || null,
-        purchasePrice: taxNum(r.purchase_price) || 0,
-        acqCosts: taxNum(r.acquisition_costs) || 0,
-        improvements: taxNum(r.improvements) || 0,
-        worksClaimed: taxNum(r.capital_works_claimed) || 0,
-        saleDate: r.planned_sale_date || null,
-        salePrice: taxNum(r.expected_sale_price) || 0,
-        newBuild: !!r.is_new_build,
-        v27: taxNum(r.value_at_jul_2027) || 0
-      };
-    }
-
-    var TAX_DEFAULTS = { other_income: null, cpi_pct: 2.5, selling_cost_pct: 2, other_land: {} };
-    var taxSettings = Object.assign({}, TAX_DEFAULTS);
-    var taxSettingsProblem = "";
-
-    function cgtSettingsNow() {
-      return {
-        otherIncome: taxSettings.other_income,
-        cpiPct: taxSettings.cpi_pct == null ? 2.5 : taxSettings.cpi_pct,
-        sellingCostPct: taxSettings.selling_cost_pct == null ? 2 : taxSettings.selling_cost_pct
-      };
-    }
-
-    function cgtFor(row) { return pcTax.cgtEstimate(cgtInputOf(row), cgtSettingsNow()); }
-
     function listJoin(items) {
       if (items.length < 2) return items.join("");
       return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
     }
 
-    function taxPreviewText(row) {
-      var r = cgtFor(row);
-      if (r.error) return r.error;
-      if (!r.ready) return "Add the " + listJoin(r.missing) + " to see a capital gains estimate.";
-      if (r.loss) return "At this sale price there is no gain (a loss of " + fmtMoney(r.loss) + "), so no capital gains tax.";
-      var line = "Estimated gain " + fmtMoney(r.gain) + ". ";
-      if (r.needsIncome) return line + "Add your other taxable income under Tax position below to see the tax.";
-      line += "Tax if sold" + (r.reform ? " under current law: " : ": ") + fmtMoney(r.currentLaw.tax) + ".";
-      if (r.reform && r.reform.tax != null) line += " Under the announced 1 July 2027 rules: " + fmtMoney(r.reform.tax) + ".";
-      return line;
+    /* what selling this property would leave you with, in one sentence */
+    function salePreviewText(m) {
+      var s = m.sale, c = s.cgt;
+      if (s.price == null) return "Add a current value, or a sale price, to see what selling would leave you with.";
+      var before = s.cashBeforeTax != null ? " Before tax you would have about " + fmtMoney(s.cashBeforeTax) + " after selling costs and the loan." : "";
+      if (!c || !c.ready) {
+        return "Add the " + listJoin(c && c.missing && c.missing.length ? c.missing : ["purchase price", "purchase date"]) + " to see capital gains tax." + before;
+      }
+      if (c.error) return c.error;
+      if (c.preCgt) return "Bought before 20 September 1985, so generally outside capital gains tax today. Ask your accountant how the announced changes treat later growth." + before;
+      var head = "Sold for " + fmtMoney(s.price) + ", you keep " + fmtMoney(c.proceeds) + " after selling costs";
+      if (m.loan != null) head += " and owe " + fmtMoney(m.loan) + " to the lender";
+      if (c.loss) return head + ". There is no gain (a loss of " + fmtMoney(c.loss) + "), so no capital gains tax" + (m.loan != null ? ", leaving " + fmtMoney(c.proceeds - m.loan) + " in your hand" : "") + ".";
+      if (c.needsIncome) return head + ". The capital gain is " + fmtMoney(c.gain) + ". Add your other taxable income under Tax position to see the tax and your cash in hand.";
+      var out = head + ". Capital gains tax is " + fmtMoney(c.currentLaw.tax);
+      out += s.cashIfSold != null ? ", leaving " + fmtMoney(s.cashIfSold) + " in your hand." : ".";
+      if (c.reform && c.reform.tax != null) {
+        out += " Under the announced 1 July 2027 rules the tax would be " + fmtMoney(c.reform.tax) +
+          (s.cashIfSoldReform != null ? ", leaving " + fmtMoney(s.cashIfSoldReform) : "") + ".";
+      }
+      return out;
     }
 
-    function propertyCardHTML() {
-      return (
-        '<summary>' +
-          '<span class="acct-property__name"></span>' +
-          '<span class="acct-tag"></span>' +
-          '<span class="acct-property__meta"></span>' +
-          '<span class="acct-property__caret" aria-hidden="true"></span>' +
-        '</summary>' +
-        '<div class="acct-property__body">' +
-          '<div class="field acct-property__link" data-puller></div>' +
-          '<div class="acct-plan__row">' +
-            '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>' +
-            '<div class="field">' +
-              '<label>Type</label>' +
-              '<div class="acct-type-toggle" role="group">' +
-                '<button type="button" data-type-btn="residential">Residential</button>' +
-                '<button type="button" data-type-btn="commercial">Commercial</button>' +
-              '</div>' +
-              '<select data-f="property_type" hidden><option value="residential">Residential</option><option value="commercial">Commercial</option></select>' +
-            '</div>' +
-          '</div>' +
-          '<div data-lease-rows></div>' +
-          '<button type="button" class="linklike" data-act="add-lease">+ Add another lease</button>' +
-          '<p class="field-hint" data-res-hint>A single house usually has one lease. For a duplex, unit block, townhouses or a granny flat, add a lease for each unit or dwelling.</p>' +
-          taxDetailsHTML() +
-          '<div class="field"><label>Notes <span>(optional)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
-          '<div class="acct-property__actions">' +
-            '<button type="button" class="btn btn-accent btn-sm" data-act="save">Save changes</button>' +
-            '<button type="button" class="linklike" data-act="delete-property">Delete property</button>' +
-          '</div>' +
-          '<p class="acct-msg" data-msg hidden></p>' +
-        '</div>'
-      );
+    function stripItems(m) {
+      var items = [];
+      if (m.value != null) items.push(["Value", fmtMoney(m.value)]);
+      if (m.equity != null) { items.push(["Equity", fmtMoney(m.equity)]); items.push(["LVR", fmtPct(m.lvr)]); }
+      if (m.grossYield != null) items.push(["Yield", fmtPct(m.grossYield)]);
+      if (m.cashFlow != null) items.push(["Cash flow / yr", fmtSignedMoney(m.cashFlow)]);
+      if (m.sale.cashIfSold != null) items.push(["Cash if sold", fmtMoney(m.sale.cashIfSold)]);
+      return items;
     }
 
-    /* Assigns this lease-register property to one property card inside a
-       saved Portfolio Review report - unlike the rest of the site's
-       "pull a figure once" pattern, this stays linked: picking a card
-       saves immediately (one action, no separate Save click needed) and
-       the link is carried on every later Save too, so it isn't lost.
-       Matched by name (PR cards have no id of their own), so renaming the
-       card in PR needs a re-assign. Returns {getLink} so the property's
-       own Save button can include the current link state. */
-    function renderPropertyLink(details, property, nameInput, setType, msgEl) {
-      var wrap = details.querySelector("[data-puller]");
-      if (!wrap) return { getLink: function () { return {}; } };
-      var linkedReportId = property.linked_pr_report_id || null;
-      var linkedName = property.linked_pr_property_name || null;
-
-      function currentFields() {
-        return {
-          id: property.id,
-          name: nameInput.value.trim() || "Untitled property",
-          property_type: (details.querySelector('[data-f="property_type"]') || {}).value,
-          notes: (details.querySelector('[data-f="notes"]') || {}).value
-        };
+    function renderStrip(details, m) {
+      var el = details.querySelector("[data-strip]");
+      el.innerHTML = "";
+      var items = stripItems(m);
+      if (!items.length) {
+        el.appendChild(tEl("span", "acct-strip__empty", "Add the current value and loan balance to see this property's position."));
+        return;
       }
-      function saveLink() {
-        setMsg(msgEl, "Saving…");
-        var row = currentFields();
-        row.linked_pr_report_id = linkedReportId;
-        row.linked_pr_property_name = linkedName;
-        window.pcAuth.saveProperty(row).then(function (res) {
-          if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
-          loadLeaseRegister(true).then(function () { setMsg(leaseMsgEl, "Saved.", "ok"); });
-        });
-      }
-
-      /* One dropdown at the top of the card: every property in the visitor's
-         portfolio, plus "Not linked". Picking one fills the name/type and
-         links + saves in a single step; picking "Not linked" unlinks. */
-      function render() {
-        wrap.innerHTML = "";
-        var label = document.createElement("label");
-        label.textContent = "Link to a property in your portfolio";
-        var sel = document.createElement("select");
-        var none = document.createElement("option");
-        none.value = ""; none.textContent = "Not linked - enter details manually";
-        sel.appendChild(none);
-        leasePortfolioOptions.forEach(function (o, i) {
-          var op = document.createElement("option");
-          op.value = String(i);
-          op.textContent = o.name + (o.value ? " (" + fmtMoney(o.value) + ")" : "");
-          sel.appendChild(op);
-        });
-
-        var selected = "";
-        if (linkedReportId && linkedName) {
-          var idx = -1;
-          leasePortfolioOptions.forEach(function (o, i) {
-            if (idx === -1 && o.reportId === linkedReportId && o.name === linkedName) idx = i;
-          });
-          if (idx >= 0) selected = String(idx);
-          else {
-            var gone = document.createElement("option");
-            gone.value = "gone";
-            gone.textContent = "Linked: " + linkedName + " (no longer in your portfolio)";
-            sel.appendChild(gone);
-            selected = "gone";
-          }
-        }
-        sel.value = selected;
-
-        sel.addEventListener("change", function () {
-          if (sel.value === "gone") return;
-          if (sel.value === "") {
-            linkedReportId = null; linkedName = null;
-            saveLink();
-            return;
-          }
-          var o = leasePortfolioOptions[Number(sel.value)];
-          if (!o) return;
-          nameInput.value = o.name;
-          setType(o.propertyType === "commercial" ? "commercial" : "residential");
-          linkedReportId = o.reportId; linkedName = o.name;
-          saveLink();
-        });
-
-        wrap.appendChild(label);
-        wrap.appendChild(sel);
-        if (!leasePortfolioOptions.length) {
-          var hint = document.createElement("p");
-          hint.className = "field-hint";
-          hint.textContent = "No properties in your portfolio yet - add one in Portfolio Review and save it to link here.";
-          wrap.appendChild(hint);
-        }
-      }
-
-      render();
-      return { getLink: function () { return { linked_pr_report_id: linkedReportId, linked_pr_property_name: linkedName }; } };
+      items.forEach(function (pair) {
+        var s = tEl("span", "acct-strip__item");
+        s.appendChild(tEl("em", null, pair[0]));
+        s.appendChild(document.createTextNode(" " + pair[1]));
+        el.appendChild(s);
+      });
     }
 
-    function renderPropertySummary(details, property) {
+    function renderPropertyHead(details, property) {
       details.querySelector(".acct-property__name").textContent = property.name || "Untitled property";
       var tag = details.querySelector(".acct-tag");
-      var isCommercial = property.property_type === "commercial";
+      var isCommercial = (details.querySelector('[data-f="property_type"]') || {}).value === "commercial";
       tag.textContent = isCommercial ? "Commercial" : "Residential";
       tag.className = "acct-tag " + (isCommercial ? "is-commercial" : "is-residential");
       var wale = computeWale([property]);
       var leaseCount = (property.leases || []).length;
       var hasPeriodic = (property.leases || []).some(function (l) { return l.is_periodic; });
-      var tail = wale ? " · WALE " + wale.years.toFixed(1) + " yrs" : (hasPeriodic ? " · on a periodic lease" : "");
+      var tail = wale ? " · WALE " + wale.years.toFixed(1) + " yrs" : (hasPeriodic ? " · periodic lease" : "");
       details.querySelector(".acct-property__meta").textContent =
-        leaseCount + (leaseCount === 1 ? " lease" : " leases") + tail;
+        (property.state ? property.state + " · " : "") + leaseCount + (leaseCount === 1 ? " lease" : " leases") + tail;
     }
 
     function buildPropertyEl(property) {
@@ -1556,12 +1405,15 @@
       var resHint = details.querySelector('[data-res-hint]');
       var rowsWrap = details.querySelector('[data-lease-rows]');
       var msgEl = details.querySelector('[data-msg]');
-
+      var body = details.querySelector(".acct-property__body");
+      var stateSel = details.querySelector('[data-t="state"]');
+      var waWrap = details.querySelector("[data-wa-metro]");
       var typeButtons = Array.prototype.slice.call(details.querySelectorAll("[data-type-btn]"));
 
       nameInput.value = property.name || "";
       typeSelect.value = property.property_type === "commercial" ? "commercial" : "residential";
       notesInput.value = property.notes || "";
+      fillTaxFields(details, property);
 
       function syncHint() { resHint.hidden = typeSelect.value !== "residential"; }
       function syncTypeButtons() {
@@ -1569,6 +1421,19 @@
           btn.classList.toggle("is-active", btn.getAttribute("data-type-btn") === typeSelect.value);
         });
       }
+      function syncWaMetro() { waWrap.hidden = stateSel.value !== "WA"; }
+      function refreshLive() {
+        var row = readTaxFields(details);
+        row.id = property.id;
+        row.name = nameInput.value.trim() || "Untitled property";
+        row.leases = property.leases || [];
+        var m = pcPortfolio.propertyMetrics(row, taxSettings);
+        renderStrip(details, m);
+        details.querySelector("[data-sale-preview]").textContent = salePreviewText(m);
+        details.querySelector(".acct-property__name").textContent = row.name;
+      }
+      details.refreshLive = refreshLive;
+
       function setType(value) {
         if (typeSelect.value === value) return;
         typeSelect.value = value;
@@ -1584,27 +1449,9 @@
 
       (property.leases || []).forEach(function (lease) { addLeaseRowEl(rowsWrap, lease, typeSelect.value); });
 
-      renderPropertySummary(details, property);
-
-      var taxBox = details.querySelector("[data-tax-details]");
-      var taxStateSel = details.querySelector('[data-t="state"]');
-      var waWrap = details.querySelector("[data-wa-metro]");
-      var previewEl = details.querySelector("[data-tax-preview]");
-      fillTaxFields(details, property);
-      function syncWaMetro() { waWrap.hidden = taxStateSel.value !== "WA"; }
-      function refreshTaxPreview() { previewEl.textContent = taxPreviewText(readTaxFields(details)); }
-      details.refreshTaxPreview = refreshTaxPreview;
-      taxBox.addEventListener("input", refreshTaxPreview);
-      taxBox.addEventListener("change", function () { syncWaMetro(); refreshTaxPreview(); });
+      renderPropertyHead(details, property);
       syncWaMetro();
-      refreshTaxPreview();
-      /* a property linked to a Portfolio Review card already has a value
-         there - offer it as the sale-price hint rather than a blank */
-      leasePortfolioOptions.forEach(function (o) {
-        if (o.reportId === property.linked_pr_report_id && o.name === property.linked_pr_property_name && o.value) {
-          details.querySelector('[data-t="expected_sale_price"]').placeholder = String(Math.round(o.value));
-        }
-      });
+      refreshLive();
 
       /* Residential and commercial leases ask different questions (see
          leaseRowHTML) - switching type rebuilds every row under the new
@@ -1614,7 +1461,11 @@
         var snapshot = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row")).map(serializeLeaseRow);
         rowsWrap.innerHTML = "";
         snapshot.forEach(function (lease) { addLeaseRowEl(rowsWrap, lease, typeSelect.value); });
+        renderPropertyHead(details, property);
       });
+
+      body.addEventListener("input", refreshLive);
+      body.addEventListener("change", function () { syncWaMetro(); refreshLive(); });
 
       details.querySelector('[data-act="add-lease"]').addEventListener("click", function () {
         if (rowsWrap.children.length >= MAX_LEASES_PER_PROPERTY) return;
@@ -1624,14 +1475,10 @@
 
       /* Opening a property that has no leases yet drops a blank lease row
          in straight away - filling it in is then one action (open ->
-         type), not two (open, then separately click "Add a lease"). This
-         covers a brand-new property AND an existing one that's simply
-         never had a lease added. */
+         type), not two (open, then separately click "Add a lease"). */
       details.addEventListener("toggle", function () {
         if (details.open && !rowsWrap.children.length) addLeaseRowEl(rowsWrap, {}, typeSelect.value);
       });
-
-      var linkState = renderPropertyLink(details, property, nameInput, setType, msgEl);
 
       /* A brand-new property (just created) lands already open, focused
          and ready to fill in, rather than a collapsed card the visitor
@@ -1661,16 +1508,16 @@
           name: nameInput.value.trim() || "Untitled property",
           property_type: typeSelect.value,
           notes: notesInput.value
-        }, readTaxFields(details), linkState.getLink())).then(function (res) {
-          if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
+        }, readTaxFields(details))).then(function (res) {
+          if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); return; }
           var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
             var lease = serializeLeaseRow(row);
             lease.property_id = property.id;
             if (lease.is_periodic) lease.lease_expiry = null;
-            /* annual_rent is the one figure WALE weights by, whichever
-               template built this row - residential enters a weekly/monthly
-               amount, so annualise it here before saving. */
+            /* annual_rent is the one figure WALE and cash flow weight by,
+               whichever template built this row - residential enters a
+               weekly/monthly amount, so annualise it here before saving. */
             if (lease.rent_amount !== undefined) {
               var amt = parseFloat((lease.rent_amount || "").toString().replace(/[^0-9.]/g, ""));
               lease.annual_rent = isFinite(amt) ? amt * (lease.rent_frequency === "monthly" ? 12 : 52) : null;
@@ -1680,9 +1527,7 @@
           Promise.all(saves).then(function (results) {
             var failed = results.filter(function (r) { return r && r.error; })[0];
             /* Reload either way - the property itself did save even if a
-               lease row failed, and leaving the stale pre-save state on
-               screen after an error is what made this look like nothing
-               had saved at all. keepMsg so the reload doesn't clear the
+               lease row failed. keepMsg so the reload doesn't clear the
                result message before the visitor sees it. */
             loadLeaseRegister(true).then(function () {
               if (failed) setMsg(leaseMsgEl, "Property saved, but a lease didn't: " + failed.error.message, "error");
@@ -1698,19 +1543,15 @@
     function renderLeaseProperties(properties) {
       var wrap = document.getElementById("leaseProperties");
       var emptyEl = document.getElementById("leaseEmpty");
-      var openIds = {}, openTaxIds = {};
+      var openIds = {};
       wrap.querySelectorAll(".acct-property[open]").forEach(function (d) { openIds[d.dataset.propertyId] = true; });
-      wrap.querySelectorAll(".acct-property [data-tax-details][open]").forEach(function (d) {
-        openTaxIds[d.closest(".acct-property").dataset.propertyId] = true;
-      });
 
       wrap.innerHTML = "";
-      if (!properties || !properties.length) { emptyEl.hidden = !leasePortfolioOptions.length; return; }
+      if (!properties || !properties.length) { show(emptyEl); return; }
       hide(emptyEl);
       properties.forEach(function (property) {
         var el = buildPropertyEl(property);
         if (openIds[property.id]) el.open = true;
-        if (openTaxIds[property.id]) el.querySelector("[data-tax-details]").open = true;
         wrap.appendChild(el);
       });
     }
@@ -1852,17 +1693,106 @@
       return sec;
     }
 
+    /* One property's arithmetic laid out line by line, so a visitor (and
+       their accountant) can see exactly which figure drove the estimate. */
+    function workingsEl(name, r, m) {
+      var det = tEl("details", "acct-workings");
+      det.appendChild(tEl("summary", null, "How " + name + " was worked out"));
+      var table = tEl("table", "acct-taxtable acct-workings__table");
+      var tb = tEl("tbody");
+      function row(label, value, strong) {
+        var tr = tEl("tr", strong ? "is-total" : null);
+        tr.appendChild(tEl("td", null, label));
+        tr.appendChild(tEl("td", "is-num", value));
+        tb.appendChild(tr);
+      }
+      var i = r.inputs;
+      row("Purchase price", fmtMoney(i.purchasePrice));
+      if (i.acqCosts) row("Plus buying costs", fmtMoney(i.acqCosts));
+      if (i.improvements) row("Plus capital improvements", fmtMoney(i.improvements));
+      if (i.worksClaimed) row("Less building write-off (Division 43)", fmtSignedMoney(-i.worksClaimed));
+      row("Cost base", fmtMoney(r.costBase), true);
+      row("Sale price", fmtMoney(i.salePrice));
+      row("Less selling costs (" + i.sellingCostPct + "% of sale price)", fmtSignedMoney(-r.sellingCosts));
+      row("Net sale proceeds", fmtMoney(r.proceeds), true);
+      row(r.gain > 0 ? "Capital gain" : "Capital loss", fmtMoney(Math.abs(r.gain)), true);
+
+      if (r.preCgt) {
+        row("Bought before 20 September 1985", "Outside CGT today");
+      } else if (r.gain > 0) {
+        var cl = r.currentLaw;
+        row("Current law: discount", r.over12 ? cl.discountPct.toFixed(cl.discountPct % 1 ? 1 : 0) + "%" : "None (held 12 months or less)");
+        row("Current law: taxable gain", fmtMoney(cl.taxableGain));
+        row("Current law: estimated tax", r.needsIncome ? "Add your income" : fmtMoney(cl.tax), true);
+        if (r.reform) {
+          var rf = r.reform;
+          row("1 July 2027 value" + (rf.v27Estimated ? " (estimated)" : ""), rf.v27 == null ? "Not applicable" : fmtMoney(rf.v27));
+          if (rf.v27 != null) row("Gain up to 1 July 2027 (50% discount applies)", fmtMoney(rf.preGain));
+          row("Cost base indexed by CPI at " + rf.cpiPct + "% to the sale", fmtMoney(rf.indexedBase));
+          row("Real gain after 1 July 2027", fmtMoney(rf.postGain));
+          row("Amount taxed (discounted pre-2027 gain plus real gain)", fmtMoney(rf.taxableAmount));
+          row("30% minimum tax", rf.tax == null ? "Add your income" : (rf.floorApplied ? "Applies, lifts the tax" : "Not needed, your normal rate is higher"));
+          row("Announced rules: estimated tax" + (rf.election ? " (new build, cheaper option)" : ""), rf.tax == null ? "Add your income" : fmtMoney(rf.tax), true);
+        }
+      }
+      if (m && m.loan != null) {
+        row("Net sale proceeds less loan balance (" + fmtMoney(m.loan) + ")", fmtMoney(r.proceeds - m.loan), true);
+        if (m.sale.cashIfSold != null) row("Cash in hand after tax (current law)", fmtMoney(m.sale.cashIfSold), true);
+        if (m.sale.cashIfSoldReform != null) row("Cash in hand after tax (announced rules)", fmtMoney(m.sale.cashIfSoldReform), true);
+      }
+      table.appendChild(tb);
+      det.appendChild(table);
+      if (r.reform && r.reform.v27Estimated) {
+        det.appendChild(tEl("p", "acct-tax-basis", "The 1 July 2027 value is a steady-growth estimate. If you might sell after that date, a registered valuer's valuation as at 1 July 2027 will replace it with a firm figure."));
+      }
+      return det;
+    }
+
+    function accountantCallout() {
+      var box = tEl("div", "acct-callout");
+      box.appendChild(tEl("p", "acct-callout__title", "Before you sell, get the final numbers from your accountant"));
+      box.appendChild(tEl("p", "acct-callout__lead", "This is a planning estimate, not a tax calculation. The real figure depends on things this page can't see."));
+      var cols = tEl("div", "acct-callout__cols");
+      var a = tEl("div");
+      a.appendChild(tEl("p", "acct-callout__sub", "What changes the answer"));
+      a.appendChild(tNotes([
+        "The contract dates. The sale contract sets the tax year and the 12-month test, and the purchase contract sets when you acquired it.",
+        "Everything else you earn or lose that year, including capital losses carried forward and other gains.",
+        "Any time it was your home, or wasn't rented, which can make part of the gain exempt.",
+        "Plant and equipment (Division 40) items, which are settled separately on sale, and building write-off you never claimed but could have.",
+        "Your residency, and whether it is held in a structure with its own rules.",
+        "The 2027 rules, which are announced but not yet law."
+      ]));
+      var b = tEl("div");
+      b.appendChild(tEl("p", "acct-callout__sub", "What to bring"));
+      b.appendChild(tNotes([
+        "Purchase and sale contracts and settlement statements.",
+        "Receipts for stamp duty, legal, valuation and selling costs.",
+        "The date and cost of every capital improvement.",
+        "Your depreciation (quantity surveyor) schedule.",
+        "Recent tax returns showing what you have claimed.",
+        "Records of any period it was your home."
+      ]));
+      cols.appendChild(a);
+      cols.appendChild(b);
+      box.appendChild(cols);
+      return box;
+    }
+
     function renderCgtSection() {
       var sec = tEl("div", "acct-tax-section");
       sec.appendChild(tEl("p", "acct-tax-title", "Capital gains tax if sold"));
 
-      var rows = leaseProperties.map(function (p) { return { p: p, r: cgtFor(p) }; });
-      var ready = rows.filter(function (x) { return x.r.ready; });
-      var notReady = rows.filter(function (x) { return !x.r.ready; });
+      var rows = leaseProperties.map(function (p, i) {
+        var m = portfolio.props[i];
+        return { p: p, m: m, r: m.sale.cgt };
+      });
+      var ready = rows.filter(function (x) { return x.r && x.r.ready; });
+      var notReady = rows.filter(function (x) { return x.r && !x.r.ready; });
       var totals = pcTax.cgtPortfolio(ready.map(function (x) { return x.r; }));
 
       if (!ready.length) {
-        sec.appendChild(tEl("p", "acct-empty", "Add a purchase date, purchase price and expected sale price to a property (under Tax details) to estimate its capital gains tax."));
+        sec.appendChild(tEl("p", "acct-empty", "Add a purchase date, purchase price and current value to a property to estimate its capital gains tax."));
       } else {
         var anyReform = ready.some(function (x) { return x.r.reform; });
         var noIncome = totals.needsIncome;
@@ -1905,14 +1835,17 @@
         table.appendChild(tb);
         sec.appendChild(table);
 
+        ready.forEach(function (x) { sec.appendChild(workingsEl(x.p.name || "Untitled property", x.r, x.m)); });
+
         if (noIncome) sec.appendChild(tNotes(["Add your other taxable income under \"Your tax settings\" above to see the tax on an individual's or trust's gain."]));
       }
 
       if (notReady.length) {
-        sec.appendChild(tNotes(notReady.map(function (x) {
-          return (x.p.name || "Untitled property") + ": " + (x.r.error || "add the " + listJoin(x.r.missing) + " to include it.");
-        })));
+        sec.appendChild(tNotes([gapLine("Not included yet, add the purchase date and price (and a current value): ",
+          notReady.map(function (x) { return x.p.name || "Untitled property"; }))]));
       }
+
+      sec.appendChild(accountantCallout());
 
       sec.appendChild(tEl("p", "acct-tax-fine",
         "Announced, not yet law: the 2026-27 Budget replaces the 50% CGT discount from 1 July 2027 with cost-base indexation (by CPI) plus a 30% minimum tax on the gain. " +
@@ -1928,17 +1861,28 @@
       var body = document.getElementById("taxBody");
       body.innerHTML = "";
       if (!leaseProperties.length) {
-        body.appendChild(tEl("p", "acct-empty", "Add a property above and fill in its tax details to see your estimates here."));
+        body.appendChild(tEl("p", "acct-empty", "Add a property above and fill in its state, land value and purchase details to see your land tax and capital gains estimates here."));
         return;
       }
       body.appendChild(renderLandTaxSection());
       body.appendChild(renderCgtSection());
     }
 
-    function refreshAllTaxPreviews() {
+    function refreshAllLive() {
       document.querySelectorAll("#leaseProperties .acct-property").forEach(function (d) {
-        if (d.refreshTaxPreview) d.refreshTaxPreview();
+        if (d.refreshLive) d.refreshLive();
       });
+    }
+
+    /* Recompute the portfolio from the register + settings and repaint
+       everything that reads it, except the property forms themselves
+       (which would wipe whatever is mid-typing). */
+    function recomputePortfolio() {
+      portfolio = pcPortfolio.build(leaseProperties, taxSettings);
+      renderPortfolio();
+      renderTaxPosition();
+      refreshAllLive();
+      updateStartHere(leaseProperties.length);
     }
 
     buildTaxOtherLandInputs();
@@ -1961,47 +1905,47 @@
         taxSettingsProblem = "";
         fillTaxSettingsInputs();
         setMsg(taxMsgEl, "Saved.", "ok");
-        renderTaxPosition();
-        refreshAllTaxPreviews();
+        recomputePortfolio();
       });
     });
 
     function loadLeaseRegister(keepMsg) {
       return Promise.all([
         window.pcAuth.listProperties(),
-        window.pcAuth.listReports("pr"),
         window.pcAuth.getTaxSettings()
       ]).then(function (results) {
-        var res = results[0], prRes = results[1], taxRes = results[2];
+        var res = results[0], taxRes = results[1];
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         leaseProperties = res.data || [];
-        leasePrReports = (prRes && !prRes.error && prRes.data) || [];
-        leasePortfolioOptions = buildPortfolioOptions();
         if (taxRes && !taxRes.error) {
           taxSettings = Object.assign({}, TAX_DEFAULTS, taxRes.data);
           taxSettingsProblem = "";
         } else if (taxRes && taxRes.error) {
           taxSettingsProblem = taxErrMsg(taxRes.error);
         }
-        syncLeaseGate();
+        portfolio = pcPortfolio.build(leaseProperties, taxSettings);
         if (!keepMsg) setMsg(leaseMsgEl, "");
+        renderPortfolio();
         renderLeaseStats(leaseProperties);
         renderLeaseProperties(leaseProperties);
         fillTaxSettingsInputs();
         if (taxSettingsProblem) setMsg(taxMsgEl, taxSettingsProblem, "error");
         else if (!keepMsg) setMsg(taxMsgEl, "");
         renderTaxPosition();
+        updateStartHere(leaseProperties.length);
       });
     }
 
-    document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () {
-      if (leaseProperties.length >= MAX_PROPERTIES || !leasePortfolioOptions.length) return;
+    function addProperty() {
+      if (leaseProperties.length >= MAX_PROPERTIES) return;
       window.pcAuth.saveProperty({ name: "", property_type: "residential" }).then(function (res) {
-        if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
+        if (res.error) { setMsg(leaseMsgEl, taxErrMsg(res.error), "error"); return; }
         pendingOpenPropertyId = res.data && res.data.id;
         loadLeaseRegister();
       });
-    });
+    }
+    document.getElementById("leaseAddPropertyBtn").addEventListener("click", addProperty);
+    document.getElementById("portfolioAddBtn").addEventListener("click", addProperty);
 
     var CALC_PAGE_SET = {};
     Object.keys(CALC_PAGES).forEach(function (k) { CALC_PAGE_SET[CALC_PAGES[k]] = 1; });
@@ -2074,9 +2018,7 @@
         window.pcAuth.listReports().then(function (res) {
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
           renderReports(res.data);
-          renderPortfolio(res.data);
           renderQuickLaunch(res.data);
-          updateStartHere(res.data);
         });
         loadLeaseRegister();
       } else {
@@ -2250,8 +2192,8 @@
       var roiMsg = document.getElementById("portfolioRoiMsg");
       var resultEl = document.getElementById("portfolioRoiResult");
       hide(resultEl);
-      if (!currentMasterReport) { setMsg(roiMsg, "Set a master portfolio first.", "error"); return; }
-      var s = currentMasterReport.summary || {};
+      if (!portfolio || !portfolio.totals.complete) { setMsg(roiMsg, "Add a value, loan, interest rate and a lease with rent to every property first.", "error"); return; }
+      var s = portfolio.summary;
       if (!(s.portfolioValue > 0)) { setMsg(roiMsg, "This portfolio has no combined value to project yet."); return; }
 
       var years = Math.max(1, Math.min(30, Math.round(parseFloat(document.getElementById("planYears").value) || 5)));
@@ -2265,7 +2207,7 @@
       setMsg(roiMsg, "Building your plan…");
       var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 100)) : 0;
       var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 1000) / 10) : 6.5;
-      var title = (currentMasterReport.title || "Your portfolio") + " - ROI projection";
+      var title = "Your portfolio - ROI projection";
       var inputs = {
         v: 2, calc: "roi", projectName: title,
         fields: {

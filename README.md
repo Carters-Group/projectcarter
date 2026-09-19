@@ -29,9 +29,10 @@ enquire.html                    multi-step lead-capture page (full site header, 
 api/email-reputation.js         Vercel serverless function - same-origin POST {email} proxy for the enquiry form's deliverability check via abstractapi.com, so ABSTRACTAPI_KEY stays server-side (a Vercel env var), never in client-side JS; rate-limited, fails open
 api/geocode.js                  Vercel serverless function - same-origin proxy for the DA calculator's Nominatim address lookup (OSM requires an identifying User-Agent, which browsers can't set); rate-limited, fails soft
 thanks.html                     post-submit confirmation page (drop ad conversion tags here)
-account.html                    sign in / sign up (magic link or password) + a profile photo (upload, stored in Supabase Storage) with initials fallback + a "Quick access" grid of one-click calculator cards (resumes each calculator's most recently saved report where one exists) + a "Your portfolio" overview card (adds net rental income and a "Useable equity" block showing both a conservative 70% LVR and a higher-gearing 80% LVR figure side by side, a "See this as an ROI projection" button - saves a new ROI report seeded from the portfolio's combined value/gearing/net rent and its own blended interest rate with sensible placeholder growth/term assumptions and opens it, and a standalone "Debt reduction goal" mini-tool - an extra $/year contribution field with a live payoff-time + interest-saved readout, assuming the portfolio's debt is interest-only as modelled in Portfolio Review; this is a planning figure only, not part of any calculator, report or ROI projection, and a "Check your portfolio risk" block below the portfolio plan - three fixed stress scenarios (Mild/Moderate/Severe: rate rise, weeks of vacancy) recomputed from the master report's summary snapshot, showing cash flow under a rate-rise scenario and under a vacancy scenario as two separate rows only (never summed, and a rate rise says nothing about value or vice versa, so no derived LVR/value row either); the vacancy row needs `grossRentalIncome` in the summary (added to `pcCalcSummary()` in `pr-calculator.html`) so a report saved before this shipped only shows the rate-rise row until re-saved; the block sits in its own tinted, bordered panel with a bolder display-font title (`.acct-risk-section`) so it reads as the important one, distinct from the plain "Debt reduction goal" / "Portfolio plan" sections around it, while the Mild/Moderate/Severe scenario cards keep their own yellow/orange/red tint), the "Your portfolio" card sits first on the page as one continuous box - the "Signed in as" identity row (email + Sign out) and the "Your portfolio" heading (with Rename and Edit portfolio actions together in its header row) share the same card background, split only by a single thin divider rather than two separately-bordered sections; the hero heading/copy above the dashboard (`.acct-hero-inner`) is pinned to the same 1180px max-width as the signed-in dashboard so both share a left edge instead of the hero sitting ~30px further left at wide viewports; Quick access cards clamp their "Saved: <title>" text to 2 lines and pin the "Saved / Edit" or "Start a report" link to the bottom of the card (`margin-top:auto`) so every card in the grid reads at the same levels regardless of how long a saved report's title is; below "Quick access" (same column, so it always sits directly under it) is a single accent "Recently saved calculations" toggle (native `<details>`, open by default so it's visible without a click) that unfolds one merged, calculator-grouped list of every other saved report (Rename/Duplicate/Delete, and "Make this my portfolio" on Portfolio Review reports) - no separate "Recently updated" feed and no second per-calculator launch grid, since Quick access above already covers that; only the first 6 reports render un-hidden, with a "Load N more" button revealing the rest already in the DOM (no second fetch) if there are more; the master portfolio report is left out of this list entirely, since it already has its place at the top of the page, and (being the master) can only be opened and edited in place, never duplicated. The whole dashboard (portfolio card, quick access, this list) only re-fetches on page load, sign-in state change, or an action taken in the list itself (Delete/Duplicate/Make this my portfolio) - saving a report from a calculator page does not push a live update to an already-open account tab; revisiting or reloading account.html picks it up + an editable details form (name, phone, occupation, read-only email)
-pc-auth.js                      shared Supabase client - window.pcAuth (auth + save/list/get/rename/delete/duplicate report, get/set/clear master report, update profile incl. occupation), auth status bar, subscription gate (canSave, always true for now)
-tax.js                          land tax + capital gains tax estimators (window.pcTax, pure functions, unit-tested in tax.test.js) used by the account page's Tax position card - see "Property register and tax position" below
+account.html                    sign in / sign up (magic link or password) + the signed-in dashboard: a "Your portfolio" card (combined value, debt, equity, LVR, useable equity at 70% and 80%, cash flow before tax, land tax, "if you sold everything" cash in hand, a debt-reduction goal, a portfolio plan that seeds an ROI projection, and a three-scenario risk check, all derived live from the property register), a "Your properties" register (one accordion per property, entered once, with a live summary strip plus leases / WALE), a "Tax position" card (land tax by state, capital gains tax if sold with line-by-line workings and an accountant checklist), "Quick access" calculator cards, a "Recently saved calculations" list, a profile photo and an editable details form
+pc-auth.js                      shared Supabase client - window.pcAuth (auth, save/list/get/rename/delete/duplicate report, properties + leases CRUD, tax settings, getPortfolioSummary for the calculators' funds-available, update profile incl. occupation), auth status bar, subscription gate (canSave, always true for now)
+tax.js                          land tax + capital gains tax estimators (window.pcTax, pure functions, unit-tested in tax.test.js) - see "Property register and tax position" below
+portfolio.js                    portfolio metrics from the property register (window.pcPortfolio, pure, unit-tested in portfolio.test.js): equity / LVR / useable equity, yield, cash flow, growth, land tax share, cash in hand if sold, portfolio totals and the summary the calculators pull
 pc-report.js                    shared per-calculator wiring - "Project name or address" field, "Save report" button, ?report=<id> rehydration
 supabase-schema.sql             one-time SQL for the Supabase project: profiles (incl. occupation, tax_settings) + reports + properties/leases tables (properties carry the land tax / CGT fields), row-level security, subscription_status column, one-master-portfolio-per-user constraint
 styles.css                      design system + layout (home, project pages, landing, calculator, account)
@@ -132,54 +133,51 @@ and still pings Formspree once, so every new account also lands in your inbox as
 a lead. Signed-in visitors can update their name and phone any time from a
 "Your details" form on `account.html`.
 
-### Master portfolio
+### Your portfolio (the property register)
 
-One saved **Portfolio Review (PR)** report per account can be flagged as the
-visitor's **master portfolio** (`reports.is_master`, enforced to at most one per
-user by a partial unique index in `supabase-schema.sql`). `account.html` shows
-it as a headline "Your portfolio" card above the report list — property count,
-combined value, current equity position, combined debt, portfolio LVR, net
-rental income and after-tax cash flow per year/week, all read straight from
-that report's `summary` snapshot, plus a **useable equity** block showing the
-same equity two ways — a conservative **70% LVR** figure and a higher-gearing
-**80% LVR** figure side by side, for visitors with different risk appetites —
-with a link back into the PR calculator and a control to pick a different
-saved PR report as master. A **"See this as an ROI projection"** button seeds
-a brand-new saved ROI report from the portfolio's combined value, implied LVR,
-net rental income and its own **blended interest rate** (`summary.blendedRate`
-- the portfolio's total interest ÷ total debt, from `pr-calculator.html`;
-placeholder growth/term/debt-reduction assumptions fill the rest) and opens it
-on `roi-calculator.html` - a one-time snapshot, not a live link, same as every
-other pull-a-figure. A separate **"Debt reduction goal"** control sits below
-it: a plain extra-$/year input with a live payoff-time and interest-saved
-readout, computed straight from the portfolio's debt and blended rate
-(interest-only, so every dollar goes to principal - a simple division, not a
-schedule). It is deliberately **not** part of any calculator, saved report, or
-the ROI projection above - contributing extra capital toward debt genuinely
-dilutes a property's IRR (real cash going in lowers the annualised return even
-as total profit rises), so this stays a separate, ROI-agnostic planning figure
-rather than folding into that model. A "Make this my portfolio" action sits next to every saved
-PR report in the list below for the same purpose. This is the one designated **starting point**:
-saving or updating any other calculator's report (or a non-master PR report)
-never touches it — the only way it changes is opening it directly, editing it,
-and pressing Save, or explicitly designating a different report as master.
-Other calculators can still **pull a figure** from it (see below), which copies
-a number across once rather than linking to it live. `account.html` also lists
-the 5 most recently updated reports across every calculator ("Recently
-updated"), and every saved report can be **duplicated** ("Save as new" via the
-report list's Duplicate action) to branch a scenario without touching the
-original.
+The **property register** on `account.html` is the single source of truth for a
+visitor's portfolio. Each property is entered **once**, in the order an owner
+thinks about it: the property (name, type, state, owned by), what was paid
+(contract date, price, buying costs), what has been put in (capital
+improvements, building write-off), what it is worth and owed today (current
+value, unimproved land value, loan balance, interest rate, yearly running
+costs), what it earns (the leases, with rent and expiry) and an "if you sold"
+scenario (sale date, sale price, optional 1 July 2027 value). Blank means "not
+entered" and `0` means "none" (a loan balance of 0 is a property with no loan).
+
+`portfolio.js` (`window.pcPortfolio`, pure and unit-tested in
+`portfolio.test.js`) derives every figure from those fields, so no number is
+ever asked for twice and none can disagree: per property, equity, LVR, useable
+equity at 70% and 80%, gross yield, cash flow before tax (rent from current
+leases less running costs less interest), growth since purchase, land tax share
+and cash in hand if sold (net proceeds less the loan less capital gains tax);
+for the portfolio, the sums plus land tax by state, a blended interest rate and
+the cash in hand if everything were sold. Totals only count properties that
+have what each figure needs, and a "To complete your picture" list names who is
+missing what rather than guessing. Each collapsed property shows a one-line
+summary strip (value, equity, LVR, yield, cash flow, cash if sold) that updates
+live as the form is edited.
+
+The "Your portfolio" card on top of the page reads from that, and so do its
+debt-reduction goal, portfolio plan (which also seeds a saved ROI projection)
+and three-scenario risk check (rate rise or vacancy, shown separately). The
+lending, ROI and development calculators pull **useable equity** as "funds
+available" through `pcAuth.getPortfolioSummary()`, which computes it live from
+the register. Portfolio Review (`pr-calculator.html`) stays a standalone
+after-tax cash-flow model with its own saved reports; the old master-portfolio
+flag (`reports.is_master`) is no longer read anywhere on the account page.
+`account.html` lists every saved report under "Recently saved calculations"
+(Rename, Duplicate, Delete).
 
 ### Property register and tax position
 
-Below the portfolio card, `account.html` has a **Property register** (formerly
-"Lease register"): one accordion per property, backed by the `properties` /
-`leases` tables, tracking tenants, expiries, reviews and options (with a
-portfolio WALE and an upcoming-dates timeline). Each property also has a
-**Tax details** sub-panel (state, owner type, unimproved land value; purchase
-date/price, buying costs, improvements, capital works claimed, new-build tick,
-planned sale date, expected sale price, optional 1 July 2027 value). A
-**Tax position** card underneath rolls those up, live from the saved data:
+The register (a "Your properties" card, one accordion per property, backed by
+the `properties` / `leases` tables) also tracks tenants, expiries, reviews and
+options, with a portfolio WALE and an upcoming-dates timeline. A **Tax
+position** card underneath rolls the same fields up, live from the saved data
+(nothing is asked twice; state, owner type, land value, purchase details,
+improvements, building write-off and the sale scenario all live in the
+property form):
 
 - **Land tax.** Grouped per state per owner type (thresholds do not stack across
   states), tax worked out on the aggregated unimproved value and split back to
@@ -201,13 +199,24 @@ planned sale date, expected sale price, optional 1 July 2027 value). A
   1 July 2027 value being the visitor's figure or a steady-growth estimate) and a
   new-build election that takes the cheaper regime. Rates and dates live in one
   config block at the top of `tax.js` so a legislated change is a small edit.
+  Cost base = purchase price + buying costs + capital improvements - building
+  write-off (Division 43), which reduces it whether or not it was claimed (s110-45);
+  plant and equipment (Division 40) is a separate balancing adjustment and is not
+  in this estimate. The dates are contract dates, and the 12-month discount test
+  leaves out both the purchase day and the sale day (a sale exactly on the
+  anniversary is still short). Each property has a "How this was worked out"
+  panel showing every line, and the section ends with a "get the final numbers
+  from your accountant" callout (what changes the answer, what records to bring).
+  A purchase before 20 September 1985 is flagged as outside CGT and not modelled.
 - **Settings** (`profiles.tax_settings`, jsonb): other taxable income, CPI,
   selling-cost %, other land per state. Read/written on their own, not through
   `PROFILE_COLS`, so a missing migration only disables this card, never sign-in.
 
-Re-run `supabase-schema.sql` after deploying this (adds the property tax
-columns and `profiles.tax_settings`); until then the card shows a prompt to do
-so. Run `node --test tax.test.js stamp.test.js` for the estimator tests.
+Re-run `supabase-schema.sql` before deploying this (it adds the property tax
+columns, the current value / loan balance / interest rate / running costs
+columns and `profiles.tax_settings`); until then saving a property shows a
+prompt to do so. Run `node --test portfolio.test.js tax.test.js stamp.test.js`
+for the estimator tests.
 
 Everything is **free**. `profiles.subscription_status` (defaults to `'free'`)
 and the `pc_can_save()` SQL function are the hooks for a future paywall - today

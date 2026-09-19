@@ -23,6 +23,7 @@
 
 var pcTax = (function () {
   var REFORM_DATE = "2027-07-01";
+  var PRE_CGT_DATE = "1985-09-20";
   var MS_YEAR = 365.25 * 86400000;
 
   var OWNERS = {
@@ -274,13 +275,27 @@ var pcTax = (function () {
     var sellingCosts = p.salePrice * ((s.sellingCostPct || 0) / 100);
     var proceeds = p.salePrice - sellingCosts;
     var gain = proceeds - costBase;
-    var over12 = ms(saleDate) >= ms(addYearISO(p.purchaseDate));
+    /* the ATO leaves out both the day of acquisition and the day of the CGT
+       event, so a sale exactly on the anniversary is still short of 12 months */
+    var over12 = ms(saleDate) > ms(addYearISO(p.purchaseDate));
     var other = s.otherIncome == null || !isFinite(s.otherIncome) ? null : s.otherIncome;
 
     var res = {
       ready: true, owner: owner, saleDate: saleDate, costBase: costBase, sellingCosts: sellingCosts,
-      proceeds: proceeds, gain: gain, over12: over12, needsIncome: false, reform: null
+      proceeds: proceeds, gain: gain, over12: over12, needsIncome: false, reform: null,
+      preCgt: ms(p.purchaseDate) < ms(PRE_CGT_DATE),
+      inputs: {
+        purchasePrice: p.purchasePrice, acqCosts: p.acqCosts || 0, improvements: p.improvements || 0,
+        worksClaimed: p.worksClaimed || 0, salePrice: p.salePrice, sellingCostPct: s.sellingCostPct || 0
+      }
     };
+
+    /* bought before 20 September 1985: outside CGT today. The announced
+       reform would bring later growth in, but how is too unsettled to model. */
+    if (res.preCgt) {
+      res.currentLaw = { discountPct: 0, taxableGain: 0, tax: 0 };
+      return res;
+    }
 
     if (gain <= 0) {
       res.currentLaw = { discountPct: 0, taxableGain: 0, tax: 0 };
@@ -320,17 +335,19 @@ var pcTax = (function () {
     }
 
     var amount = pre * 0.5 + post;
-    var reformTax;
+    var reformTax, floorApplied = false;
     var base = taxOn(owner, amount, other, saleDate);
     if (base == null) { reformTax = null; }
     else {
-      var floored = Math.max(base - amount * MEDICARE, amount * 0.30);
-      reformTax = floored + amount * MEDICARE;
+      var scaled = base - amount * MEDICARE;
+      var minTax = amount * 0.30;
+      floorApplied = minTax > scaled;
+      reformTax = Math.max(scaled, minTax) + amount * MEDICARE;
     }
 
     var reform = {
       preGain: pre, postGain: post, indexedBase: indexedBase, v27: v27, v27Estimated: v27Estimated,
-      cpiPct: cpi * 100, taxableAmount: amount, tax: reformTax, election: null
+      cpiPct: cpi * 100, taxableAmount: amount, tax: reformTax, election: null, floorApplied: floorApplied
     };
 
     if (p.newBuild && reformTax != null && tax != null) {

@@ -210,6 +210,17 @@ alter table public.properties add column if not exists planned_sale_date date;
 alter table public.properties add column if not exists expected_sale_price numeric;
 alter table public.properties add column if not exists value_at_jul_2027 numeric;
 
+-- What it is worth and owes today, and what it costs to hold. The property
+-- register is the single source of truth for the portfolio figures (equity,
+-- LVR, useable equity, cash flow, cash in hand if sold): blank means "not
+-- entered", 0 means none (a 0 loan balance is a property with no loan).
+-- expected_sale_price above now means "sale price if sold" and defaults to
+-- current_value when blank.
+alter table public.properties add column if not exists current_value numeric;
+alter table public.properties add column if not exists loan_balance numeric;
+alter table public.properties add column if not exists interest_rate numeric;
+alter table public.properties add column if not exists annual_running_costs numeric;
+
 -- Portfolio-level tax settings (other taxable income, CPI assumption,
 -- selling-cost %, taxable land held outside the register per state). One
 -- small JSON blob per user; deliberately NOT in pc-auth.js's PROFILE_COLS so
