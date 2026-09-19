@@ -177,6 +177,13 @@
 
         <!-- signed in -->
         <div id="acctSignedIn" class="acct-dashboard" hidden>
+          <nav class="acct-nav" id="acctNav" aria-label="Account sections">
+            <a href="#acctPortfolioCard" data-nav="acctPortfolioCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Portfolio</span></a>
+            <a href="#acctLeaseCard" data-nav="acctLeaseCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Properties</span></a>
+            <a href="#acctTaxCard" data-nav="acctTaxCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Tax</span></a>
+            <a href="#acctQuickCard" data-nav="acctQuickCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Calculators</span></a>
+            <a href="#acctDetailsCard" data-nav="acctDetailsCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Profile</span></a>
+          </nav>
           <a class="acct-starthere-bar acct-dash-start" id="acctStartHere" href="#acctLeaseCard" hidden>
             <span class="acct-starthere-bar__icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" aria-hidden="true"></span>
             <span class="acct-starthere-bar__text">
@@ -231,19 +238,6 @@
                 <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are under Tax and land tax below.</p>
               </div>
 
-              <div class="acct-debt-goal" id="portfolioTax">
-                <p class="acct-eyebrow">Tax and land tax</p>
-                <p class="field-hint">Land tax by state and capital gains tax if you sold, built from the tax details on each property below. Estimates only, not tax advice.</p>
-                <p class="acct-msg" id="taxMsg" hidden></p>
-                <div class="acct-plan__row acct-plan__row--aligned acct-plan__row--two">
-                  <div class="field"><label for="taxRate">Your marginal tax rate <span>(including Medicare, used to tax a sale)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="47" /></div></div>
-                  <div class="field"><label for="taxSellPct">Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
-                </div>
-                <div class="acct-property__actions">
-                  <button type="button" class="btn btn-accent btn-sm" id="taxSaveSettings">Save tax settings</button>
-                </div>
-                <div id="taxBody"></div>
-              </div>
 
               <div id="portfolioGaps" hidden></div>
 
@@ -351,6 +345,25 @@
             </div>
           </div>
 
+          <div class="card acct-card acct-dash-tax" id="acctTaxCard">
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Tax and land tax</h2>
+            </div>
+            <div id="portfolioTax">
+              <p class="field-hint">Land tax by state and capital gains tax if you sold, built from the tax details on each property below. Estimates only, not tax advice.</p>
+              <p class="acct-msg" id="taxMsg" hidden></p>
+              <div class="acct-plan__row acct-plan__row--aligned acct-plan__row--two">
+                <div class="field"><label for="taxRate">Your marginal tax rate <span>(including Medicare, used to tax a sale)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="47" /></div></div>
+                <div class="field"><label for="taxSellPct">Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
+              </div>
+              <div class="acct-property__actions">
+                <button type="button" class="btn btn-accent btn-sm" id="taxSaveSettings">Save tax settings</button>
+              </div>
+              <div id="taxBody"></div>
+            </div>
+          </div>
+
+          <div class="acct-dash-side" id="acctSide">
           <div class="acct-dash-quick" id="acctQuickCol">
             <div class="card acct-card" id="acctQuickCard">
               <h2 class="calc-subhead">Quick access</h2>
@@ -434,6 +447,8 @@
             <p class="acct-msg" id="passMsg" hidden></p>
           </div>
 
+          </div>
+
           <div class="card acct-card acct-danger acct-dash-danger" id="acctDangerCard">
             <h2 class="calc-subhead">Request account deletion</h2>
             <p class="acct-empty">This wipes all your saved reports now and clears your name, phone and occupation from your profile, then signs you out. We'll email Trent to close your sign-in. Your login may still work until he does. Wiped reports can't be restored.</p>
@@ -445,6 +460,7 @@
             </div>
             <p class="acct-msg" id="deleteAcctMsg" hidden></p>
           </div>
+
         </div>
       </div>
     </section>
@@ -2285,6 +2301,52 @@
     function importParam() {
       try { return new URL(window.location.href).searchParams.get("import"); } catch (e) { return null; }
     }
+
+    /* ---- section nav: smooth-scroll links + highlight of where you are --- */
+    (function () {
+      var nav = document.getElementById("acctNav");
+      if (!nav) return;
+      var links = Array.prototype.slice.call(nav.querySelectorAll("a[data-nav]"));
+
+      function targetFor(id) {
+        var el = document.getElementById(id);
+        /* the tax section lives inside the portfolio card and is hidden until there are properties */
+        if (el && !el.getClientRects().length) el = document.getElementById("acctPortfolioCard");
+        return el;
+      }
+
+      links.forEach(function (a) {
+        a.addEventListener("click", function (e) {
+          e.preventDefault();
+          var el = targetFor(a.getAttribute("data-nav"));
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      var ticking = false;
+      function update() {
+        ticking = false;
+        if (!nav.getClientRects().length) return;
+        var line = window.innerHeight * 0.35;
+        var best = null, bestTop = -Infinity;
+        links.forEach(function (a) {
+          var el = document.getElementById(a.getAttribute("data-nav"));
+          if (!el || !el.getClientRects().length) return;
+          var r = el.getBoundingClientRect();
+          if (r.top <= line && r.bottom > line && r.top > bestTop) { best = a; bestTop = r.top; }
+        });
+        links.forEach(function (a) { a.classList.toggle("is-active", a === best); });
+        /* on the phone bar, keep the current pill in view */
+        if (best && getComputedStyle(nav).position === "sticky" && nav.scrollWidth > nav.clientWidth) {
+          nav.scrollLeft = best.offsetLeft - (nav.clientWidth - best.offsetWidth) / 2;
+        }
+      }
+      function onScroll() { if (!ticking) { ticking = true; window.requestAnimationFrame(update); } }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      document.addEventListener("pc-auth-change", onScroll);
+      setTimeout(update, 600);
+    })();
 
     var CALC_PAGE_SET = {};
     Object.keys(CALC_PAGES).forEach(function (k) { CALC_PAGE_SET[CALC_PAGES[k]] = 1; });
