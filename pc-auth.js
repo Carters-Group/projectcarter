@@ -601,16 +601,9 @@
         v = parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, ""));
         return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null;
       };
-      var otherLand = {};
-      Object.keys(s.other_land || {}).forEach(function (st) {
-        var v = clamp(s.other_land[st], 0, 1e10);
-        if (TAX_STATES.indexOf(st) >= 0 && v) otherLand[st] = v;
-      });
       var clean = {
-        other_income: clamp(s.other_income, 0, 1e9),
-        cpi_pct: clamp(s.cpi_pct, 0, 15),
-        selling_cost_pct: clamp(s.selling_cost_pct, 0, 10),
-        other_land: otherLand
+        tax_rate_pct: clamp(s.tax_rate_pct, 0, 60),
+        selling_cost_pct: clamp(s.selling_cost_pct, 0, 10)
       };
       return client.from("profiles").update({ tax_settings: clean }).eq("id", currentUser.id)
         .then(function (res) { return { data: clean, error: res.error }; });

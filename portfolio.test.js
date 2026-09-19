@@ -12,7 +12,7 @@ var vm = require("node:vm");
 
 var P = globalThis.pcPortfolio;
 var TODAY = "2026-09-19";
-var settings = { other_income: 100000, cpi_pct: 2.5, selling_cost_pct: 2, other_land: {} };
+var settings = { tax_rate_pct: 37, cpi_pct: 2.5, selling_cost_pct: 2 };
 
 function near(actual, expected, tol, msg) {
   assert.ok(Math.abs(actual - expected) <= tol, (msg || "") + " expected ~" + expected + " got " + actual);
@@ -87,7 +87,7 @@ test("cash in hand if sold: net proceeds less loan less capital gains tax", func
 });
 
 test("without other income the tax is unknown but cash before tax is still shown", function () {
-  var m = P.propertyMetrics(houseA, { other_income: null, selling_cost_pct: 2 }, TODAY);
+  var m = P.propertyMetrics(houseA, { tax_rate_pct: null, selling_cost_pct: 2 }, TODAY);
   assert.equal(m.sale.tax, null);
   assert.equal(m.sale.cashIfSold, null);
   near(m.sale.cashBeforeTax, 882000 - 500000, 0.5);

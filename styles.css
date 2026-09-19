@@ -1672,6 +1672,7 @@ h1, h2, h3 {
 .acct-plan__row .field label { line-height: 1.4; min-height: 2.8em; }
 /* inputs share one baseline however many lines each label wraps to */
 .acct-plan__row--aligned { align-items: end; }
+.acct-plan__row--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .acct-plan__row--aligned .field { display: flex; flex-direction: column; justify-content: flex-end; }
 .acct-plan__row--aligned .field label { min-height: 0; margin-bottom: 6px; }
 @media (max-width: 640px) {
@@ -1752,7 +1753,6 @@ h1, h2, h3 {
       "pwnudge    pwnudge"
       "portfolio  quick"
       "leases     leases"
-      "tax        tax"
       "details    details"
       "danger     danger";
     align-items: start;
@@ -1765,7 +1765,6 @@ h1, h2, h3 {
   .acct-dash-portfolio { grid-area: portfolio; }
   .acct-dash-quick     { grid-area: quick; }
   .acct-dash-leases    { grid-area: leases; }
-  .acct-dash-tax       { grid-area: tax; }
   .acct-dash-details   { grid-area: details; }
   .acct-dash-danger    { grid-area: danger; }
 }

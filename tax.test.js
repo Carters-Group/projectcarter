@@ -120,13 +120,6 @@ test("WA metro adds MRIT; missing state / unmodelled state are reported", functi
   assert.equal(r.unmodelled.length, 1);
 });
 
-/* ---- income tax scale -------------------------------------------------- */
-
-test("scale tax at $100k and $280k (2026-27 rates)", function () {
-  near(T.scaleTax(100000, "2026-12-01"), 20520, 0.5);
-  near(T.scaleTax(280000, "2026-12-01"), 91870, 0.5);
-});
-
 /* ---- CGT: current law -------------------------------------------------- */
 
 var base = {
@@ -134,19 +127,19 @@ var base = {
   acqCosts: 40000, improvements: 0, worksClaimed: 0,
   saleDate: "2026-12-01", salePrice: 1200000
 };
-var settings = { otherIncome: 100000, cpiPct: 2.5, sellingCostPct: 0 };
+var settings = { taxRatePct: 37, cpiPct: 2.5, sellingCostPct: 0 };
 
-test("individual, held over 12 months: 50% discount then marginal tax + Medicare", function () {
+test("individual, held over 12 months: 50% discount then the flat tax rate", function () {
   var r = T.cgtEstimate(base, settings);
   assert.equal(r.gain, 360000);
   assert.equal(r.currentLaw.discountPct, 50);
   assert.equal(r.currentLaw.taxableGain, 180000);
-  near(r.currentLaw.tax, 74950, 1);
+  near(r.currentLaw.tax, 180000 * 0.37, 0.01);
   assert.equal(r.reform, null, "sale before 1 July 2027 has no reform column");
 });
 
 test("selling costs reduce the gain", function () {
-  var r = T.cgtEstimate(base, { otherIncome: 100000, cpiPct: 2.5, sellingCostPct: 2 });
+  var r = T.cgtEstimate(base, { taxRatePct: 37, cpiPct: 2.5, sellingCostPct: 2 });
   assert.equal(r.gain, 360000 - 24000);
 });
 
@@ -203,9 +196,9 @@ test("a loss produces no tax and reports the loss", function () {
   assert.ok(r.loss > 0);
 });
 
-test("missing income leaves an individual's tax unknown, not zero", function () {
-  var r = T.cgtEstimate(base, { otherIncome: null, cpiPct: 2.5, sellingCostPct: 0 });
-  assert.equal(r.needsIncome, true);
+test("missing tax rate leaves an individual's tax unknown, not zero", function () {
+  var r = T.cgtEstimate(base, { taxRatePct: null, cpiPct: 2.5, sellingCostPct: 0 });
+  assert.equal(r.needsRate, true);
   assert.equal(r.currentLaw.tax, null);
 });
 
@@ -226,7 +219,7 @@ test("straddling 1 July 2027: pre-portion discounted, post-portion indexed", fun
   assert.equal(r.reform.preGain, 160000);
   near(r.reform.postGain, 187482, 30);
   near(r.reform.taxableAmount, 80000 + r.reform.postGain, 0.01);
-  near(r.reform.tax, 116075, 60);
+  near(r.reform.tax, r.reform.taxableAmount * 0.37, 0.01);
   assert.equal(r.reform.v27Estimated, false);
 });
 
@@ -236,17 +229,17 @@ test("estimated 1 July 2027 value sits between purchase price and sale price", f
   assert.ok(r.reform.v27 > 800000 && r.reform.v27 < 1200000);
 });
 
-test("minimum 30% tax floors a low-income holder's tax", function () {
+test("minimum 30% tax floors a low-rate holder's tax", function () {
   var r = T.cgtEstimate(
     { owner: "individual", purchaseDate: "2027-08-01", purchasePrice: 1000000, saleDate: "2028-08-02", salePrice: 1050000 },
-    { otherIncome: 0, cpiPct: 2.5, sellingCostPct: 0 }
+    { taxRatePct: 19, cpiPct: 2.5, sellingCostPct: 0 }
   );
   near(r.reform.postGain, 24900, 150);
-  near(r.reform.tax, r.reform.postGain * 0.30 + r.reform.postGain * 0.02, 0.5);
+  near(r.reform.tax, r.reform.postGain * 0.30, 0.5);
   assert.equal(r.reform.floorApplied, true);
 });
 
-test("the minimum tax is not flagged when the normal scale already exceeds it", function () {
+test("the minimum tax is not flagged when the normal rate already exceeds it", function () {
   var r = T.cgtEstimate(Object.assign({}, base, { saleDate: "2028-01-01", v27: 1000000 }), settings);
   assert.equal(r.reform.floorApplied, false);
 });
@@ -254,7 +247,7 @@ test("the minimum tax is not flagged when the normal scale already exceeds it", 
 test("indexation cannot turn a gain into a loss", function () {
   var r = T.cgtEstimate(
     { owner: "individual", purchaseDate: "2027-08-01", purchasePrice: 1000000, saleDate: "2029-08-01", salePrice: 1010000 },
-    { otherIncome: 100000, cpiPct: 2.5, sellingCostPct: 0 }
+    { taxRatePct: 37, cpiPct: 2.5, sellingCostPct: 0 }
   );
   assert.equal(r.reform.postGain, 0);
 });
@@ -266,12 +259,12 @@ test("new build takes the cheaper of the two regimes", function () {
   assert.ok(r.reform.tax <= r.currentLaw.tax + 0.01);
 });
 
-test("portfolio totals skip unready rows and flag missing income", function () {
+test("portfolio totals skip unready rows and flag a missing tax rate", function () {
   var a = T.cgtEstimate(base, settings);
   var b = T.cgtEstimate({ owner: "individual" }, settings);
   var t = T.cgtPortfolio([a, b]);
   assert.equal(t.count, 1);
-  near(t.currentTax, 74950, 1);
-  var t2 = T.cgtPortfolio([T.cgtEstimate(base, { otherIncome: null })]);
-  assert.equal(t2.needsIncome, true);
+  near(t.currentTax, 180000 * 0.37, 0.01);
+  var t2 = T.cgtPortfolio([T.cgtEstimate(base, { taxRatePct: null })]);
+  assert.equal(t2.needsRate, true);
 });

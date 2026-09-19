@@ -211,26 +211,6 @@ var pcTax = (function () {
     return { groups: out, totalTax: totalTax, missingState: missingState, unmodelled: unmodelled, missingValue: missingValue };
   }
 
-  /* ---- income tax (for the tax on a gain) ----------------------------- */
-
-  /* resident rates, excluding Medicare. Bottom rate is 15% for 2026-27 and
-     14% from 1 July 2027 (legislated); above $45k it makes no difference. */
-  function scaleTax(income, dateISO) {
-    var bottom = dateISO >= REFORM_DATE ? 0.14 : 0.15;
-    var t = 0;
-    var i = Math.max(0, income);
-    if (i > 18200) t += (Math.min(i, 45000) - 18200) * bottom;
-    if (i > 45000) t += (Math.min(i, 135000) - 45000) * 0.30;
-    if (i > 135000) t += (Math.min(i, 190000) - 135000) * 0.37;
-    if (i > 190000) t += (i - 190000) * 0.45;
-    return t;
-  }
-  var MEDICARE = 0.02;
-
-  function personalTaxOnTop(other, add, dateISO) {
-    return scaleTax(other + add, dateISO) - scaleTax(other, dateISO) + add * MEDICARE;
-  }
-
   /* ---- capital gains tax ---------------------------------------------- */
 
   function ms(iso) { return Date.parse(iso + "T00:00:00Z"); }
@@ -249,17 +229,17 @@ var pcTax = (function () {
   }
 
   /* tax on a taxable amount for one owner type */
-  function taxOn(owner, amount, otherIncome, dateISO) {
+  function taxOn(owner, amount, ratePct) {
     if (amount <= 0) return 0;
     if (owner === "company") return amount * 0.30;
     if (owner === "super") return amount * 0.15;
-    if (otherIncome == null) return null;
-    return personalTaxOnTop(otherIncome, amount, dateISO);
+    if (ratePct == null) return null;
+    return amount * ratePct / 100;
   }
 
   /* p: { owner, purchaseDate, purchasePrice, acqCosts, improvements,
           worksClaimed, saleDate, salePrice, newBuild, v27 }
-     s: { otherIncome (number|null), cpiPct, sellingCostPct } */
+     s: { taxRatePct (marginal rate incl. Medicare, number|null), cpiPct, sellingCostPct } */
   function cgtEstimate(p, s) {
     var owner = p.owner || "individual";
     var missing = [];
@@ -278,11 +258,11 @@ var pcTax = (function () {
     /* the ATO leaves out both the day of acquisition and the day of the CGT
        event, so a sale exactly on the anniversary is still short of 12 months */
     var over12 = ms(saleDate) > ms(addYearISO(p.purchaseDate));
-    var other = s.otherIncome == null || !isFinite(s.otherIncome) ? null : s.otherIncome;
+    var rate = s.taxRatePct == null || !isFinite(s.taxRatePct) ? null : s.taxRatePct;
 
     var res = {
       ready: true, owner: owner, saleDate: saleDate, costBase: costBase, sellingCosts: sellingCosts,
-      proceeds: proceeds, gain: gain, over12: over12, needsIncome: false, reform: null,
+      proceeds: proceeds, gain: gain, over12: over12, needsRate: false, reform: null,
       preCgt: ms(p.purchaseDate) < ms(PRE_CGT_DATE),
       inputs: {
         purchasePrice: p.purchasePrice, acqCosts: p.acqCosts || 0, improvements: p.improvements || 0,
@@ -305,8 +285,8 @@ var pcTax = (function () {
 
     var disc = currentDiscount(owner, over12);
     var taxable = gain * (1 - disc);
-    var tax = taxOn(owner, taxable, other, saleDate);
-    if (tax == null) res.needsIncome = true;
+    var tax = taxOn(owner, taxable, rate);
+    if (tax == null) res.needsRate = true;
     res.currentLaw = { discountPct: disc * 100, taxableGain: taxable, tax: tax };
 
     var reformApplies = ms(saleDate) >= ms(REFORM_DATE) && over12 && (owner === "individual" || owner === "trust");
@@ -336,13 +316,12 @@ var pcTax = (function () {
 
     var amount = pre * 0.5 + post;
     var reformTax, floorApplied = false;
-    var base = taxOn(owner, amount, other, saleDate);
+    var base = taxOn(owner, amount, rate);
     if (base == null) { reformTax = null; }
     else {
-      var scaled = base - amount * MEDICARE;
       var minTax = amount * 0.30;
-      floorApplied = minTax > scaled;
-      reformTax = Math.max(scaled, minTax) + amount * MEDICARE;
+      floorApplied = minTax > base;
+      reformTax = Math.max(base, minTax);
     }
 
     var reform = {
@@ -362,16 +341,16 @@ var pcTax = (function () {
   }
 
   function cgtPortfolio(items) {
-    var current = 0, reform = 0, gain = 0, count = 0, needsIncome = false;
+    var current = 0, reform = 0, gain = 0, count = 0, needsRate = false;
     items.forEach(function (r) {
       if (!r || !r.ready) return;
       count++;
       if (r.gain > 0) gain += r.gain;
-      if (r.needsIncome) { needsIncome = true; return; }
+      if (r.needsRate) { needsRate = true; return; }
       current += r.currentLaw.tax || 0;
       reform += (r.reform && r.reform.tax != null ? r.reform.tax : r.currentLaw.tax) || 0;
     });
-    return { count: count, gain: gain, currentTax: current, reformTax: reform, needsIncome: needsIncome };
+    return { count: count, gain: gain, currentTax: current, reformTax: reform, needsRate: needsRate };
   }
 
   return {
@@ -381,7 +360,6 @@ var pcTax = (function () {
     LAND: LAND,
     landTax: landTax,
     landTaxPortfolio: landTaxPortfolio,
-    scaleTax: scaleTax,
     cgtEstimate: cgtEstimate,
     cgtPortfolio: cgtPortfolio,
     todayISO: todayISO

@@ -62,7 +62,7 @@ var pcPortfolio = (function () {
 
   function cgtSettingsFrom(s) {
     return {
-      otherIncome: s && s.other_income != null ? s.other_income : null,
+      taxRatePct: s && s.tax_rate_pct != null ? s.tax_rate_pct : null,
       cpiPct: s && s.cpi_pct != null ? s.cpi_pct : 2.5,
       sellingCostPct: s && s.selling_cost_pct != null ? s.selling_cost_pct : 2
     };
@@ -118,7 +118,7 @@ var pcPortfolio = (function () {
         if (cgt.ready) {
           sale.proceeds = cgt.proceeds;
           if (loan != null) sale.cashBeforeTax = cgt.proceeds - loan;
-          if (!cgt.needsIncome && cgt.currentLaw.tax != null) {
+          if (!cgt.needsRate && cgt.currentLaw.tax != null) {
             sale.tax = cgt.currentLaw.tax;
             if (loan != null) sale.cashIfSold = cgt.proceeds - loan - cgt.currentLaw.tax;
             if (cgt.reform && cgt.reform.tax != null) {
@@ -147,7 +147,7 @@ var pcPortfolio = (function () {
           id: m.id, name: m.name, state: m.state, owner: m.owner,
           landValue: pos(props[i].land_value) || 0, waMetro: !!props[i].wa_metro
         };
-      }), settings.other_land || {});
+      }), {});
       landTax.groups.forEach(function (g) {
         g.properties.forEach(function (gp) {
           metrics.forEach(function (m) { if (m.id === gp.id) m.landTaxShare = gp.share; });
@@ -195,7 +195,7 @@ var pcPortfolio = (function () {
       landTax: landTax ? landTax.totalTax : null,
       cgtCurrent: cgtTotals ? cgtTotals.currentTax : null,
       cgtReform: cgtTotals ? cgtTotals.reformTax : null,
-      cgtNeedsIncome: cgtTotals ? cgtTotals.needsIncome : false,
+      cgtNeedsRate: cgtTotals ? cgtTotals.needsRate : false,
       soldCount: sold.length,
       cashIfSold: sold.reduce(function (a, m) { return a + m.sale.cashIfSold; }, 0),
       grossYield: value > 0 && flowed.length === counted.length && rent > 0 ? rent / value * 100 : null

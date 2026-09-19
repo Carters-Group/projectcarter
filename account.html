@@ -227,7 +227,21 @@
               <div class="acct-debt-goal" id="portfolioIfSold" hidden>
                 <p class="acct-eyebrow">If you sold everything</p>
                 <div class="acct-overview acct-overview--modes" id="portfolioIfSoldStats"></div>
-                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are under Tax position below.</p>
+                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are under Tax and land tax below.</p>
+              </div>
+
+              <div class="acct-debt-goal" id="portfolioTax">
+                <p class="acct-eyebrow">Tax and land tax</p>
+                <p class="field-hint">Land tax by state and capital gains tax if you sold, built from the tax details on each property below. Estimates only, not tax advice.</p>
+                <p class="acct-msg" id="taxMsg" hidden></p>
+                <div class="acct-plan__row acct-plan__row--aligned acct-plan__row--two">
+                  <div class="field"><label for="taxRate">Your marginal tax rate <span>(including Medicare, used to tax a sale)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="47" /></div></div>
+                  <div class="field"><label for="taxSellPct">Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
+                </div>
+                <div class="acct-property__actions">
+                  <button type="button" class="btn btn-accent btn-sm" id="taxSaveSettings">Save tax settings</button>
+                </div>
+                <div id="taxBody"></div>
               </div>
 
               <div id="portfolioGaps" hidden></div>
@@ -319,33 +333,6 @@
             <div class="acct-property__actions acct-addprop">
               <button type="button" class="btn btn-ghost btn-sm" id="leaseAddPropertyBtn">Add a property</button>
             </div>
-          </div>
-
-          <div class="card acct-card acct-dash-tax" id="acctTaxCard">
-            <div class="acct-card-head">
-              <h2 class="calc-subhead">Tax position</h2>
-            </div>
-            <p class="field-hint">Estimated land tax by state and capital gains tax if you sold, built from the tax details on each property above. Estimates only, not tax advice.</p>
-            <p class="acct-msg" id="taxMsg" hidden></p>
-
-            <details class="acct-subdetails" id="taxSettingsBox">
-              <summary>Your tax settings <span class="acct-subdetails__hint">income, inflation, other land</span></summary>
-              <div class="acct-subdetails__body">
-                <div class="acct-plan__row acct-plan__row--aligned">
-                  <div class="field"><label>Your other taxable income per year <span>(excluding these gains, used to tax a sale)</span></label><div class="input-money"><input type="text" inputmode="numeric" id="taxOtherIncome" autocomplete="off" placeholder="0" /></div></div>
-                  <div class="field"><label>Inflation (CPI) assumption <span>(indexation after 1 July 2027)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxCpi" autocomplete="off" placeholder="2.5" /></div></div>
-                  <div class="field"><label>Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
-                </div>
-                <p class="acct-subhead">Other taxable land you hold in your own name</p>
-                <p class="field-hint">Land tax is worked out on everything you own in a state, so investment land outside this register still counts. Enter its total unimproved value per state (leave your own home out, it is normally exempt).</p>
-                <div class="acct-plan__row acct-taxland" id="taxOtherLand"></div>
-                <div class="acct-property__actions">
-                  <button type="button" class="btn btn-accent btn-sm" id="taxSaveSettings">Save settings</button>
-                </div>
-              </div>
-            </details>
-
-            <div id="taxBody"></div>
           </div>
 
           <div class="acct-dash-quick" id="acctQuickCol">
@@ -932,7 +919,7 @@
         gapLine("Add an interest rate: ", m.rate),
         gapLine("Add a lease with a rent figure: ", m.rent),
         gapLine("Add the purchase date and price to work out capital gains tax: ", noPurchase),
-        t.cgtNeedsIncome ? "Add your other taxable income under Tax position to include capital gains tax." : null
+        t.cgtNeedsRate ? "Add your marginal tax rate under Tax and land tax to include capital gains tax." : null
       ].filter(Boolean);
       gapsEl.innerHTML = "";
       if (gaps.length) {
@@ -960,7 +947,7 @@
     /* ---- Your properties (the register) ---------------------------------
        The single source of truth for the portfolio: one record per property,
        each carrying zero or more leases. Everything on the portfolio card
-       and the Tax position card is derived from these (see portfolio.js). */
+       and the tax section is derived from these (see portfolio.js). */
     var REVIEW_FREQUENCIES = [
       ["", "Not set"], ["annual", "Annual"], ["2-yearly", "2-yearly"],
       ["3-yearly", "3-yearly"], ["market", "Market review"], ["other", "Other"]
@@ -1200,7 +1187,7 @@
        sold" scenario. Each property is entered once here; every portfolio
        figure (see portfolio.js) is derived from these fields. Tax fields
        use data-t (not data-f) so they never mix with the lease rows. */
-    var TAX_DEFAULTS = { other_income: null, cpi_pct: 2.5, selling_cost_pct: 2, other_land: {} };
+    var TAX_DEFAULTS = { tax_rate_pct: null, cpi_pct: 2.5, selling_cost_pct: 2 };
     var taxSettings = Object.assign({}, TAX_DEFAULTS);
     var taxSettingsProblem = "";
     /* the latest pcPortfolio.build() result - rebuilt whenever the register
@@ -1349,7 +1336,7 @@
       var head = "Sold for " + fmtMoney(s.price) + ", you keep " + fmtMoney(c.proceeds) + " after selling costs";
       if (m.loan != null) head += " and owe " + fmtMoney(m.loan) + " to the lender";
       if (c.loss) return head + ". There is no gain (a loss of " + fmtMoney(c.loss) + "), so no capital gains tax" + (m.loan != null ? ", leaving " + fmtMoney(c.proceeds - m.loan) + " in your hand" : "") + ".";
-      if (c.needsIncome) return head + ". The capital gain is " + fmtMoney(c.gain) + ". Add your other taxable income under Tax position to see the tax and your cash in hand.";
+      if (c.needsRate) return head + ". The capital gain is " + fmtMoney(c.gain) + ". Add your marginal tax rate under Tax and land tax to see the tax and your cash in hand.";
       var out = head + ". Capital gains tax is " + fmtMoney(c.currentLaw.tax);
       out += s.cashIfSold != null ? ", leaving " + fmtMoney(s.cashIfSold) + " in your hand." : ".";
       if (c.reform && c.reform.tax != null) {
@@ -1567,11 +1554,10 @@
       });
     }
 
-    /* ---- Tax position card (land tax by state + CGT if sold) ------------
+    /* ---- Tax and land tax section (land tax by state + CGT if sold) ------------
        Reads the saved properties above plus the portfolio-level settings.
        Rebuilt whenever the register reloads or the settings are saved. */
     var taxMsgEl = document.getElementById("taxMsg");
-    var taxBoxAutoOpened = false;
 
     function tEl(tag, cls, text) {
       var e = document.createElement(tag);
@@ -1605,28 +1591,9 @@
       return m;
     }
 
-    function buildTaxOtherLandInputs() {
-      var wrap = document.getElementById("taxOtherLand");
-      wrap.innerHTML = "";
-      Object.keys(pcTax.LAND).forEach(function (st) {
-        var f = tEl("div", "field");
-        f.innerHTML = '<label>' + st + '</label><div class="input-money"><input type="text" inputmode="numeric" data-land="' + st + '" placeholder="0" autocomplete="off" /></div>';
-        wrap.appendChild(f);
-      });
-    }
-
     function fillTaxSettingsInputs() {
-      document.getElementById("taxOtherIncome").value = taxSettings.other_income == null ? "" : taxSettings.other_income;
-      document.getElementById("taxCpi").value = taxSettings.cpi_pct == null ? "" : taxSettings.cpi_pct;
+      document.getElementById("taxRate").value = taxSettings.tax_rate_pct == null ? "" : taxSettings.tax_rate_pct;
       document.getElementById("taxSellPct").value = taxSettings.selling_cost_pct == null ? "" : taxSettings.selling_cost_pct;
-      document.querySelectorAll("[data-land]").forEach(function (i) {
-        var v = (taxSettings.other_land || {})[i.getAttribute("data-land")];
-        i.value = v ? v : "";
-      });
-      if (taxSettings.other_income == null && !taxBoxAutoOpened) {
-        taxBoxAutoOpened = true;
-        document.getElementById("taxSettingsBox").open = true;
-      }
     }
 
     function renderLandTaxSection() {
@@ -1639,7 +1606,7 @@
           owner: p.ownership_type || "individual", landValue: Number(p.land_value) || 0, waMetro: !!p.wa_metro
         };
       });
-      var res = pcTax.landTaxPortfolio(props, taxSettings.other_land || {});
+      var res = pcTax.landTaxPortfolio(props, {});
 
       if (!res.groups.length) {
         sec.appendChild(tEl("p", "acct-empty", "Add a state and the unimproved land value to a property (under Tax details) to estimate its land tax."));
@@ -1674,13 +1641,6 @@
             tr.appendChild(tEl("td", "is-num", fmtMoney(p.share)));
             tb.appendChild(tr);
           });
-          if (g.otherLand > 0) {
-            var tr2 = tEl("tr");
-            tr2.appendChild(tEl("td", null, "Other land (not in this register)"));
-            tr2.appendChild(tEl("td", "is-num", fmtMoney(g.otherLand)));
-            tr2.appendChild(tEl("td", "is-num", fmtMoney(g.total > 0 ? g.tax * g.otherLand / g.total : 0)));
-            tb.appendChild(tr2);
-          }
           table.appendChild(tb);
           box.appendChild(table);
 
@@ -1734,7 +1694,7 @@
         var cl = r.currentLaw;
         row("Current law: discount", r.over12 ? cl.discountPct.toFixed(cl.discountPct % 1 ? 1 : 0) + "%" : "None (held 12 months or less)");
         row("Current law: taxable gain", fmtMoney(cl.taxableGain));
-        row("Current law: estimated tax", r.needsIncome ? "Add your income" : fmtMoney(cl.tax), true);
+        row("Current law: estimated tax", r.needsRate ? "Add your tax rate" : fmtMoney(cl.tax), true);
         if (r.reform) {
           var rf = r.reform;
           row("1 July 2027 value" + (rf.v27Estimated ? " (estimated)" : ""), rf.v27 == null ? "Not applicable" : fmtMoney(rf.v27));
@@ -1742,8 +1702,8 @@
           row("Cost base indexed by CPI at " + rf.cpiPct + "% to the sale", fmtMoney(rf.indexedBase));
           row("Real gain after 1 July 2027", fmtMoney(rf.postGain));
           row("Amount taxed (discounted pre-2027 gain plus real gain)", fmtMoney(rf.taxableAmount));
-          row("30% minimum tax", rf.tax == null ? "Add your income" : (rf.floorApplied ? "Applies, lifts the tax" : "Not needed, your normal rate is higher"));
-          row("Announced rules: estimated tax" + (rf.election ? " (new build, cheaper option)" : ""), rf.tax == null ? "Add your income" : fmtMoney(rf.tax), true);
+          row("30% minimum tax", rf.tax == null ? "Add your tax rate" : (rf.floorApplied ? "Applies, lifts the tax" : "Not needed, your normal rate is higher"));
+          row("Announced rules: estimated tax" + (rf.election ? " (new build, cheaper option)" : ""), rf.tax == null ? "Add your tax rate" : fmtMoney(rf.tax), true);
         }
       }
       if (m && m.loan != null) {
@@ -1806,11 +1766,11 @@
         sec.appendChild(tEl("p", "acct-empty", "Add a purchase date, purchase price and current value to a property to estimate its capital gains tax."));
       } else {
         var anyReform = ready.some(function (x) { return x.r.reform; });
-        var noIncome = totals.needsIncome;
+        var noRate = totals.needsRate;
         var stats = [["Estimated capital gain", fmtMoney(totals.gain)]];
-        stats.push([anyReform ? "Tax under current law" : "Estimated tax", noIncome ? "Add your income" : fmtMoney(totals.currentTax)]);
+        stats.push([anyReform ? "Tax under current law" : "Estimated tax", noRate ? "Add your tax rate" : fmtMoney(totals.currentTax)]);
         if (anyReform) {
-          stats.push(["Tax under announced 2027 rules", noIncome ? "Add your income" : fmtMoney(totals.reformTax)]);
+          stats.push(["Tax under announced 2027 rules", noRate ? "Add your tax rate" : fmtMoney(totals.reformTax)]);
         }
         sec.appendChild(tStats(stats));
 
@@ -1836,7 +1796,7 @@
           tr.appendChild(nameTd);
           tr.appendChild(tEl("td", null, fmtDate(r.saleDate)));
           tr.appendChild(tEl("td", "is-num", r.loss ? "Loss " + fmtMoney(r.loss) : fmtMoney(r.gain)));
-          tr.appendChild(tEl("td", "is-num", r.needsIncome ? "—" : fmtMoney(r.currentLaw.tax)));
+          tr.appendChild(tEl("td", "is-num", r.needsRate ? "—" : fmtMoney(r.currentLaw.tax)));
           var reformCell = "n/a";
           if (r.reform) reformCell = r.reform.tax == null ? "—" : fmtMoney(r.reform.tax);
           else if (r.saleDate >= pcTax.REFORM_DATE) reformCell = "Unchanged";
@@ -1848,7 +1808,7 @@
 
         ready.forEach(function (x) { sec.appendChild(workingsEl(x.p.name || "Untitled property", x.r, x.m)); });
 
-        if (noIncome) sec.appendChild(tNotes(["Add your other taxable income under \"Your tax settings\" above to see the tax on an individual's or trust's gain."]));
+        if (noRate) sec.appendChild(tNotes(["Add your marginal tax rate above to see the tax on an individual's or trust's gain."]));
       }
 
       if (notReady.length) {
@@ -1862,8 +1822,8 @@
         "Announced, not yet law: the 2026-27 Budget replaces the 50% CGT discount from 1 July 2027 with cost-base indexation (by CPI) plus a 30% minimum tax on the gain. " +
         "For an asset held across that date, the gain up to 1 July 2027 keeps the 50% discount and only the later gain is indexed. Treat the \"announced 2027 rules\" column as a guide until the legislation passes."));
       sec.appendChild(tEl("p", "acct-tax-fine",
-        "Assumptions: each sale is taxed as its own year on top of your other taxable income (Medicare levy included); a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
-        "the 30% minimum applies to the taxable gain. Companies get no discount or indexation (30%); a super fund keeps its one-third discount at 15%. " +
+        "Assumptions: individuals and trusts are taxed at the flat marginal rate you enter above (Medicare levy included), with the cost base indexed at a 2.5% CPI assumption under the announced rules; a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
+        "the 30% minimum applies to the taxable gain, so a lower rate is lifted to 30%. Companies get no discount or indexation (30%); a super fund keeps its one-third discount at 15%. " +
         "It leaves out the main residence exemption, foreign-resident rules, carried-forward losses and other concessions. Not tax advice."));
       return sec;
     }
@@ -1896,20 +1856,11 @@
       updateStartHere(leaseProperties.length);
     }
 
-    buildTaxOtherLandInputs();
-
     document.getElementById("taxSaveSettings").addEventListener("click", function () {
-      var otherLand = {};
-      document.querySelectorAll("[data-land]").forEach(function (i) {
-        var v = taxNum(i.value);
-        if (v) otherLand[i.getAttribute("data-land")] = v;
-      });
       setMsg(taxMsgEl, "Saving…");
       window.pcAuth.saveTaxSettings({
-        other_income: taxNum(document.getElementById("taxOtherIncome").value),
-        cpi_pct: taxNum(document.getElementById("taxCpi").value),
-        selling_cost_pct: taxNum(document.getElementById("taxSellPct").value),
-        other_land: otherLand
+        tax_rate_pct: taxNum(document.getElementById("taxRate").value),
+        selling_cost_pct: taxNum(document.getElementById("taxSellPct").value)
       }).then(function (res) {
         if (res.error) { setMsg(taxMsgEl, taxErrMsg(res.error), "error"); return; }
         taxSettings = Object.assign({}, TAX_DEFAULTS, res.data);
