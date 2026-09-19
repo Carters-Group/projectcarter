@@ -2107,3 +2107,6 @@ h1, h2, h3 {
 .pm-first .intro-body { margin-top: clamp(22px, 3vw, 34px); }
 .pm-first .pm-mock__body { gap: 16px; }
 .pm-first .pm-intro { align-items: start; }
+.pm-mock__bar span:nth-child(1) { background: #ff5f57; }
+.pm-mock__bar span:nth-child(2) { background: #febc2e; }
+.pm-mock__bar span:nth-child(3) { background: #28c840; }
