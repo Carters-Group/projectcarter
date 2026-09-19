@@ -910,7 +910,7 @@
           ["Cash flow / yr", fmtSignedMoney(t.cashFlow)],
           ["Cash flow / wk", fmtSignedMoney(t.cashFlowWeekly)]
         ];
-        if (t.grossYield != null) cf.push(["Gross yield", fmtPct(t.grossYield)]);
+        if (t.grossYield != null) cf.push([t.yieldKind === "net" ? "Net yield on value" : (t.yieldKind === "mixed" ? "Yield on value" : "Gross yield on value"), fmtPct(t.grossYield)]);
         fillStats(document.getElementById("portfolioCashFlowStats"), cf);
         show(cfEl);
       } else { hide(cfEl); }
@@ -1150,7 +1150,7 @@
             row +
               '<div class="field"><label>Term <span>(e.g. "5 years" or "3+3+3")</span></label><input type="text" data-f="term_label" autocomplete="off" /></div>' +
               '<div class="field"><label>Years in occupation <span>(type it or pick, near enough is fine)</span></label><input type="text" inputmode="decimal" data-years list="yearsList" autocomplete="off" placeholder="0" /></div>' +
-              '<div class="field"><label>Annual rent <span>(optional, sharpens the WALE figure)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
+              '<div class="field"><label>Net rent per year <span>(after outgoings, your NOI. Not sure? <a href="net-operating-income-calculator">Use the NOI calculator</a>)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
             '</div>' +
             row +
               '<div class="field"><label>Next market review</label><input type="date" data-f="next_review_date" /></div>' +
@@ -1429,7 +1429,7 @@
           ) +
           fRow(
             fPct("interest_rate", "Interest rate"),
-            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs")
+            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs. On a commercial lease, only what your net rent does not already cover")
           ) +
 
           '<p class="acct-subhead">What it earns</p>' +
@@ -1513,7 +1513,7 @@
       var items = [];
       if (m.value != null) items.push(["Value", fmtMoney(m.value)]);
       if (m.equity != null) { items.push(["Equity", fmtMoney(m.equity)]); items.push(["LVR", fmtPct(m.lvr)]); }
-      if (m.grossYield != null) items.push(["Yield", fmtPct(m.grossYield)]);
+      if (m.grossYield != null) items.push([m.type === "commercial" ? "Net yield" : "Yield", fmtPct(m.grossYield)]);
       if (m.cashFlow != null) items.push(["Cash flow / yr", fmtSignedMoney(m.cashFlow)]);
       if (m.sale.cashIfSold != null) items.push(["Cash if sold", fmtMoney(m.sale.cashIfSold)]);
       return items;
@@ -2222,7 +2222,7 @@
           if (failed) return null;
           var row = { name: c.name, property_type: c.type, current_value: c.value, loan_balance: c.loan };
           if (c.ratePct != null) row.interest_rate = c.ratePct;
-          if (c.runningCosts != null) row.annual_running_costs = c.runningCosts;
+          if (c.runningCosts != null && c.type !== "commercial") row.annual_running_costs = c.runningCosts;
           if (c.state) row.state = c.state;
           if (c.owner) row.ownership_type = c.owner;
           if (c.acqCosts) row.acquisition_costs = c.acqCosts;
@@ -2232,6 +2232,7 @@
             if (!firstId) firstId = res.data.id;
             if (!(c.weeklyRent > 0)) return null;
             var lease = { property_id: res.data.id, annual_rent: c.weeklyRent * 52 };
+            if (c.type === "commercial" && c.runningCosts) lease.annual_rent = Math.max(0, lease.annual_rent - c.runningCosts);
             if (c.type === "residential") { lease.rent_amount = c.weeklyRent; lease.rent_frequency = "weekly"; }
             return window.pcAuth.saveLease(lease);
           });

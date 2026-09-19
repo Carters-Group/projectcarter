@@ -81,7 +81,7 @@ var pcPortfolio = (function () {
     var rent = annualRent(p, today);
 
     var m = {
-      id: p.id, name: p.name || "Untitled property", state: p.state || "", owner: p.ownership_type || "individual",
+      id: p.id, name: p.name || "Untitled property", type: p.property_type === "commercial" ? "commercial" : "residential", state: p.state || "", owner: p.ownership_type || "individual",
       value: value, loan: loan, rate: rate, price: price,
       equity: value != null && loan != null ? value - loan : null,
       lvr: value != null && loan != null ? loan / value * 100 : null,
@@ -198,7 +198,10 @@ var pcPortfolio = (function () {
       cgtNeedsRate: cgtTotals ? cgtTotals.needsRate : false,
       soldCount: sold.length,
       cashIfSold: sold.reduce(function (a, m) { return a + m.sale.cashIfSold; }, 0),
-      grossYield: value > 0 && flowed.length === counted.length && rent > 0 ? rent / value * 100 : null
+      grossYield: value > 0 && flowed.length === counted.length && rent > 0 ? rent / value * 100 : null,
+      /* commercial rent is entered net of outgoings, so its yield is a net yield */
+      yieldKind: flowed.length && flowed.every(function (m) { return m.type === "commercial"; }) ? "net"
+        : (flowed.some(function (m) { return m.type === "commercial"; }) ? "mixed" : "gross")
     };
 
     var names = function (list) { return list.map(function (m) { return m.name; }); };
