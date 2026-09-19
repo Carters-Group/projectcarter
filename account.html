@@ -300,10 +300,15 @@
           <div class="card acct-card acct-dash-leases" id="acctLeaseCard">
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your properties</h2>
-              <button type="button" class="btn btn-ghost btn-sm" id="leaseAddPropertyBtn">Add a property</button>
             </div>
             <p class="field-hint">Enter each property once. Your portfolio figures, land tax and sale position above and below are all worked out from what you put in here, and the calculators can pull your equity from it.</p>
             <p class="acct-msg" id="leaseMsg" hidden></p>
+
+            <div id="leaseProperties"></div>
+
+            <p class="acct-empty" id="leaseEmpty" hidden>
+              No properties yet. Add your first one to see your portfolio, land tax and sale position.
+            </p>
 
             <div id="leaseSummary" hidden>
               <p class="acct-eyebrow">Leases</p>
@@ -311,11 +316,9 @@
               <div id="leaseTimeline" class="acct-lease-timeline"></div>
             </div>
 
-            <div id="leaseProperties"></div>
-
-            <p class="acct-empty" id="leaseEmpty" hidden>
-              No properties yet. Add your first one to see your portfolio, land tax and sale position.
-            </p>
+            <div class="acct-property__actions acct-addprop">
+              <button type="button" class="btn btn-ghost btn-sm" id="leaseAddPropertyBtn">Add a property</button>
+            </div>
           </div>
 
           <div class="card acct-card acct-dash-tax" id="acctTaxCard">
@@ -1231,7 +1234,10 @@
           '<span class="acct-property__name"></span>' +
           '<span class="acct-tag"></span>' +
           '<span class="acct-property__meta"></span>' +
-          '<span class="acct-property__caret" aria-hidden="true"></span>' +
+          '<span class="acct-property__side">' +
+            '<button type="button" class="acct-property__del" data-act="quick-delete" title="Delete this property" aria-label="Delete this property">Delete</button>' +
+            '<span class="acct-property__caret" aria-hidden="true"></span>' +
+          '</span>' +
           '<span class="acct-property__strip" data-strip></span>' +
         '</summary>' +
         '<div class="acct-property__body">' +
@@ -1493,12 +1499,17 @@
         }, 0);
       }
 
-      details.querySelector('[data-act="delete-property"]').addEventListener("click", function () {
+      function deleteThisProperty() {
         if (!window.confirm('Delete "' + (property.name || "this property") + '" and all its leases? This cannot be undone.')) return;
         window.pcAuth.deleteProperty(property.id).then(function (res) {
-          if (res.error) { setMsg(msgEl, res.error.message, "error"); return; }
+          if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
           loadLeaseRegister();
         });
+      }
+      details.querySelector('[data-act="delete-property"]').addEventListener("click", deleteThisProperty);
+      details.querySelector('[data-act="quick-delete"]').addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        deleteThisProperty();
       });
 
       details.querySelector('[data-act="save"]').addEventListener("click", function () {
