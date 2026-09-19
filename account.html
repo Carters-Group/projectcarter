@@ -2372,6 +2372,11 @@
           if (r.top <= line && r.bottom > line && r.top > bestTop) { best = a; bestTop = r.top; }
         });
         links.forEach(function (a) { a.classList.toggle("is-active", a === best); });
+        /* show the desktop rail only while the dashboard cards are on screen */
+        var first = document.getElementById("acctPortfolioCard");
+        var last = document.getElementById("acctDangerCard");
+        var shown = first && last && first.getBoundingClientRect().top <= window.innerHeight * 0.5 && last.getBoundingClientRect().bottom > window.innerHeight * 0.3;
+        nav.classList.toggle("is-shown", !!shown);
         /* on the phone bar, keep the current pill in view */
         if (best && getComputedStyle(nav).position === "sticky" && nav.scrollWidth > nav.clientWidth) {
           nav.scrollLeft = best.offsetLeft - (nav.clientWidth - best.offsetWidth) / 2;
