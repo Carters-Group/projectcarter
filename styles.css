@@ -1739,11 +1739,9 @@ h1, h2, h3 {
 /* signed-in dashboard layout - desktop only. Below the breakpoint everything
    falls back to the plain stacked flow (DOM order) it always had, so mobile
    is untouched. */
-#acctWrap.is-signedin { max-width: 1180px; }
-/* the hero heading/copy use the site's default (wider) max-width, which
-   otherwise sits ~30px further left than the signed-in dashboard below it
-   at wide viewports - match it so both line up on the same left edge. */
-.acct-hero-inner { max-width: 1180px; }
+/* same width as the site header and every other page (.wrap), so the hero,
+   the password bar and the cards all share the header's left edge */
+#acctWrap.is-signedin { max-width: var(--maxw); }
 @media (min-width: 901px) {
   .acct-dashboard:not([hidden]) {
     display: grid;
