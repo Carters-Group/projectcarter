@@ -79,7 +79,7 @@
       phone: (currentProfile && currentProfile.phone) || meta.phone || "",
       occupation: (currentProfile && currentProfile.occupation) || "",
       avatar_url: (currentProfile && currentProfile.avatar_url) || "",
-      has_password: !!(currentProfile && currentProfile.has_password),
+      has_password: !!((currentProfile && currentProfile.has_password) || meta.has_password),
       subscription_status: (currentProfile && currentProfile.subscription_status) || "free"
     };
   }
@@ -358,7 +358,13 @@
 
     signInWithPassword: function (email, password) {
       if (!CONFIGURED) return Promise.resolve({ error: { message: "Accounts are not set up yet." } });
-      return client.auth.signInWithPassword({ email: email, password: password });
+      return client.auth.signInWithPassword({ email: email, password: password }).then(function (res) {
+        /* signing in with a password proves there is one, so stop nudging (best effort) */
+        if (!res.error && res.data && res.data.user) {
+          client.from("profiles").update({ has_password: true }).eq("id", res.data.user.id).then(function () {}, function () {});
+        }
+        return res;
+      });
     },
 
     signUpWithPassword: function (email, password, opts) {
@@ -384,12 +390,13 @@
     setPassword: function (newPassword) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
-      return client.auth.updateUser({ password: newPassword }).then(function (res) {
+      return client.auth.updateUser({ password: newPassword, data: { has_password: true } }).then(function (res) {
         if (res.error) return { error: res.error };
         return client.from("profiles").update({ has_password: true }).eq("id", currentUser.id)
           .then(function (r2) {
-            if (!r2.error && currentProfile) currentProfile.has_password = true;
-            return { error: r2.error };
+            if (currentProfile) currentProfile.has_password = true;
+            /* the auth metadata already records it, so a failed profile write is not the visitor's problem */
+            return { error: null };
           });
       });
     },
