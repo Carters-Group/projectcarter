@@ -2120,28 +2120,19 @@ h1, h2, h3 {
 .pm-mock__bar span:nth-child(2) { background: #febc2e; }
 .pm-mock__bar span:nth-child(3) { background: #28c840; }
 
-/* ---- Account page: headings you stop and read -------------------------
-   Card titles are large, centred and blue with a short accent rule; the
-   section titles inside a card are a clear second tier, also centred. */
+/* ---- Account page: clear, left-aligned headings ------------------------
+   Card titles are a step up from the old small caps; section titles inside
+   a card sit one tier below. Both blue, in the display font. */
 .acct-card .calc-subhead {
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  line-height: 1.1;
-  text-align: center;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
   color: var(--accent-2);
-  border-bottom: 0;
-  padding-bottom: 16px;
-  position: relative;
+  padding-bottom: 12px;
 }
-.acct-card .calc-subhead::after {
-  content: ""; display: block; width: 56px; height: 3px;
-  margin: 14px auto 0; background: var(--accent); border-radius: 2px;
-}
-.acct-card-head { flex-direction: column; justify-content: center; gap: 4px; margin-bottom: 10px; }
-.acct-card-head h2 { width: 100%; }
-.acct-card-head__actions { justify-content: center; }
+.acct-card-head h2 { flex: 1 1 auto; }
 
 .acct-debt-goal > .acct-eyebrow,
 .acct-equity-modes > .acct-eyebrow,
@@ -2149,20 +2140,14 @@ h1, h2, h3 {
 .acct-risk-section__title,
 .acct-card .acct-tax-title.calc-subhead {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 2.6vw, 1.75rem);
+  font-size: 1.2rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  line-height: 1.15;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
   text-transform: uppercase;
-  text-align: center;
   color: var(--accent-2);
-  margin: 6px 0 14px;
+  margin: 4px 0 12px;
   padding: 0;
   border: 0;
 }
-.acct-card .acct-tax-title.calc-subhead::after { display: none; }
-.acct-debt-goal > .acct-eyebrow,
-.acct-equity-modes > .acct-eyebrow,
-#leaseSummary > .acct-eyebrow,
-.acct-risk-section__title { padding-top: 22px; border-top: 1px solid var(--line-soft); }
 .acct-subhead { font-size: 13px; color: var(--accent-2); }
