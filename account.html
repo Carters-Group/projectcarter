@@ -1013,6 +1013,20 @@
       return { years: sumWeighted / sumWeight, basis: incomeCapable ? "income" : "count" };
     }
 
+    /* from the leases overview: open that property card, scroll to the lease and flash it */
+    function openPropertyLease(propertyId, leaseId) {
+      var card = document.querySelector('#leaseProperties .acct-property[data-property-id="' + propertyId + '"]');
+      if (!card) return;
+      card.open = true;
+      var row = leaseId ? card.querySelector('.acct-lease-row[data-lease-id="' + leaseId + '"]') : null;
+      var target = row || card;
+      setTimeout(function () {
+        target.scrollIntoView({ block: "center", behavior: "smooth" });
+        target.classList.add("is-flash");
+        setTimeout(function () { target.classList.remove("is-flash"); }, 1800);
+      }, 60);
+    }
+
     function renderLeaseStats(properties) {
       var summaryEl = document.getElementById("leaseSummary");
       var statsEl = document.getElementById("leaseStats");
@@ -1106,6 +1120,11 @@
           var sub = document.createElement("small");
           sub.textContent = line.join(" \u00b7 ") || "No dates or rent entered yet";
           main.appendChild(title); main.appendChild(sub);
+          var edit = document.createElement("button");
+          edit.type = "button"; edit.className = "linklike acct-lease-line__edit"; edit.textContent = "Edit";
+          function openInCard() { openPropertyLease(p.id, l.id); }
+          edit.addEventListener("click", openInCard);
+          main.addEventListener("click", openInCard);
           var del = document.createElement("button");
           del.type = "button"; del.className = "linklike acct-lease-line__del"; del.textContent = "Delete lease";
           del.addEventListener("click", function () {
@@ -1115,7 +1134,10 @@
               loadLeaseRegister();
             });
           });
-          row.appendChild(main); row.appendChild(del);
+          var acts = document.createElement("div");
+          acts.className = "acct-lease-line__acts";
+          acts.appendChild(edit); acts.appendChild(del);
+          row.appendChild(main); row.appendChild(acts);
           body.appendChild(row);
         });
         det.appendChild(body);
@@ -1726,6 +1748,7 @@
             /* Reload either way - the property itself did save even if a
                lease row failed. keepMsg so the reload doesn't clear the
                result message before the visitor sees it. */
+            details.open = false; /* saved: tuck the card away again */
             loadLeaseRegister(true).then(function () {
               if (failed) setMsg(leaseMsgEl, "Property saved, but a lease didn't: " + failed.error.message, "error");
               else setMsg(leaseMsgEl, "Saved.", "ok");
