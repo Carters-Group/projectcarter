@@ -1674,6 +1674,7 @@ h1, h2, h3 {
 .acct-plan__row--aligned { align-items: end; }
 .acct-plan__row--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .acct-plan__row--aligned .field { display: flex; flex-direction: column; justify-content: flex-end; }
+.acct-plan__row--aligned .field[hidden] { display: none; }
 .acct-plan__row--aligned .field label { min-height: 0; margin-bottom: 6px; }
 @media (max-width: 640px) {
   .acct-plan__row { grid-template-columns: 1fr; }

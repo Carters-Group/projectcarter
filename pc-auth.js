@@ -621,7 +621,7 @@
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
       if (!lease.property_id) return Promise.resolve({ error: { message: "Missing property." } });
-      var num = function (v) { v = parseFloat(v); return isFinite(v) ? v : null; };
+      var num = function (v) { v = parseFloat(String(v == null ? "" : v).replace(/[^0-9.\-]/g, "")); return isFinite(v) ? v : null; };
       var date = function (v) { return v || null; };
       var row = {
         user_id: currentUser.id,

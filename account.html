@@ -948,10 +948,6 @@
        The single source of truth for the portfolio: one record per property,
        each carrying zero or more leases. Everything on the portfolio card
        and the tax section is derived from these (see portfolio.js). */
-    var REVIEW_FREQUENCIES = [
-      ["", "Not set"], ["annual", "Annual"], ["2-yearly", "2-yearly"],
-      ["3-yearly", "3-yearly"], ["market", "Market review"], ["other", "Other"]
-    ];
     var MAX_PROPERTIES = 40;
     var MAX_LEASES_PER_PROPERTY = 12;
     var leaseProperties = [];
@@ -1061,30 +1057,32 @@
        hard expiry, so it gets its own short row rather than a cut-down
        version of the commercial one. */
     function leaseRowHTML(propertyType) {
+      var head =
+        '<div class="acct-lease-row__head">' +
+          '<span class="acct-lease-row__title"></span>' +
+          '<button type="button" class="linklike" data-act="remove-lease">Remove</button>' +
+        '</div>';
+      var row = '<div class="acct-plan__row acct-plan__row--aligned">';
       if (propertyType === "commercial") {
         return (
-          '<div class="acct-lease-row">' +
-            '<div class="acct-lease-row__head">' +
-              '<span class="acct-lease-row__title"></span>' +
-              '<button type="button" class="linklike" data-act="remove-lease">Remove</button>' +
-            '</div>' +
-            '<div class="acct-plan__row">' +
+          '<div class="acct-lease-row">' + head +
+            row +
               '<div class="field"><label>Tenant name</label><input type="text" data-f="tenant_name" autocomplete="off" /></div>' +
               '<div class="field"><label>Lease start</label><input type="date" data-f="lease_start" /></div>' +
               '<div class="field"><label>Lease expiry</label><input type="date" data-f="lease_expiry" /></div>' +
             '</div>' +
-            '<div class="acct-plan__row">' +
+            row +
               '<div class="field"><label>Term <span>(e.g. "5 years" or "3+3+3")</span></label><input type="text" data-f="term_label" autocomplete="off" /></div>' +
               '<div class="field"><label>In occupation since <span>(optional, if renewed)</span></label><input type="date" data-f="in_occupation_since" /></div>' +
-              '<div class="field"><label>Annual rent <span>(optional - sharpens the WALE figure)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
+              '<div class="field"><label>Annual rent <span>(optional, sharpens the WALE figure)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
             '</div>' +
-            '<div class="acct-plan__row">' +
+            row +
               '<div class="field"><label>Next market review</label><input type="date" data-f="next_review_date" /></div>' +
-              '<div class="field"><label>Review frequency</label><select data-f="review_frequency"></select></div>' +
-              '<div class="field"><label>Option exercise-by</label><input type="date" data-f="option_exercise_by" /></div>' +
+              '<div class="field"><label>Annual increase</label><div class="input-pct"><input type="text" inputmode="decimal" data-f="review_frequency" autocomplete="off" placeholder="0" /></div></div>' +
+              '<div class="field"><label>Option exercise by</label><select data-opt-months><option value="">Not set</option><option value="3">3 months before lease end</option><option value="6">6 months before lease end</option></select></div>' +
             '</div>' +
-            '<div class="acct-plan__row">' +
-              '<div class="field"><label>Number of options</label><input type="text" inputmode="numeric" data-f="option_count" autocomplete="off" /></div>' +
+            '<p class="field-hint">The market review date fills in from the lease expiry, since reviews usually fall at the option term. Change it if yours is different.</p>' +
+            row +
               '<div class="field"><label>Length of each option <span>(years)</span></label><input type="text" inputmode="decimal" data-f="option_length_years" autocomplete="off" /></div>' +
               '<div class="field"><label>Notes</label><input type="text" data-f="notes" autocomplete="off" /></div>' +
             '</div>' +
@@ -1092,17 +1090,13 @@
         );
       }
       return (
-        '<div class="acct-lease-row">' +
-          '<div class="acct-lease-row__head">' +
-            '<span class="acct-lease-row__title"></span>' +
-            '<button type="button" class="linklike" data-act="remove-lease">Remove</button>' +
+        '<div class="acct-lease-row">' + head +
+          row +
+            '<div class="field"><label>Lease start date</label><input type="date" data-f="lease_start" /></div>' +
+            '<div class="field" data-expiry-field><label>Lease end date <span>(or renewal date)</span></label><input type="date" data-f="lease_expiry" /></div>' +
+            '<div class="field"><label>Years in occupation <span>(how long the occupant has been there)</span></label><input type="text" inputmode="decimal" data-years autocomplete="off" placeholder="0" /></div>' +
           '</div>' +
-          '<div class="acct-plan__row">' +
-            '<div class="field"><label>First move-in date</label><input type="date" data-f="in_occupation_since" /></div>' +
-            '<div class="field"><label>Lease start</label><input type="date" data-f="lease_start" /></div>' +
-            '<div class="field" data-expiry-field><label>Lease expiry <span>(or renewal date)</span></label><input type="date" data-f="lease_expiry" /></div>' +
-          '</div>' +
-          '<div class="acct-plan__row">' +
+          row +
             '<div class="field"><label>Rent</label><div class="acct-rent-combo"><div class="input-money"><input type="text" inputmode="numeric" data-f="rent_amount" placeholder="0" /></div><select data-f="rent_frequency"><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div></div>' +
             '<div class="field"><label>Lease type</label><label class="acct-periodic-check"><input type="checkbox" data-f="is_periodic" /><span class="acct-periodic-check__text"><strong>Periodic lease</strong><small>Month-to-month, no fixed end date</small></span></label></div>' +
           '</div>' +
@@ -1120,12 +1114,76 @@
        so a property-type switch can rebuild the row list under the new
        template without losing whatever the visitor already typed into the
        fields both templates share (tenant name, dates, notes). */
+    /* thousands separators for money inputs; keeps up to two decimals */
+    function withCommas(v) {
+      var t = String(v == null ? "" : v).replace(/[^0-9.]/g, "");
+      var parts = t.split(".");
+      var whole = parts[0].replace(/([0-9])(?=([0-9]{3})+$)/g, "$1,");
+      return parts.length > 1 ? whole + "." + parts.slice(1).join("").slice(0, 2) : whole;
+    }
+    /* reformat as they type, keeping the caret after the same digit */
+    function commaInputHandler(e) {
+      var el = e.target;
+      if (!el || el.tagName !== "INPUT" || !el.parentNode || !el.parentNode.classList.contains("input-money")) return;
+      var caret = el.selectionStart;
+      var digitsBefore = el.value.slice(0, caret == null ? el.value.length : caret).replace(/[^0-9.]/g, "").length;
+      var next = withCommas(el.value);
+      if (next === el.value) return;
+      el.value = next;
+      var pos = 0, seen = 0;
+      while (pos < next.length && seen < digitsBefore) { if (/[0-9.]/.test(next.charAt(pos))) seen++; pos++; }
+      try { el.setSelectionRange(pos, pos); } catch (err) { /* not focusable, ignore */ }
+    }
+
+    /* the % sits just after the number, so measure the number's width */
+    var pctCanvas = document.createElement("canvas").getContext("2d");
+    function positionPct(root) {
+      (root || document).querySelectorAll(".input-pct").forEach(function (wrap) {
+        var el = wrap.querySelector("input");
+        if (!el) return;
+        var cs = getComputedStyle(el);
+        pctCanvas.font = cs.font || (cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily);
+        var txt = el.value !== "" ? el.value : (el.placeholder || "");
+        var padLeft = parseFloat(cs.paddingLeft) || 15;
+        wrap.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 3) + "px");
+      });
+    }
+    document.addEventListener("input", function (e) {
+      var p = e.target && e.target.parentNode;
+      if (p && p.classList && p.classList.contains("input-pct")) positionPct(p.parentNode);
+    });
+
+    function isoPlusMonths(iso, months) {
+      var d = new Date(iso + "T00:00:00Z");
+      if (isNaN(d.getTime())) return "";
+      d.setUTCMonth(d.getUTCMonth() + months);
+      return d.toISOString().slice(0, 10);
+    }
+
     function serializeLeaseRow(row) {
       var lease = { id: row.dataset.leaseId || undefined };
       row.querySelectorAll("[data-f]").forEach(function (input) {
         var key = input.getAttribute("data-f");
         lease[key] = input.type === "checkbox" ? input.checked : input.value;
       });
+      if (lease.review_frequency != null) lease.review_frequency = String(lease.review_frequency).replace(/[^0-9.]/g, "");
+      /* residential: the visitor types years in occupation, stored as the
+         move-in date it implies (untouched = the original date, so nothing drifts) */
+      var yearsInput = row.querySelector("[data-years]");
+      if (yearsInput) {
+        var yv = yearsInput.value.trim();
+        if (!yv) lease.in_occupation_since = "";
+        else if (yv === row.dataset.yearsInit) lease.in_occupation_since = row.dataset.sinceOrig || "";
+        else {
+          var yrs = parseFloat(yv.replace(/[^0-9.]/g, ""));
+          lease.in_occupation_since = isFinite(yrs) ? new Date(Date.now() - yrs * 365.25 * 86400000).toISOString().slice(0, 10) : "";
+        }
+      }
+      /* commercial: "3 or 6 months before lease end" is stored as the date it lands on */
+      var optSel = row.querySelector("[data-opt-months]");
+      if (optSel) {
+        lease.option_exercise_by = optSel.value && lease.lease_expiry ? isoPlusMonths(lease.lease_expiry, -Number(optSel.value)) : "";
+      }
       return lease;
     }
 
@@ -1141,19 +1199,50 @@
         var key = input.getAttribute("data-f");
         if (key === "is_periodic") { input.checked = !!lease[key]; return; }
         if (key === "review_frequency") {
-          input.innerHTML = "";
-          REVIEW_FREQUENCIES.forEach(function (pair) {
-            var o = document.createElement("option");
-            o.value = pair[0]; o.textContent = pair[1];
-            input.appendChild(o);
-          });
-          input.value = lease[key] || "";
+          var inc = parseFloat(lease[key]);
+          input.value = isFinite(inc) ? String(inc) : "";
           return;
         }
         if (key === "rent_frequency") { input.value = lease[key] || "weekly"; return; }
         var v = lease[key];
         input.value = v == null ? "" : v;
+        if (input.parentNode.classList.contains("input-money")) input.value = withCommas(input.value);
       });
+
+      var yearsInput = row.querySelector("[data-years]");
+      if (yearsInput) {
+        var since = lease.in_occupation_since;
+        var yrsText = "";
+        if (since) {
+          var y = (Date.now() - new Date(since + "T00:00:00").getTime()) / (365.25 * 86400000);
+          if (isFinite(y)) yrsText = String(Math.max(0, Math.round(y * 10) / 10));
+        }
+        yearsInput.value = yrsText;
+        row.dataset.yearsInit = yrsText;
+        row.dataset.sinceOrig = since || "";
+      }
+
+      var optSel = row.querySelector("[data-opt-months]");
+      if (optSel) {
+        var optVal = "";
+        if (lease.option_exercise_by && lease.lease_expiry) {
+          var gap = (new Date(lease.lease_expiry + "T00:00:00Z") - new Date(lease.option_exercise_by + "T00:00:00Z")) / (30.44 * 86400000);
+          if (gap >= 1.5 && gap < 4.5) optVal = "3";
+          else if (gap >= 4.5 && gap <= 9) optVal = "6";
+        }
+        optSel.value = optVal;
+      }
+
+      /* market review defaults to the lease expiry (it normally lands at the
+         option term) until the visitor sets a different date */
+      var expiryInput = row.querySelector('[data-f="lease_expiry"]');
+      var reviewInput = row.querySelector('[data-f="next_review_date"]');
+      if (expiryInput && reviewInput) {
+        var reviewOwn = !!reviewInput.value && reviewInput.value !== expiryInput.value;
+        if (!reviewInput.value && expiryInput.value) reviewInput.value = expiryInput.value;
+        reviewInput.addEventListener("input", function () { reviewOwn = !!reviewInput.value && reviewInput.value !== expiryInput.value; });
+        expiryInput.addEventListener("input", function () { if (!reviewOwn) reviewInput.value = expiryInput.value; });
+      }
 
       var periodicBox = row.querySelector('[data-f="is_periodic"]');
       var expiryField = row.querySelector('[data-expiry-field]');
@@ -1207,7 +1296,7 @@
     function fTick(key, head, title, small, attrs) {
       return '<div class="field"' + (attrs || "") + '><label>' + head + '</label><label class="acct-periodic-check"><input type="checkbox" data-t="' + key + '" /><span class="acct-periodic-check__text"><strong>' + title + '</strong><small>' + small + '</small></span></label></div>';
     }
-    function fRow() { return '<div class="acct-plan__row">' + Array.prototype.join.call(arguments, "") + '</div>'; }
+    function fRow() { return '<div class="acct-plan__row acct-plan__row--aligned">' + Array.prototype.join.call(arguments, "") + '</div>'; }
 
     function propertyCardHTML() {
       var stateOpts = '<option value="">Select a state</option>' + pcTax.STATES.map(function (s) {
@@ -1242,7 +1331,7 @@
           ) +
           fRow(
             '<div class="field"><label>Owned by</label><select data-t="ownership_type">' + ownerOpts + '</select></div>',
-            fTick("is_new_build", "Type of purchase", "New residential build", "May choose the better of the old discount or the new rules"),
+            fTick("is_new_build", "Type of purchase", "New residential build", "May choose the better of the old discount or the new rules", " data-new-build"),
             fTick("wa_metro", "Location", "Perth metropolitan region", "Adds the Metropolitan Region Improvement Tax", " data-wa-metro hidden")
           ) +
 
@@ -1256,7 +1345,7 @@
           '<p class="acct-subhead">What you have put in</p>' +
           fRow(
             fMoney("improvements", "Capital improvements", "renovations, extensions; not repairs"),
-            fMoney("capital_works_claimed", "Building write-off (Division 43)", "claimed or claimable, not plant and equipment")
+            fMoney("capital_works_claimed", "Building depreciation", "estimate from your depreciation schedule, if you have one")
           ) +
 
           '<p class="acct-subhead">Worth and owed today</p>' +
@@ -1315,6 +1404,7 @@
         if (input.type === "checkbox") { input.checked = !!v; return; }
         if (key === "ownership_type") { input.value = v || "individual"; return; }
         input.value = v == null ? "" : v;
+        if (input.parentNode.classList.contains("input-money")) input.value = withCommas(input.value);
       });
     }
 
@@ -1408,7 +1498,14 @@
       notesInput.value = property.notes || "";
       fillTaxFields(details, property);
 
-      function syncHint() { resHint.hidden = typeSelect.value !== "residential"; }
+      var newBuildWrap = details.querySelector("[data-new-build]");
+      function syncHint() {
+        resHint.hidden = typeSelect.value !== "residential";
+        /* the new-build choice is a residential-only question */
+        var commercial = typeSelect.value === "commercial";
+        newBuildWrap.hidden = commercial;
+        if (commercial) newBuildWrap.querySelector("input").checked = false;
+      }
       function syncTypeButtons() {
         typeButtons.forEach(function (btn) {
           btn.classList.toggle("is-active", btn.getAttribute("data-type-btn") === typeSelect.value);
@@ -1457,8 +1554,10 @@
         renderPropertyHead(details, property);
       });
 
+      body.addEventListener("input", commaInputHandler, true);
       body.addEventListener("input", refreshLive);
       body.addEventListener("change", function () { syncWaMetro(); refreshLive(); });
+      positionPct(details);
 
       details.querySelector('[data-act="add-lease"]').addEventListener("click", function () {
         if (rowsWrap.children.length >= MAX_LEASES_PER_PROPERTY) return;
@@ -1594,6 +1693,7 @@
     function fillTaxSettingsInputs() {
       document.getElementById("taxRate").value = taxSettings.tax_rate_pct == null ? "" : taxSettings.tax_rate_pct;
       document.getElementById("taxSellPct").value = taxSettings.selling_cost_pct == null ? "" : taxSettings.selling_cost_pct;
+      positionPct(document.getElementById("portfolioTax"));
     }
 
     function renderLandTaxSection() {
