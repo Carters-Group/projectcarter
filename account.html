@@ -338,6 +338,8 @@
               No properties yet. Add your first one to see your portfolio, land tax and sale position.
             </p>
 
+            <datalist id="yearsList"><option value="0.5"></option><option value="1"></option><option value="2"></option><option value="3"></option><option value="4"></option><option value="5"></option><option value="6"></option><option value="7"></option><option value="8"></option><option value="9"></option><option value="10"></option><option value="15"></option><option value="20"></option></datalist>
+
             <div id="leaseSummary" hidden>
               <p class="acct-eyebrow">Leases</p>
               <div class="acct-overview" id="leaseStats"></div>
@@ -1014,7 +1016,12 @@
     function renderLeaseStats(properties) {
       var summaryEl = document.getElementById("leaseSummary");
       var statsEl = document.getElementById("leaseStats");
-      var timelineEl = document.getElementById("leaseTimeline");
+      var groupsEl = document.getElementById("leaseTimeline");
+
+      /* keep whichever property was open across a re-render */
+      var openId = null;
+      var openEl = groupsEl.querySelector(".acct-lease-group[open]");
+      if (openEl) openId = openEl.dataset.propertyId;
 
       var totalLeases = 0, expiringSoon = 0, allEvents = [];
       (properties || []).forEach(function (p) {
@@ -1037,10 +1044,10 @@
       var next = allEvents[0];
 
       var stats = [
-        ["WALE" + (wale ? (wale.basis === "income" ? " (by income)" : " (by lease count)") : ""), wale ? wale.years.toFixed(1) + " yrs" : "—"],
+        ["WALE" + (wale ? (wale.basis === "income" ? " (by income)" : " (by lease count)") : ""), wale ? wale.years.toFixed(1) + " yrs" : "\u2014"],
         ["Total leases", String(totalLeases)],
         ["Expiring within 12 months", String(expiringSoon)],
-        ["Next event", next ? fmtDate(next.date) : "—"]
+        ["Next event", next ? fmtDate(next.date) : "\u2014"]
       ];
       statsEl.innerHTML = "";
       stats.forEach(function (pair) {
@@ -1050,18 +1057,73 @@
         statsEl.appendChild(d);
       });
 
-      timelineEl.innerHTML = "";
-      allEvents.slice(0, 8).forEach(function (ev) {
-        var row = document.createElement("div");
-        row.className = "acct-lease-event";
-        row.innerHTML =
-          '<span class="acct-lease-event__date"></span>' +
-          '<span class="acct-lease-event__main"><strong></strong></span>';
-        row.querySelector(".acct-lease-event__date").textContent = fmtDate(ev.date);
-        var main = row.querySelector(".acct-lease-event__main");
-        main.querySelector("strong").textContent = ev.property || "Untitled property";
-        main.appendChild(document.createTextNode(" — " + ev.type + (ev.tenant ? " (" + ev.tenant + ")" : "")));
-        timelineEl.appendChild(row);
+      /* one placeholder per property with its blended top line; the leases
+         inside are one click away, and only one property is open at a time */
+      groupsEl.innerHTML = "";
+      groupsEl.className = "acct-lease-groups";
+      (properties || []).forEach(function (p) {
+        var leases = p.leases || [];
+        if (!leases.length) return;
+        var det = document.createElement("details");
+        det.className = "acct-lease-group";
+        det.dataset.propertyId = p.id;
+        if (String(p.id) === String(openId)) det.open = true;
+
+        var current = leases.filter(function (l) { var d = daysUntil(l.lease_expiry); return l.is_periodic || d == null || d >= 0; });
+        var rent = current.reduce(function (a, l) { return a + (Number(l.annual_rent) > 0 ? Number(l.annual_rent) : 0); }, 0);
+        var w = computeWale([p]);
+        var expiries = leases.map(function (l) { return l.lease_expiry; }).filter(function (d) { var n = daysUntil(d); return n != null && n >= 0; }).sort();
+        var bits = [leases.length + (leases.length === 1 ? " lease" : " leases")];
+        if (rent > 0) bits.push(fmtMoney(rent) + "/yr rent");
+        if (w) bits.push("WALE " + w.years.toFixed(1) + " yrs");
+        if (expiries.length) bits.push("next expiry " + fmtDate(expiries[0]));
+
+        var sum = document.createElement("summary");
+        var nm = document.createElement("span"); nm.className = "acct-lease-group__name"; nm.textContent = p.name || "Untitled property";
+        var meta = document.createElement("span"); meta.className = "acct-lease-group__meta"; meta.textContent = bits.join(" \u00b7 ");
+        var caret = document.createElement("span"); caret.className = "acct-lease-group__caret"; caret.setAttribute("aria-hidden", "true");
+        sum.appendChild(nm); sum.appendChild(meta); sum.appendChild(caret);
+        det.appendChild(sum);
+
+        var body = document.createElement("div");
+        body.className = "acct-lease-group__body";
+        leases.forEach(function (l, i) {
+          var row = document.createElement("div");
+          row.className = "acct-lease-line";
+          var main = document.createElement("div");
+          main.className = "acct-lease-line__main";
+          var title = document.createElement("strong");
+          title.textContent = l.tenant_name || ("Lease " + (i + 1));
+          var line = [];
+          if (l.is_periodic) line.push("Periodic lease");
+          else if (l.lease_expiry) {
+            var d = daysUntil(l.lease_expiry);
+            line.push((l.lease_start ? fmtDate(l.lease_start) + " to " : "Ends ") + fmtDate(l.lease_expiry) + (d != null ? (d >= 0 ? " (" + (d > 400 ? (d / 365.25).toFixed(1) + " yrs" : d + " days") + " left)" : " (expired)") : ""));
+          }
+          if (Number(l.annual_rent) > 0) line.push(fmtMoney(Number(l.annual_rent)) + "/yr" + (l.rent_amount && l.rent_frequency === "weekly" ? " (" + fmtMoney(Number(l.rent_amount)) + "/wk)" : ""));
+          if (l.next_review_date) line.push("review " + fmtDate(l.next_review_date));
+          if (l.option_exercise_by) line.push("option by " + fmtDate(l.option_exercise_by));
+          var sub = document.createElement("small");
+          sub.textContent = line.join(" \u00b7 ") || "No dates or rent entered yet";
+          main.appendChild(title); main.appendChild(sub);
+          var del = document.createElement("button");
+          del.type = "button"; del.className = "linklike acct-lease-line__del"; del.textContent = "Delete lease";
+          del.addEventListener("click", function () {
+            if (!window.confirm("Remove " + (l.tenant_name ? '"' + l.tenant_name + '"' : "this lease") + " from " + (p.name || "this property") + "? This cannot be undone.")) return;
+            window.pcAuth.deleteLease(l.id).then(function (res) {
+              if (res && res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
+              loadLeaseRegister();
+            });
+          });
+          row.appendChild(main); row.appendChild(del);
+          body.appendChild(row);
+        });
+        det.appendChild(body);
+        det.addEventListener("toggle", function () {
+          if (!det.open) return;
+          groupsEl.querySelectorAll(".acct-lease-group[open]").forEach(function (o) { if (o !== det) o.open = false; });
+        });
+        groupsEl.appendChild(det);
       });
     }
 
@@ -1087,7 +1149,7 @@
             '</div>' +
             row +
               '<div class="field"><label>Term <span>(e.g. "5 years" or "3+3+3")</span></label><input type="text" data-f="term_label" autocomplete="off" /></div>' +
-              '<div class="field"><label>In occupation since <span>(optional, if renewed)</span></label><input type="date" data-f="in_occupation_since" /></div>' +
+              '<div class="field"><label>Years in occupation <span>(type it or pick, near enough is fine)</span></label><input type="text" inputmode="decimal" data-years list="yearsList" autocomplete="off" placeholder="0" /></div>' +
               '<div class="field"><label>Annual rent <span>(optional, sharpens the WALE figure)</span></label><div class="input-money"><input type="text" inputmode="numeric" data-f="annual_rent" placeholder="0" /></div></div>' +
             '</div>' +
             row +
@@ -1096,10 +1158,7 @@
               '<div class="field"><label>Option exercise by</label><select data-opt-months><option value="">Not set</option><option value="3">3 months before lease end</option><option value="6">6 months before lease end</option></select></div>' +
             '</div>' +
             '<p class="field-hint">The market review date fills in from the lease expiry, since reviews usually fall at the option term. Change it if yours is different.</p>' +
-            row +
-              '<div class="field"><label>Length of each option <span>(years)</span></label><input type="text" inputmode="decimal" data-f="option_length_years" autocomplete="off" /></div>' +
-              '<div class="field"><label>Notes</label><input type="text" data-f="notes" autocomplete="off" /></div>' +
-            '</div>' +
+            '<div class="field"><label>Notes <span>(options, review terms, anything worth remembering)</span></label><input type="text" data-f="notes" autocomplete="off" /></div>' +
           '</div>'
         );
       }
@@ -1108,7 +1167,7 @@
           row +
             '<div class="field"><label>Lease start date</label><input type="date" data-f="lease_start" /></div>' +
             '<div class="field" data-expiry-field><label>Lease end date <span>(or renewal date)</span></label><input type="date" data-f="lease_expiry" /></div>' +
-            '<div class="field"><label>Years in occupation <span>(how long the occupant has been there)</span></label><input type="text" inputmode="decimal" data-years autocomplete="off" placeholder="0" /></div>' +
+            '<div class="field"><label>Years in occupation <span>(type it or pick, near enough is fine)</span></label><input type="text" inputmode="decimal" data-years list="yearsList" autocomplete="off" placeholder="0" /></div>' +
           '</div>' +
           row +
             '<div class="field"><label>Rent</label><div class="acct-rent-combo"><div class="input-money"><input type="text" inputmode="numeric" data-f="rent_amount" placeholder="0" /></div><select data-f="rent_frequency"><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div></div>' +
@@ -1298,8 +1357,8 @@
     var portfolio = null;
 
     function fLabel(label, hint) { return label + (hint ? ' <span>(' + hint + ')</span>' : ''); }
-    function fMoney(key, label, hint) {
-      return '<div class="field"><label>' + fLabel(label, hint) + '</label><div class="input-money"><input type="text" inputmode="numeric" data-t="' + key + '" autocomplete="off" placeholder="0" /></div></div>';
+    function fMoney(key, label, hint, attrs) {
+      return '<div class="field"' + (attrs || "") + '><label>' + fLabel(label, hint) + '</label><div class="input-money"><input type="text" inputmode="numeric" data-t="' + key + '" autocomplete="off" placeholder="0" /></div></div>';
     }
     function fPct(key, label, hint) {
       return '<div class="field"><label>' + fLabel(label, hint) + '</label><div class="input-pct"><input type="text" inputmode="decimal" data-t="' + key + '" autocomplete="off" placeholder="0" /></div></div>';
@@ -1380,9 +1439,9 @@
 
           '<p class="acct-subhead">If you sold</p>' +
           fRow(
-            fDate("planned_sale_date", "Sale contract date", "blank = today"),
-            fMoney("expected_sale_price", "Sale price", "blank = current value"),
-            fMoney("value_at_jul_2027", "Value on 1 July 2027", "optional, else estimated")
+            fDate("planned_sale_date", "Sale contract date", "starts at today, change it for a later sale"),
+            fMoney("expected_sale_price", "Sale price", "starts at today's value"),
+            fMoney("value_at_jul_2027", "Value on 1 July 2027", "starts at today's value, use a valuation if you have one", " data-v27")
           ) +
           '<p class="field-hint">Your cost base is the purchase price plus buying costs and capital improvements, less the building write-off (Division 43), which reduces it whether or not you claimed it. ' +
             'Plant and equipment depreciation (Division 40) is handled separately by your accountant when you sell. The tax clock (12 months, and which financial year) runs from the contract dates, not settlement.</p>' +
@@ -1513,12 +1572,32 @@
       fillTaxFields(details, property);
 
       var newBuildWrap = details.querySelector("[data-new-build]");
+      var v27Wrap = details.querySelector("[data-v27]");
+      var curValEl = details.querySelector('[data-t="current_value"]');
+      var saleDateEl = details.querySelector('[data-t="planned_sale_date"]');
+      var salePriceEl = details.querySelector('[data-t="expected_sale_price"]');
+      var v27El = details.querySelector('[data-t="value_at_jul_2027"]');
+      var follow = { price: false, v27: false };
+      /* the "if sold" scenario starts from today's numbers instead of blanks;
+         the price and 1 July 2027 value follow the current value until edited */
+      function prefillSale() {
+        if (!saleDateEl.value) {
+          var now = new Date();
+          saleDateEl.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2);
+        }
+        if (!salePriceEl.value && curValEl.value) salePriceEl.value = curValEl.value;
+        if (typeSelect.value !== "commercial" && !v27El.value && curValEl.value) v27El.value = curValEl.value;
+        follow.price = salePriceEl.value === curValEl.value;
+        follow.v27 = v27El.value === curValEl.value;
+      }
       function syncHint() {
         resHint.hidden = typeSelect.value !== "residential";
-        /* the new-build choice is a residential-only question */
+        /* the new-build choice and the 1 July 2027 value are residential-only questions */
         var commercial = typeSelect.value === "commercial";
         newBuildWrap.hidden = commercial;
+        v27Wrap.hidden = commercial;
         if (commercial) newBuildWrap.querySelector("input").checked = false;
+        prefillSale();
       }
       function syncTypeButtons() {
         typeButtons.forEach(function (btn) {
@@ -1569,6 +1648,13 @@
       });
 
       body.addEventListener("input", commaInputHandler, true);
+      body.addEventListener("input", function (e) {
+        if (e.target === curValEl) {
+          if (follow.price) salePriceEl.value = curValEl.value;
+          if (follow.v27 && typeSelect.value !== "commercial") v27El.value = curValEl.value;
+        } else if (e.target === salePriceEl) follow.price = salePriceEl.value === curValEl.value;
+        else if (e.target === v27El) follow.v27 = v27El.value === curValEl.value;
+      }, true);
       body.addEventListener("input", refreshLive);
       body.addEventListener("change", function () { syncWaMetro(); refreshLive(); });
       positionPct(details);
