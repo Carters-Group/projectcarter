@@ -2103,7 +2103,7 @@ h1, h2, h3 {
 .pm-hero-short .project-hero-inner { padding-top: 128px; padding-bottom: clamp(120px, 16vw, 200px); }
 .pm-hero-short .project-title { font-size: clamp(36px, 5.6vw, 72px); margin-bottom: 14px; }
 .pm-hero-short .pm-hero-actions { margin-top: 22px; }
-.pm-first { padding-block: clamp(36px, 5vw, 64px) clamp(72px, 10vw, 130px); }
+.pm-first { padding-block: clamp(56px, 9vw, 110px) clamp(72px, 10vw, 130px); }
 .pm-first .intro-body { margin-top: clamp(22px, 3vw, 34px); }
 .pm-first .pm-mock__body { gap: 16px; }
 .pm-first .pm-intro { align-items: start; }
