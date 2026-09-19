@@ -2065,3 +2065,10 @@ h1, h2, h3 {
 .pm-box .link-arrow { margin-top: auto; align-self: flex-start; }
 @media (max-width: 1080px) { .pm-boxes { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .pm-boxes { grid-template-columns: 1fr; } }
+
+/* portfolio page: lead heading in the hero, dashboard preview below */
+.pm-hero-lead { font-size: clamp(26px, 3.6vw, 44px); line-height: 1.05; margin: 0 0 16px; max-width: 22ch; color: var(--accent-2); }
+.pm-hero-grid .project-locale, .pm-hero-copy .project-locale { max-width: 60ch; }
+.pm-hero-copy .pm-hero-actions { margin-top: 26px; }
+.pm-preview { max-width: 760px; }
+.pm-preview__lead { margin: 0 0 clamp(26px, 4vw, 40px); color: var(--muted); font-size: 1.05rem; text-align: center; }
