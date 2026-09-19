@@ -1921,6 +1921,31 @@ h1, h2, h3 {
 .acct-taxtable td:first-child, .acct-taxtable th:first-child { min-width: 160px; }
 .acct-taxtable td:nth-child(2) { white-space: nowrap; }
 .acct-taxtable__sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.acct-workings { margin-top: 10px; border: 1px solid var(--line-soft); border-radius: 6px; }
+.acct-workings > summary {
+  cursor: pointer; list-style: none; padding: 11px 14px; font-size: 13.5px;
+  font-weight: 600; color: var(--accent-2); display: flex; align-items: center;
+}
+.acct-workings > summary::-webkit-details-marker { display: none; }
+.acct-workings > summary::after { content: "+"; margin-left: auto; color: var(--muted); font-size: 16px; }
+.acct-workings[open] > summary::after { content: "\2212"; }
+.acct-workings .acct-taxtable { border: 0; border-top: 1px solid var(--line-soft); }
+.acct-workings .acct-taxtable td:nth-child(2) { white-space: normal; }
+.acct-workings .acct-taxtable td:first-child { min-width: 0; }
+.acct-workings .is-total td { font-weight: 700; color: var(--text); background: var(--bg-2); }
+.acct-workings > .acct-tax-basis { padding: 0 14px 12px; }
+
+.acct-callout {
+  margin-top: 22px; padding: 18px 20px; border: 1px solid rgba(95, 161, 208, 0.4);
+  border-left: 4px solid var(--accent); border-radius: 6px;
+  background: linear-gradient(135deg, rgba(95, 161, 208, 0.12), rgba(95, 161, 208, 0.02)), var(--bg-2);
+}
+.acct-callout__title { margin: 0 0 4px; font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.acct-callout__lead { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
+.acct-callout__cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 6px 28px; }
+.acct-callout__sub { margin: 14px 0 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-2); }
+@media (max-width: 760px) { .acct-callout__cols { grid-template-columns: 1fr; } }
+
 .acct-tax-basis { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
 .acct-tax-notes { margin: 14px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
 .acct-tax-notes li { margin: 4px 0; }
@@ -2075,7 +2100,7 @@ h1, h2, h3 {
 
 /* portfolio page: short hero so the intro + dashboard row is on screen at load */
 .pm-hero-short { min-height: 0; }
-.pm-hero-short .project-hero-inner { padding-top: 128px; padding-bottom: 36px; }
+.pm-hero-short .project-hero-inner { padding-top: 128px; padding-bottom: clamp(70px, 10vw, 120px); }
 .pm-hero-short .project-title { font-size: clamp(36px, 5.6vw, 72px); margin-bottom: 14px; }
 .pm-hero-short .pm-hero-actions { margin-top: 22px; }
 .pm-first { padding-block: clamp(36px, 5vw, 64px) clamp(72px, 10vw, 130px); }
