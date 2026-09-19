@@ -214,6 +214,7 @@
             <div class="field">
               <label for="message">Anything else I should know? (optional)</label>
               <textarea id="message" name="Message" rows="3"></textarea>
+              <p class="form-note" id="messageNote" aria-live="polite"></p>
             </div>
           </div>
         </fieldset>
@@ -251,6 +252,21 @@
     var current = 0;
 
     var emailCheck = { email: "", ok: null, busy: false };
+
+    /* Spam screening. These only stop scripts that drive this page; a bot
+       posting straight to Formspree skips them, so the Formspree-side spam
+       settings are the real backstop. */
+    var loadedAt = Date.now();
+    var MIN_FILL_MS = 8000;          /* eight radio answers + details take a person longer */
+    var SPAM_PHRASES = /(seo|backlinks?|guest post|search engine|rank(ing)? (on|in) google|first page of google|web ?(site )?(design|development)|digital marketing|lead generation|social media (marketing|management)|link ?building|traffic to your|increase your (sales|traffic|revenue)|we offer|our (agency|services|team can)|free (audit|quote|trial)|crypto|bitcoin|casino|viagra|loan offer)/i;
+    var messageInput = document.getElementById("message");
+    var messageNote = document.getElementById("messageNote");
+
+    function looksLikeSpam() {
+      var text = [messageInput.value, document.getElementById("name").value].join(" ");
+      var links = (text.match(/https?:\/\/|www\./gi) || []).length;
+      return links >= 1 || SPAM_PHRASES.test(text);
+    }
 
     function setNote(msg, kind) {
       emailNote.textContent = msg || "";
@@ -357,8 +373,23 @@
     backBtn.addEventListener("click", function () {
       if (current > 0) { current--; render(true); }
     });
+    messageInput.addEventListener("input", function () { messageNote.textContent = ""; messageNote.className = "form-note"; });
     form.addEventListener("submit", function (e) {
       if (!stepValid(current)) { e.preventDefault(); return; }
+      if (form._gotcha && form._gotcha.value) { e.preventDefault(); return; }
+      if (Date.now() - loadedAt < MIN_FILL_MS) {
+        /* far too fast to be a person: act as if it sent, send nothing */
+        e.preventDefault();
+        window.location.href = "thanks";
+        return;
+      }
+      if (looksLikeSpam()) {
+        e.preventDefault();
+        messageNote.textContent = "This looks like an advertising message or contains a link, so it wasn't sent. If you're enquiring about a property, please remove any links and reword it.";
+        messageNote.className = "form-note is-bad";
+        messageInput.focus();
+        return;
+      }
       if (!emailVerified()) {
         e.preventDefault();
         verifyEmail().then(function (ok) { if (ok) form.submit(); });
