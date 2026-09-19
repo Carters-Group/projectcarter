@@ -258,7 +258,7 @@
        settings are the real backstop. */
     var loadedAt = Date.now();
     var MIN_FILL_MS = 8000;          /* eight radio answers + details take a person longer */
-    var SPAM_PHRASES = /(seo|backlinks?|guest post|search engine|rank(ing)? (on|in) google|first page of google|web ?(site )?(design|development)|digital marketing|lead generation|social media (marketing|management)|link ?building|traffic to your|increase your (sales|traffic|revenue)|we offer|our (agency|services|team can)|free (audit|quote|trial)|crypto|bitcoin|casino|viagra|loan offer)/i;
+    var SPAM_PHRASES = /\b(seo|backlinks?|guest post|search engine|rank(ing)? (on|in) google|first page of google|web ?(site )?(design|development)|digital marketing|lead generation|social media (marketing|management)|link ?building|traffic to your|increase your (sales|traffic|revenue)|we offer|our (agency|services|team can)|free (audit|quote|trial)|crypto|bitcoin|casino|viagra|loan offer)\b/i;
     var messageInput = document.getElementById("message");
     var messageNote = document.getElementById("messageNote");
 
