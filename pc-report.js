@@ -335,7 +335,13 @@
       }
       try { window.sessionStorage.removeItem(DRAFT_KEY); } catch (e) {}
       msg("Saved as “" + title + "”.", "ok");
-      saveInstances.forEach(function (inst) { inst.link.hidden = false; });
+      saveInstances.forEach(function (inst) {
+        /* a saved Portfolio Review can seed the account's property register */
+        if (CALC === "pr" && loadedReportId) {
+          inst.link.innerHTML = "Add these properties to <a href=\"account?import=" + encodeURIComponent(loadedReportId) + "\">your account</a>, or open them any time from there.";
+        }
+        inst.link.hidden = false;
+      });
       syncUi();
       /* a Portfolio Review report is what drives the account page's
          portfolio overview, but only once it is flagged as the master

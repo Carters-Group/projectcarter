@@ -1934,10 +1934,23 @@
            pages (the account page's lease register) offer a one-time pull
            of a property's name/type rather than retyping it */
         properties: m.live.map(function (p) {
+          var ownerMap = { personal: "individual", company: "company", trust: "trust" };
+          var impEl = document.getElementById("p" + p.id + "_improve");
+          var improve = p.acqOn && impEl ? (parseFloat((impEl.value || "").replace(/[^0-9.]/g, "")) || 0) : 0;
+          var stEl = document.getElementById("p" + p.id + "_stampState");
           return {
             name: p.label || "Untitled property",
             value: Math.round(p.value || 0),
-            propertyType: p.isCom ? "commercial" : "residential"
+            propertyType: p.isCom ? "commercial" : "residential",
+            /* the rest lets the account page start a property from this card */
+            loan: Math.round(p.loan || 0),
+            ratePct: p.isOwn ? null : Math.round((p.rate || 0) * 10000) / 100,
+            weeklyRent: p.isOwn ? null : Math.round((p.rentWk || 0) * 100) / 100,
+            runningCosts: p.isOwn ? null : Math.round(Math.max(0, (p.expenses || 0) - (p.landTax || 0))),
+            state: stEl ? stEl.value : "",
+            owner: ownerMap[p.entity] || null,
+            acqCosts: p.acqOn ? Math.round(Math.max(0, (p.acq || 0) - improve)) : null,
+            improvements: p.acqOn ? Math.round(improve) : null
           };
         })
       };

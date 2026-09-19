@@ -208,7 +208,7 @@
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your portfolio</h2>
               <div class="acct-card-head__actions">
-                <button type="button" class="btn btn-ghost btn-sm" id="portfolioAddBtn">Add a property</button>
+                <button type="button" class="btn btn-accent btn-sm" id="portfolioAddBtn">Add a property</button>
               </div>
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
@@ -318,6 +318,19 @@
             <p class="field-hint">Enter each property once. Your portfolio figures, land tax and sale position above and below are all worked out from what you put in here, and the calculators can pull your equity from it.</p>
             <p class="acct-msg" id="leaseMsg" hidden></p>
 
+            <div class="acct-import" id="prImportPanel" hidden>
+              <p class="acct-import__title">Start from a Portfolio Review</p>
+              <p class="field-hint">Pick the properties you already entered in a saved Portfolio Review. Their name, value, loan, interest rate, rent and running costs come across. You then add what the calculator doesn't ask for: purchase date and price, unimproved land value and state.</p>
+              <div class="field" id="prImportReportWrap"><label for="prImportReport">Saved review</label><select id="prImportReport"></select></div>
+              <div id="prImportList" class="acct-import__list"></div>
+              <div class="acct-property__actions">
+                <button type="button" class="btn btn-accent btn-sm" id="prImportGo">Add selected properties</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="prImportBlank">Add a blank property instead</button>
+                <button type="button" class="linklike" id="prImportCancel">Cancel</button>
+              </div>
+              <p class="acct-msg" id="prImportMsg" hidden></p>
+            </div>
+
             <div id="leaseProperties"></div>
 
             <p class="acct-empty" id="leaseEmpty" hidden>
@@ -331,7 +344,7 @@
             </div>
 
             <div class="acct-property__actions acct-addprop">
-              <button type="button" class="btn btn-ghost btn-sm" id="leaseAddPropertyBtn">Add a property</button>
+              <button type="button" class="btn btn-accent btn-sm" id="leaseAddPropertyBtn">Add a property</button>
             </div>
           </div>
 
@@ -2006,8 +2019,161 @@
         loadLeaseRegister();
       });
     }
-    document.getElementById("leaseAddPropertyBtn").addEventListener("click", addProperty);
-    document.getElementById("portfolioAddBtn").addEventListener("click", addProperty);
+
+    /* ---- Start from a saved Portfolio Review --------------------------------
+       The Portfolio Review calculator is usually filled in before the account
+       exists, so "Add a property" offers its saved cards first. It is a one-time
+       copy of what the calculator knows (name, value, loan, rate, rent, running
+       costs); the tax fields it never asks for are left for the owner to fill in
+       and show up in "To complete your picture". */
+    var prImportEl = document.getElementById("prImportPanel");
+    var prImportMsgEl = document.getElementById("prImportMsg");
+    var prReports = [];
+
+    function prNum(v) {
+      var n = parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, ""));
+      return isFinite(n) ? n : null;
+    }
+
+    /* the cards in a saved report, in one shape. New saves carry a full
+       per-property summary; older ones only have the raw calculator inputs. */
+    function prCards(report) {
+      var sum = (report.summary && report.summary.properties) || [];
+      if (sum.length && sum[0].loan !== undefined) {
+        return sum.map(function (p) {
+          return {
+            name: p.name, type: p.propertyType === "commercial" ? "commercial" : "residential",
+            value: p.value, loan: p.loan, ratePct: p.ratePct, weeklyRent: p.weeklyRent,
+            runningCosts: p.runningCosts, state: p.state, owner: p.owner,
+            acqCosts: p.acqCosts, improvements: p.improvements
+          };
+        });
+      }
+      var raw = (report.inputs && report.inputs.dyn && report.inputs.dyn.props) || [];
+      return raw.filter(function (p) { return prNum(p.value) > 0; }).map(function (p) {
+        return {
+          name: (p.label || "").trim() || "Untitled property",
+          type: p.ptype === "com" ? "commercial" : "residential",
+          value: prNum(p.value), loan: prNum(p.loan), ratePct: p.ptype === "own" ? null : prNum(p.rate),
+          weeklyRent: p.ptype === "own" ? null : prNum(p.rentwk),
+          runningCosts: null, state: p.stampState || "", owner: null, acqCosts: null, improvements: null
+        };
+      });
+    }
+
+    function prShowMsg(text, kind) { setMsg(prImportMsgEl, text, kind); }
+
+    function renderPrImportList() {
+      var listEl = document.getElementById("prImportList");
+      var report = prReports[document.getElementById("prImportReport").selectedIndex] || prReports[0];
+      listEl.innerHTML = "";
+      if (!report) return;
+      var have = {};
+      leaseProperties.forEach(function (p) { have[(p.name || "").trim().toLowerCase()] = true; });
+      prCards(report).forEach(function (c, i) {
+        var already = !!have[c.name.trim().toLowerCase()];
+        var row = document.createElement("label");
+        row.className = "acct-import__row" + (already ? " is-already" : "");
+        var box = document.createElement("input");
+        box.type = "checkbox"; box.value = String(i); box.checked = !already; box.disabled = already;
+        var text = document.createElement("span");
+        var bits = [fmtMoney(c.value) + " value"];
+        if (c.loan != null) bits.push(fmtMoney(c.loan) + " loan");
+        if (c.weeklyRent) bits.push(fmtMoney(c.weeklyRent) + "/week rent");
+        var strong = document.createElement("strong"); strong.textContent = c.name;
+        var small = document.createElement("small");
+        small.textContent = (already ? "Already in your properties" : bits.join(" \u00b7 "));
+        text.appendChild(strong); text.appendChild(small);
+        row.appendChild(box); row.appendChild(text);
+        listEl.appendChild(row);
+      });
+    }
+
+    function showPrImport(reports, preferId) {
+      prReports = reports;
+      var sel = document.getElementById("prImportReport");
+      sel.innerHTML = "";
+      reports.forEach(function (r) {
+        var o = document.createElement("option");
+        o.value = r.id;
+        o.textContent = (r.title || "Untitled review") + " (" + prCards(r).length + (prCards(r).length === 1 ? " property" : " properties") + ")";
+        sel.appendChild(o);
+      });
+      if (preferId) {
+        for (var i = 0; i < reports.length; i++) if (reports[i].id === preferId) sel.selectedIndex = i;
+      }
+      document.getElementById("prImportReportWrap").hidden = reports.length < 2;
+      prShowMsg("");
+      renderPrImportList();
+      show(prImportEl);
+      prImportEl.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+
+    function startAdd(preferId) {
+      if (leaseProperties.length >= MAX_PROPERTIES) return;
+      window.pcAuth.listReports("pr").then(function (res) {
+        var reports = (res && !res.error ? res.data || [] : []).filter(function (r) { return prCards(r).length; });
+        if (!reports.length) { addProperty(); return; }
+        showPrImport(reports, preferId);
+      }, function () { addProperty(); });
+    }
+
+    function importSelectedCards() {
+      var report = prReports[document.getElementById("prImportReport").selectedIndex] || prReports[0];
+      if (!report) return;
+      var cards = prCards(report);
+      var picked = [];
+      document.querySelectorAll("#prImportList input:checked").forEach(function (b) { picked.push(cards[Number(b.value)]); });
+      if (!picked.length) { prShowMsg("Tick at least one property, or add a blank one instead.", "error"); return; }
+      if (leaseProperties.length + picked.length > MAX_PROPERTIES) { prShowMsg("That would go over the " + MAX_PROPERTIES + " property limit.", "error"); return; }
+      var goBtn = document.getElementById("prImportGo");
+      goBtn.disabled = true;
+      prShowMsg("Adding…");
+      var firstId = null, failed = null;
+      picked.reduce(function (chain, c) {
+        return chain.then(function () {
+          if (failed) return null;
+          var row = { name: c.name, property_type: c.type, current_value: c.value, loan_balance: c.loan };
+          if (c.ratePct != null) row.interest_rate = c.ratePct;
+          if (c.runningCosts != null) row.annual_running_costs = c.runningCosts;
+          if (c.state) row.state = c.state;
+          if (c.owner) row.ownership_type = c.owner;
+          if (c.acqCosts) row.acquisition_costs = c.acqCosts;
+          if (c.improvements) row.improvements = c.improvements;
+          return window.pcAuth.saveProperty(row).then(function (res) {
+            if (res.error || !res.data) { failed = res.error || { message: "Could not add " + c.name + "." }; return null; }
+            if (!firstId) firstId = res.data.id;
+            if (!(c.weeklyRent > 0)) return null;
+            var lease = { property_id: res.data.id, annual_rent: c.weeklyRent * 52 };
+            if (c.type === "residential") { lease.rent_amount = c.weeklyRent; lease.rent_frequency = "weekly"; }
+            return window.pcAuth.saveLease(lease);
+          });
+        });
+      }, Promise.resolve()).then(function () {
+        goBtn.disabled = false;
+        if (failed) { prShowMsg(taxErrMsg(failed), "error"); loadLeaseRegister(true); return; }
+        hide(prImportEl);
+        pendingOpenPropertyId = firstId;
+        loadLeaseRegister(true).then(function () {
+          setMsg(leaseMsgEl, "Added " + picked.length + (picked.length === 1 ? " property" : " properties") +
+            " from your Portfolio Review. Open each one to add the purchase date and price, unimproved land value and state, so the tax figures can be worked out.", "ok");
+        });
+      });
+    }
+
+    document.getElementById("prImportGo").addEventListener("click", importSelectedCards);
+    document.getElementById("prImportBlank").addEventListener("click", function () { hide(prImportEl); addProperty(); });
+    document.getElementById("prImportCancel").addEventListener("click", function () { hide(prImportEl); });
+    document.getElementById("prImportReport").addEventListener("change", renderPrImportList);
+
+    document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () { startAdd(); });
+    document.getElementById("portfolioAddBtn").addEventListener("click", function () { startAdd(); });
+
+    /* arriving from the Portfolio Review calculator right after saving:
+       open the chooser on that report straight away */
+    function importParam() {
+      try { return new URL(window.location.href).searchParams.get("import"); } catch (e) { return null; }
+    }
 
     var CALC_PAGE_SET = {};
     Object.keys(CALC_PAGES).forEach(function (k) { CALC_PAGE_SET[CALC_PAGES[k]] = 1; });
@@ -2082,7 +2248,13 @@
           renderReports(res.data);
           renderQuickLaunch(res.data);
         });
-        loadLeaseRegister();
+        loadLeaseRegister().then(function () {
+          var want = importParam();
+          if (want) {
+            try { var u2 = new URL(window.location.href); u2.searchParams.delete("import"); history.replaceState(null, "", u2.toString()); } catch (e) {}
+            startAdd(want);
+          }
+        });
       } else {
         show(elSignedOut); hide(elSignedIn);
         showAuthPanel("signup");

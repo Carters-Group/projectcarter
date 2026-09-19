@@ -2157,3 +2157,24 @@ h1, h2, h3 {
   border: 0;
 }
 .acct-subhead { font-size: 13px; color: var(--accent-2); }
+
+/* ---- Start a property from a saved Portfolio Review -------------------- */
+.acct-import {
+  margin: 0 0 18px; padding: 18px 20px; border: 1px solid rgba(95, 161, 208, 0.4);
+  border-left: 4px solid var(--accent); border-radius: 6px;
+  background: linear-gradient(135deg, rgba(95, 161, 208, 0.1), rgba(95, 161, 208, 0.02)), var(--bg-2);
+}
+.acct-import__title {
+  margin: 0 0 6px; font-family: var(--font-display); font-size: 1.2rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-2);
+}
+.acct-import__list { display: grid; gap: 8px; margin: 12px 0 4px; }
+.acct-import__row {
+  display: flex; align-items: center; gap: 12px; padding: 11px 14px; cursor: pointer;
+  border: 1px solid var(--line-soft); border-radius: 6px; background: var(--bg);
+}
+.acct-import__row:has(input:checked) { border-color: var(--accent); background: rgba(95, 161, 208, 0.1); }
+.acct-import__row.is-already { opacity: 0.55; cursor: default; }
+.acct-import__row input { width: 18px; height: 18px; flex: none; accent-color: var(--accent); }
+.acct-import__row strong { display: block; font-size: 14.5px; color: var(--text); }
+.acct-import__row small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }
