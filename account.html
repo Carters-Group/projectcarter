@@ -268,11 +268,11 @@
 
           <div class="card acct-card acct-dash-plan" id="acctPlanCard" hidden>
             <div class="acct-card-head">
-              <h2 class="calc-subhead">Portfolio plan</h2>
+              <h2 class="calc-subhead">Total Portfolio Return on Investment (ROI)</h2>
             </div>
-            <p class="acct-empty" id="portfolioPlanNote" hidden>The plan needs a current value, loan balance, interest rate and rent on every property. Fill in what is missing under Your properties and it appears here.</p>
+            <p class="acct-empty" id="portfolioPlanNote" hidden>The ROI projection needs a current value, loan balance, interest rate and rent on every property. Fill in what is missing under Your properties and it appears here.</p>
               <div class="acct-debt-goal" id="portfolioPlanInputs">
-                <p class="acct-eyebrow">Portfolio plan</p>
+                <p class="acct-eyebrow">Growth assumptions</p>
                 <div class="acct-plan__row">
                   <div class="field">
                     <label for="planYears">Plan over</label>
@@ -301,7 +301,7 @@
                 <p class="field-hint">One blended growth rate applied across the whole portfolio rather than property by property. Debt is assumed to reduce the way the ROI calculator models it: 50% of surplus cash after interest goes to principal, at your blended rate. No capital gains tax is included, since nothing here assumes you are selling.</p>
               </div>
 
-              <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn">Generate portfolio plan</button>
+              <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn">Generate portfolio ROI</button>
               <p class="acct-msg" id="portfolioRoiMsg" hidden></p>
               <div id="portfolioRoiResult" hidden>
                 <div class="acct-overview acct-overview--modes" id="portfolioRoiStats"></div>
