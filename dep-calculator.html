@@ -192,6 +192,7 @@
             <div class="result-row is-final"><dt>Tax saved over 10 years</dt><dd data-out="tax10">&mdash;</dd></div>
 
             <p class="calc-note" id="depNote" hidden></p>
+            <p class="calc-note" id="costNote" hidden></p>
             <p class="calc-note" id="newNote" hidden></p>
             <p class="calc-note" id="qsNote" hidden></p>
 
@@ -275,7 +276,7 @@
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
             <li><strong>Two kinds of deduction.</strong> <em>Capital works</em> (Division 43) is the building itself: 2.5% of its original construction cost a year for 40 years. <em>Plant and equipment</em> (Division 40) is the removable fixtures and fittings such as appliances, blinds, carpet and air conditioning, written off faster because they wear out sooner. Only the fixtures and fittings can be front-loaded: the building is a flat 2.5% a year by law.</li>
-            <li><strong>Construction cost.</strong> If you enter the original cost, that is used. Otherwise it is estimated: from the floor area at typical 2026 build rates, or, with no area, as a share of the purchase price (about 40% for a house, 55% for a townhouse, 75% for an apartment and 60% for commercial, the rest being land). For an established building that cost is wound back to the year it was built at 3.5% a year, because the deduction is based on what it cost to build then, not what it would cost now.</li>
+            <li><strong>Construction cost.</strong> If you enter the original cost, that is used. Otherwise it is estimated: from the floor area at typical 2026 build rates, or, with no area, as a share of the purchase price (about 40% for a house, 55% for a townhouse, 75% for an apartment and 60% for commercial, the rest being land). For an established building that cost is wound back to the year it was built using the ABS price index for building a new dwelling (national, excluding land, from 1998; earlier years are extended at 3.5% a year), because the deduction is based on what it cost to build then, not what it would cost now. It is a national index, so it smooths over state and suburb differences.</li>
             <li><strong>Building deduction rules.</strong> Residential construction that started on or before 15 September 1987 gets no capital works deduction on the original building, and the deduction stops 40 years after the building was finished. Later renovations by an earlier owner can add their own deductions, which this estimate can't see.</li>
             <li><strong>Fixtures and fittings rules.</strong> For residential property bought on or after 9 May 2017, investors can only claim fixtures and fittings that are new: in a brand new home, or that they install themselves. Second-hand items in an established home are not claimable, so this calculator shows $0 there unless you say you bought before that date. Commercial property has no such limit, but items are worth less second-hand, so an established commercial estimate assumes half of the new value.</li>
             <li><strong>Fixtures and fittings maths.</strong> Their starting value is a share of the construction cost (about 7% for a house, 8% for a townhouse, 10% for an apartment and 12% for commercial), written off over an average effective life of ten years. <em>Diminishing value</em> (the default) takes 20% of the remaining balance each year, so the biggest deductions come first. <em>Prime cost</em> takes an even 10% of the starting value each year. Both add up to the same total over the assets' lives; diminishing value just brings it forward. Most schedules use diminishing value, but confirm which method suits you with your accountant.</li>
@@ -382,7 +383,19 @@
        Everything here is a desk estimate; the page says so. Constants are the
        few knobs a quantity surveyor's real schedule would replace. */
     var NOW = new Date().getFullYear();
-    var INFLATION = 0.035;        /* build-cost inflation used to wind today's cost back to the build year */
+    var INFLATION = 0.035;        /* fallback build-cost inflation, used only for years before the index starts (1998) */
+    /* ABS Consumer Price Index, "New dwelling purchase by owner-occupiers" (Australia,
+       excluding land): annual averages of the quarterly series, 1998 to the latest quarter loaded.
+       Source: ABS Data API, dataflow CPI, index 131186. Refresh once a year. */
+    var COST_INDEX = {"1998":33.13,"1999":34.77,"2000":38.25,"2001":40.13,"2002":41.49,"2003":43.79,"2004":46.09,"2005":48.39,"2006":49.78,"2007":51.45,"2008":53.98,"2009":55.05,"2010":57,"2011":58.18,"2012":58.62,"2013":60.61,"2014":62.64,"2015":65.35,"2016":66.66,"2017":68.66,"2018":70.27,"2019":70.47,"2020":71.22,"2021":73.64,"2022":86.99,"2023":93.58,"2024":97.74,"2025":99.1,"2026":102.66};
+    var INDEX_YEAR = 2026;        /* latest year in the table - today's costs are stated at this level */
+    /* how much dearer it is to build today than in the year given */
+    function costGrowth(year) {
+      var now = COST_INDEX[INDEX_YEAR];
+      if (year >= INDEX_YEAR) return 1;
+      if (COST_INDEX[year]) return now / COST_INDEX[year];
+      return (now / COST_INDEX[1998]) * Math.pow(1 + INFLATION, 1998 - year);
+    }
     var WORKS_RATE = 0.025;       /* Division 43: 2.5% of construction cost */
     var WORKS_YEARS = 40;
     var WORKS_FROM = 1988;        /* construction after 15 Sep 1987 (year-level approximation) */
@@ -422,7 +435,7 @@
       if (o.yearBuilt == null) return out;
 
       var age = o.isNew ? 0 : Math.max(0, NOW - o.yearBuilt);
-      var growth = Math.pow(1 + INFLATION, age);
+      var growth = o.isNew ? 1 : costGrowth(o.yearBuilt);
       var todayCost, origCost, basis;
       if (o.knownCost > 0) {
         origCost = o.knownCost; todayCost = origCost * growth; basis = "your figure";
@@ -556,6 +569,16 @@
         }
       }
       setNote("depNote", why.join(" "));
+
+      if (ok && !o.isNew && m.basis !== "your figure") {
+        var sz = o.area > 0 ? o.area + " m² " : "";
+        setNote("costNote", "Building a " + sz + m.T.label + " in " + o.yearBuilt + " is estimated to have cost about " + money(m.origCost) +
+          (o.area > 0 ? " (about " + money(m.origCost / o.area) + "/m²)" : "") +
+          ", worked back from about " + money(m.todayCost) + " to build today using the ABS new-dwelling price index" +
+          (o.yearBuilt < 1998 ? " (extended before 1998 at 3.5% a year)" : "") + ".");
+      } else {
+        setNote("costNote", "");
+      }
 
       if (ok && m.asNew && m.asNew.y1 > m.y1 * 1.05) {
         setNote("newNote", "For comparison: the same " + m.T.label + " bought brand new would deduct about " + money(m.asNew.y1) + " in year 1, and " + money(m.asNew.y5) + " over 5 years.");
