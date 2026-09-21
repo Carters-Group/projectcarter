@@ -2038,8 +2038,13 @@
         }
       }
       if (m && m.loan != null) {
-        row("Net sale proceeds less loan balance (" + fmtMoney(m.loan) + ")", fmtMoney(r.proceeds - m.loan), true);
-        if (m.sale.cashIfSold != null) row("Cash in hand after tax", fmtMoney(m.sale.cashIfSold), true);
+        row("Less loan balance repaid at sale", fmtSignedMoney(-m.loan));
+        row("Proceeds after repaying the loan", fmtMoney(r.proceeds - m.loan), true);
+        if (m.sale.cashIfSold != null) {
+          var taxDue = r.proceeds - m.loan - m.sale.cashIfSold;
+          if (taxDue > 0.5) row("Less estimated capital gains tax", fmtSignedMoney(-taxDue));
+          row("Cash in hand after loan and tax", fmtMoney(m.sale.cashIfSold), true);
+        }
       }
       return rows;
     }
@@ -2054,7 +2059,7 @@
       var table = tEl("table", "acct-taxtable acct-workings__table");
       var tb = tEl("tbody");
       rows.forEach(function (x) {
-        var tr = tEl("tr", x[2] ? "is-total" : null);
+        var tr = tEl("tr", x[2] ? "is-total" : (x[1].charAt(0) === "-" ? "is-deduction" : null));
         tr.appendChild(tEl("td", null, x[0]));
         tr.appendChild(tEl("td", "is-num", x[1]));
         tb.appendChild(tr);
@@ -2081,9 +2086,11 @@
         var h = Math.max(label.length, val.length) * 12 + 8;
         ensure(h);
         if (x[2]) { doc.setFillColor(238, 243, 248); doc.rect(M - 4, y - 10, W - M * 2 + 8, h, "F"); }
+        var ded = !x[2] && String(x[1]).charAt(0) === "-";
         doc.setFont("helvetica", x[2] ? "bold" : "normal"); doc.setFontSize(10); doc.setTextColor(30, 40, 55);
         doc.text(label, M, y);
-        doc.text(val, W - M, y, { align: "right" });
+        if (ded) doc.setTextColor(185, 48, 48);
+        doc.text(ded ? val.map(function (v) { return v + "  (deduction)"; }) : val, W - M, y, { align: "right" });
         y += h;
       });
       y += 14;

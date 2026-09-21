@@ -1943,6 +1943,7 @@ h1, h2, h3 {
 .acct-workings .acct-taxtable td:nth-child(2) { white-space: normal; }
 .acct-workings .acct-taxtable td:first-child { min-width: 0; }
 .acct-workings .is-total td { font-weight: 700; color: var(--text); background: var(--bg-2); }
+.acct-workings .is-deduction td.is-num { color: #e38a8a; }
 .acct-workings > .acct-tax-basis { padding: 0 14px 12px; }
 
 .acct-callout {
