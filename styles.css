@@ -2335,3 +2335,49 @@ h1, h2, h3 {
   .acct-nav__label { position: static; padding: 0; }
   .acct-nav a { padding-right: 16px; }
 }
+
+/* ---------- Pricing page ---------- */
+.pricing-hero { padding: clamp(130px, 16vw, 190px) 0 clamp(32px, 5vw, 56px); text-align: center; }
+.pricing-hero h1 { font-size: clamp(38px, 6.5vw, 72px); max-width: 16ch; margin: 0 auto 18px; }
+.pricing-lead { color: var(--muted); font-size: 1.1rem; margin: 0 auto; max-width: 46ch; }
+.pricing-plans { padding-bottom: clamp(72px, 10vw, 130px); }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 2.5vw, 28px);
+  max-width: 940px;
+  align-items: stretch;
+}
+.plan {
+  position: relative;
+  display: flex; flex-direction: column;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: clamp(28px, 3.5vw, 44px);
+}
+.plan-featured { border-color: rgba(95, 161, 208, 0.6); background: var(--bg-3); }
+.plan-badge {
+  position: absolute; top: 0; right: clamp(20px, 3vw, 32px); transform: translateY(-50%);
+  background: var(--accent); color: #141210;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 6px 12px;
+}
+.plan-name { font-size: 30px; margin: 0 0 6px; }
+.plan-tag { color: var(--muted); margin: 0 0 26px; min-height: 3.3em; }
+.plan-price { display: flex; flex-direction: column; gap: 2px; margin: 0 0 28px; padding-bottom: 28px; border-bottom: 1px solid var(--line-soft); }
+.plan-amt { font-family: var(--font-display); font-weight: 700; font-size: clamp(52px, 6vw, 68px); line-height: 1; }
+.plan-per { color: var(--muted); font-size: 0.9rem; }
+.plan-list { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 14px; flex: 1; align-content: start; }
+.plan-list li { display: flex; gap: 12px; align-items: flex-start; }
+.plan-list svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 4px; color: var(--accent); }
+.plan-cta { text-align: center; width: 100%; }
+.pricing-note {
+  max-width: 940px; margin: clamp(28px, 4vw, 44px) auto 0;
+  color: var(--muted); font-size: 0.92rem; text-align: center;
+}
+.pricing-note strong { color: var(--text); font-weight: 600; }
+@media (max-width: 780px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+  .plan-featured { margin-top: 12px; }
+  .plan-tag { min-height: 0; }
+}
