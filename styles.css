@@ -2338,7 +2338,7 @@ h1, h2, h3 {
 
 /* ---------- Pricing page ---------- */
 .pricing-hero { padding: clamp(130px, 16vw, 190px) 0 clamp(32px, 5vw, 56px); text-align: center; }
-.pricing-hero h1 { font-size: clamp(38px, 6.5vw, 72px); max-width: 16ch; margin: 0 auto 18px; }
+.pricing-hero h1 { font-size: clamp(30px, 6vw, 68px); margin: 0 auto 18px; }
 .pricing-lead { color: var(--muted); font-size: 1.1rem; margin: 0 auto; max-width: 46ch; }
 .pricing-plans { padding-bottom: clamp(72px, 10vw, 130px); }
 .pricing-grid {
@@ -2366,18 +2366,20 @@ h1, h2, h3 {
 .plan-tag { color: var(--muted); margin: 0 0 26px; min-height: 3.3em; }
 .plan-price { display: flex; flex-direction: column; gap: 2px; margin: 0 0 28px; padding-bottom: 28px; border-bottom: 1px solid var(--line-soft); }
 .plan-amt { font-family: var(--font-display); font-weight: 700; font-size: clamp(52px, 6vw, 68px); line-height: 1; }
+.plan-amt small { font-family: var(--font-body); font-weight: 500; font-size: 0.9rem; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
 .plan-per { color: var(--muted); font-size: 0.9rem; }
+.pricing-privacy { max-width: 940px; margin: clamp(28px, 4vw, 44px) auto 0; padding: 16px 20px; border: 1px solid var(--line); background: var(--bg-2); color: var(--muted); font-size: 0.92rem; text-align: center; }
+.pricing-privacy strong { color: var(--text); font-weight: 600; }
 .plan-list { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 14px; flex: 1; align-content: start; }
 .plan-list li { display: flex; gap: 12px; align-items: flex-start; }
 .plan-list svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 4px; color: var(--accent); }
 .plan-cta { text-align: center; width: 100%; }
 .pricing-note {
-  max-width: 940px; margin: clamp(28px, 4vw, 44px) auto 0;
+  max-width: 940px; margin: 18px auto 0;
   color: var(--muted); font-size: 0.92rem; text-align: center;
 }
 .pricing-note strong { color: var(--text); font-weight: 600; }
 @media (max-width: 780px) {
   .pricing-grid { grid-template-columns: 1fr; }
-  .plan-featured { margin-top: 12px; }
-  .plan-tag { min-height: 0; }
+    .plan-tag { min-height: 0; }
 }
