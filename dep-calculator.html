@@ -31,6 +31,14 @@
     "publisher": { "@type": "Organization", "name": "Project Carter" }
   }
   </script>
+  <style>
+    /* five short columns: keep the year-by-year table inside the screen on a phone */
+    #calcSchedule th, #calcSchedule td { padding: 10px 6px; font-size: 0.82rem; }
+    #calcSchedule thead th { font-size: 10px; letter-spacing: 0.04em; }
+    #calcSchedule th:first-child, #calcSchedule td:first-child { padding-left: 2px; }
+    #calcSchedule th:last-child, #calcSchedule td:last-child { padding-right: 2px; }
+    #calcSchedule tr.is-total td { font-weight: 600; }
+  </style>
 </head>
 <body data-pc-calc="dep">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -127,7 +135,7 @@
               </div>
 
               <div class="field" id="yearField">
-                <label for="yearBuilt">Year it was built</label>
+                <label for="yearBuilt">Estimated year built</label>
                 <input type="text" inputmode="numeric" id="yearBuilt" autocomplete="off" maxlength="4" placeholder="1998" />
                 <p class="field-hint">A rough year is fine. The building deduction runs for 40 years from when construction finished.</p>
               </div>
@@ -150,9 +158,9 @@
               <p class="field-hint" style="margin-top:0">Skip this and the estimate uses typical building costs. Add either figure and it gets tighter.</p>
 
               <div class="field">
-                <label for="area">Floor area <span>(m&sup2;)</span></label>
+                <label for="area">Internal floor area <span>(m&sup2;)</span></label>
                 <input type="text" inputmode="decimal" id="area" autocomplete="off" placeholder="180" />
-                <p class="field-hint">Internal floor area, or building area for commercial. Costs the building at today's rates instead of as a share of the price.</p>
+                <p class="field-hint">The internal floor area of the building (building area for commercial). Costs it at today's rates instead of as a share of the price.</p>
               </div>
 
               <div class="field">
@@ -210,13 +218,13 @@
         <div class="calc-schedule-wrap">
           <h2 class="calc-subhead">Year by year</h2>
           <div class="calc-schedule-scroll">
-            <table class="calc-schedule" id="calcSchedule">
+            <table class="calc-schedule calc-schedule--compact" id="calcSchedule">
               <thead>
                 <tr>
                   <th scope="col">Year</th>
                   <th scope="col">Building</th>
-                  <th scope="col">Fixtures &amp; fittings</th>
-                  <th scope="col">Total deduction</th>
+                  <th scope="col">Fittings</th>
+                  <th scope="col">Total</th>
                   <th scope="col">Tax saved</th>
                 </tr>
               </thead>
