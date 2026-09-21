@@ -112,7 +112,9 @@
                     <option value="house">House</option>
                     <option value="town">Townhouse / villa</option>
                     <option value="unit">Apartment / unit</option>
-                    <option value="comm">Commercial (office, retail, industrial)</option>
+                    <option value="ret">Commercial: retail / shop</option>
+                    <option value="off">Commercial: office</option>
+                    <option value="ind">Commercial: industrial / warehouse</option>
                   </select>
                 </div>
                 <div class="field">
@@ -276,7 +278,7 @@
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
             <li><strong>Two kinds of deduction.</strong> <em>Capital works</em> (Division 43) is the building itself: 2.5% of its original construction cost a year for 40 years. <em>Plant and equipment</em> (Division 40) is the removable fixtures and fittings such as appliances, blinds, carpet and air conditioning, written off faster because they wear out sooner. Only the fixtures and fittings can be front-loaded: the building is a flat 2.5% a year by law.</li>
-            <li><strong>Construction cost.</strong> If you enter the original cost, that is used. Otherwise it is estimated: from the floor area at typical 2026 build rates, or, with no area, as a share of the purchase price (about 40% for a house, 55% for a townhouse, 75% for an apartment and 60% for commercial, the rest being land). For an established building that cost is wound back to the year it was built using the ABS price index for building a new dwelling (national, excluding land, from 1998; earlier years are extended at 3.5% a year), because the deduction is based on what it cost to build then, not what it would cost now. It is a national index, so it smooths over state and suburb differences.</li>
+            <li><strong>Construction cost.</strong> If you enter the original cost, that is used. Otherwise it is estimated: from the floor area at typical 2026 build rates before GST (about $2,400/m² for a house, $3,000 for a townhouse, $4,500 for an apartment, $3,800 for an office, $2,800 for retail and $1,250 for industrial, set against published QS guides such as BMT, Rawlinsons and Rider Levett Bucknall and ABS builder-reported costs), or, with no area, as a share of the purchase price (about 40% for a house, 55% for a townhouse, 75% for an apartment and 60% for commercial, the rest being land; a rough fallback, so the floor area is worth entering). For an established building that cost is wound back to the year it was built using the ABS price index for building a new dwelling (national, excluding land, from 1998; earlier years are extended at 3.5% a year), because the deduction is based on what it cost to build then, not what it would cost now. It is a national index, so it smooths over state and suburb differences.</li>
             <li><strong>Building deduction rules.</strong> Residential construction that started on or before 15 September 1987 gets no capital works deduction on the original building, and the deduction stops 40 years after the building was finished. Later renovations by an earlier owner can add their own deductions, which this estimate can't see.</li>
             <li><strong>Fixtures and fittings rules.</strong> For residential property bought on or after 9 May 2017, investors can only claim fixtures and fittings that are new: in a brand new home, or that they install themselves. Second-hand items in an established home are not claimable, so this calculator shows $0 there unless you say you bought before that date. Commercial property has no such limit, but items are worth less second-hand, so an established commercial estimate assumes half of the new value.</li>
             <li><strong>Fixtures and fittings maths.</strong> Their starting value is a share of the construction cost (about 7% for a house, 8% for a townhouse, 10% for an apartment and 12% for commercial), written off over an average effective life of ten years. <em>Diminishing value</em> (the default) takes 20% of the remaining balance each year, so the biggest deductions come first. <em>Prime cost</em> takes an even 10% of the starting value each year. Both add up to the same total over the assets' lives; diminishing value just brings it forward. Most schedules use diminishing value, but confirm which method suits you with your accountant.</li>
@@ -406,10 +408,16 @@
     var QS_FEE = 700;
     var YEARS = 10;
     var TYPES = {
-      house: { label: "house",         res: true,  share: 0.40, plant: 0.07, rate: 3400 },
-      town:  { label: "townhouse",     res: true,  share: 0.55, plant: 0.08, rate: 3600 },
-      unit:  { label: "apartment",     res: true,  share: 0.75, plant: 0.10, rate: 4200 },
-      comm:  { label: "commercial property", res: false, share: 0.60, plant: 0.12, rate: 3000 }
+      /* rate = typical 2026 construction cost per m2, before GST, for an investor-grade building.
+         Checked 2026-09-21 against BMT / Rawlinsons (project home $2,176-2,895, townhouse $3,171-4,318),
+         RLB Riders Digest Q4 2025 (low-rise apartments $4,200-5,700, retail $2,100-4,200, industrial $1,060-1,340)
+         and ABS Building Activity (builder-reported house ~$1,967 incl GST, apartments ~$4,533). */
+      house: { label: "house",         res: true,  share: 0.40, plant: 0.07, rate: 2400 },
+      town:  { label: "townhouse",     res: true,  share: 0.55, plant: 0.08, rate: 3000 },
+      unit:  { label: "apartment",     res: true,  share: 0.75, plant: 0.10, rate: 4500 },
+      off:   { label: "office building", res: false, share: 0.60, plant: 0.12, rate: 3800 },
+      ret:   { label: "retail property", res: false, share: 0.60, plant: 0.12, rate: 2800 },
+      ind:   { label: "industrial property", res: false, share: 0.60, plant: 0.10, rate: 1250 }
     };
 
     function opts() {
@@ -574,7 +582,7 @@
         var sz = o.area > 0 ? o.area + " m² " : "";
         setNote("costNote", "Building a " + sz + m.T.label + " in " + o.yearBuilt + " is estimated to have cost about " + money(m.origCost) +
           (o.area > 0 ? " (about " + money(m.origCost / o.area) + "/m²)" : "") +
-          ", worked back from about " + money(m.todayCost) + " to build today using the ABS new-dwelling price index" +
+          ", worked back from about " + money(m.todayCost) + " to build today using the ABS new-dwelling price index" + (m.T.res ? "" : " (a housing index, used here as a proxy for commercial building)") +
           (o.yearBuilt < 1998 ? " (extended before 1998 at 3.5% a year)" : "") + ".");
       } else {
         setNote("costNote", "");
