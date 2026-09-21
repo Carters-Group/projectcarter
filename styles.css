@@ -2169,7 +2169,28 @@ h1, h2, h3 {
   border: 1px solid var(--line-soft); border-radius: 6px; background: var(--bg);
 }
 .acct-import__row:has(input:checked) { border-color: var(--accent); background: rgba(95, 161, 208, 0.1); }
-.acct-import__row.is-already { opacity: 0.55; cursor: default; }
+.acct-import__row[hidden] { display: none; }
+.acct-import__row.is-already { cursor: default; }
+.acct-import__row.is-already input, .acct-import__row.is-already .acct-import__text { opacity: 0.55; }
+.acct-import__text { flex: 1; min-width: 0; }
+.acct-import__remove { flex: none; margin-left: auto; color: var(--muted); font-size: 13px; }
+.acct-import__remove:hover { color: var(--text); }
+.acct-import__more { margin-top: 8px; }
+
+/* Sale workings: one collapsible with a property picker */
+.acct-workings__pick { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line-soft); }
+.acct-workings__pick label { font-size: 13px; color: var(--muted); }
+.acct-workings__pick select { flex: 1; min-width: 180px; }
+
+/* Disclaimer popup */
+.acct-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(4, 8, 14, 0.78); }
+.acct-modal[hidden] { display: none; }
+.acct-modal__box { width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; padding: 26px 26px 22px; border: 1px solid var(--line-soft); border-top: 4px solid var(--accent); border-radius: 8px; background: var(--bg-2); }
+.acct-modal__box h2 { margin: 0 0 10px; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-2); }
+.acct-modal__box p, .acct-modal__box li { font-size: 14.5px; line-height: 1.55; color: var(--text); }
+.acct-modal__box ul { margin: 8px 0 14px; padding-left: 20px; }
+.acct-modal__tick { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0; font-size: 14px; cursor: pointer; }
+.acct-modal__tick input { width: 18px; height: 18px; flex: none; margin-top: 2px; accent-color: var(--accent); }
 .acct-import__row input { width: 18px; height: 18px; flex: none; accent-color: var(--accent); }
 .acct-import__row strong { display: block; font-size: 14.5px; color: var(--text); }
 .acct-import__row small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }

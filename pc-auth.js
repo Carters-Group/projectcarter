@@ -626,6 +626,9 @@
         tax_rate_pct: clamp(s.tax_rate_pct, 0, 60),
         selling_cost_pct: clamp(s.selling_cost_pct, 0, 10)
       };
+      /* the signed disclaimer rides along in the same jsonb column */
+      if (typeof s.disclaimer_accepted_at === "string") clean.disclaimer_accepted_at = s.disclaimer_accepted_at.slice(0, 40);
+      if (typeof s.disclaimer_name === "string") clean.disclaimer_name = s.disclaimer_name.slice(0, 120);
       return client.from("profiles").update({ tax_settings: clean }).eq("id", currentUser.id)
         .then(function (res) { return { data: clean, error: res.error }; });
     },
