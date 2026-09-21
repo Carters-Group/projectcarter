@@ -81,7 +81,7 @@ var pcPortfolio = (function () {
     var rent = annualRent(p, today);
 
     var m = {
-      id: p.id, name: p.name || "Untitled property", type: p.property_type === "commercial" ? "commercial" : "residential", state: p.state || "", owner: p.ownership_type || "individual",
+      id: p.id, name: p.name || "Untitled property", entity: (p.holding_entity || "").trim(), type: p.property_type === "commercial" ? "commercial" : "residential", state: p.state || "", owner: p.ownership_type || "individual",
       value: value, loan: loan, rate: rate, price: price,
       equity: value != null && loan != null ? value - loan : null,
       lvr: value != null && loan != null ? loan / value * 100 : null,
@@ -118,13 +118,10 @@ var pcPortfolio = (function () {
         if (cgt.ready) {
           sale.proceeds = cgt.proceeds;
           if (loan != null) sale.cashBeforeTax = cgt.proceeds - loan;
-          if (!cgt.needsRate && cgt.currentLaw.tax != null) {
-            sale.tax = cgt.currentLaw.tax;
-            if (loan != null) sale.cashIfSold = cgt.proceeds - loan - cgt.currentLaw.tax;
-            if (cgt.reform && cgt.reform.tax != null) {
-              sale.taxReform = cgt.reform.tax;
-              if (loan != null) sale.cashIfSoldReform = cgt.proceeds - loan - cgt.reform.tax;
-            }
+          /* the tax on the sale date: the new rules from 1 July 2027, otherwise current law */
+          if (!cgt.needsRate && cgt.tax != null) {
+            sale.tax = cgt.tax;
+            if (loan != null) sale.cashIfSold = cgt.proceeds - loan - cgt.tax;
           }
         }
       }
@@ -145,7 +142,7 @@ var pcPortfolio = (function () {
       landTax = pcTax.landTaxPortfolio(metrics.map(function (m, i) {
         return {
           id: m.id, name: m.name, state: m.state, owner: m.owner,
-          landValue: pos(props[i].land_value) || 0, waMetro: !!props[i].wa_metro
+          landValue: pos(props[i].land_value) || 0, waMetro: !!props[i].wa_metro, entity: props[i].holding_entity || ""
         };
       }), {});
       landTax.groups.forEach(function (g) {
@@ -193,6 +190,7 @@ var pcPortfolio = (function () {
       cashFlow: cashFlow, cashFlowWeekly: cashFlow / 52,
       blendedRate: blendedRate,
       landTax: landTax ? landTax.totalTax : null,
+      cgtTax: cgtTotals ? cgtTotals.tax : null,
       cgtCurrent: cgtTotals ? cgtTotals.currentTax : null,
       cgtReform: cgtTotals ? cgtTotals.reformTax : null,
       cgtNeedsRate: cgtTotals ? cgtTotals.needsRate : false,
@@ -211,8 +209,16 @@ var pcPortfolio = (function () {
       rent: names(metrics.filter(function (m) { return m.rent == null; })),
       rate: names(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
     };
+    /* the same lists as {id, name} so each can link to the field to fill in */
+    var refs = function (list) { return list.map(function (m) { return { id: m.id, name: m.name }; }); };
+    var missingRefs = {
+      value: refs(metrics.filter(function (m) { return m.value == null; })),
+      loan: refs(metrics.filter(function (m) { return m.value != null && m.loan == null; })),
+      rent: refs(metrics.filter(function (m) { return m.rent == null; })),
+      rate: refs(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
+    };
 
-    return { props: metrics, totals: totals, missing: missing, landTax: landTax, cgt: cgtTotals, summary: toSummary(totals) };
+    return { props: metrics, totals: totals, missing: missing, missingRefs: missingRefs, landTax: landTax, cgt: cgtTotals, summary: toSummary(totals) };
   }
 
   /* the small snapshot shape the calculators already read (usableEquity70 /

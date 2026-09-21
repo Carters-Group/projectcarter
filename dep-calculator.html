@@ -1,0 +1,926 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tax Depreciation Calculator | Project Carter</title>
+  <meta name="description" content="Estimate the tax depreciation on an investment property in four quick answers: building (capital works) and fixtures and fittings, year by year, with a realistic range and a plain-English reason for every zero. Free one-page PDF. A guide only, not tax advice." />
+  <meta name="theme-color" content="#0c1016" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Tax Depreciation Calculator | Project Carter" />
+  <meta property="og:description" content="How much could this property deduct each year? Building and fixtures and fittings, year by year, with a realistic range and the reasons behind it." />
+  <meta property="og:image" content="assets/og-image.svg" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Tax Depreciation Calculator",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any (web browser)",
+    "description": "Estimate an investment property's tax depreciation: capital works and fixtures and fittings, year by year, for residential and commercial property.",
+    "url": "https://www.projectcarter.com.au/tax-depreciation-calculator",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
+    "publisher": { "@type": "Organization", "name": "Project Carter" }
+  }
+  </script>
+</head>
+<body data-pc-calc="dep">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER (shared) ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="/" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+        <span class="brand-sub">CARTERS INVESTMENT GROUP</span>
+      </a>
+      <nav class="nav" id="primaryNav" aria-label="Primary">
+        <div class="nav-dropdown" id="aboutDropdown">
+          <a href="about" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="aboutDropdownMenu">
+            About
+            <svg class="nav-caret" viewBox="0 0 9 6" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          </a>
+          <div class="nav-dropdown-menu" id="aboutDropdownMenu">
+            <a href="about">About</a>
+            <a href="approach">Approach</a>
+            <a href="/#projects">Projects</a>
+          </div>
+        </div>
+        <a href="property-portfolio-management">Portfolio Management</a>
+        <div class="nav-dropdown" id="calcDropdown">
+          <a href="commercial-calculators" class="nav-dropdown-toggle" aria-expanded="false" aria-controls="calcDropdownMenu">
+            Calculators
+            <svg class="nav-caret" viewBox="0 0 9 6" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          </a>
+          <div class="nav-dropdown-menu" id="calcDropdownMenu">
+            <a href="portfolio-review-calculator">Portfolio Review (PR)</a>
+            <a href="commercial-lending-calculator">Commercial Lending (CL)</a>
+            <a href="return-on-investment-calculator">Return on Investment (ROI)</a>
+            <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
+            <a href="development-site-calculator">Development Site (DA)</a>
+            <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
+            <a href="tax-depreciation-calculator">Tax Depreciation (DEP)</a>
+          </div>
+        </div>
+        <a href="account">Account</a>
+        <a href="enquire" class="btn btn-accent nav-cta-mobile">Contact</a>
+      </nav>
+      <a href="enquire" class="btn btn-accent header-cta">Contact</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+  <main id="main">
+    <section class="calc">
+      <div class="wrap">
+        <div class="calc-intro">
+          <p class="kicker">Project Carter</p>
+          <h1>Tax Depreciation Calculator</h1>
+          <p>Four quick answers and you'll see roughly what a property could deduct each year for the building and, where the rules allow, its fixtures and fittings. It shows a range rather than a false-precision figure, and it tells you plainly when a deduction doesn't apply. It is an estimate to help you think, not tax advice.</p>
+        </div>
+
+        <div class="calc-grid">
+          <div class="calc-inputs" id="calcInputs">
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Report</h2>
+              <div class="field">
+                <label for="pcProjectName">Property name or address</label>
+                <input type="text" id="pcProjectName" autocomplete="off" placeholder="e.g. 12 Example Street, Suburb" />
+                <p class="field-hint">Shown on the PDF and used to name the report if you save it to your account.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">The property</h2>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="propType">What is it?</label>
+                  <select id="propType">
+                    <option value="house">House</option>
+                    <option value="town">Townhouse / villa</option>
+                    <option value="unit">Apartment / unit</option>
+                    <option value="comm">Commercial (office, retail, industrial)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="cond">Is it new?</label>
+                  <select id="cond">
+                    <option value="est">Established (lived in or used before)</option>
+                    <option value="new">Brand new (first sale, never occupied)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field" id="yearField">
+                <label for="yearBuilt">Year it was built</label>
+                <input type="text" inputmode="numeric" id="yearBuilt" autocomplete="off" maxlength="4" placeholder="1998" />
+                <p class="field-hint">A rough year is fine. The building deduction runs for 40 years from when construction finished.</p>
+              </div>
+
+              <div class="field">
+                <label for="price">Purchase price</label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="price" autocomplete="off" placeholder="850,000" /></div>
+                <p class="field-hint">Used to estimate the building's construction cost when you don't have the real figure.</p>
+              </div>
+
+              <div class="field">
+                <label for="taxRate">Your marginal tax rate</label>
+                <div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="taxRate" autocomplete="off" placeholder="37" value="37" /></div>
+                <p class="field-hint">Turns the deduction into a tax saving. Leave it as is if you're not sure.</p>
+              </div>
+            </div>
+
+            <div class="calc-group">
+              <h2 class="calc-subhead">Sharpen the estimate (optional)</h2>
+              <p class="field-hint" style="margin-top:0">Skip this and the estimate uses typical building costs. Add either figure and it gets tighter.</p>
+
+              <div class="field">
+                <label for="area">Floor area <span>(m&sup2;)</span></label>
+                <input type="text" inputmode="decimal" id="area" autocomplete="off" placeholder="180" />
+                <p class="field-hint">Internal floor area, or building area for commercial. Costs the building at today's rates instead of as a share of the price.</p>
+              </div>
+
+              <div class="field">
+                <label for="knownCost">Original construction cost <span>(if you know it)</span></label>
+                <div class="input-money"><input type="text" inputmode="numeric" id="knownCost" autocomplete="off" placeholder="0" /></div>
+                <p class="field-hint">From a builder's contract, a developer's disclosure or an earlier depreciation schedule. Beats any estimate.</p>
+              </div>
+
+              <div class="field">
+                <label for="method">Fixtures &amp; fittings method</label>
+                <select id="method">
+                  <option value="dv">Diminishing value (bigger deductions early)</option>
+                  <option value="pc">Prime cost (the same amount every year)</option>
+                </select>
+                <p class="field-hint">Your choice for fixtures and fittings. The building itself is always a flat 2.5% a year, which the tax law doesn't let you front-load.</p>
+              </div>
+
+              <div class="field" id="pre2017Field" hidden>
+                <label class="calc-check">
+                  <input type="checkbox" id="pre2017" />
+                  <span>I bought it before 9 May 2017</span>
+                </label>
+                <p class="field-hint">Owners from before that date can still claim second-hand fixtures and fittings in a home.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <dl class="calc-results" id="calcResults" aria-live="polite">
+            <h2>Your depreciation estimate</h2>
+            <div class="result-row is-teaser"><dt>Estimated construction cost</dt><dd data-out="cost">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Building (capital works) <span>(year 1)</span></dt><dd data-out="works1">&mdash;</dd></div>
+            <div class="result-row is-teaser"><dt>Fixtures &amp; fittings <span>(year 1)</span></dt><dd data-out="plant1">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>Year 1 deduction</dt><dd data-out="y1">&mdash;</dd></div>
+            <div class="result-row"><dt>Realistic range <span>(year 1)</span></dt><dd data-out="range1">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>First 5 years</dt><dd data-out="y5">&mdash;</dd></div>
+            <div class="result-row is-key"><dt>First 10 years</dt><dd data-out="y10">&mdash;</dd></div>
+            <div class="result-row"><dt>Tax saved in year 1</dt><dd data-out="tax1">&mdash;</dd></div>
+            <div class="result-row is-final"><dt>Tax saved over 10 years</dt><dd data-out="tax10">&mdash;</dd></div>
+
+            <p class="calc-note" id="depNote" hidden></p>
+            <p class="calc-note" id="newNote" hidden></p>
+            <p class="calc-note" id="qsNote" hidden></p>
+
+            <div class="calc-cta">
+              <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
+              <button type="button" class="btn btn-accent btn-block" id="openLead">Download PDF</button>
+              <p class="acct-msg is-error" id="leadEmptyNote" hidden>Enter your figures above first &mdash; there's nothing to download yet.</p>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one.</p>
+            </div>
+          </dl>
+
+          <div class="calc-below">
+        <div class="calc-schedule-wrap">
+          <h2 class="calc-subhead">Year by year</h2>
+          <div class="calc-schedule-scroll">
+            <table class="calc-schedule" id="calcSchedule">
+              <thead>
+                <tr>
+                  <th scope="col">Year</th>
+                  <th scope="col">Building</th>
+                  <th scope="col">Fixtures &amp; fittings</th>
+                  <th scope="col">Total deduction</th>
+                  <th scope="col">Tax saved</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Lead-capture modal, opened by the "Download PDF" button.
+             The submit is sent in the background so the visitor keeps the
+             page and their PDF. -->
+        <div class="modal" id="leadModal" hidden>
+          <div class="modal-backdrop" data-close></div>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+            <button type="button" class="modal-close" data-close aria-label="Close">&times;</button>
+            <h2 id="leadModalTitle">Get your summary</h2>
+            <p>The page builds a one-page PDF of your depreciation estimate, year by year. A copy is sent to Project Carter so we can follow up if you'd like.</p>
+
+            <form class="calc-lead-form" id="leadForm"
+                  action="https://formspree.io/f/xqpkjvkb" method="POST" novalidate>
+              <input type="hidden" name="_subject" value="DEP Calculator request" />
+              <input type="hidden" name="Figures" id="figuresField" value="" />
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
+              <div class="field">
+                <label for="leadName">Name</label>
+                <input type="text" id="leadName" name="Name" autocomplete="name" required />
+              </div>
+              <div class="field">
+                <label for="leadEmail">Email</label>
+                <input type="email" id="leadEmail" name="Email" autocomplete="email" required />
+              </div>
+              <div class="field">
+                <label for="leadPhone">Phone</label>
+                <input type="tel" id="leadPhone" name="Phone" autocomplete="tel" required />
+              </div>
+              <label class="calc-check">
+                <input type="checkbox" id="leadHelp" name="Assessment requested" value="Yes, review these figures and get back to me" />
+                <span>Can you review these figures and summarise them for me?</span>
+              </label>
+              <div class="calc-note">
+                <p><strong>Optional</strong> &mdash; set a password to also create a free account in the same step, so you can save this report and open it again later.</p>
+                <div class="field">
+                  <label for="leadPassword">Password</label>
+                  <input type="password" id="leadPassword" autocomplete="new-password" placeholder="Create a password" />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-accent btn-block" id="leadBtn">Download PDF</button>
+              <p class="form-fineprint">Project Carter is sent your figures for an assessment only if you request one. You'll only need to do this once - every calculator on this site will let you download straight away after this.</p>
+            </form>
+
+            <div class="calc-done" id="calcDone" hidden>
+              <p><strong>Done.</strong> Your PDF has downloaded. If it didn't, <button type="button" class="linklike" id="redownload">download it again</button>. Project Carter has your figures and will be in touch if you asked for a follow-up.</p>
+              <p id="calcDoneAccount" hidden>Your free account is ready &mdash; check your email to confirm it, then <a href="account">sign in</a> any time to see your saved reports.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-assumptions">
+          <h2 class="calc-subhead">How the numbers work</h2>
+          <ul>
+            <li><strong>Two kinds of deduction.</strong> <em>Capital works</em> (Division 43) is the building itself: 2.5% of its original construction cost a year for 40 years. <em>Plant and equipment</em> (Division 40) is the removable fixtures and fittings such as appliances, blinds, carpet and air conditioning, written off faster because they wear out sooner. Only the fixtures and fittings can be front-loaded: the building is a flat 2.5% a year by law.</li>
+            <li><strong>Construction cost.</strong> If you enter the original cost, that is used. Otherwise it is estimated: from the floor area at typical 2026 build rates, or, with no area, as a share of the purchase price (about 40% for a house, 55% for a townhouse, 75% for an apartment and 60% for commercial, the rest being land). For an established building that cost is wound back to the year it was built at 3.5% a year, because the deduction is based on what it cost to build then, not what it would cost now.</li>
+            <li><strong>Building deduction rules.</strong> Residential construction that started on or before 15 September 1987 gets no capital works deduction on the original building, and the deduction stops 40 years after the building was finished. Later renovations by an earlier owner can add their own deductions, which this estimate can't see.</li>
+            <li><strong>Fixtures and fittings rules.</strong> For residential property bought on or after 9 May 2017, investors can only claim fixtures and fittings that are new: in a brand new home, or that they install themselves. Second-hand items in an established home are not claimable, so this calculator shows $0 there unless you say you bought before that date. Commercial property has no such limit, but items are worth less second-hand, so an established commercial estimate assumes half of the new value.</li>
+            <li><strong>Fixtures and fittings maths.</strong> Their starting value is a share of the construction cost (about 7% for a house, 8% for a townhouse, 10% for an apartment and 12% for commercial), written off over an average effective life of ten years. <em>Diminishing value</em> (the default) takes 20% of the remaining balance each year, so the biggest deductions come first. <em>Prime cost</em> takes an even 10% of the starting value each year. Both add up to the same total over the assets' lives; diminishing value just brings it forward. Most schedules use diminishing value, but confirm which method suits you with your accountant.</li>
+            <li><strong>The range.</strong> A quantity surveyor measures the real building, so a real schedule can land above or below a desk estimate. The range shows roughly 25% below to 30% above.</li>
+            <li><strong>Tax saved</strong> is the deduction multiplied by the marginal tax rate you enter. It assumes you have enough taxable income to use it. Capital works deductions you claim reduce the cost base of the property, so some of the benefit comes back as capital gains tax when you sell. The first year is shown as a full year; in practice it is pro-rated from settlement.</li>
+            <li><strong>Is a quantity surveyor's report worth it?</strong> A schedule from a quantity surveyor typically costs around $600 to $800 and is itself tax deductible. The report is what lets you claim with confidence, and it finds things a desk estimate can't. This page is a guide only and is not a substitute for one.</li>
+          </ul>
+        </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="/" aria-label="Project Carter home">
+        <span class="brand-name">PROJECT&nbsp;CARTER</span>
+      </a>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="about">About</a>
+        <a href="/#projects">Projects</a>
+        <a href="approach">Approach</a>
+        <a href="property-portfolio-management">Portfolio Management</a>
+        <a href="commercial-calculators">Calculators</a>
+        <a href="account">Account</a>
+        <a href="enquire">Contact</a>
+      </nav>
+    </div>
+    <div class="wrap footer-legal">
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <div class="footer-social">
+        <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/trent-macartney-793a8a37b/" aria-label="Trent Macartney on LinkedIn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4v15h-4V8zm7.5 0h3.8v2.05h.05c.53-.95 1.83-2.05 3.77-2.05C20.6 8 22 10.02 22 13.6V23h-4v-8.15c0-1.94-.03-4.44-2.7-4.44-2.7 0-3.12 2.11-3.12 4.29V23H8V8z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/trent.macartney/" aria-label="Trent Macartney on Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@trentmacartney" aria-label="Trent Macartney on TikTok">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.2 2h-3.2v13.9c0 1.7-1.4 3.1-3.1 3.1s-3.1-1.4-3.1-3.1c0-1.6 1.2-2.9 2.8-3.1V9.5c-3.4.2-6 3-6 6.3 0 3.5 2.8 6.3 6.3 6.3s6.3-2.8 6.3-6.3V8.9c1.5.9 3.2 1.4 5 1.4V7c-1.2 0-2.3-.3-3.3-.9-1.4-.8-2.3-2.2-2.5-3.8V2h-.2z"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
+  <script src="pc-auth.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var inputs = document.getElementById("calcInputs");
+    var leadForm = document.getElementById("leadForm");
+    var money0 = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 });
+
+    function num(id) {
+      var el = document.getElementById(id);
+      if (!el) return 0;
+      var raw = (el.value || "").replace(/[^0-9.]/g, "");
+      var n = parseFloat(raw);
+      return isNaN(n) || n < 0 ? 0 : n;
+    }
+    function money(n) { return money0.format(Math.round(n)); }
+
+    /* Reveal gate: figures update live, but every digit after the first is
+       masked until the visitor leaves their details (persisted per browser). */
+    var LOCK_KEY = "pc_dep_unlocked";
+    var LEAD_KEY = "pc_lead_unlocked";
+    var LEAD_CONTACT_KEY = "pc_lead_contact";
+    var unlocked = false;
+    try { unlocked = window.localStorage.getItem(LOCK_KEY) === "1" || window.localStorage.getItem(LEAD_KEY) === "1"; } catch (e) {}
+    if (window.pcMember) unlocked = true;
+    function mask(str) {
+      var seen = false;
+      return String(str).replace(/\d/g, function (d) {
+        if (seen) return "•";
+        seen = true; return d;
+      });
+    }
+
+    /* Slide the "%" suffix to sit right after the typed number, left-aligned */
+    var PCT_FIELDS = ["taxRate"];
+    var pctCanvas = document.createElement("canvas").getContext("2d");
+    function positionPct() {
+      PCT_FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var cs = getComputedStyle(el);
+        pctCanvas.font = cs.font || (cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily);
+        var txt = el.value !== "" ? el.value : (el.placeholder || "");
+        var padLeft = parseFloat(cs.paddingLeft) || 15;
+        el.parentNode.style.setProperty("--pct-x", (padLeft + pctCanvas.measureText(txt).width + 1) + "px");
+      });
+    }
+
+    /* ---- the depreciation model ------------------------------------------
+       Everything here is a desk estimate; the page says so. Constants are the
+       few knobs a quantity surveyor's real schedule would replace. */
+    var NOW = new Date().getFullYear();
+    var INFLATION = 0.035;        /* build-cost inflation used to wind today's cost back to the build year */
+    var WORKS_RATE = 0.025;       /* Division 43: 2.5% of construction cost */
+    var WORKS_YEARS = 40;
+    var WORKS_FROM = 1988;        /* construction after 15 Sep 1987 (year-level approximation) */
+    var PLANT_DV = 0.20;          /* diminishing value: 200% / ~10 year average effective life, on the opening balance */
+    var PLANT_PC = 0.10;          /* prime cost: 100% / ~10 year effective life, on the starting value */
+    var SECOND_HAND = 0.5;        /* second-hand plant is worth about half of new */
+    var RANGE_LOW = 0.75, RANGE_HIGH = 1.30;
+    var QS_FEE = 700;
+    var YEARS = 10;
+    var TYPES = {
+      house: { label: "house",         res: true,  share: 0.40, plant: 0.07, rate: 3400 },
+      town:  { label: "townhouse",     res: true,  share: 0.55, plant: 0.08, rate: 3600 },
+      unit:  { label: "apartment",     res: true,  share: 0.75, plant: 0.10, rate: 4200 },
+      comm:  { label: "commercial property", res: false, share: 0.60, plant: 0.12, rate: 3000 }
+    };
+
+    function opts() {
+      var isNew = document.getElementById("cond").value === "new";
+      var yr = parseInt((document.getElementById("yearBuilt").value || "").replace(/[^0-9]/g, ""), 10);
+      return {
+        type: document.getElementById("propType").value,
+        isNew: isNew,
+        yearBuilt: isNew ? NOW : (yr >= 1800 && yr <= NOW ? yr : null),
+        price: num("price"),
+        area: num("area"),
+        knownCost: num("knownCost"),
+        pre2017: document.getElementById("pre2017").checked,
+        method: document.getElementById("method").value === "pc" ? "pc" : "dv",
+        taxRate: Math.min(99, num("taxRate"))
+      };
+    }
+
+    function calc(o) {
+      var T = TYPES[o.type];
+      var out = { valid: false, T: T, o: o };
+      if (!(o.price > 0 || o.knownCost > 0 || o.area > 0)) return out;
+      if (o.yearBuilt == null) return out;
+
+      var age = o.isNew ? 0 : Math.max(0, NOW - o.yearBuilt);
+      var growth = Math.pow(1 + INFLATION, age);
+      var todayCost, origCost, basis;
+      if (o.knownCost > 0) {
+        origCost = o.knownCost; todayCost = origCost * growth; basis = "your figure";
+      } else if (o.area > 0) {
+        todayCost = o.area * T.rate; origCost = todayCost / growth; basis = "floor area at typical build rates";
+      } else {
+        todayCost = o.price * T.share; origCost = todayCost / growth; basis = "a share of the purchase price";
+      }
+
+      /* Division 43 - building */
+      var yearsLeft = Math.max(0, WORKS_YEARS - age);
+      var worksOn = o.isNew || o.yearBuilt >= WORKS_FROM;
+      var worksAnnual = origCost * WORKS_RATE;
+
+      /* Division 40 - fixtures and fittings */
+      var plantOk = !T.res || o.isNew || o.pre2017;
+      var plantStart = plantOk ? T.plant * todayCost * (o.isNew ? 1 : SECOND_HAND) : 0;
+
+      var rows = [], tot = { works: 0, plant: 0, all: 0 }, bal = plantStart;
+      var t5 = 0, t10 = 0;
+      for (var n = 1; n <= YEARS; n++) {
+        var w = (worksOn && n <= yearsLeft) ? worksAnnual : 0;
+        var p = o.method === "pc" ? Math.min(bal, plantStart * PLANT_PC) : bal * PLANT_DV;
+        bal -= p;
+        var sum = w + p;
+        rows.push({ n: n, works: w, plant: p, total: sum, tax: sum * o.taxRate / 100 });
+        tot.works += w; tot.plant += p; tot.all += sum;
+        if (n <= 5) t5 += sum;
+        if (n <= 10) t10 += sum;
+      }
+      out.valid = true;
+      out.age = age; out.basis = basis; out.origCost = origCost; out.todayCost = todayCost;
+      out.worksOn = worksOn; out.yearsLeft = yearsLeft; out.plantOk = plantOk; out.plantStart = plantStart;
+      out.rows = rows; out.y1 = rows[0].total; out.works1 = rows[0].works; out.plant1 = rows[0].plant;
+      out.y5 = t5; out.y10 = t10;
+      out.tax1 = rows[0].tax; out.tax10 = t10 * o.taxRate / 100;
+      out.lo1 = out.y1 * RANGE_LOW; out.hi1 = out.y1 * RANGE_HIGH;
+      return out;
+    }
+
+    function model() {
+      var o = opts();
+      var m = calc(o);
+      /* the same property if it were brand new - only meaningful when it isn't */
+      if (m.valid && !o.isNew) {
+        var n = {};
+        Object.keys(o).forEach(function (k) { n[k] = o[k]; });
+        n.isNew = true; n.yearBuilt = NOW; n.knownCost = 0;
+        m.asNew = calc(n);
+      }
+      return m;
+    }
+
+    /* ---- render -------------------------------------------------------- */
+    function setOut(key, val) {
+      var el = document.querySelector('[data-out="' + key + '"]');
+      if (el) el.textContent = val;
+    }
+    function setNote(id, text) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text || "";
+      el.hidden = !text;
+    }
+
+    function syncFields() {
+      var o = opts();
+      document.getElementById("yearField").hidden = o.isNew;
+      /* only established residential owners can be affected by the 2017 rule */
+      document.getElementById("pre2017Field").hidden = o.isNew || !TYPES[o.type].res;
+    }
+
+    function render() {
+      positionPct();
+      syncFields();
+      var m = model();
+      var o = m.o;
+
+      function put(key, str, teaser) {
+        setOut(key, (unlocked || teaser) ? str : mask(str));
+      }
+      var ok = m.valid;
+      put("cost", ok ? money(m.origCost) : "—", true);
+      put("works1", ok ? money(m.works1) : "—", true);
+      put("plant1", ok ? money(m.plant1) : "—", true);
+      put("y1", ok ? money(m.y1) : "—");
+      put("range1", ok && m.y1 > 0 ? money(m.lo1) + " – " + money(m.hi1) : "—");
+      put("y5", ok ? money(m.y5) : "—");
+      put("y10", ok ? money(m.y10) : "—");
+      put("tax1", ok ? money(m.tax1) : "—");
+      put("tax10", ok ? money(m.tax10) : "—");
+
+      /* schedule */
+      var body = document.getElementById("scheduleBody");
+      body.innerHTML = "";
+      if (ok) {
+        m.rows.forEach(function (r) {
+          var tr = document.createElement("tr");
+          [String(r.n), money(r.works), money(r.plant), money(r.total), money(r.tax)].forEach(function (v, i) {
+            var td = document.createElement("td");
+            td.textContent = (i === 0 || unlocked) ? v : mask(v);
+            tr.appendChild(td);
+          });
+          body.appendChild(tr);
+        });
+        var tt = document.createElement("tr");
+        tt.className = "is-total";
+        [ "10-year total", money(m.rows.reduce(function (a, r) { return a + r.works; }, 0)),
+          money(m.rows.reduce(function (a, r) { return a + r.plant; }, 0)), money(m.y10), money(m.tax10)
+        ].forEach(function (v, i) {
+          var td = document.createElement("td");
+          td.textContent = (i === 0 || unlocked) ? v : mask(v);
+          tt.appendChild(td);
+        });
+        body.appendChild(tt);
+      }
+
+      /* plain-English reasons - why a line is $0 is the thing people get
+         wrong most, so it is spelled out rather than left as a bare zero */
+      var why = [];
+      if (ok) {
+        if (!m.worksOn) {
+          why.push("No building deduction: residential construction that started on or before 15 September 1987 isn't eligible. Renovations by an earlier owner may still carry their own deductions, which a quantity surveyor would find.");
+        } else if (m.yearsLeft <= 0) {
+          why.push("No building deduction: the 40-year capital works period has already run out.");
+        } else if (m.yearsLeft < YEARS) {
+          why.push("The building deduction has about " + m.yearsLeft + " year" + (m.yearsLeft === 1 ? "" : "s") + " left to run.");
+        }
+        if (!m.plantOk) {
+          why.push("Fixtures and fittings are $0: since 9 May 2017 investors can't claim second-hand items in an established home. Only the building counts. Tick the box under \"Sharpen the estimate\" if you bought before that date.");
+        }
+      }
+      setNote("depNote", why.join(" "));
+
+      if (ok && m.asNew && m.asNew.y1 > m.y1 * 1.05) {
+        setNote("newNote", "For comparison: the same " + m.T.label + " bought brand new would deduct about " + money(m.asNew.y1) + " in year 1, and " + money(m.asNew.y5) + " over 5 years.");
+      } else {
+        setNote("newNote", "");
+      }
+
+      if (ok && m.tax1 > 0) {
+        var cover = m.tax1 / QS_FEE;
+        setNote("qsNote", "A quantity surveyor's schedule typically costs around $" + QS_FEE + " and is itself deductible. Your estimated year 1 tax saving is " +
+          (cover >= 1 ? "about " + (cover >= 10 ? Math.round(cover) : cover.toFixed(1)) + " times that." : "less than that, so weigh it up."));
+      } else {
+        setNote("qsNote", "");
+      }
+    }
+
+    inputs.addEventListener("input", render);
+    inputs.addEventListener("change", render);
+
+    /* Tidy money fields with thousands separators on blur */
+    ["price", "knownCost"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("blur", function () {
+        var raw = (el.value || "").replace(/[^0-9.]/g, "");
+        var n = num(id);
+        el.value = n > 0 ? n.toLocaleString("en-AU") : (parseFloat(raw) === 0 ? "0" : "");
+      });
+    });
+
+    render();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(positionPct);
+    window.addEventListener("resize", positionPct);
+
+    /* ---- PDF --------------------------------------------------------- */
+    var lastDoc = null;
+
+    function condText(m) {
+      var o = m.o;
+      return o.isNew ? "Brand new" : "Established, built " + o.yearBuilt;
+    }
+
+    function makePDF() {
+      if (!window.jspdf || !window.jspdf.jsPDF) return null;
+      var m = model();
+      var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+      var w = doc.internal.pageSize.getWidth();
+      var L = 48;
+      var y = 56;
+
+      doc.setFillColor(95, 161, 208); doc.rect(0, 0, w, 6, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(95, 161, 208);
+      doc.text("PROJECT CARTER", L, y);
+      doc.setFont("helvetica", "normal"); doc.setTextColor(120);
+      doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
+      doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
+
+      doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+      doc.text("Tax Depreciation (DEP) Calculator", L, y + 44);
+
+      var name = document.getElementById("leadName").value.trim();
+      var d = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
+      doc.text("Prepared for " + (name || "you") + "   ·   " + d, L, y + 61);
+      var pcProject = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
+      if (pcProject) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(40);
+        doc.text(pcProject, L, y + 78);
+        y += 17;
+      }
+
+      y += 92;
+      function section(title) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
+        doc.text(title, L, y); y += 7;
+        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 17;
+      }
+      function row(k, v, strong) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
+        doc.text(k, L, y);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        doc.text(String(v), w - L, y, { align: "right" });
+        y += 18;
+      }
+      function bigrow(k, v) {
+        var top = y - 18, h = 36;
+        doc.setFillColor(234, 242, 248);
+        doc.roundedRect(L, top, w - 2 * L, h, 4, 4, "F");
+        doc.setFillColor(95, 161, 208);
+        doc.rect(L, top, 4, h, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(30);
+        doc.text(k, L + 16, y + 2);
+        doc.setFontSize(15); doc.setTextColor(30, 80, 120);
+        doc.text(String(v), w - L - 12, y + 2, { align: "right" });
+        y += h + 10;
+      }
+
+      var o = m.o;
+      section("The property");
+      row("Type", m.T.label.charAt(0).toUpperCase() + m.T.label.slice(1));
+      row("Condition", condText(m));
+      if (o.price > 0) row("Purchase price", money(o.price));
+      if (m.valid) row("Estimated construction cost", money(m.origCost) + "  (" + m.basis + ")");
+      row("Fixtures & fittings method", o.method === "pc" ? "Prime cost" : "Diminishing value");
+      row("Marginal tax rate", o.taxRate.toFixed(o.taxRate % 1 ? 1 : 0) + "%");
+
+      y += 8;
+      section("Your estimate");
+      if (m.valid) {
+        row("Building (capital works), year 1", money(m.works1));
+        row("Fixtures & fittings, year 1", money(m.plant1));
+        row("Realistic range, year 1", money(m.lo1) + " - " + money(m.hi1));
+        row("First 5 years", money(m.y5));
+        row("First 10 years", money(m.y10));
+        row("Tax saved in year 1", money(m.tax1));
+        row("Tax saved over 10 years", money(m.tax10));
+        y += 6;
+        bigrow("YEAR 1 DEDUCTION (ESTIMATE)", money(m.y1));
+
+        section("Year by year");
+        var cols = [L, L + 60, L + 190, L + 320, L + 440];
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(90);
+        ["Year", "Building", "Fixtures & fittings", "Total deduction", "Tax saved"].forEach(function (h, i) {
+          doc.text(h, i === 0 ? cols[i] : cols[i] + 110, y, { align: i === 0 ? "left" : "right" });
+        });
+        y += 14;
+        doc.setFont("helvetica", "normal"); doc.setTextColor(30);
+        m.rows.forEach(function (r) {
+          [String(r.n), money(r.works), money(r.plant), money(r.total), money(r.tax)].forEach(function (v, i) {
+            doc.text(v, i === 0 ? cols[i] : cols[i] + 110, y, { align: i === 0 ? "left" : "right" });
+          });
+          y += 15;
+        });
+        y += 4;
+        var why = document.getElementById("depNote").textContent;
+        if (why) {
+          doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.setTextColor(90);
+          var wl = doc.splitTextToSize(why, w - 2 * L);
+          doc.text(wl, L, y); y += wl.length * 11 + 4;
+        }
+      } else {
+        row("Not enough information entered", "-");
+      }
+
+      y += 10;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+      var disc = "This is a guide only, a desk estimate and not a depreciation schedule. Capital works deductions are 2.5% of estimated original construction cost for up to 40 years, and fixtures and fittings are estimated as a share of construction cost written off over an average ten-year effective life using the method selected (diminishing value at 20% a year, or prime cost at 10% a year). For residential property bought on or after 9 May 2017, second-hand fixtures and fittings in an established home are not claimable, and this estimate shows nil for them. Real deductions depend on the actual building, its history, your ownership dates and your circumstances, and are best confirmed by a quantity surveyor and your accountant. Capital works claimed reduce the property's cost base for capital gains tax. This is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+
+      var totalPages = doc.internal.getNumberOfPages();
+      for (var p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        var ph = doc.internal.pageSize.getHeight();
+        doc.setDrawColor(95, 161, 208); doc.setLineWidth(0.6); doc.line(L, ph - 34, w - L, ph - 34); doc.setLineWidth(0.2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140);
+        doc.text("Project Carter", L, ph - 22);
+        doc.text("Page " + p + " of " + totalPages, w - L, ph - 22, { align: "right" });
+      }
+
+      return doc;
+    }
+
+    function figuresSummary(m) {
+      var o = m.o;
+      var pn = (document.getElementById("pcProjectName") && document.getElementById("pcProjectName").value.trim()) || "";
+      var lines = [
+        (pn ? "Property: " + pn : null),
+        "Type: " + m.T.label,
+        "Condition: " + condText(m),
+        "Purchase price: " + (o.price > 0 ? money(o.price) : "not entered"),
+        (o.area > 0 ? "Floor area: " + o.area + " m2" : null),
+        (o.knownCost > 0 ? "Original construction cost (entered): " + money(o.knownCost) : null),
+        (o.pre2017 ? "Bought before 9 May 2017: yes" : null),
+        "Fixtures & fittings method: " + (o.method === "pc" ? "prime cost" : "diminishing value"),
+        "Marginal tax rate: " + o.taxRate + "%",
+        "----"
+      ];
+      if (m.valid) {
+        lines.push(
+          "Estimated construction cost: " + money(m.origCost) + " (" + m.basis + ")",
+          "Building (capital works), year 1: " + money(m.works1),
+          "Fixtures & fittings, year 1: " + money(m.plant1),
+          "Year 1 deduction: " + money(m.y1) + " (range " + money(m.lo1) + " - " + money(m.hi1) + ")",
+          "First 5 years: " + money(m.y5),
+          "First 10 years: " + money(m.y10),
+          "Tax saved year 1: " + money(m.tax1),
+          "Tax saved 10 years: " + money(m.tax10)
+        );
+      } else {
+        lines.push("No estimate yet (missing figures)");
+      }
+      return lines.filter(Boolean).join("\n");
+    }
+
+    function pcPdfFilename(abbr) {
+      var el = document.getElementById("pcProjectName") || document.getElementById("address");
+      var name = ((el && el.value) || "").trim().replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, " ").trim();
+      return "(" + abbr + ") - " + (name ? name + " - " : "") + "Project Carter.pdf";
+    }
+
+    function saveDoc() {
+      if (!lastDoc) lastDoc = makePDF();
+      if (lastDoc) lastDoc.save(pcPdfFilename("DEP"));
+    }
+
+    leadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = document.getElementById("leadName");
+      var email = document.getElementById("leadEmail");
+      var phone = document.getElementById("leadPhone");
+      if (!name.value.trim() || !phone.value.trim() || !email.value.trim() || !email.checkValidity()) {
+        if (leadForm.reportValidity) leadForm.reportValidity();
+        return;
+      }
+
+      lastDoc = makePDF();
+      saveDoc();
+
+      var password = document.getElementById("leadPassword").value;
+      var madeAccount = password.length >= 6 && !!(window.pcAuth && window.pcAuth.configured);
+      if (madeAccount) {
+        window.pcAuth.signUpWithPassword(email.value.trim(), password, {
+          full_name: name.value.trim(), phone: phone.value.trim()
+        });
+      }
+
+      document.getElementById("figuresField").value = figuresSummary(model());
+      var help = document.getElementById("leadHelp");
+      var subj = leadForm.querySelector('input[name="_subject"]');
+      if (subj) subj.value = (help && help.checked)
+        ? "DEP Calculator - assessment requested"
+        : "DEP Calculator request";
+      fetch(leadForm.action, {
+        method: "POST",
+        body: new FormData(leadForm),
+        headers: { "Accept": "application/json" }
+      })["catch"](function () { /* the visitor still has their PDF */ })
+        .then(function () {
+          unlock();
+          leadForm.hidden = true;
+          var done = document.getElementById("calcDone");
+          document.getElementById("calcDoneAccount").hidden = !madeAccount;
+          done.hidden = false;
+          done.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+
+    document.getElementById("redownload").addEventListener("click", saveDoc);
+
+    /* ---- lead-capture modal --------------------------------------------- */
+    var openLead = document.getElementById("openLead");
+    var leadModal = document.getElementById("leadModal");
+
+    function onModalKey(e) { if (e.key === "Escape") closeModal(); }
+
+    function openModal() {
+      leadModal.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      document.addEventListener("keydown", onModalKey);
+      var first = document.getElementById("leadName");
+      if (first) first.focus();
+    }
+    function closeModal() {
+      leadModal.hidden = true;
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("keydown", onModalKey);
+      openLead.focus();
+    }
+
+    leadModal.addEventListener("click", function (e) {
+      if (e.target.hasAttribute("data-close")) closeModal();
+    });
+
+    /* ---- reveal gate wiring ------------------------------------------------ */
+    var resultsEl = document.querySelector(".calc-results");
+    var lockNote = document.getElementById("lockNote");
+    var scheduleWraps = Array.prototype.slice.call(document.querySelectorAll(".calc-schedule-wrap"));
+
+    function applyLock() {
+      resultsEl.classList.toggle("is-locked", !unlocked);
+      scheduleWraps.forEach(function (w) { w.classList.toggle("is-locked", !unlocked); });
+      if (lockNote) lockNote.hidden = unlocked;
+      openLead.textContent = "Download PDF";
+      render();
+    }
+    function unlock() {
+      if (unlocked) return;
+      unlocked = true;
+      try {
+        window.localStorage.setItem(LOCK_KEY, "1");
+        window.localStorage.setItem(LEAD_KEY, "1");
+        window.localStorage.setItem(LEAD_CONTACT_KEY, JSON.stringify({
+          name: document.getElementById("leadName").value.trim(),
+          email: document.getElementById("leadEmail").value.trim(),
+          phone: document.getElementById("leadPhone").value.trim()
+        }));
+      } catch (e) {}
+      applyLock();
+    }
+    applyLock();
+
+    document.addEventListener("pc-auth-change", function (ev) {
+      if (ev && ev.detail && ev.detail.isMember && !unlocked) { unlocked = true; applyLock(); }
+    });
+
+    /* Once a visitor has left their details on any calculator, every
+       calculator skips the modal from then on - a repeat download still
+       pings Formspree from the stored contact so Project Carter is
+       notified each time. */
+    function pingRepeatDownload() {
+      var contact = null;
+      try { contact = JSON.parse(window.localStorage.getItem(LEAD_CONTACT_KEY) || "null"); } catch (e) {}
+      if (!contact) return;
+      var body = new FormData();
+      body.append("_subject", "DEP Calculator - repeat download");
+      body.append("Name", contact.name || "(not given)");
+      body.append("Email", contact.email || "(not given)");
+      body.append("Phone", contact.phone || "(not given)");
+      body.append("Figures", figuresSummary(model()));
+      fetch(leadForm.action, { method: "POST", body: body, headers: { Accept: "application/json" } })["catch"](function () {});
+    }
+
+    function hasResults() {
+      var keys = document.querySelectorAll(".result-row.is-key [data-out]");
+      for (var i = 0; i < keys.length; i++) {
+        var t = (keys[i].textContent || "").trim();
+        if (t && t !== "—" && t !== "-") return true;
+      }
+      return false;
+    }
+
+    openLead.addEventListener("click", function () {
+      var emptyNote = document.getElementById("leadEmptyNote");
+      if (!hasResults()) { if (emptyNote) emptyNote.hidden = false; return; }
+      if (emptyNote) emptyNote.hidden = true;
+      if (unlocked) { lastDoc = makePDF(); saveDoc(); pingRepeatDownload(); }
+      else openModal();
+    });
+    resultsEl.addEventListener("click", function (e) {
+      if (!unlocked && e.target.closest && e.target.closest(".result-row:not(.is-teaser)")) openModal();
+    });
+    scheduleWraps.forEach(function (w) {
+      w.addEventListener("click", function () { if (!unlocked) openModal(); });
+    });
+
+    /* Small labelled snapshot, saved alongside the report so other
+       calculators can pull a figure across without re-running this page's
+       model. See pc-report.js. */
+    window.pcCalcSummary = function () {
+      var m = model();
+      if (!m.valid) return {};
+      return {
+        constructionCost: Math.round(m.origCost),
+        year1Deduction: Math.round(m.y1),
+        buildingYear1: Math.round(m.works1),
+        fittingsYear1: Math.round(m.plant1),
+        fiveYearDeduction: Math.round(m.y5),
+        tenYearDeduction: Math.round(m.y10),
+        year1TaxSaving: Math.round(m.tax1)
+      };
+    };
+  })();
+  </script>
+  <script src="pc-report.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

@@ -268,3 +268,65 @@ test("portfolio totals skip unready rows and flag a missing tax rate", function 
   var t2 = T.cgtPortfolio([T.cgtEstimate(base, { taxRatePct: null })]);
   assert.equal(t2.needsRate, true);
 });
+
+/* ---- the rules follow the sale date ------------------------------------ */
+
+test("a sale before 1 July 2027 uses current law and the tax equals it", function () {
+  var r = T.cgtEstimate(base, settings);
+  assert.equal(r.rules, "current");
+  assert.equal(r.tax, r.currentLaw.tax);
+});
+
+test("a sale after 1 July 2027 uses the new rules for an individual, not the 50% discount", function () {
+  var r = T.cgtEstimate(Object.assign({}, base, { saleDate: "2028-01-01", v27: 1000000 }), settings);
+  assert.equal(r.rules, "new");
+  assert.equal(r.tax, r.reform.tax);
+});
+
+test("a company is 30% with no discount whatever the sale date, and ignores the personal rate", function () {
+  var early = T.cgtEstimate(Object.assign({}, base, { owner: "company" }), settings);
+  var late = T.cgtEstimate(Object.assign({}, base, { owner: "company", saleDate: "2028-01-01" }), settings);
+  var other = T.cgtEstimate(Object.assign({}, base, { owner: "company" }), Object.assign({}, settings, { taxRatePct: 45 }));
+  near(early.tax, 360000 * 0.30, 0.01);
+  near(late.tax, 360000 * 0.30, 0.01);
+  assert.equal(early.tax, other.tax);
+  assert.equal(early.rules, "current");
+});
+
+test("held 12 months or less is taxed in full at the rate, before and after 2027", function () {
+  var r = T.cgtEstimate(Object.assign({}, base, { purchaseDate: "2027-09-01", saleDate: "2028-03-01" }), settings);
+  assert.equal(r.currentLaw.discountPct, 0);
+  near(r.tax, r.gain * 0.37, 0.01);
+});
+
+test("portfolio tax total follows each property's own rules", function () {
+  var a = T.cgtEstimate(base, settings);
+  var b = T.cgtEstimate(Object.assign({}, base, { owner: "company" }), settings);
+  var t = T.cgtPortfolio([a, b]);
+  near(t.tax, a.tax + b.tax, 0.01);
+});
+
+/* ---- land tax: a separate entity is a separate taxpayer ------------------ */
+
+test("properties in different entities get their own land tax threshold", function () {
+  var same = T.landTaxPortfolio([
+    { id: "a", name: "A", state: "NSW", owner: "company", landValue: 900000, entity: "" },
+    { id: "b", name: "B", state: "NSW", owner: "company", landValue: 900000, entity: "" }
+  ], {});
+  var split = T.landTaxPortfolio([
+    { id: "a", name: "A", state: "NSW", owner: "company", landValue: 900000, entity: "Alpha Pty Ltd" },
+    { id: "b", name: "B", state: "NSW", owner: "company", landValue: 900000, entity: "Beta Pty Ltd" }
+  ], {});
+  assert.equal(same.groups.length, 1);
+  assert.equal(split.groups.length, 2);
+  assert.equal(split.groups[0].entity, "Alpha Pty Ltd");
+  assert.ok(split.totalTax <= same.totalTax, "splitting across entities never raises land tax");
+});
+
+test("the same entity name (any case) is grouped together", function () {
+  var r = T.landTaxPortfolio([
+    { id: "a", name: "A", state: "NSW", owner: "company", landValue: 900000, entity: "Alpha Pty Ltd" },
+    { id: "b", name: "B", state: "NSW", owner: "company", landValue: 900000, entity: "alpha pty ltd" }
+  ], {});
+  assert.equal(r.groups.length, 1);
+});

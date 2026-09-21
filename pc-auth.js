@@ -566,10 +566,24 @@
       if (has("loan_balance")) row.loan_balance = money(property.loan_balance);
       if (has("interest_rate")) { var r = money(property.interest_rate); row.interest_rate = r != null && r <= 100 ? r : null; }
       if (has("annual_running_costs")) row.annual_running_costs = money(property.annual_running_costs);
-      var q = property.id
-        ? client.from("properties").update(row).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
-        : client.from("properties").insert(row).select().maybeSingle();
-      return q.then(function (res) { return { data: res.data, error: res.error }; });
+      var withEntity = has("holding_entity");
+      if (withEntity) row.holding_entity = String(property.holding_entity || "").trim().slice(0, 120) || null;
+      function write(r) {
+        return property.id
+          ? client.from("properties").update(r).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
+          : client.from("properties").insert(r).select().maybeSingle();
+      }
+      return write(row).then(function (res) {
+        /* the entity column comes from a database update; if it has not been run yet,
+           save everything else and say so instead of failing the whole save */
+        if (res.error && withEntity && /holding_entity/i.test(res.error.message || "")) {
+          var rest = Object.assign({}, row); delete rest.holding_entity;
+          return write(rest).then(function (r2) {
+            return { data: r2.data, error: r2.error, warning: "Saved, but the entity name needs the latest database update (run supabase-schema.sql), so it was not kept." };
+          });
+        }
+        return { data: res.data, error: res.error };
+      });
     },
 
     /* The portfolio summary the calculators pull "funds available" from

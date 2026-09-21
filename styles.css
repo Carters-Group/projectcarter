@@ -2283,8 +2283,6 @@ h1, h2, h3 {
 /* the gains table is one column too wide for a half-width card: drop the
    sale date (it is in each property's workings) and let it scroll if it must */
 .acct-dash-exit .acct-tax-section > .acct-taxtable { display: block; overflow-x: auto; }
-.acct-dash-exit .acct-tax-section > .acct-taxtable th:nth-child(2),
-.acct-dash-exit .acct-tax-section > .acct-taxtable td:nth-child(2) { display: none; }
 .acct-dash-exit .acct-tax-section > .acct-taxtable td:first-child,
 .acct-dash-exit .acct-tax-section > .acct-taxtable th:first-child { min-width: 120px; }
 
@@ -2292,4 +2290,48 @@ h1, h2, h3 {
 @media (min-width: 1100px) {
   .acct-nav { opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; }
   .acct-nav.is-shown { opacity: 1; visibility: visible; }
+}
+
+/* ---- "To complete your picture": a real subheading, and links to the boxes ---- */
+.acct-gaps__title {
+  margin: 26px 0 4px; font-family: var(--font-display); font-size: 1.2rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-2);
+  padding-top: 20px; border-top: 1px solid var(--line-soft);
+}
+.acct-gaps { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.acct-gaps li { padding: 10px 14px; border: 1px solid var(--line-soft); border-left: 3px solid #e0c43c; border-radius: 6px; background: var(--bg); font-size: 13.5px; color: var(--muted); }
+.acct-gaps__link { color: var(--accent-2); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.acct-gaps__link:hover { color: var(--text); }
+
+/* ---- commercial (yellow) and residential (blue) at a glance ---------------- */
+.acct-lease-group.is-commercial, .acct-property.is-commercial { border-left: 4px solid #e0c43c; }
+.acct-lease-group.is-residential, .acct-property.is-residential { border-left: 4px solid var(--accent); }
+.acct-dashboard .acct-card .acct-lease-group.is-commercial, .acct-dashboard .acct-card .acct-property.is-commercial {
+  background-image: linear-gradient(rgba(224, 196, 60, 0.07), rgba(224, 196, 60, 0.07));
+}
+.acct-dashboard .acct-card .acct-lease-group.is-residential, .acct-dashboard .acct-card .acct-property.is-residential {
+  background-image: linear-gradient(rgba(95, 161, 208, 0.07), rgba(95, 161, 208, 0.07));
+}
+.acct-lease-group > summary .acct-tag { margin-left: 2px; }
+
+/* "before you sell" runs the full width under the tax and exit cards */
+.acct-dash-callout .acct-callout { margin-top: 0; }
+
+/* ---- side rail: a proper panel you can see -------------------------------- */
+@media (min-width: 1100px) {
+  .acct-nav {
+    padding: 10px 8px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+  }
+  .acct-nav a { padding: 9px 10px 9px 8px; }
+  .acct-nav__dot { width: 13px; height: 13px; border: 2px solid var(--accent); opacity: 0.55; }
+  .acct-nav a:hover .acct-nav__dot { opacity: 1; }
+  .acct-nav a.is-active .acct-nav__dot { opacity: 1; box-shadow: 0 0 0 4px rgba(95, 161, 208, 0.25); }
+  .acct-nav a.is-active .acct-nav__label { color: var(--accent-2); }
+  .acct-nav:hover .acct-nav__label { opacity: 1; }
+  .acct-nav__label { left: 38px; font-weight: 700; }
+}
+@media (min-width: 1500px) {
+  .acct-nav__label { position: static; padding: 0; }
+  .acct-nav a { padding-right: 16px; }
 }

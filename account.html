@@ -62,6 +62,7 @@
             <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
             <a href="development-site-calculator">Development Site (DA)</a>
             <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
+            <a href="tax-depreciation-calculator">Tax Depreciation (DEP)</a>
           </div>
         </div>
         <a href="account">Account</a>
@@ -365,7 +366,7 @@
               <p class="field-hint">Land tax by state and capital gains tax if you sold, built from the tax details on each property below. Estimates only, not tax advice.</p>
               <p class="acct-msg" id="taxMsg" hidden></p>
               <div class="acct-plan__row acct-plan__row--aligned acct-plan__row--two">
-                <div class="field"><label for="taxRate">Your marginal tax rate <span>(including Medicare, used to tax a sale)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="47" /></div></div>
+                <div class="field"><label for="taxRate">Your marginal tax rate <span>(including Medicare, for properties in your own name or a trust)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="47" /></div></div>
                 <div class="field"><label for="taxSellPct">Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
               </div>
               <div class="acct-property__actions">
@@ -390,6 +391,8 @@
             <div id="exitBody"></div>
           </div>
 
+          <div class="acct-dash-callout" id="acctCallout" hidden></div>
+
           <div class="acct-dash-quick" id="acctQuickCol">
             <div class="card acct-card" id="acctQuickCard">
               <h2 class="calc-subhead">Quick access</h2>
@@ -412,19 +415,6 @@
           <div class="card acct-card acct-dash-details" id="acctDetailsCard">
             <h2 class="calc-subhead">Your details</h2>
             <form id="profileForm">
-              <div class="field">
-                <label for="profAvatarFile">Photo</label>
-                <div class="acct-avatar-controls">
-                  <div class="acct-avatar" id="profAvatar" aria-hidden="true"></div>
-                  <div>
-                    <input type="file" id="profAvatarFile" accept="image/jpeg,image/png,image/webp" hidden />
-                    <button type="button" class="btn btn-ghost btn-sm" id="profAvatarPick">Choose photo</button>
-                    <button type="button" class="linklike" id="profAvatarRemove" hidden>Remove photo</button>
-                    <p class="field-hint">JPEG, PNG or WebP. 2 MB max.</p>
-                  </div>
-                </div>
-                <p class="acct-msg" id="avatarMsg" hidden></p>
-              </div>
               <div class="field">
                 <label for="profName">Name</label>
                 <input type="text" id="profName" autocomplete="name" placeholder="Your name" />
@@ -538,22 +528,23 @@
 
     var CALC_NAMES = {
       noi: "NOI Calculator", roi: "ROI Calculator", da: "DA Calculator",
-      grv: "GRV Calculator", pr: "Portfolio Review", cl: "CL Calculator"
+      grv: "GRV Calculator", pr: "Portfolio Review", cl: "CL Calculator", dep: "DEP Calculator"
     };
     var CALC_PAGES = {
       noi: "net-operating-income-calculator", roi: "return-on-investment-calculator",
       da: "development-site-calculator", grv: "gross-realisation-value-calculator",
-      pr: "portfolio-review-calculator", cl: "commercial-lending-calculator"
+      pr: "portfolio-review-calculator", cl: "commercial-lending-calculator", dep: "tax-depreciation-calculator"
     };
-    var CALC_ORDER = ["pr", "cl", "roi", "noi", "da", "grv"];
+    var CALC_ORDER = ["pr", "cl", "roi", "noi", "da", "grv", "dep"];
     var CALC_ICON = {
       noi: "assets/images/calculators/noi-icon.svg", roi: "assets/images/calculators/roi-icon.svg",
       da: "assets/images/calculators/da-icon.svg", grv: "assets/images/calculators/grv-icon.svg",
-      pr: "assets/images/calculators/pr-icon.svg", cl: "assets/images/calculators/cl-icon.svg"
+      pr: "assets/images/calculators/pr-icon.svg", cl: "assets/images/calculators/cl-icon.svg",
+      dep: "assets/images/calculators/dep-icon.svg"
     };
     var CALC_SHORT = {
       noi: "Net Operating Income", roi: "Return on Investment", da: "Development Site (DA)",
-      grv: "Gross Realisation Value", pr: "Portfolio Review", cl: "Commercial Lending"
+      grv: "Gross Realisation Value", pr: "Portfolio Review", cl: "Commercial Lending", dep: "Tax Depreciation"
     };
 
     var elUnconfigured = document.getElementById("acctUnconfigured");
@@ -965,27 +956,53 @@
         var sold = [
           ["Properties counted", t.soldCount + " of " + t.count],
           ["Cash in hand", fmtMoney(t.cashIfSold)],
-          ["Capital gains tax", fmtMoney(t.cgtCurrent)]
+          ["Capital gains tax", fmtMoney(t.cgtTax)]
         ];
-        if (t.cgtReform != null && Math.abs(t.cgtReform - t.cgtCurrent) > 0.5) sold.push(["Tax under announced 2027 rules", fmtMoney(t.cgtReform)]);
         fillStats(document.getElementById("portfolioIfSoldStats"), sold);
         show(soldEl);
       } else { hide(soldEl); }
 
       var gapsEl = document.getElementById("portfolioGaps");
-      var noPurchase = portfolio.props.filter(function (p) { return p.value != null && p.sale.cgt && !p.sale.cgt.ready; }).map(function (p) { return p.name; });
-      var gaps = [
-        gapLine("Add a current value: ", m.value),
-        gapLine("Add a loan balance (0 if none): ", m.loan),
-        gapLine("Add an interest rate: ", m.rate),
-        gapLine("Add a lease with a rent figure: ", m.rent),
-        gapLine("Add the purchase date and price to work out capital gains tax: ", noPurchase),
-        t.cgtNeedsRate ? "Add your marginal tax rate under Tax and land tax to include capital gains tax." : null
-      ].filter(Boolean);
+      var refs = portfolio.missingRefs || { value: [], loan: [], rent: [], rate: [] };
+      var noPurchaseRefs = portfolio.props.filter(function (p) { return p.value != null && p.sale.cgt && !p.sale.cgt.ready; }).map(function (p) { return { id: p.id, name: p.name }; });
+      var gapGroups = [
+        { text: "Add a current value", refs: refs.value, field: "current_value" },
+        { text: "Add a loan balance (0 if none)", refs: refs.loan, field: "loan_balance" },
+        { text: "Add an interest rate", refs: refs.rate, field: "interest_rate" },
+        { text: "Add a lease with a rent figure", refs: refs.rent, field: "__lease" },
+        { text: "Add the purchase date and price for capital gains tax", refs: noPurchaseRefs, field: "purchase_date" }
+      ].filter(function (g) { return g.refs.length; });
       gapsEl.innerHTML = "";
-      if (gaps.length) {
-        gapsEl.appendChild(tEl("p", "acct-eyebrow", "To complete your picture"));
-        gapsEl.appendChild(tNotes(gaps));
+      if (gapGroups.length || t.cgtNeedsRate) {
+        gapsEl.appendChild(tEl("p", "acct-gaps__title", "To complete your picture"));
+        gapsEl.appendChild(tEl("p", "field-hint", "Tap a property to jump to the box that needs filling in."));
+        var ul = tEl("ul", "acct-gaps");
+        gapGroups.forEach(function (g) {
+          var li = tEl("li");
+          li.appendChild(tEl("span", "acct-gaps__what", g.text + ": "));
+          g.refs.slice(0, 6).forEach(function (ref, i) {
+            if (i) li.appendChild(document.createTextNode(", "));
+            var b = tEl("button", "linklike acct-gaps__link", ref.name || "Untitled property");
+            b.type = "button";
+            b.addEventListener("click", function () { openPropertyField(ref.id, g.field); });
+            li.appendChild(b);
+          });
+          if (g.refs.length > 6) li.appendChild(document.createTextNode(" and " + (g.refs.length - 6) + " more"));
+          ul.appendChild(li);
+        });
+        if (t.cgtNeedsRate) {
+          var lt = tEl("li");
+          lt.appendChild(tEl("span", "acct-gaps__what", "Add your marginal tax rate to include capital gains tax: "));
+          var tb2 = tEl("button", "linklike acct-gaps__link", "Tax settings");
+          tb2.type = "button";
+          tb2.addEventListener("click", function () {
+            var box = document.getElementById("taxRate");
+            if (box) { box.scrollIntoView({ block: "center", behavior: "smooth" }); box.focus({ preventScroll: true }); }
+          });
+          lt.appendChild(tb2);
+          ul.appendChild(lt);
+        }
+        gapsEl.appendChild(ul);
         show(gapsEl);
       } else { hide(gapsEl); }
 
@@ -1061,6 +1078,23 @@
       return { years: sumWeighted / sumWeight, basis: incomeCapable ? "income" : "count" };
     }
 
+    /* from the "to complete your picture" list: open the card and jump to the box that needs filling in */
+    function openPropertyField(propertyId, dataT) {
+      var card = document.querySelector('#leaseProperties .acct-property[data-property-id="' + propertyId + '"]');
+      if (!card) return;
+      card.open = true;
+      setTimeout(function () {
+        var target = null;
+        if (dataT === "__lease") target = card.querySelector('[data-f="rent_amount"], [data-f="annual_rent"]');
+        else target = card.querySelector('[data-t="' + dataT + '"]');
+        var scrollTo = target ? (target.closest(".field") || target) : card;
+        scrollTo.scrollIntoView({ block: "center", behavior: "smooth" });
+        if (target && target.focus) target.focus({ preventScroll: true });
+        scrollTo.classList.add("is-flash");
+        setTimeout(function () { scrollTo.classList.remove("is-flash"); }, 1800);
+      }, 260);
+    }
+
     /* from the leases overview: open that property card, scroll to the lease and flash it */
     function openPropertyLease(propertyId, leaseId) {
       var card = document.querySelector('#leaseProperties .acct-property[data-property-id="' + propertyId + '"]');
@@ -1128,7 +1162,7 @@
         var leases = p.leases || [];
         if (!leases.length) return;
         var det = document.createElement("details");
-        det.className = "acct-lease-group";
+        det.className = "acct-lease-group " + (p.property_type === "commercial" ? "is-commercial" : "is-residential");
         det.dataset.propertyId = p.id;
         if (String(p.id) === String(openId)) det.open = true;
 
@@ -1143,9 +1177,12 @@
 
         var sum = document.createElement("summary");
         var nm = document.createElement("span"); nm.className = "acct-lease-group__name"; nm.textContent = p.name || "Untitled property";
+        var tagEl = document.createElement("span");
+        tagEl.className = "acct-tag " + (p.property_type === "commercial" ? "is-commercial" : "is-residential");
+        tagEl.textContent = p.property_type === "commercial" ? "Commercial" : "Residential";
         var meta = document.createElement("span"); meta.className = "acct-lease-group__meta"; meta.textContent = bits.join(" \u00b7 ");
         var caret = document.createElement("span"); caret.className = "acct-lease-group__caret"; caret.setAttribute("aria-hidden", "true");
-        sum.appendChild(nm); sum.appendChild(meta); sum.appendChild(caret);
+        sum.appendChild(nm); sum.appendChild(tagEl); sum.appendChild(meta); sum.appendChild(caret);
         det.appendChild(sum);
 
         var body = document.createElement("div");
@@ -1440,6 +1477,9 @@
     function fTick(key, head, title, small, attrs) {
       return '<div class="field"' + (attrs || "") + '><label>' + head + '</label><label class="acct-periodic-check"><input type="checkbox" data-t="' + key + '" /><span class="acct-periodic-check__text"><strong>' + title + '</strong><small>' + small + '</small></span></label></div>';
     }
+    function fText(key, label, hint, placeholder) {
+      return '<div class="field"><label>' + fLabel(label, hint) + '</label><input type="text" data-t="' + key + '" autocomplete="off" placeholder="' + (placeholder || "") + '" /></div>';
+    }
     function fRow() { return '<div class="acct-plan__row acct-plan__row--aligned">' + Array.prototype.join.call(arguments, "") + '</div>'; }
 
     function propertyCardHTML() {
@@ -1475,6 +1515,9 @@
           ) +
           fRow(
             '<div class="field"><label>Owned by</label><select data-t="ownership_type">' + ownerOpts + '</select></div>',
+            fText("holding_entity", "Holding entity name", "blank if held in your own name", "e.g. Smith Property Pty Ltd")
+          ) +
+          fRow(
             fTick("is_new_build", "Type of purchase", "New residential build", "May choose the better of the old discount or the new rules", " data-new-build"),
             fTick("wa_metro", "Location", "Perth metropolitan region", "Adds the Metropolitan Region Improvement Tax", " data-wa-metro hidden")
           ) +
@@ -1566,17 +1609,13 @@
         return "Add the " + listJoin(c && c.missing && c.missing.length ? c.missing : ["purchase price", "purchase date"]) + " to see capital gains tax." + before;
       }
       if (c.error) return c.error;
-      if (c.preCgt) return "Bought before 20 September 1985, so generally outside capital gains tax today. Ask your accountant how the announced changes treat later growth." + before;
+      if (c.preCgt) return "Bought before 20 September 1985, so generally outside capital gains tax today. Ask your accountant how the 2027 changes treat later growth." + before;
       var head = "Sold for " + fmtMoney(s.price) + ", you keep " + fmtMoney(c.proceeds) + " after selling costs";
       if (m.loan != null) head += " and owe " + fmtMoney(m.loan) + " to the lender";
       if (c.loss) return head + ". There is no gain (a loss of " + fmtMoney(c.loss) + "), so no capital gains tax" + (m.loan != null ? ", leaving " + fmtMoney(c.proceeds - m.loan) + " in your hand" : "") + ".";
       if (c.needsRate) return head + ". The capital gain is " + fmtMoney(c.gain) + ". Add your marginal tax rate under Tax and land tax to see the tax and your cash in hand.";
-      var out = head + ". Capital gains tax is " + fmtMoney(c.currentLaw.tax);
+      var out = head + ". Capital gains tax is " + fmtMoney(c.tax) + (c.rules === "new" ? " under the rules from 1 July 2027" : "");
       out += s.cashIfSold != null ? ", leaving " + fmtMoney(s.cashIfSold) + " in your hand." : ".";
-      if (c.reform && c.reform.tax != null) {
-        out += " Under the announced 1 July 2027 rules the tax would be " + fmtMoney(c.reform.tax) +
-          (s.cashIfSoldReform != null ? ", leaving " + fmtMoney(s.cashIfSoldReform) : "") + ".";
-      }
       return out;
     }
 
@@ -1612,6 +1651,8 @@
       var isCommercial = (details.querySelector('[data-f="property_type"]') || {}).value === "commercial";
       tag.textContent = isCommercial ? "Commercial" : "Residential";
       tag.className = "acct-tag " + (isCommercial ? "is-commercial" : "is-residential");
+      details.classList.toggle("is-commercial", isCommercial);
+      details.classList.toggle("is-residential", !isCommercial);
       var wale = computeWale([property]);
       var leaseCount = (property.leases || []).length;
       var hasPeriodic = (property.leases || []).some(function (l) { return l.is_periodic; });
@@ -1771,6 +1812,7 @@
 
       details.querySelector('[data-act="save"]').addEventListener("click", function () {
         setMsg(msgEl, "Saving…");
+        var propWarning = "";
         window.pcAuth.saveProperty(Object.assign({
           id: property.id,
           name: nameInput.value.trim() || "Untitled property",
@@ -1778,6 +1820,7 @@
           notes: notesInput.value
         }, readTaxFields(details))).then(function (res) {
           if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); return; }
+          propWarning = res.warning || "";
           var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
             var lease = serializeLeaseRow(row);
@@ -1800,6 +1843,7 @@
             details.open = false; /* saved: tuck the card away again */
             loadLeaseRegister(true).then(function () {
               if (failed) setMsg(leaseMsgEl, "Property saved, but a lease didn't: " + failed.error.message, "error");
+              else if (propWarning) setMsg(leaseMsgEl, propWarning, "error");
               else setMsg(leaseMsgEl, "Saved.", "ok");
             });
           });
@@ -1875,7 +1919,7 @@
       var props = leaseProperties.map(function (p) {
         return {
           id: p.id, name: p.name || "Untitled property", state: p.state,
-          owner: p.ownership_type || "individual", landValue: Number(p.land_value) || 0, waMetro: !!p.wa_metro
+          owner: p.ownership_type || "individual", entity: p.holding_entity || "", landValue: Number(p.land_value) || 0, waMetro: !!p.wa_metro
         };
       });
       var res = pcTax.landTaxPortfolio(props, {});
@@ -1892,7 +1936,7 @@
         res.groups.forEach(function (g) {
           var box = tEl("div", "acct-taxgroup");
           var head = tEl("div", "acct-taxgroup__head");
-          head.appendChild(tEl("strong", null, g.state + " · " + g.ownerLabel));
+          head.appendChild(tEl("strong", null, g.entity ? g.state + " · " + g.entity + " (" + g.ownerLabel + ")" : g.state + " · " + g.ownerLabel));
           head.appendChild(tEl("span", null, "Land value " + fmtMoney(g.total)));
           head.appendChild(tEl("span", "acct-taxgroup__tax", "Land tax " + fmtMoney(g.tax)));
           box.appendChild(head);
@@ -1930,7 +1974,7 @@
       if (flags.length) sec.appendChild(tNotes(flags));
 
       sec.appendChild(tEl("p", "acct-tax-fine",
-        "Land tax is charged on the owner, per state, on unimproved land value, so thresholds do not stack across states. " +
+        "Land tax is charged on the owner, per state, on unimproved land value, so thresholds do not stack across states. Each entity (for example a company set up for one large purchase) is its own taxpayer with its own threshold, so give properties in the same entity the same holding entity name. " +
         "Uses the published general and trust rates; it leaves out exemptions (such as your own home), foreign-owner and absentee surcharges, " +
         "and SMSF-specific rules (an SMSF is taxed at general rates outside Queensland). Confirm the figure with your state revenue office or accountant."));
       return sec;
@@ -1964,24 +2008,28 @@
         row("Bought before 20 September 1985", "Outside CGT today");
       } else if (r.gain > 0) {
         var cl = r.currentLaw;
-        row("Current law: discount", r.over12 ? cl.discountPct.toFixed(cl.discountPct % 1 ? 1 : 0) + "%" : "None (held 12 months or less)");
-        row("Current law: taxable gain", fmtMoney(cl.taxableGain));
-        row("Current law: estimated tax", r.needsRate ? "Add your tax rate" : fmtMoney(cl.tax), true);
-        if (r.reform) {
+        var rateText = r.owner === "company" ? "30% flat (company, your personal rate is not used)"
+          : (r.owner === "super" ? "15% (super fund)" : (taxSettings.tax_rate_pct != null ? taxSettings.tax_rate_pct + "% (your marginal rate)" : "Add your tax rate"));
+        row("Tax rate", rateText);
+        if (r.rules === "new") {
           var rf = r.reform;
+          row("Sale after 1 July 2027", "New rules apply: indexation, no 50% discount on later growth");
           row("1 July 2027 value" + (rf.v27Estimated ? " (estimated)" : ""), rf.v27 == null ? "Not applicable" : fmtMoney(rf.v27));
-          if (rf.v27 != null) row("Gain up to 1 July 2027 (50% discount applies)", fmtMoney(rf.preGain));
+          if (rf.v27 != null) row("Gain up to 1 July 2027 (keeps the 50% discount)", fmtMoney(rf.preGain));
           row("Cost base indexed by CPI at " + rf.cpiPct + "% to the sale", fmtMoney(rf.indexedBase));
           row("Real gain after 1 July 2027", fmtMoney(rf.postGain));
-          row("Amount taxed (discounted pre-2027 gain plus real gain)", fmtMoney(rf.taxableAmount));
-          row("30% minimum tax", rf.tax == null ? "Add your tax rate" : (rf.floorApplied ? "Applies, lifts the tax" : "Not needed, your normal rate is higher"));
-          row("Announced rules: estimated tax" + (rf.election ? " (new build, cheaper option)" : ""), rf.tax == null ? "Add your tax rate" : fmtMoney(rf.tax), true);
+          row("Amount taxed (discounted earlier gain plus real gain)", fmtMoney(rf.taxableAmount));
+          row("30% minimum tax", rf.tax == null ? "Add your tax rate" : (rf.floorApplied ? "Applies, lifts the tax" : "Not needed, your rate is higher"));
+          row("Estimated tax" + (rf.election ? " (new build, cheaper option)" : ""), rf.tax == null ? "Add your tax rate" : fmtMoney(rf.tax), true);
+        } else {
+          row("Discount", r.over12 ? cl.discountPct.toFixed(cl.discountPct % 1 ? 1 : 0) + "%" : "None (held 12 months or less)");
+          row("Taxable gain", fmtMoney(cl.taxableGain));
+          row("Estimated tax", r.needsRate ? "Add your tax rate" : fmtMoney(cl.tax), true);
         }
       }
       if (m && m.loan != null) {
         row("Net sale proceeds less loan balance (" + fmtMoney(m.loan) + ")", fmtMoney(r.proceeds - m.loan), true);
-        if (m.sale.cashIfSold != null) row("Cash in hand after tax (current law)", fmtMoney(m.sale.cashIfSold), true);
-        if (m.sale.cashIfSoldReform != null) row("Cash in hand after tax (announced rules)", fmtMoney(m.sale.cashIfSoldReform), true);
+        if (m.sale.cashIfSold != null) row("Cash in hand after tax", fmtMoney(m.sale.cashIfSold), true);
       }
       table.appendChild(tb);
       det.appendChild(table);
@@ -2004,7 +2052,7 @@
         "Any time it was your home, or wasn't rented, which can make part of the gain exempt.",
         "Plant and equipment (Division 40) items, which are settled separately on sale, and building write-off you never claimed but could have.",
         "Your residency, and whether it is held in a structure with its own rules.",
-        "The 2027 rules, which are announced but not yet law."
+        "The 2027 rules (now law), and how the gain before and after 1 July 2027 is split and valued."
       ]));
       var b = tEl("div");
       b.appendChild(tEl("p", "acct-callout__sub", "What to bring"));
@@ -2037,19 +2085,24 @@
       if (!ready.length) {
         sec.appendChild(tEl("p", "acct-empty", "Add a purchase date, purchase price and current value to a property to estimate its capital gains tax."));
       } else {
-        var anyReform = ready.some(function (x) { return x.r.reform; });
         var noRate = totals.needsRate;
-        var stats = [["Estimated capital gain", fmtMoney(totals.gain)]];
-        stats.push([anyReform ? "Tax under current law" : "Estimated tax", noRate ? "Add your tax rate" : fmtMoney(totals.currentTax)]);
-        if (anyReform) {
-          stats.push(["Tax under announced 2027 rules", noRate ? "Add your tax rate" : fmtMoney(totals.reformTax)]);
-        }
+        var stats = [
+          ["Estimated capital gain", fmtMoney(totals.gain)],
+          ["Estimated tax", noRate ? "Add your tax rate" : fmtMoney(totals.tax)]
+        ];
         sec.appendChild(tStats(stats));
+
+        var otherOwners = ready.filter(function (x) { return x.r.owner === "company" || x.r.owner === "super"; }).length;
+        if (otherOwners) {
+          sec.appendChild(tNotes([otherOwners + (otherOwners === 1 ? " property is" : " properties are") +
+            " held in a company or super fund, so " + (otherOwners === 1 ? "it uses" : "they use") +
+            " the flat company (30%) or super (15%) rate and " + (otherOwners === 1 ? "ignores" : "ignore") + " your personal rate above."]));
+        }
 
         var table = tEl("table", "acct-taxtable");
         var thead = tEl("thead");
         var hr = tEl("tr");
-        ["Property", "Sale date", "Gain", "Tax: current law", "Tax: announced 2027 rules"].forEach(function (h, i) {
+        ["Property", "Sale date", "Gain", "Tax"].forEach(function (h, i) {
           hr.appendChild(tEl("th", i > 1 ? "is-num" : null, h));
         });
         thead.appendChild(hr);
@@ -2061,18 +2114,18 @@
           var nameTd = tEl("td");
           nameTd.appendChild(tEl("span", null, x.p.name || "Untitled property"));
           var bits = [];
-          if (!r.over12) bits.push("held 12 months or less, no discount");
+          if (r.owner === "company") bits.push("company: 30%, no discount");
+          else if (r.owner === "super") bits.push("super fund: one-third discount at 15%");
+          else if (r.rules === "new") bits.push("new rules from 1 July 2027: indexation and 30% minimum");
+          else if (r.over12) bits.push("50% discount (sale before 1 July 2027)");
+          else bits.push("held 12 months or less, no discount");
           if (r.reform && r.reform.v27Estimated) bits.push("1 Jul 2027 value estimated at " + fmtMoney(r.reform.v27));
           if (r.reform && r.reform.election) bits.push("new build: " + (r.reform.election === "discount" ? "keeping the 50% discount is cheaper" : "the new rules are cheaper"));
           if (bits.length) nameTd.appendChild(tEl("small", "acct-taxtable__sub", bits.join(" · ")));
           tr.appendChild(nameTd);
           tr.appendChild(tEl("td", null, fmtDate(r.saleDate)));
           tr.appendChild(tEl("td", "is-num", r.loss ? "Loss " + fmtMoney(r.loss) : fmtMoney(r.gain)));
-          tr.appendChild(tEl("td", "is-num", r.needsRate ? "—" : fmtMoney(r.currentLaw.tax)));
-          var reformCell = "n/a";
-          if (r.reform) reformCell = r.reform.tax == null ? "—" : fmtMoney(r.reform.tax);
-          else if (r.saleDate >= pcTax.REFORM_DATE) reformCell = "Unchanged";
-          tr.appendChild(tEl("td", "is-num", reformCell));
+          tr.appendChild(tEl("td", "is-num", r.needsRate ? "\u2014" : fmtMoney(r.tax)));
           tb.appendChild(tr);
         });
         table.appendChild(tb);
@@ -2088,14 +2141,12 @@
           notReady.map(function (x) { return x.p.name || "Untitled property"; }))]));
       }
 
-      sec.appendChild(accountantCallout());
-
       sec.appendChild(tEl("p", "acct-tax-fine",
-        "Announced, not yet law: the 2026-27 Budget replaces the 50% CGT discount from 1 July 2027 with cost-base indexation (by CPI) plus a 30% minimum tax on the gain. " +
-        "For an asset held across that date, the gain up to 1 July 2027 keeps the 50% discount and only the later gain is indexed. Treat the \"announced 2027 rules\" column as a guide until the legislation passes."));
+        "The rules follow each property's sale date. Sales before 1 July 2027 still get the 50% discount (individuals and trusts, held over 12 months). From 1 July 2027 the discount is replaced (Treasury Laws Amendment (Tax Reform No. 1) Act 2026) by cost-base indexation with a 30% minimum tax, and the gain up to 1 July 2027 keeps the discount while only later growth is indexed. " +
+        "Companies never had the discount, so they pay 30% either way; a super fund keeps its one-third discount at 15%; anything held 12 months or less gets no discount."));
       sec.appendChild(tEl("p", "acct-tax-fine",
-        "Assumptions: individuals and trusts are taxed at the flat marginal rate you enter above (Medicare levy included), with the cost base indexed at a 2.5% CPI assumption under the announced rules; a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
-        "the 30% minimum applies to the taxable gain, so a lower rate is lifted to 30%. Companies get no discount or indexation (30%); a super fund keeps its one-third discount at 15%. " +
+        "Assumptions: individuals and trusts are taxed at the flat marginal rate you enter above (Medicare levy included), with the cost base indexed at a 2.5% CPI assumption; a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
+        "the 30% minimum applies to the taxable gain, so a lower rate is lifted to 30%. " +
         "It leaves out the main residence exemption, foreign-resident rules, carried-forward losses and other concessions. Not tax advice."));
       return sec;
     }
@@ -2108,10 +2159,15 @@
       if (!leaseProperties.length) {
         body.appendChild(tEl("p", "acct-empty", "Add a property and fill in its state and land value to see your land tax here."));
         exitBody.appendChild(tEl("p", "acct-empty", "Add a property with a purchase date and price to see what selling would leave you with."));
+        document.getElementById("acctCallout").hidden = true;
         return;
       }
       body.appendChild(renderLandTaxSection());
       exitBody.appendChild(renderCgtSection());
+      var calloutEl = document.getElementById("acctCallout");
+      calloutEl.innerHTML = "";
+      calloutEl.appendChild(accountantCallout());
+      calloutEl.hidden = false;
     }
 
     function refreshAllLive() {
@@ -2477,30 +2533,6 @@
 
     var profileForm = document.getElementById("profileForm");
     var profMsg = document.getElementById("profMsg");
-    var avatarMsg = document.getElementById("avatarMsg");
-    var profAvatarFile = document.getElementById("profAvatarFile");
-    document.getElementById("profAvatarPick").addEventListener("click", function () {
-      profAvatarFile.click();
-    });
-    profAvatarFile.addEventListener("change", function () {
-      var file = profAvatarFile.files && profAvatarFile.files[0];
-      profAvatarFile.value = "";
-      if (!file) return;
-      setMsg(avatarMsg, "Uploading…");
-      window.pcAuth.uploadAvatar(file).then(function (res) {
-        if (res.error) { setMsg(avatarMsg, res.error.message, "error"); return; }
-        setMsg(avatarMsg, "Photo saved.", "ok");
-        load();
-      });
-    });
-    document.getElementById("profAvatarRemove").addEventListener("click", function () {
-      setMsg(avatarMsg, "Removing…");
-      window.pcAuth.removeAvatar().then(function (res) {
-        if (res.error) { setMsg(avatarMsg, res.error.message, "error"); return; }
-        setMsg(avatarMsg, "Photo removed.", "ok");
-        load();
-      });
-    });
     profileForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var btn = document.getElementById("profSaveBtn");

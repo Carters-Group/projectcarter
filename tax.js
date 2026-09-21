@@ -10,14 +10,17 @@
    QLD (Queensland Revenue Office), WA / SA / TAS (2025-26). Estimate only.
    ACT and NT are not modelled.
 
-   CAPITAL GAINS TAX: current law (50% discount for individuals/trusts, 33.3%
-   for super, none for companies) alongside the 2026-27 Budget reform that
-   applies from 1 July 2027 (announced, NOT yet confirmed as legislation):
-   cost-base indexation + a 30% minimum tax on the net gain, with a split-gain
-   transition for assets held across 1 July 2027 and a new-build election.
-   Where the announcement is silent (exact apportionment formula, how the
-   minimum tax interacts with the pre-2027 discounted portion) this makes a
-   stated, editable assumption rather than guessing silently.
+   CAPITAL GAINS TAX: the rules that apply follow the SALE DATE. Before
+   1 July 2027 the 50% discount still applies to individuals and trusts (asset
+   held over 12 months), one third for super, none for companies. From
+   1 July 2027 the discount is replaced (Treasury Laws Amendment (Tax Reform
+   No. 1) Act 2026, royal assent 26 June 2026) by cost-base indexation plus a
+   30% minimum tax on the net gain for individuals and trusts, with a
+   split-gain transition for assets held across that date and a new-build
+   election. Companies never had the discount and are unchanged (30%); super
+   keeps its one-third discount. Where the Act's detail is not modelled (exact
+   apportionment, how the minimum tax interacts with the pre-2027 discounted
+   portion) this makes a stated, editable assumption rather than guessing.
    ========================================================================= */
 "use strict";
 
@@ -165,10 +168,14 @@ var pcTax = (function () {
     var unmodelled = [];
     var missingValue = [];
 
-    function groupFor(state, owner) {
-      var k = state + "|" + owner;
+    /* an entity name (for example a company set up for one large purchase) is
+       its own taxpayer, so it gets its own threshold; blank = held in your
+       own name, and properties of the same type share one group */
+    function groupFor(state, owner, entity) {
+      var name = (entity || "").trim();
+      var k = state + "|" + owner + "|" + name.toLowerCase();
       if (!groups[k]) {
-        groups[k] = { state: state, owner: owner, ownerLabel: OWNERS[owner], total: 0, otherLand: 0, metroTotal: 0, properties: [] };
+        groups[k] = { state: state, owner: owner, ownerLabel: OWNERS[owner], entity: name, total: 0, otherLand: 0, metroTotal: 0, properties: [] };
         order.push(k);
       }
       return groups[k];
@@ -178,7 +185,7 @@ var pcTax = (function () {
       if (!p.state) { missingState.push(p); return; }
       if (!LAND[p.state]) { unmodelled.push(p); return; }
       if (!(p.landValue > 0)) { missingValue.push(p); return; }
-      var g = groupFor(p.state, p.owner || "individual");
+      var g = groupFor(p.state, p.owner || "individual", p.entity);
       g.total += p.landValue;
       if (p.state === "WA" && p.waMetro) g.metroTotal += p.landValue;
       g.properties.push({ id: p.id, name: p.name, landValue: p.landValue });
@@ -187,7 +194,7 @@ var pcTax = (function () {
     Object.keys(otherLand || {}).forEach(function (st) {
       var v = otherLand[st];
       if (LAND[st] && v > 0) {
-        var g = groupFor(st, "individual");
+        var g = groupFor(st, "individual", "");
         g.otherLand += v;
         g.total += v;
       }
@@ -240,7 +247,7 @@ var pcTax = (function () {
   /* p: { owner, purchaseDate, purchasePrice, acqCosts, improvements,
           worksClaimed, saleDate, salePrice, newBuild, v27 }
      s: { taxRatePct (marginal rate incl. Medicare, number|null), cpiPct, sellingCostPct } */
-  function cgtEstimate(p, s) {
+  function cgtEstimateRaw(p, s) {
     var owner = p.owner || "individual";
     var missing = [];
     if (!(p.purchasePrice > 0)) missing.push("purchase price");
@@ -340,17 +347,29 @@ var pcTax = (function () {
     return res;
   }
 
+  /* the tax that applies on the sale date: from 1 July 2027 individuals and
+     trusts use the new indexation rules, otherwise current law */
+  function cgtEstimate(p, s) {
+    var r = cgtEstimateRaw(p, s);
+    if (r && r.ready && r.currentLaw) {
+      if (r.reform) { r.rules = "new"; r.tax = r.reform.tax; }
+      else { r.rules = "current"; r.tax = r.currentLaw.tax; }
+    }
+    return r;
+  }
+
   function cgtPortfolio(items) {
-    var current = 0, reform = 0, gain = 0, count = 0, needsRate = false;
+    var current = 0, reform = 0, gain = 0, count = 0, needsRate = false, tax = 0;
     items.forEach(function (r) {
       if (!r || !r.ready) return;
       count++;
       if (r.gain > 0) gain += r.gain;
       if (r.needsRate) { needsRate = true; return; }
+      tax += r.tax || 0;
       current += r.currentLaw.tax || 0;
       reform += (r.reform && r.reform.tax != null ? r.reform.tax : r.currentLaw.tax) || 0;
     });
-    return { count: count, gain: gain, currentTax: current, reformTax: reform, needsRate: needsRate };
+    return { count: count, gain: gain, tax: tax, currentTax: current, reformTax: reform, needsRate: needsRate };
   }
 
   return {

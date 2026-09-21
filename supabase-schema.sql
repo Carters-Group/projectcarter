@@ -102,7 +102,7 @@ $$;
 create table if not exists public.reports (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid        not null references auth.users (id) on delete cascade,
-  calculator  text        not null check (calculator in ('noi', 'roi', 'da', 'grv', 'pr', 'cl')),
+  calculator  text        not null check (calculator in ('noi', 'roi', 'da', 'grv', 'pr', 'cl', 'dep')),
   title       text        not null default 'Untitled report',
   inputs      jsonb       not null default '{}'::jsonb,
   summary     jsonb       not null default '{}'::jsonb,
@@ -117,7 +117,7 @@ create index if not exists reports_user_idx
 alter table public.reports drop constraint if exists reports_calculator_check;
 alter table public.reports
   add constraint reports_calculator_check
-  check (calculator in ('noi', 'roi', 'da', 'grv', 'pr', 'cl'));
+  check (calculator in ('noi', 'roi', 'da', 'grv', 'pr', 'cl', 'dep'));
 
 -- Small labelled snapshot of a report's key computed outputs (e.g. a
 -- Portfolio Review's usable equity, a DA's cash equity required), stored
@@ -226,6 +226,11 @@ alter table public.properties add column if not exists annual_running_costs nume
 -- small JSON blob per user; deliberately NOT in pc-auth.js's PROFILE_COLS so
 -- sign-in still works if this migration hasn't been run yet.
 alter table public.profiles add column if not exists tax_settings jsonb;
+
+-- Name of the entity that holds a property (for example a company set up for one
+-- large purchase). Land tax is worked out per entity, so a separate entity gets
+-- its own threshold. Blank = held in the owner's own name.
+alter table public.properties add column if not exists holding_entity text;
 
 create index if not exists properties_user_idx
   on public.properties (user_id, name);

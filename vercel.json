@@ -27,7 +27,9 @@
     { "source": "/grv-calculator", "destination": "/gross-realisation-value-calculator", "permanent": true },
     { "source": "/grv-calculator.html", "destination": "/gross-realisation-value-calculator", "permanent": true },
     { "source": "/noi-calculator", "destination": "/net-operating-income-calculator", "permanent": true },
-    { "source": "/noi-calculator.html", "destination": "/net-operating-income-calculator", "permanent": true }
+    { "source": "/noi-calculator.html", "destination": "/net-operating-income-calculator", "permanent": true },
+    { "source": "/dep-calculator", "destination": "/tax-depreciation-calculator", "permanent": true },
+    { "source": "/dep-calculator.html", "destination": "/tax-depreciation-calculator", "permanent": true }
   ],
   "rewrites": [
     { "source": "/about", "destination": "/about.html" },
@@ -47,7 +49,8 @@
     { "source": "/return-on-investment-calculator", "destination": "/roi-calculator.html" },
     { "source": "/development-site-calculator", "destination": "/da-calculator.html" },
     { "source": "/gross-realisation-value-calculator", "destination": "/grv-calculator.html" },
-    { "source": "/net-operating-income-calculator", "destination": "/noi-calculator.html" }
+    { "source": "/net-operating-income-calculator", "destination": "/noi-calculator.html" },
+    { "source": "/tax-depreciation-calculator", "destination": "/dep-calculator.html" }
   ],
   "headers": [
     {

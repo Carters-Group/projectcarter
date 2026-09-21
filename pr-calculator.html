@@ -67,6 +67,7 @@
             <a href="net-operating-income-calculator">Net Operating Income (NOI)</a>
             <a href="development-site-calculator">Development Site (DA)</a>
             <a href="gross-realisation-value-calculator">Gross Realisation Value (GRV)</a>
+            <a href="tax-depreciation-calculator">Tax Depreciation (DEP)</a>
           </div>
         </div>
         <a href="account">Account</a>
@@ -102,19 +103,18 @@
 
             <div class="calc-group">
               <h2 class="calc-subhead">Properties</h2>
-              <p class="field-hint" style="margin-top:0">Add one card per property. Each card shows that property's own after-tax weekly position; the panel on the right combines them.</p>
+              <p class="field-hint" style="margin-top:0">Add one property review card per property. Each card shows that property's own after-tax weekly position; the panel on the right combines them. Save a card to your account to reopen it later or pull it into your account's property register.</p>
               <div class="dwelling-types" id="propertyCards"></div>
               <div class="calc-prop-actions">
-                <button type="button" class="btn btn-accent btn-add" id="saveAddProperty">Save &amp; update portfolio</button>
-                <button type="button" class="btn btn-ghost btn-add" id="saveProperty">Save review</button>
+                <button type="button" class="btn btn-accent btn-add" id="saveCard">Save card to account</button>
                 <button type="button" class="btn btn-ghost btn-add" id="addProperty">Add another</button>
               </div>
               <p class="acct-msg" id="savePropertyMsg" hidden></p>
               <div class="calc-prop-templates" id="propTemplates" hidden>
-                <label for="propTemplateSelect">Reuse a saved property</label>
+                <label for="propTemplateSelect">Your saved property review cards</label>
                 <div class="calc-prop-templates__row">
                   <select id="propTemplateSelect"></select>
-                  <button type="button" class="btn btn-ghost btn-sm" id="propTemplateUse">Add to portfolio</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="propTemplateUse">Open / edit card</button>
                   <button type="button" class="linklike" id="propTemplateDelete">Remove</button>
                 </div>
               </div>
@@ -123,7 +123,6 @@
           </div>
 
           <dl class="calc-results" id="calcResults" aria-live="polite">
-            <a href="account#acctPortfolioCard" class="btn btn-ghost btn-sm calc-results__acct-link">View portfolio breakdown in account</a>
             <h2>Portfolio position</h2>
             <div class="result-row is-teaser"><dt>Properties</dt><dd data-out="count">&mdash;</dd></div>
             <div class="result-row is-teaser"><dt>Portfolio value</dt><dd data-out="value">&mdash;</dd></div>
@@ -778,14 +777,45 @@
         else el.value = fields[key];
       });
     }
+    /* Signed-in visitors save each card to their account as its own small
+       "pr" report (inputs.kind === "card", one entry in dyn.props), so it
+       lists on the account page and imports into the property register from
+       there. Guests keep a local, this-browser-only list instead. */
+    var savedCards = [];
+    function isMember() {
+      return !!(window.pcAuth && window.pcAuth.isMember && window.pcAuth.isMember());
+    }
     function renderTemplatePicker() {
       var wrap = document.getElementById("propTemplates");
       var sel = document.getElementById("propTemplateSelect");
-      var list = loadTemplates();
-      wrap.hidden = list.length === 0;
-      sel.innerHTML = list.map(function (t) {
-        return '<option value="' + t.id + '">' + (t.label || "Saved property") + '</option>';
-      }).join("");
+      var keep = sel.value;
+      wrap.hidden = savedCards.length === 0;
+      sel.innerHTML = "";
+      savedCards.forEach(function (t) {
+        var o = document.createElement("option");
+        o.value = t.id;
+        o.textContent = t.label || "Saved property";
+        sel.appendChild(o);
+      });
+      if (keep) sel.value = keep;
+    }
+    function refreshSavedCards() {
+      if (isMember() && window.pcAuth.listReports) {
+        return window.pcAuth.listReports("pr").then(function (res) {
+          savedCards = (res && !res.error ? res.data || [] : []).filter(function (r) {
+            var inp = r.inputs || {};
+            return inp.kind === "card" && inp.dyn && inp.dyn.props && inp.dyn.props[0];
+          }).map(function (r) {
+            return { id: r.id, label: r.title, fields: r.inputs.dyn.props[0], cloud: true };
+          });
+          renderTemplatePicker();
+        }, function () {});
+      }
+      savedCards = loadTemplates().map(function (t) {
+        return { id: t.id, label: t.label, fields: t.fields, cloud: false };
+      });
+      renderTemplatePicker();
+      return Promise.resolve();
     }
 
     function removeProperty(id) {
@@ -1101,8 +1131,7 @@
          save, and it reads as odd to offer it next to two finished cards
          when the visitor just wants a third */
       var hasOpenCard = openCardId() != null;
-      document.getElementById("saveProperty").hidden = !hasOpenCard;
-      document.getElementById("saveAddProperty").hidden = !hasOpenCard;
+      document.getElementById("saveCard").hidden = !hasOpenCard;
 
       /* per-card hints + derived figures */
       m.props.forEach(function (r) {
@@ -1355,21 +1384,21 @@
     document.getElementById("addProperty").addEventListener("click", function (e) { doAddProperty(e.isTrusted); });
 
     var savePropertyMsg = document.getElementById("savePropertyMsg");
-    function flashSaveMsg(text) {
+    function flashSaveMsg(text, isError) {
       savePropertyMsg.textContent = text;
+      savePropertyMsg.className = "acct-msg" + (isError ? " is-error" : "");
       savePropertyMsg.hidden = false;
       window.clearTimeout(flashSaveMsg._t);
       flashSaveMsg._t = window.setTimeout(function () { savePropertyMsg.hidden = true; }, 4000);
     }
-    /* Saves whichever card is currently open as a reusable local template -
-       independent of the cloud push below, since a card doesn't have to be
-       open for "Save & update portfolio" to work (see doSaveProperty). */
-    function saveLocalTemplate() {
-      var id = openCardId();
-      if (id == null) return null;
-      var fields = serializeCard(id);
-      if (!fields) return null;
-      var label = (fields.label || "").trim() || "Saved property";
+    /* Saves the open card. Members: to their account as its own "pr" report
+       (updating in place when the card was opened from, or already saved to,
+       a saved card). Guests: a this-browser-only template, plus a nudge to
+       sign in. Never marks anything as a master portfolio - cards are
+       standalone and feed the account page's property register instead. */
+    function cardEl(id) { return propertyCards.querySelector('[data-prop="' + id + '"]'); }
+
+    function saveLocalTemplate(id, fields, label) {
       var list = loadTemplates();
       /* re-saving under a name that's already there updates that template
          in place rather than piling up duplicates */
@@ -1384,54 +1413,44 @@
         if (list.length > MAXT) list = list.slice(0, MAXT);
       }
       saveTemplates(list);
-      renderTemplatePicker();
-      maybeAutoCollapse(id);
-      render();
-      return label;
     }
 
-    /* Pushes the FULL current property list to the cloud as this visitor's
-       saved PR report. This must not depend on a card being open - it used
-       to (piggybacking on saveLocalTemplate's early return), which meant
-       removing a property and clicking save did nothing whenever every
-       remaining card was collapsed: the deleted property just reappeared
-       next time the portfolio was opened, looking like removal was broken.
-       asPortfolio explicitly (re)marks the saved report as the master
-       portfolio that drives the account page overview; "Save review" (its
-       button) leaves master status untouched so a guest's local-only
-       template save (below) doesn't force a cloud save or sign-in redirect
-       they didn't ask for. */
-    function doSaveProperty(asPortfolio) {
-      var label = saveLocalTemplate();
-      if (label) flashSaveMsg('Saved "' + label + '" - reuse it any time from "Reuse a saved property" below.');
-      var isMember = !!(window.pcAuth && window.pcAuth.isMember && window.pcAuth.isMember());
-      if (!isMember && !asPortfolio) return null;
-      if (!window.pcReport || !window.pcReport.save) return null;
-      var saved = window.pcReport.save();
-      if (asPortfolio && saved && typeof saved.then === "function") {
-        saved = saved.then(function (res) {
-          if (res && res.data && res.data.id && window.pcAuth && window.pcAuth.setMasterReport) {
-            return window.pcAuth.setMasterReport(res.data.id).then(function () { return res; });
-          }
-          return res;
-        });
+    function doSaveCard() {
+      var id = openCardId();
+      if (id == null) return;
+      var fields = serializeCard(id);
+      if (!fields) return;
+      var label = (fields.label || "").trim() || "Saved property";
+      var card = cardEl(id);
+      if (!isMember()) {
+        saveLocalTemplate(id, fields, label);
+        refreshSavedCards();
+        maybeAutoCollapse(id);
+        render();
+        flashSaveMsg('Saved "' + label + '" on this device. Sign in or create a free account to keep it in your account.');
+        return;
       }
-      return saved;
+      var btn = document.getElementById("saveCard");
+      btn.disabled = true;
+      flashSaveMsg("Saving…");
+      window.pcAuth.saveReport({
+        calculator: "pr",
+        title: label,
+        inputs: { v: 2, calc: "pr", kind: "card", projectName: label, fields: {}, dyn: { props: [fields] } },
+        summary: window.pcCardSummary(id),
+        id: card && card.getAttribute("data-saved-id") || undefined
+      }).then(function (res) {
+        btn.disabled = false;
+        if (res.error || !res.data) { flashSaveMsg((res.error && res.error.message) || "Could not save.", true); return; }
+        if (card) card.setAttribute("data-saved-id", res.data.id);
+        refreshSavedCards();
+        collapseOverride[id] = true;
+        setCardCollapsed(id, true);
+        render();
+        flashSaveMsg('Saved "' + label + '" to your account.');
+      });
     }
-    document.getElementById("saveProperty").addEventListener("click", function () { doSaveProperty(false); });
-    document.getElementById("saveAddProperty").addEventListener("click", function () {
-      var saved = doSaveProperty(true);
-      if (saved && typeof saved.then === "function") {
-        /* onSave() itself redirects anonymous visitors to account (stashing
-           a draft first) and marks that with { redirected: true } - skip
-           our own navigation then so we don't clobber its ?from= param */
-        saved.then(function (res) {
-          if (!res || !res.redirected) window.location.href = "account";
-        });
-      } else {
-        window.location.href = "account";
-      }
-    });
+    document.getElementById("saveCard").addEventListener("click", doSaveCard);
     /* fired by pc-report.js once a saved portfolio has been rehydrated -
        collapse every restored card unconditionally (not just the ones that
        pass the "looks full" heuristic used while a visitor is still typing -
@@ -1441,23 +1460,61 @@
       propIds.forEach(function (id) { setCardCollapsed(id, true, { silent: true }); });
       render();
     });
+
+    /* "Open / edit card": bring a saved card back onto the page. If it is
+       already there (opened earlier), just expand it rather than duplicating. */
     document.getElementById("propTemplateUse").addEventListener("click", function () {
       var sel = document.getElementById("propTemplateSelect");
-      var list = loadTemplates();
-      var t = list.filter(function (x) { return x.id === sel.value; })[0];
+      var t = savedCards.filter(function (x) { return x.id === sel.value; })[0];
       if (!t) return;
+      var existing = t.cloud ? propertyCards.querySelector('[data-saved-id="' + t.id + '"]') : null;
+      if (existing) {
+        var eid = parseInt(existing.getAttribute("data-prop"), 10);
+        collapseOverride[eid] = true;
+        setCardCollapsed(eid, false, { silent: true });
+        existing.scrollIntoView({ block: "center", behavior: "smooth" });
+        render();
+        return;
+      }
+      /* an untouched blank starter card is replaced rather than left above it */
+      propIds.slice().forEach(function (pid) {
+        var lab = document.getElementById("p" + pid + "_label");
+        var val = document.getElementById("p" + pid + "_value");
+        if (propIds.length > 1 && lab && val && !lab.value && !val.value) removeProperty(pid);
+      });
+      var before = propIds.length;
       addProperty({ fields: t.fields });
+      if (propIds.length === before) { flashSaveMsg("You've reached the card limit for one review."); return; }
+      var newId = propIds[propIds.length - 1];
+      if (t.cloud) cardEl(newId).setAttribute("data-saved-id", t.id);
+      collapseOverride[newId] = true;
       render();
+      cardEl(newId).scrollIntoView({ block: "center", behavior: "smooth" });
     });
     document.getElementById("propTemplateDelete").addEventListener("click", function () {
       var sel = document.getElementById("propTemplateSelect");
-      var list = loadTemplates().filter(function (x) { return x.id !== sel.value; });
-      saveTemplates(list);
-      renderTemplatePicker();
+      var t = savedCards.filter(function (x) { return x.id === sel.value; })[0];
+      if (!t) return;
+      if (t.cloud) {
+        if (!window.confirm("Remove “" + (t.label || "this card") + "” from your account?")) return;
+        window.pcAuth.deleteReport(t.id).then(function () {
+          var open = propertyCards.querySelector('[data-saved-id="' + t.id + '"]');
+          if (open) open.removeAttribute("data-saved-id");
+          refreshSavedCards();
+        });
+      } else {
+        saveTemplates(loadTemplates().filter(function (x) { return x.id !== t.id; }));
+        refreshSavedCards();
+      }
     });
 
     addProperty();
-    renderTemplatePicker();
+    refreshSavedCards();
+    document.addEventListener("pc-auth-change", refreshSavedCards);
+    /* pc-auth.js loads after this script, so hook its ready promise on load */
+    window.addEventListener("load", function () {
+      if (window.pcAuth && window.pcAuth.ready) window.pcAuth.ready.then(refreshSavedCards);
+    });
     render();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(positionPct);
     window.addEventListener("resize", positionPct);
@@ -1912,6 +1969,30 @@
     /* Small labelled snapshot of this portfolio, saved alongside the report
        so other calculators can pull a figure across (e.g. the deposit for a
        new purchase) without re-running this page's model. See pc-report.js. */
+    function propSummary(p) {
+      var ownerMap = { personal: "individual", company: "company", trust: "trust" };
+      var impEl = document.getElementById("p" + p.id + "_improve");
+      var improve = p.acqOn && impEl ? (parseFloat((impEl.value || "").replace(/[^0-9.]/g, "")) || 0) : 0;
+      var stEl = document.getElementById("p" + p.id + "_stampState");
+      return {
+        name: p.label || "Untitled property",
+        value: Math.round(p.value || 0),
+        propertyType: p.isCom ? "commercial" : "residential",
+        /* the rest lets the account page start a property from this card */
+        loan: Math.round(p.loan || 0),
+        ratePct: p.isOwn ? null : Math.round((p.rate || 0) * 10000) / 100,
+        weeklyRent: p.isOwn ? null : Math.round((p.rentWk || 0) * 100) / 100,
+        runningCosts: p.isOwn ? null : Math.round(Math.max(0, (p.expenses || 0) - (p.landTax || 0))),
+        state: stEl ? stEl.value : "",
+        owner: ownerMap[p.entity] || null,
+        acqCosts: p.acqOn ? Math.round(Math.max(0, (p.acq || 0) - improve)) : null,
+        improvements: p.acqOn ? Math.round(improve) : null
+      };
+    }
+    window.pcCardSummary = function (id) {
+      var p = modelProp(id);
+      return p && p.valid ? { propertyCount: 1, properties: [propSummary(p)] } : {};
+    };
     window.pcCalcSummary = function () {
       var m = model(), T = m.T, I = m.I;
       if (!(T.value > 0)) return {};
@@ -1933,26 +2014,7 @@
         /* per-property identity, not just portfolio totals - lets other
            pages (the account page's lease register) offer a one-time pull
            of a property's name/type rather than retyping it */
-        properties: m.live.map(function (p) {
-          var ownerMap = { personal: "individual", company: "company", trust: "trust" };
-          var impEl = document.getElementById("p" + p.id + "_improve");
-          var improve = p.acqOn && impEl ? (parseFloat((impEl.value || "").replace(/[^0-9.]/g, "")) || 0) : 0;
-          var stEl = document.getElementById("p" + p.id + "_stampState");
-          return {
-            name: p.label || "Untitled property",
-            value: Math.round(p.value || 0),
-            propertyType: p.isCom ? "commercial" : "residential",
-            /* the rest lets the account page start a property from this card */
-            loan: Math.round(p.loan || 0),
-            ratePct: p.isOwn ? null : Math.round((p.rate || 0) * 10000) / 100,
-            weeklyRent: p.isOwn ? null : Math.round((p.rentWk || 0) * 100) / 100,
-            runningCosts: p.isOwn ? null : Math.round(Math.max(0, (p.expenses || 0) - (p.landTax || 0))),
-            state: stEl ? stEl.value : "",
-            owner: ownerMap[p.entity] || null,
-            acqCosts: p.acqOn ? Math.round(Math.max(0, (p.acq || 0) - improve)) : null,
-            improvements: p.acqOn ? Math.round(improve) : null
-          };
-        })
+        properties: m.live.map(propSummary)
       };
     };
   })();

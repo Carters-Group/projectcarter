@@ -10,7 +10,7 @@
      <script src="pc-auth.js"></script>
      <script src="pc-report.js"></script>
 
-   The page must carry <body data-pc-calc="noi|roi|da|grv|pr|cl">.
+   The page must carry <body data-pc-calc="noi|roi|da|grv|pr|cl|dep">.
 
    What this does, entirely from the DOM (no reach into the calculator IIFE):
      - wires the "Project name or address" field (#pcProjectName, or #address
@@ -26,7 +26,7 @@
   var CALC = (document.body.getAttribute("data-pc-calc") || "").toLowerCase();
   if (!CALC) return;
 
-  var CALC_LABEL = { noi: "NOI", roi: "ROI", da: "DA", grv: "GRV", pr: "PR", cl: "CL" }[CALC] || CALC.toUpperCase();
+  var CALC_LABEL = { noi: "NOI", roi: "ROI", da: "DA", grv: "GRV", pr: "PR", cl: "CL", dep: "DEP" }[CALC] || CALC.toUpperCase();
   var inputsRoot = document.getElementById("calcInputs");
   if (!inputsRoot) return;
 
@@ -343,17 +343,6 @@
         inst.link.hidden = false;
       });
       syncUi();
-      /* a Portfolio Review report is what drives the account page's
-         portfolio overview, but only once it is flagged as the master
-         report - without this, saving your first one silently does
-         nothing on the account page, which reads as broken. So: the
-         first PR report anyone saves becomes their master automatically;
-         later ones stay opt-in via "Make this my portfolio" on account. */
-      if (CALC === "pr" && res.data && res.data.id) {
-        window.pcAuth.getMasterReport().then(function (mres) {
-          if (!mres.error && !mres.data) window.pcAuth.setMasterReport(res.data.id);
-        });
-      }
       return res;
     });
   }
