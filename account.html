@@ -86,16 +86,9 @@
   </header>
 
   <main id="main">
-    <section class="project-hero">
-      <div class="project-hero-media" style="background-image:url('assets/images/projects/haig/haig-02.jpg')" aria-hidden="true"></div>
-      <div class="wrap project-hero-inner">
-        <a class="back-link" href="/">Home</a>
-        <p class="project-eyebrow">Project Carter <span class="sep">/</span> Your portfolio</p>
-        <h1 class="project-title">Your account</h1>
-        <p class="project-locale" style="max-width:56ch">See the combined value, equity, debt and cash flow of every property you own, stress-test it against rate rises and vacancy, and keep each lease, expiry and market review in one place. Your saved calculators and tax position live here too.</p>
-      </div>
-    </section>
-    <section class="calc calc--after-hero">
+    <div class="acct-hero" id="acctHero">
+      <div class="pricing-bg" aria-hidden="true"><div class="pricing-bg__strip"></div></div>
+    <section class="calc acct-hero__inner">
       <div class="wrap narrow" id="acctWrap">
 
         <!-- not configured -->
@@ -490,6 +483,7 @@
         </div>
       </div>
     </section>
+    </div>
   </main>
 
   <!-- ============ FOOTER (shared) ============ -->
@@ -560,6 +554,7 @@
     var elUnconfigured = document.getElementById("acctUnconfigured");
     var elSignedOut    = document.getElementById("acctSignedOut");
     var elSignedIn     = document.getElementById("acctSignedIn");
+    var elAcctHero     = document.getElementById("acctHero");
     var magicForm      = document.getElementById("magicForm");
     var magicMsg       = document.getElementById("magicMsg");
     var magicBtn       = document.getElementById("magicBtn");
@@ -2505,10 +2500,13 @@
         fromNote.hidden = true;
       }
       if (!window.pcAuth.configured) {
-        show(elUnconfigured); hide(elSignedOut); hide(elSignedIn); return;
+        show(elUnconfigured); hide(elSignedOut); hide(elSignedIn);
+        elAcctHero.classList.add("acct-hero--auth");
+        return;
       }
       hide(elUnconfigured);
       document.getElementById("acctWrap").classList.toggle("is-signedin", !!u);
+      elAcctHero.classList.toggle("acct-hero--auth", !u);
       if (u) {
         hide(elSignedOut); show(elSignedIn);
         document.getElementById("acctWhoEmail").textContent = u.email;

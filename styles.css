@@ -2408,3 +2408,15 @@ h1, h2, h3 {
 
 /* nav labels stay on one line */
 .nav a, .nav-dropdown-toggle { white-space: nowrap; }
+
+/* ---------- Account page: same scrolling dashboard backdrop behind sign-in/create-account, no photo hero ---------- */
+.acct-hero { position: relative; }
+.acct-hero .pricing-bg { display: none; }
+.acct-hero.acct-hero--auth { overflow: hidden; }
+.acct-hero.acct-hero--auth .pricing-bg { display: block; }
+.acct-hero.acct-hero--auth .acct-hero__inner {
+  position: relative; min-height: 100vh;
+  padding: 104px 0 40px;
+  display: flex; align-items: center;
+}
+.acct-hero.acct-hero--auth #acctWrap { position: relative; z-index: 1; width: 100%; }
