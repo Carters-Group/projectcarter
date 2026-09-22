@@ -2442,3 +2442,15 @@ h1, h2, h3 {
   display: flex; align-items: center;
 }
 .acct-hero.acct-hero--auth #acctWrap { position: relative; z-index: 1; width: 100%; }
+
+/* ---------- Blank-portfolio placeholders (account.html) ---------- */
+.acct-placeholder-wrap.is-placeholder { filter: blur(3px); opacity: 0.55; pointer-events: none; user-select: none; }
+.acct-placeholder-cta {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin: 10px 0 18px; padding: 12px 16px;
+  background: rgba(95, 161, 208, 0.08);
+  border: 1px dashed rgba(95, 161, 208, 0.45);
+}
+.acct-placeholder-cta[hidden] { display: none; }
+.acct-placeholder-cta span { font-size: 13px; color: var(--muted); }
+.acct-placeholder-cta .btn { flex: 0 0 auto; }

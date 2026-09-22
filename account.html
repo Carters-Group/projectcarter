@@ -224,37 +224,48 @@
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
 
-            <div id="portfolioSet" hidden>
+            <div id="portfolioSet">
               <p class="acct-report__date" id="portfolioBasis"></p>
-              <div class="acct-overview" id="portfolioStats"></div>
-              <div class="acct-equity-modes" id="portfolioEquityModes"></div>
+
+              <div class="acct-placeholder-wrap" id="portfolioStatsWrap">
+                <div class="acct-overview" id="portfolioStats"></div>
+                <div class="acct-equity-modes" id="portfolioEquityModes"></div>
+              </div>
+              <div class="acct-placeholder-cta" id="portfolioStatsCta" hidden>
+                <span>Example figures &mdash; add a property to see your real ones.</span>
+                <button type="button" class="btn btn-accent btn-sm" data-placeholder-add>Add a property</button>
+              </div>
 
               <div class="acct-debt-goal" id="portfolioCashFlow" hidden>
                 <p class="acct-eyebrow">Cash flow before tax</p>
-                <div class="acct-overview acct-overview--modes" id="portfolioCashFlowStats"></div>
+                <div class="acct-placeholder-wrap" id="portfolioCashFlowWrap">
+                  <div class="acct-overview acct-overview--modes" id="portfolioCashFlowStats"></div>
+                </div>
+                <div class="acct-placeholder-cta" id="portfolioCashFlowCta" hidden>
+                  <span>Example figures &mdash; add a lease with a rent figure to see your real ones.</span>
+                  <button type="button" class="btn btn-accent btn-sm" data-placeholder-add>Add a property</button>
+                </div>
                 <p class="field-hint">Rent from your current leases, less the running costs and loan interest you have entered. Tax on that income is not included.</p>
               </div>
 
               <div id="portfolioGaps" hidden></div>
             </div>
-
-            <div id="portfolioUnset" hidden>
-              <p class="acct-empty">
-                Add your properties below, once each: what you paid, what it is worth, what you owe and what it earns.
-                Your equity, cash flow, land tax and what you would walk away with if you sold are all worked out from that,
-                and the calculators can pull your equity straight in.
-              </p>
-            </div>
           </div>
 
-          <div class="card acct-card acct-dash-risk" id="acctRiskCard" hidden>
+          <div class="card acct-card acct-dash-risk" id="acctRiskCard">
             <div class="acct-card-head">
               <h2 class="calc-subhead">Risk and debt</h2>
             </div>
-              <div class="acct-debt-goal acct-risk-section" id="portfolioRisk" hidden>
+              <div class="acct-debt-goal acct-risk-section" id="portfolioRisk">
                 <p class="acct-risk-section__title">Check your portfolio risk</p>
                 <p class="field-hint">How your cash flow would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
-                <div class="acct-risk-grid" id="portfolioRiskGrid"></div>
+                <div class="acct-placeholder-wrap" id="portfolioRiskWrap">
+                  <div class="acct-risk-grid" id="portfolioRiskGrid"></div>
+                </div>
+                <div class="acct-placeholder-cta" id="portfolioRiskCta" hidden>
+                  <span>Example figures &mdash; add a property with a rent figure to see your real ones.</span>
+                  <button type="button" class="btn btn-accent btn-sm" data-placeholder-add>Add a property</button>
+                </div>
                 <p class="field-hint" id="portfolioRiskNote">Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast.</p>
               </div>
               <div class="acct-debt-goal" id="portfolioDebtGoal" hidden>
@@ -918,13 +929,53 @@
        pcPortfolio.build() (see portfolio.js). Totals only count properties
        that have what each figure needs, and the gaps list names who is
        missing what - it never guesses. */
+    /* Illustrative-only figures for a blank portfolio, so a brand-new
+       sign-in sees roughly what this dashboard becomes rather than a wall
+       of empty cards. Each block that uses them is blurred and carries its
+       own small "Add a property" CTA, and both disappear the moment real
+       data satisfies that block - never saved, never sent anywhere. */
+    var SAMPLE_STATS = [
+      ["Properties", "3"],
+      ["Combined value", fmtMoney(2590000)],
+      ["Combined debt", fmtMoney(1528000)],
+      ["Equity", fmtMoney(1062000)],
+      ["Portfolio LVR", fmtPct(59)]
+    ];
+    var SAMPLE_EQUITY = [
+      ["Conservative (70% LVR)", fmtMoney(285000)],
+      ["Higher gearing (80% LVR)", fmtMoney(544000)]
+    ];
+    var SAMPLE_CASHFLOW = [
+      ["Rent / yr", fmtMoney(156400)],
+      ["Running costs / yr", fmtMoney(38900)],
+      ["Loan interest / yr", fmtMoney(91700)],
+      ["Cash flow / yr", fmtSignedMoney(25800)],
+      ["Cash flow / wk", fmtSignedMoney(496)],
+      ["Yield on value", fmtPct(6.0)]
+    ];
+    var SAMPLE_RISK_BASIS = { portfolioDebt: 1528000, annualSurplus: 25800, grossRentalIncome: 156400 };
+
+    /* Toggles the blur on a placeholder block and its matching CTA row
+       (id + "Cta"), wiring the CTA's "Add a property" button once. */
+    function setPlaceholder(wrapId, isPlaceholder) {
+      var wrap = document.getElementById(wrapId);
+      var cta = document.getElementById(wrapId.replace("Wrap", "Cta"));
+      if (wrap) wrap.classList.toggle("is-placeholder", isPlaceholder);
+      if (cta) {
+        cta.hidden = !isPlaceholder;
+        if (isPlaceholder && !cta.dataset.wired) {
+          cta.dataset.wired = "1";
+          var btn = cta.querySelector("[data-placeholder-add]");
+          if (btn) btn.addEventListener("click", function () { startAdd(); });
+        }
+      }
+    }
+
     function renderPortfolio() {
-      var setEl = document.getElementById("portfolioSet");
-      var unsetEl = document.getElementById("portfolioUnset");
       var riskCardEl = document.getElementById("acctRiskCard");
       var planCardEl = document.getElementById("acctPlanCard");
-      if (!leaseProperties.length || !portfolio) { hide(setEl); show(unsetEl); hide(riskCardEl); hide(planCardEl); return; }
-      show(setEl); hide(unsetEl); show(planCardEl);
+      if (!portfolio) { hide(riskCardEl); hide(planCardEl); return; }
+      if (leaseProperties.length) show(planCardEl); else hide(planCardEl);
       var t = portfolio.totals, m = portfolio.missing;
       var ready = t.counted > 0;
 
@@ -932,48 +983,51 @@
         ? (t.counted === t.count
           ? "All " + t.count + (t.count === 1 ? " property" : " properties") + " counted."
           : "Based on " + t.counted + " of " + t.count + " properties that have a current value and loan balance.")
-        : "Add a current value and loan balance to a property below to see your position.";
+        : "Add a current value and loan balance to a property below to see your position. The figures below are examples.";
 
       var statsEl = document.getElementById("portfolioStats");
       var modesEl = document.getElementById("portfolioEquityModes");
       modesEl.innerHTML = "";
-      if (ready) {
-        var stats = [
+      var stats = ready ? (function () {
+        var s = [
           ["Properties", String(t.count)],
           ["Combined value", fmtMoney(t.value)],
           ["Combined debt", fmtMoney(t.debt)],
           ["Equity", fmtMoney(t.equity)],
           ["Portfolio LVR", fmtPct(t.lvr)]
         ];
-        if (t.landTax > 0) stats.push(["Land tax / yr", fmtMoney(t.landTax)]);
-        fillStats(statsEl, stats);
-        show(statsEl);
+        if (t.landTax > 0) s.push(["Land tax / yr", fmtMoney(t.landTax)]);
+        return s;
+      })() : SAMPLE_STATS;
+      fillStats(statsEl, stats);
+      show(statsEl);
 
-        modesEl.appendChild(tEl("p", "acct-eyebrow", "Useable equity"));
-        var wrap = tEl("div", "acct-overview acct-overview--modes");
-        fillStats(wrap, [
-          ["Conservative (70% LVR)", fmtMoney(t.usable70)],
-          ["Higher gearing (80% LVR)", fmtMoney(t.usable80)]
-        ]);
-        modesEl.appendChild(wrap);
-        modesEl.appendChild(tEl("p", "field-hint", "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs."));
-      } else {
-        hide(statsEl);
-      }
+      modesEl.appendChild(tEl("p", "acct-eyebrow", "Useable equity"));
+      var wrap = tEl("div", "acct-overview acct-overview--modes");
+      fillStats(wrap, ready ? [
+        ["Conservative (70% LVR)", fmtMoney(t.usable70)],
+        ["Higher gearing (80% LVR)", fmtMoney(t.usable80)]
+      ] : SAMPLE_EQUITY);
+      modesEl.appendChild(wrap);
+      modesEl.appendChild(tEl("p", "field-hint", "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs."));
+      setPlaceholder("portfolioStatsWrap", !ready);
 
       var cfEl = document.getElementById("portfolioCashFlow");
-      if (t.cashFlowCount > 0) {
-        var cf = [
+      var cfReady = t.cashFlowCount > 0;
+      var cf = cfReady ? (function () {
+        var c = [
           ["Rent / yr", fmtMoney(t.rent)],
           ["Running costs / yr", fmtMoney(t.runningCosts)],
           ["Loan interest / yr", fmtMoney(t.interest)],
           ["Cash flow / yr", fmtSignedMoney(t.cashFlow)],
           ["Cash flow / wk", fmtSignedMoney(t.cashFlowWeekly)]
         ];
-        if (t.grossYield != null) cf.push([t.yieldKind === "net" ? "Net yield on value" : (t.yieldKind === "mixed" ? "Yield on value" : "Gross yield on value"), fmtPct(t.grossYield)]);
-        fillStats(document.getElementById("portfolioCashFlowStats"), cf);
-        show(cfEl);
-      } else { hide(cfEl); }
+        if (t.grossYield != null) c.push([t.yieldKind === "net" ? "Net yield on value" : (t.yieldKind === "mixed" ? "Yield on value" : "Gross yield on value"), fmtPct(t.grossYield)]);
+        return c;
+      })() : SAMPLE_CASHFLOW;
+      fillStats(document.getElementById("portfolioCashFlowStats"), cf);
+      setPlaceholder("portfolioCashFlowWrap", !cfReady);
+      show(cfEl);
 
       var soldEl = document.getElementById("portfolioIfSold");
       if (t.soldCount > 0) {
@@ -1040,13 +1094,10 @@
       document.getElementById("portfolioPlanNote").hidden = planOk;
       if (!planOk) hide(document.getElementById("portfolioRoiResult"));
 
-      var riskEl = document.getElementById("portfolioRisk");
-      if (t.cashFlowCount > 0) {
-        show(riskEl);
-        renderPortfolioRisk({ portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent });
-      } else { hide(riskEl); }
-      /* the risk card holds the stress test and the debt goal; only show it when one of them applies */
-      if (riskEl.hidden && goalEl.hidden) hide(riskCardEl); else show(riskCardEl);
+      var riskReady = t.cashFlowCount > 0;
+      renderPortfolioRisk(riskReady ? { portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent } : SAMPLE_RISK_BASIS);
+      setPlaceholder("portfolioRiskWrap", !riskReady);
+      show(riskCardEl);
     }
 
     /* ---- Your properties (the register) ---------------------------------
