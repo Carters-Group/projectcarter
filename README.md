@@ -150,7 +150,9 @@ entered" and `0` means "none" (a loan balance of 0 is a property with no loan).
 `portfolio.test.js`) derives every figure from those fields, so no number is
 ever asked for twice and none can disagree: per property, equity, LVR, useable
 equity at 70% and 80%, gross yield, cash flow before tax (rent from current
-leases less running costs less interest), growth since purchase, land tax share
+leases less running costs, its share of the estimated land tax, and interest;
+land tax is a recurring holding cost, so it also comes off the portfolio's net
+rental income that the ROI projection grows), growth since purchase, land tax share
 and cash in hand if sold (net proceeds less the loan less capital gains tax);
 for the portfolio, the sums plus land tax by state, a blended interest rate and
 the cash in hand if everything were sold. Totals only count properties that
@@ -158,6 +160,16 @@ have what each figure needs, and a "To complete your picture" list names who is
 missing what rather than guessing. Each collapsed property shows a one-line
 summary strip (value, equity, LVR, yield, cash flow, cash if sold) that updates
 live as the form is edited.
+
+**Sold properties.** Ticking "I have sold this property" (`properties.is_sold`)
+turns the "If you sold" block into the actual sale (contract date and price)
+and moves the property into a collapsed "Sold properties" group. It drops out of
+every portfolio figure, land tax, the leases summary and the equity the
+calculators pull, but its realised capital gains tax stays under Exit strategy,
+grouped by the financial year of the sale contract, with a "Capital gains on
+sale" PDF for the accountant. Unticking brings it back. Cash in hand for a
+property owned by a company, trust or super fund carries a note that it stays
+with that entity and paying it out can carry further tax.
 
 The "Your portfolio" card on top of the page reads from that, and so do its
 debt-reduction goal, portfolio plan (which also seeds a saved ROI projection)
@@ -215,7 +227,7 @@ property form):
 
 Re-run `supabase-schema.sql` before deploying this (it adds the property tax
 columns, the current value / loan balance / interest rate / running costs
-columns and `profiles.tax_settings`); until then saving a property shows a
+columns, `profiles.tax_settings` and `properties.is_sold`); until then saving a property shows a
 prompt to do so. Run `node --test portfolio.test.js tax.test.js stamp.test.js`
 for the estimator tests.
 

@@ -566,24 +566,32 @@
       if (has("loan_balance")) row.loan_balance = money(property.loan_balance);
       if (has("interest_rate")) { var r = money(property.interest_rate); row.interest_rate = r != null && r <= 100 ? r : null; }
       if (has("annual_running_costs")) row.annual_running_costs = money(property.annual_running_costs);
-      var withEntity = has("holding_entity");
-      if (withEntity) row.holding_entity = String(property.holding_entity || "").trim().slice(0, 120) || null;
+      if (has("holding_entity")) row.holding_entity = String(property.holding_entity || "").trim().slice(0, 120) || null;
+      if (has("is_sold")) row.is_sold = !!property.is_sold;
       function write(r) {
         return property.id
           ? client.from("properties").update(r).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
           : client.from("properties").insert(r).select().maybeSingle();
       }
-      return write(row).then(function (res) {
-        /* the entity column comes from a database update; if it has not been run yet,
-           save everything else and say so instead of failing the whole save */
-        if (res.error && withEntity && /holding_entity/i.test(res.error.message || "")) {
-          var rest = Object.assign({}, row); delete rest.holding_entity;
-          return write(rest).then(function (r2) {
-            return { data: r2.data, error: r2.error, warning: "Saved, but the entity name needs the latest database update (run supabase-schema.sql), so it was not kept." };
-          });
-        }
-        return { data: res.data, error: res.error };
-      });
+      /* these columns come from later database updates; if one has not been run
+         yet, save everything else and say so instead of failing the whole save */
+      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status" };
+      var dropped = [];
+      function attempt(r) {
+        return write(r).then(function (res) {
+          var msg = (res.error && res.error.message) || "";
+          var k = Object.keys(LATER_COLS).filter(function (c) { return c in r && msg.indexOf(c) !== -1; })[0];
+          if (k) {
+            var rest = Object.assign({}, r); delete rest[k];
+            dropped.push(LATER_COLS[k]);
+            return attempt(rest);
+          }
+          var out = { data: res.data, error: res.error };
+          if (dropped.length && !res.error) out.warning = "Saved, but " + dropped.join(" and ") + " needs the latest database update (run supabase-schema.sql), so it was not kept.";
+          return out;
+        });
+      }
+      return attempt(row);
     },
 
     /* The portfolio summary the calculators pull "funds available" from

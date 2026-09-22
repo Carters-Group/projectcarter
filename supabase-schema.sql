@@ -232,6 +232,12 @@ alter table public.profiles add column if not exists tax_settings jsonb;
 -- its own threshold. Blank = held in the owner's own name.
 alter table public.properties add column if not exists holding_entity text;
 
+-- A property that has been sold. It leaves every portfolio figure (value,
+-- debt, cash flow, land tax, leases) but stays on the account so its capital
+-- gains workings are there for the accountant. The sale itself is the
+-- existing planned_sale_date (sale contract date) and expected_sale_price.
+alter table public.properties add column if not exists is_sold boolean not null default false;
+
 create index if not exists properties_user_idx
   on public.properties (user_id, name);
 

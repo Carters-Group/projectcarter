@@ -83,7 +83,7 @@ var pcPortfolio = (function () {
     var rent = annualRent(p, today);
 
     var m = {
-      id: p.id, name: p.name || "Untitled property", entity: (p.holding_entity || "").trim(), type: p.property_type === "commercial" ? "commercial" : "residential", state: p.state || "", owner: p.ownership_type || "individual",
+      id: p.id, name: p.name || "Untitled property", sold: !!p.is_sold, entity: (p.holding_entity || "").trim(), type: p.property_type === "commercial" ? "commercial" : "residential", state: p.state || "", owner: p.ownership_type || "individual",
       value: value, loan: loan, rate: rate, price: price,
       equity: value != null && loan != null ? value - loan : null,
       lvr: value != null && loan != null ? loan / value * 100 : null,
@@ -137,14 +137,19 @@ var pcPortfolio = (function () {
   function build(props, settings, today) {
     today = today || todayISO();
     settings = settings || {};
-    var metrics = (props || []).map(function (p) { return propertyMetrics(p, settings, today); });
+    /* every property keeps its metrics (in the same order as props, so the
+       account page can pair them up), but a sold one drops out of every
+       portfolio figure; it only carries its realised capital gains tax */
+    var all = (props || []).map(function (p) { return propertyMetrics(p, settings, today); });
+    var metrics = all.filter(function (m) { return !m.sold; });
+    var heldProps = (props || []).filter(function (p) { return !p.is_sold; });
 
     var landTax = null;
     if (typeof pcTax !== "undefined") {
       landTax = pcTax.landTaxPortfolio(metrics.map(function (m, i) {
         return {
           id: m.id, name: m.name, state: m.state, owner: m.owner,
-          landValue: pos(props[i].land_value) || 0, waMetro: !!props[i].wa_metro, entity: props[i].holding_entity || ""
+          landValue: pos(heldProps[i].land_value) || 0, waMetro: !!heldProps[i].wa_metro, entity: heldProps[i].holding_entity || ""
         };
       }), {});
       landTax.groups.forEach(function (g) {
@@ -153,6 +158,12 @@ var pcPortfolio = (function () {
         });
       });
     }
+
+    /* land tax is a holding cost like rates, so it comes off each
+       property's cash flow once the portfolio has worked out its share */
+    metrics.forEach(function (m) {
+      if (m.cashFlow != null && m.landTaxShare) m.cashFlow -= m.landTaxShare;
+    });
 
     var withValue = metrics.filter(function (m) { return m.value != null; });
     var counted = metrics.filter(function (m) { return m.value != null && m.loan != null; });
@@ -167,7 +178,8 @@ var pcPortfolio = (function () {
     var rent = sum(flowed, "rent");
     var costs = flowed.reduce(function (a, m) { return a + (m.runningCosts || 0); }, 0);
     var interest = sum(flowed, "interest");
-    var cashFlow = rent - costs - interest;
+    var landTaxFlow = sum(flowed, "landTaxShare");
+    var cashFlow = rent - costs - landTaxFlow - interest;
 
     var geared = flowed.filter(function (m) { return m.loan > 0 && m.rate != null; });
     var gearedDebt = sum(geared, "loan");
@@ -176,6 +188,22 @@ var pcPortfolio = (function () {
     var sold = metrics.filter(function (m) { return m.sale.cashIfSold != null; });
     var cgtItems = metrics.filter(function (m) { return m.sale.cgt; }).map(function (m) { return m.sale.cgt; });
     var cgtTotals = typeof pcTax !== "undefined" ? pcTax.cgtPortfolio(cgtItems) : null;
+
+    /* properties already sold: the tax actually owed on each sale, grouped
+       by the financial year the sale contract falls in */
+    var soldProps = all.filter(function (m) { return m.sold; });
+    var realised = { count: soldProps.length, byYear: {}, years: [] };
+    soldProps.forEach(function (m) {
+      var fy = financialYear(m.sale.cgt && m.sale.cgt.saleDate);
+      if (!realised.byYear[fy]) { realised.byYear[fy] = { fy: fy, gain: 0, tax: 0, needsRate: false, props: [] }; realised.years.push(fy); }
+      var y = realised.byYear[fy];
+      y.props.push(m);
+      var c = m.sale.cgt;
+      if (c && c.ready && c.gain > 0) y.gain += c.gain;
+      if (c && c.ready && c.needsRate) y.needsRate = true;
+      else if (m.sale.tax != null) y.tax += m.sale.tax;
+    });
+    realised.years.sort().reverse();
 
     var totals = {
       count: metrics.length,
@@ -188,7 +216,8 @@ var pcPortfolio = (function () {
       cashFlowCount: flowed.length,
       flowDebt: sum(flowed, "loan"),
       complete: counted.length > 0 && flowed.length === counted.length,
-      rent: rent, runningCosts: costs, interest: interest,
+      rent: rent, runningCosts: costs, interest: interest, landTaxFlow: landTaxFlow,
+      soldProperties: soldProps.length,
       cashFlow: cashFlow, cashFlowWeekly: cashFlow / 52,
       blendedRate: blendedRate,
       landTax: landTax ? landTax.totalTax : null,
@@ -220,7 +249,15 @@ var pcPortfolio = (function () {
       rate: refs(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
     };
 
-    return { props: metrics, totals: totals, missing: missing, missingRefs: missingRefs, landTax: landTax, cgt: cgtTotals, summary: toSummary(totals) };
+    return { props: all, totals: totals, missing: missing, missingRefs: missingRefs, landTax: landTax, cgt: cgtTotals, realised: realised, summary: toSummary(totals) };
+  }
+
+  /* "2026-27" for a contract date between 1 July 2026 and 30 June 2027 */
+  function financialYear(iso) {
+    if (!iso) return "";
+    var y = Number(iso.slice(0, 4)), mo = Number(iso.slice(5, 7));
+    var start = mo >= 7 ? y : y - 1;
+    return start + "-" + String(start + 1).slice(-2);
   }
 
   /* the small snapshot shape the calculators already read (usableEquity70 /
@@ -233,7 +270,7 @@ var pcPortfolio = (function () {
       portfolioEquity: Math.round(t.equity),
       usableEquity70: Math.round(t.usable70),
       usableEquity80: Math.round(t.usable80),
-      netRentalIncome: Math.round(t.rent - t.runningCosts),
+      netRentalIncome: Math.round(t.rent - t.runningCosts - (t.landTaxFlow || 0)),
       grossRentalIncome: Math.round(t.rent),
       blendedRate: t.blendedRate,
       portfolioLvr: t.lvr != null ? Math.round(t.lvr * 10) / 10 : null,
@@ -243,5 +280,5 @@ var pcPortfolio = (function () {
     };
   }
 
-  return { build: build, propertyMetrics: propertyMetrics, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary };
+  return { build: build, propertyMetrics: propertyMetrics, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary, financialYear: financialYear };
 })();

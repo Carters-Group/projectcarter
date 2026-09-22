@@ -1583,7 +1583,7 @@
         doc.text(k, L, y);
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         doc.text(String(v), w - L, y, { align: "right" });
-        y += 18;
+        y += 16;
       }
       function subrule() {
         doc.setDrawColor(225); doc.line(w - L - 150, y - 12, w - L, y - 12);
@@ -1605,6 +1605,30 @@
       }
       /* only print a cost line when it has a value */
       function costRow(k, v) { if (v > 0) row("  less " + k, money(v)); }
+
+      /* the answer first, in plain words, before any of the workings */
+      if (T.n > 0 && T.value > 0) {
+        var props = T.n + (T.n === 1 ? " property" : " properties");
+        var bottom = "Your " + props + (T.n === 1 ? " is" : " are") + " worth " + money(T.value) + " with " + money(T.loan) + " of debt, so you own " +
+          money(T.equity) + (T.lvr != null ? " (a " + pct(T.lvr) + " LVR)" : "") + ". ";
+        bottom += T.preTax >= 0
+          ? "The rent covers every running cost and the interest with " + money(T.preTax) + " a year to spare before tax. "
+          : "The rent falls " + money(-T.preTax) + " a year short of the running costs and interest before tax. ";
+        bottom += T.annual >= 0
+          ? "After tax and depreciation you are ahead by " + money(T.annual) + " a year, about " + money(T.weekly) + " a week."
+          : "After tax and depreciation it costs you " + money(-T.annual) + " a year, about " + money(-T.weekly) + " a week" +
+            (T.toNeutral > 0 ? ", and it would take " + money(T.toNeutral) + " more rent a week to break even." : ".");
+        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+        var bl = doc.splitTextToSize(bottom, w - 2 * L - 36);
+        var bh0 = bl.length * 14 + 32;
+        doc.setFillColor(234, 242, 248); doc.roundedRect(L, y - 14, w - 2 * L, bh0, 4, 4, "F");
+        doc.setFillColor(95, 161, 208); doc.rect(L, y - 14, 4, bh0, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(30, 80, 120);
+        doc.text("THE BOTTOM LINE", L + 16, y + 2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(30);
+        doc.text(bl, L + 16, y + 19, { lineHeightFactor: 1.15 });
+        y += bh0 + 12;
+      }
 
       section("Portfolio at a glance");
       row("Properties", String(T.n));
@@ -1679,7 +1703,7 @@
       y += 8;
       section("Property by property");
       var cols = ["Property", "Type", "Value", "Debt", "LVR", "Net", "Cash/yr", "Cash/wk"];
-      var cx = [L, L + 120, L + 178, L + 258, L + 330, L + 386, L + 442, L + 500];
+      var cx = [L, L + 118, L + 158, L + 232, L + 302, L + 352, L + 400, L + 460];
       doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
       cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
       y += 4; doc.setDrawColor(225); doc.line(L, y, w - L, y); y += 13;

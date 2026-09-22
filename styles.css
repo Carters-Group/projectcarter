@@ -2450,6 +2450,13 @@ h1, h2, h3 {
   #portfolioRiskWrap.is-placeholder .acct-risk-card + .acct-risk-card { display: none; }
 }
 
+/* ---------- Sold properties (account.html) ---------- */
+.acct-sold { margin-top: 18px; }
+.acct-sold__count { margin-left: 6px; color: var(--muted); font-weight: 400; }
+.acct-sold__hint { padding: 0 14px; margin: 10px 0 12px; }
+#soldProperties { padding: 0 12px 2px; }
+.acct-dashboard .acct-card .acct-property.is-sold { border-left-color: var(--muted); background-image: none; }
+
 /* ---------- Blank-portfolio placeholders (account.html) ---------- */
 .acct-placeholder-wrap.is-placeholder { filter: blur(3px); opacity: 0.55; pointer-events: none; user-select: none; }
 .acct-placeholder-cta {
