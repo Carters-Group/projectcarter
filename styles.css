@@ -2345,7 +2345,7 @@ h1, h2, h3 {
   position: absolute; top: 0; left: 50%; margin-left: -600px;
   width: 1200px; height: 7928px;
   background: url("assets/images/pricing/demo-dashboard.jpg") top center / 1200px auto repeat-y;
-  opacity: 0.5;
+  opacity: 0.75;
   will-change: transform;
   animation: pricing-drift 160s linear infinite;
 }
@@ -2353,8 +2353,8 @@ h1, h2, h3 {
 .pricing-bg::after {
   content: ""; position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 60% 70% at 50% 45%, rgba(12,16,22,0.78), rgba(12,16,22,0.15) 100%),
-    linear-gradient(to bottom, rgba(12,16,22,0.9) 0, rgba(12,16,22,0.5) 30%, rgba(12,16,22,0.3) 70%, rgba(12,16,22,0.8) 100%);
+    radial-gradient(ellipse 60% 70% at 50% 45%, rgba(12,16,22,0.5), rgba(12,16,22,0) 100%),
+    linear-gradient(to bottom, rgba(12,16,22,0.8) 0, rgba(12,16,22,0.35) 28%, rgba(12,16,22,0.12) 70%, rgba(12,16,22,0.6) 100%);
 }
 @media (prefers-reduced-motion: reduce) { .pricing-bg__strip { animation: none; } }
 .pricing-hero, .pricing-plans { position: relative; }
