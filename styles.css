@@ -2402,3 +2402,11 @@ h1, h2, h3 {
   .pricing-fine p:last-child { border-top-color: rgba(95, 161, 208, 0.6); }
   .pricing-bg__strip { width: 900px; margin-left: -450px; background-size: 900px auto; height: 5946px; animation-name: pricing-drift-m; }
 }
+
+/* nav labels stay on one line; tighten spacing on mid-width screens */
+.nav a, .nav-dropdown-toggle { white-space: nowrap; }
+@media (min-width: 781px) and (max-width: 1100px) {
+  .nav { gap: 20px; }
+  .nav a { font-size: 12px; letter-spacing: 0.1em; }
+  .header-cta { padding: 12px 16px; }
+}
