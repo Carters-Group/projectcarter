@@ -607,7 +607,7 @@
       } else {
         function shortfallText(t) {
           if (!t.available || !(m.fundsAvailable > 0)) return "n/a";
-          return signedMoney(t.shortfall) + (t.shortfall >= 0 ? " surplus" : " short");
+          return money(Math.abs(t.shortfall)) + (t.shortfall >= 0 ? " surplus" : " short");
         }
         var rows = [
           ["Max lend (loan-to-value ratio)", m.major.available ? pct(m.major.lvr) : "n/a", m.tier2.available ? pct(m.tier2.lvr) : "n/a"],
@@ -752,7 +752,7 @@
         row("Indicative loan amount", money(m.major.loan));
         row("Indicative rate range", rateRange(m.major.rate));
         row("What to expect", m.major.note);
-        if (m.fundsAvailable > 0) row("Shortfall / surplus", signedMoney(m.major.shortfall) + (m.major.shortfall >= 0 ? " surplus" : " short"), true);
+        if (m.fundsAvailable > 0) row("Shortfall / surplus", money(Math.abs(m.major.shortfall)) + (m.major.shortfall >= 0 ? " surplus" : " short"), true);
         row("Min deposit / equity", pct(m.major.depositPct) + "  (" + money(m.major.deposit) + ")", true);
         row("Total cash required", money(m.major.cash), true);
       } else {
@@ -766,7 +766,7 @@
         row("Indicative loan amount", money(m.tier2.loan));
         row("Indicative rate range", rateRange(m.tier2.rate));
         row("What to expect", m.tier2.note);
-        if (m.fundsAvailable > 0) row("Shortfall / surplus", signedMoney(m.tier2.shortfall) + (m.tier2.shortfall >= 0 ? " surplus" : " short"), true);
+        if (m.fundsAvailable > 0) row("Shortfall / surplus", money(Math.abs(m.tier2.shortfall)) + (m.tier2.shortfall >= 0 ? " surplus" : " short"), true);
         row("Min deposit / equity", pct(m.tier2.depositPct) + "  (" + money(m.tier2.deposit) + ")", true);
         y += 6;
         bigrow("TOTAL CASH REQUIRED (TIER 2 / NON-BANK)", money(m.tier2.cash));
@@ -811,10 +811,10 @@
         (m.fundsAvailable > 0 ? "Funds available: " + money(m.fundsAvailable) : null),
         "----",
         "Major banks: " + (m.major.available
-          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), total cash " + money(m.major.cash) + ", loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate) + (m.fundsAvailable > 0 ? ", " + (m.major.shortfall >= 0 ? "surplus " : "short ") + signedMoney(m.major.shortfall) : "")
+          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), total cash " + money(m.major.cash) + ", loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate) + (m.fundsAvailable > 0 ? ", " + (m.major.shortfall >= 0 ? "surplus " : "short ") + money(Math.abs(m.major.shortfall)) : "")
           : m.major.note),
         "Tier 2 / non-bank: " + (m.tier2.available
-          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), total cash " + money(m.tier2.cash) + ", loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate) + (m.fundsAvailable > 0 ? ", " + (m.tier2.shortfall >= 0 ? "surplus " : "short ") + signedMoney(m.tier2.shortfall) : "")
+          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), total cash " + money(m.tier2.cash) + ", loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate) + (m.fundsAvailable > 0 ? ", " + (m.tier2.shortfall >= 0 ? "surplus " : "short ") + money(Math.abs(m.tier2.shortfall)) : "")
           : m.tier2.note)
       ];
       if (m.rentalCover) {

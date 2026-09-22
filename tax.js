@@ -221,7 +221,9 @@ var pcTax = (function () {
   /* ---- capital gains tax ---------------------------------------------- */
 
   function ms(iso) { return Date.parse(iso + "T00:00:00Z"); }
-  function todayISO() { return new Date().toISOString().slice(0, 10); }
+  /* the visitor's own calendar date (toISOString is UTC, which is still
+     yesterday in Australia until 10 or 11am) */
+  function todayISO() { var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
   function addYearISO(iso) {
     var d = new Date(ms(iso));
     d.setUTCFullYear(d.getUTCFullYear() + 1);

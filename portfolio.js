@@ -23,7 +23,9 @@ var pcPortfolio = (function () {
     return isFinite(n) ? n : null;
   }
   function pos(v) { var n = num(v); return n != null && n > 0 ? n : null; }
-  function todayISO() { return new Date().toISOString().slice(0, 10); }
+  /* the visitor's own calendar date (toISOString is UTC, which is still
+     yesterday in Australia until 10 or 11am) */
+  function todayISO() { var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
   function ms(iso) { return Date.parse(iso + "T00:00:00Z"); }
 
   function leaseIsCurrent(l, today) {

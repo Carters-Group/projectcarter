@@ -1125,7 +1125,7 @@
       put("costExclLand", m.valid ? money(m.costExclLand) : "—");
       put("equityRequired", m.valid ? money(m.equityRequired) : "—");
       put("fundsAvailableOut", m.valid && m.fundsAvailable > 0 ? money(m.fundsAvailable) : "—", true);
-      put("shortfall", (m.valid && m.fundsAvailable > 0) ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
+      put("shortfall", (m.valid && m.fundsAvailable > 0) ? money(Math.abs(m.shortfall)) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
       put("debtAtDA", m.valid ? money(m.debtAtDA) : "—");
       put("costOnPrice", (m.valid && m.costOnPrice != null) ? pct(m.costOnPrice) : "—");
 
@@ -1460,7 +1460,7 @@
       if (m.fundsAvailable > 0) row("Funds available", money(m.fundsAvailable));
       y += 6;
       bigrow("SHORTFALL / SURPLUS", m.fundsAvailable > 0
-        ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short")
+        ? money(Math.abs(m.shortfall)) + (m.shortfall >= 0 ? " surplus" : " short")
         : "Enter funds available to compare");
 
       y += 4;

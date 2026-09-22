@@ -400,7 +400,7 @@
               <div class="acct-debt-goal" id="portfolioIfSold" hidden>
                 <p class="acct-eyebrow">If you sold everything</p>
                 <div class="acct-overview acct-overview--modes" id="portfolioIfSoldStats"></div>
-                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are further down this card.</p>
+                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under the rules for each sale date. The full workings, and a PDF of each, are further down this card.</p>
               </div>
 
 
@@ -1443,6 +1443,19 @@
       return lease;
     }
 
+    /* annual_rent is the one figure WALE and cash flow weight by, whichever
+       template built the row - residential enters a weekly/monthly amount,
+       so it is annualised here (for saving and for the live strip). */
+    function leaseForSave(row) {
+      var lease = serializeLeaseRow(row);
+      if (lease.is_periodic) lease.lease_expiry = null;
+      if (lease.rent_amount !== undefined) {
+        var amt = parseFloat((lease.rent_amount || "").toString().replace(/[^0-9.]/g, ""));
+        lease.annual_rent = isFinite(amt) ? amt * (lease.rent_frequency === "monthly" ? 12 : 52) : null;
+      }
+      return lease;
+    }
+
     function addLeaseRowEl(container, lease, propertyType) {
       lease = lease || {};
       var wrap = document.createElement("div");
@@ -1753,7 +1766,8 @@
       var waWrap = details.querySelector("[data-wa-metro]");
       var typeButtons = Array.prototype.slice.call(details.querySelectorAll("[data-type-btn]"));
 
-      nameInput.value = property.name || "";
+      /* a brand-new property is stored as "Untitled property"; show an empty box to type into */
+      nameInput.value = property.name && property.name !== "Untitled property" ? property.name : "";
       typeSelect.value = property.property_type === "commercial" ? "commercial" : "residential";
       notesInput.value = property.notes || "";
       fillTaxFields(details, property);
@@ -1765,12 +1779,16 @@
       var salePriceEl = details.querySelector('[data-t="expected_sale_price"]');
       var v27El = details.querySelector('[data-t="value_at_jul_2027"]');
       var follow = { price: false, v27: false };
+      /* the date the box was auto-filled with, if it was - left blank on save
+         so "sell today" keeps meaning today instead of freezing on the day
+         the property was first saved */
+      var autoSaleDate = "";
       /* the "if sold" scenario starts from today's numbers instead of blanks;
          the price and 1 July 2027 value follow the current value until edited */
       function prefillSale() {
         if (!saleDateEl.value) {
           var now = new Date();
-          saleDateEl.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2);
+          saleDateEl.value = autoSaleDate = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2);
         }
         if (!salePriceEl.value && curValEl.value) salePriceEl.value = curValEl.value;
         if (typeSelect.value !== "commercial" && !v27El.value && curValEl.value) v27El.value = curValEl.value;
@@ -1796,7 +1814,8 @@
         var row = readTaxFields(details);
         row.id = property.id;
         row.name = nameInput.value.trim() || "Untitled property";
-        row.leases = property.leases || [];
+        /* the leases as typed, not as last saved, so rent shows in the strip straight away */
+        row.leases = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row")).map(leaseForSave);
         var m = pcPortfolio.propertyMetrics(row, taxSettings);
         renderStrip(details, m);
         details.querySelector("[data-sale-preview]").textContent = salePreviewText(m);
@@ -1873,7 +1892,7 @@
       }
 
       function deleteThisProperty() {
-        if (!window.confirm('Delete "' + (property.name || "this property") + '" and all its leases? This cannot be undone.')) return;
+        if (!window.confirm('Delete "' + (property.name || "this property") + '" and all its leases? This cannot be undone.\n\nIf you have sold it, download its sale estimate first (Exit strategy, How each sale was worked out) to keep the capital gains workings for your accountant.')) return;
         window.pcAuth.deleteProperty(property.id).then(function (res) {
           if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
           loadLeaseRegister();
@@ -1888,26 +1907,20 @@
       details.querySelector('[data-act="save"]').addEventListener("click", function () {
         setMsg(msgEl, "Saving…");
         var propWarning = "";
+        var fields = readTaxFields(details);
+        if (autoSaleDate && fields.planned_sale_date === autoSaleDate) fields.planned_sale_date = "";
         window.pcAuth.saveProperty(Object.assign({
           id: property.id,
           name: nameInput.value.trim() || "Untitled property",
           property_type: typeSelect.value,
           notes: notesInput.value
-        }, readTaxFields(details))).then(function (res) {
+        }, fields)).then(function (res) {
           if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); return; }
           propWarning = res.warning || "";
           var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
-            var lease = serializeLeaseRow(row);
+            var lease = leaseForSave(row);
             lease.property_id = property.id;
-            if (lease.is_periodic) lease.lease_expiry = null;
-            /* annual_rent is the one figure WALE and cash flow weight by,
-               whichever template built this row - residential enters a
-               weekly/monthly amount, so annualise it here before saving. */
-            if (lease.rent_amount !== undefined) {
-              var amt = parseFloat((lease.rent_amount || "").toString().replace(/[^0-9.]/g, ""));
-              lease.annual_rent = isFinite(amt) ? amt * (lease.rent_frequency === "monthly" ? 12 : 52) : null;
-            }
             return window.pcAuth.saveLease(lease);
           });
           Promise.all(saves).then(function (results) {
@@ -2061,12 +2074,14 @@
       var rows = [];
       function row(label, value, strong) { rows.push([label, value, !!strong]); }
       var i = r.inputs;
+      row("Owned by", (pcTax.OWNERS[r.owner] || "Individual(s)") + (m && m.entity ? ", " + m.entity : ""));
       row("Purchase price", fmtMoney(i.purchasePrice));
       if (i.acqCosts) row("Plus buying costs", fmtMoney(i.acqCosts));
       if (i.improvements) row("Plus capital improvements", fmtMoney(i.improvements));
       if (i.worksClaimed) row("Less building write-off (Division 43)", fmtSignedMoney(-i.worksClaimed));
       row("Cost base", fmtMoney(r.costBase), true);
       row("Sale price", fmtMoney(i.salePrice));
+      row("Sale contract date", fmtDate(r.saleDate + "T00:00:00"));
       row("Less selling costs (" + i.sellingCostPct + "% of sale price)", fmtSignedMoney(-r.sellingCosts));
       row("Net sale proceeds", fmtMoney(r.proceeds), true);
       row(r.gain > 0 ? "Capital gain" : "Capital loss", fmtMoney(Math.abs(r.gain)), true);
@@ -2129,7 +2144,7 @@
        "What you entered"-style rows read top to bottom, one boxed figure
        at the end for the answer. No colour-coding - a deduction reads as
        a negative number, same as every other report on the site. */
-    function downloadWorkingsPdf(name, rows, note) {
+    function downloadWorkingsPdf(name, rows, note, bottomLine) {
       if (!window.jspdf || !window.jspdf.jsPDF) { window.alert("The PDF tool did not load. Check your connection and try again."); return; }
       var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
       var w = doc.internal.pageSize.getWidth(), h = doc.internal.pageSize.getHeight(), L = 48, y = 56;
@@ -2157,7 +2172,7 @@
       function row(k, v, strong) {
         var label = doc.splitTextToSize(pdfText(k), w - L * 2 - 170);
         var val = doc.splitTextToSize(pdfText(v), 160);
-        var lh = 15, need = Math.max(label.length, val.length) * lh + 3;
+        var lh = 14, need = Math.max(label.length, val.length) * lh + 2;
         ensure(need);
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
@@ -2182,14 +2197,44 @@
         y += bh + 10;
       }
 
-      section("How the sale works out");
+      /* the answer first, in one plain sentence, before any workings */
+      if (bottomLine) {
+        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+        var bl = doc.splitTextToSize(pdfText(bottomLine), w - 2 * L - 36);
+        var bh0 = bl.length * 14 + 32;
+        doc.setFillColor(234, 242, 248);
+        doc.roundedRect(L, y - 14, w - 2 * L, bh0, 4, 4, "F");
+        doc.setFillColor(95, 161, 208);
+        doc.rect(L, y - 14, 4, bh0, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(30, 80, 120);
+        doc.text("THE BOTTOM LINE", L + 16, y + 2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(30);
+        doc.text(bl, L + 16, y + 19, { lineHeightFactor: 1.15 });
+        y += bh0 + 10;
+      }
+
+      /* three short steps instead of one long list: the gain, the tax on
+         it, and what is left once the loan and tax are paid */
       var last = rows[rows.length - 1];
       var bigKey = last && last[2] ? last[0] : null;
-      rows.forEach(function (x) {
-        if (x === last && bigKey) return;
-        row(x[0], x[1], x[2]);
+      var gainAt = -1, keepAt = rows.length;
+      rows.forEach(function (x, idx) {
+        if (gainAt < 0 && /^Capital (gain|loss)/.test(x[0])) gainAt = idx;
+        if (keepAt === rows.length && /^Less loan balance/.test(x[0])) keepAt = idx;
       });
-      if (bigKey) { y += 6; bigrow(bigKey, last[1]); }
+      function block(title, from, to) {
+        if (from >= to) return;
+        section(title);
+        for (var k = from; k < to; k++) {
+          if (rows[k] === last && bigKey) continue;
+          row(rows[k][0], rows[k][1], rows[k][2]);
+        }
+        y += 10;
+      }
+      block("1. Your gain", 0, gainAt + 1);
+      block("2. The tax on it", gainAt + 1, keepAt);
+      block("3. What you keep", keepAt, rows.length);
+      if (bigKey) { y += 2; bigrow(bigKey, last[1]); }
 
       y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
@@ -2243,7 +2288,7 @@
       sel.addEventListener("change", paint);
       dl.addEventListener("click", function () {
         var x = current();
-        downloadWorkingsPdf(x.p.name || "Untitled property", workingsRows(x.r, x.m), workingsNote(x.r));
+        downloadWorkingsPdf(x.p.name || "Untitled property", workingsRows(x.r, x.m), workingsNote(x.r), salePreviewText(x.m));
       });
       paint();
       return det;
@@ -2417,6 +2462,27 @@
         setMsg(taxMsgEl, "Saved.", "ok");
         recomputePortfolio();
       });
+    });
+
+    /* the rate and selling costs update every figure as they are typed, and
+       save on their own when the box is left - the button stays as a visible
+       confirmation, but forgetting to press it no longer loses the change */
+    var taxLiveTimer = null;
+    ["taxRate", "taxSellPct"].forEach(function (id) {
+      var box = document.getElementById(id);
+      box.addEventListener("input", function () {
+        clearTimeout(taxLiveTimer);
+        taxLiveTimer = setTimeout(function () {
+          var r = taxNum(document.getElementById("taxRate").value);
+          var sp = taxNum(document.getElementById("taxSellPct").value);
+          taxSettings = Object.assign({}, taxSettings, {
+            tax_rate_pct: r == null ? null : Math.min(60, r),
+            selling_cost_pct: sp == null ? null : Math.min(10, sp)
+          });
+          recomputePortfolio();
+        }, 250);
+      });
+      box.addEventListener("change", function () { document.getElementById("taxSaveSettings").click(); });
     });
 
     /* ---- Disclaimer ---------------------------------------------------------
@@ -2681,6 +2747,8 @@
     document.getElementById("prImportMore").addEventListener("click", function () { prImportShown += PR_IMPORT_PAGE; applyPrImportFilter(); });
 
     document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () { startAdd(); });
+    /* "Start here - Add" goes straight to a new property, not just to the list */
+    document.getElementById("acctStartHere").addEventListener("click", function (e) { e.preventDefault(); startAdd(); });
     document.getElementById("portfolioAddBtn").addEventListener("click", function () { startAdd(); });
 
     /* arriving from the Portfolio Review calculator right after saving:
@@ -2815,7 +2883,12 @@
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
           renderReports(res.data);
           renderQuickLaunch(res.data);
+          rememberPlanReport(res.data);
         });
+        /* phones start with the saved reports folded away */
+        if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
+          document.getElementById("acctRecentGroup").open = false;
+        }
         loadLeaseRegister().then(function () {
           var want = importParam();
           if (want) {
@@ -2965,6 +3038,14 @@
     }
 
     var seededPlanReportId = null;
+    var PLAN_TITLE = "Your portfolio - ROI projection";
+    /* re-generating the plan updates the one saved projection instead of
+       adding another copy each visit */
+    function rememberPlanReport(rows) {
+      if (seededPlanReportId) return;
+      var hit = (rows || []).filter(function (r) { return r.calculator === "roi" && r.title === PLAN_TITLE; })[0];
+      if (hit) seededPlanReportId = hit.id;
+    }
 
     document.getElementById("portfolioRoiBtn").addEventListener("click", function () {
       var roiMsg = document.getElementById("portfolioRoiMsg");
@@ -2983,9 +3064,10 @@
       var btn = document.getElementById("portfolioRoiBtn");
       btn.disabled = true;
       setMsg(roiMsg, "Building your plan…");
-      var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 100)) : 0;
-      var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 1000) / 10) : 6.5;
-      var title = "Your portfolio - ROI projection";
+      /* one decimal so the calculator's loan matches the real combined debt */
+      var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 1000) / 10) : 0;
+      var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 10000) / 100) : 6.5;
+      var title = PLAN_TITLE;
       var inputs = {
         v: 2, calc: "roi", projectName: title,
         fields: {
@@ -3024,6 +3106,12 @@
         renderRoiGrowthChart(plan.rows);
         document.getElementById("portfolioRoiOpenLink").href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
         show(resultEl);
+        /* the saved projection shows up in Quick access and saved reports straight away */
+        window.pcAuth.listReports().then(function (r2) {
+          if (r2.error) return;
+          renderReports(r2.data);
+          renderQuickLaunch(r2.data);
+        });
       });
     });
 

@@ -1784,11 +1784,9 @@ h1, h2, h3 {
 .acct-collapsible[open] > summary::after { content: "\2212"; }
 .acct-collapsible[open] > summary { margin-bottom: 20px; }
 
-/* On mobile "My saved reports" adds too much scroll for what it's worth on
-   a small screen - hide the whole toggle, it's still on desktop. */
-@media (max-width: 900px) {
-  .acct-collapsible { display: none; }
-}
+/* On mobile the saved reports start folded away (see load() in
+   account.html) so they don't add scroll, but stay one tap from being
+   renamed, duplicated or deleted. */
 
 /* ---- Lease register (WALE tracker) --------------------------------- */
 .acct-tag {
@@ -2442,6 +2440,15 @@ h1, h2, h3 {
   display: flex; align-items: center;
 }
 .acct-hero.acct-hero--auth #acctWrap { position: relative; z-index: 1; width: 100%; }
+/* signed in on a phone or tablet: the dashboard starts just under the header
+   (the calculator pages' tall top padding left a dead band here) */
+@media (max-width: 1099px) {
+  .acct-hero:not(.acct-hero--auth) .acct-hero__inner { padding-top: 104px; }
+}
+/* blank portfolio on a phone: one example risk card is enough to show the idea */
+@media (max-width: 640px) {
+  #portfolioRiskWrap.is-placeholder .acct-risk-card + .acct-risk-card { display: none; }
+}
 
 /* ---------- Blank-portfolio placeholders (account.html) ---------- */
 .acct-placeholder-wrap.is-placeholder { filter: blur(3px); opacity: 0.55; pointer-events: none; user-select: none; }

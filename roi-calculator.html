@@ -691,11 +691,11 @@
       function put(key, str, teaser) {
         setOut(key, (unlocked || teaser) ? str : mask(str));
       }
-      put("loan", m.price > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "%)" : "—", true);
+      put("loan", m.price > 0 ? money(m.loan) + "  (" + (m.lvr % 1 ? m.lvr.toFixed(1) : m.lvr.toFixed(0)) + "%)" : "—", true);
       put("deposit", m.price > 0 ? money(m.deposit) : "—", true);
       put("cashRequired", m.cashRequired > 0 ? money(m.cashRequired) : "—", true);
       put("fundsAvailableOut", m.fundsAvailable > 0 ? money(m.fundsAvailable) : "—", true);
-      put("shortfall", (m.valid && m.fundsAvailable > 0) ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
+      put("shortfall", (m.valid && m.fundsAvailable > 0) ? money(Math.abs(m.shortfall)) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
       put("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—", true);
       put("exitCap", m.isRes ? (m.capGrowth ? pct(m.capGrowth * 100) : "—") : (m.exitCap ? pct(m.exitCap * 100) : "—"), true);
       put("saleValue", m.valid ? money(m.saleValue) : "—");
@@ -832,7 +832,7 @@
         doc.text(k, L, y);
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         doc.text(String(v), w - L, y, { align: "right" });
-        y += 18;
+        y += 16;
       }
       /* the one figure this report is building toward - boxed off in brand
          colour so it reads as the answer, not another line in the list */
@@ -849,9 +849,27 @@
         y += h + 10;
       }
 
+      /* the answer first, in one plain sentence, before any inputs */
+      if (m.totalProfit != null) {
+        var bottom = "Putting in " + money(m.cashRequired) + " and holding for " + m.term + " year" + (m.term === 1 ? "" : "s") +
+          ", the sale is modelled to leave " + money(m.netProceeds) + " after repaying the loan, plus " + signedMoney(m.totalKept) +
+          " of rental cash kept along the way. That is a " + (m.totalProfit >= 0 ? "profit of " + money(m.totalProfit) : "loss of " + money(-m.totalProfit)) +
+          (m.irr != null ? ", or " + (m.irr * 100).toFixed(1) + "% a year compounded (IRR)." : ".");
+        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+        var bl = doc.splitTextToSize(bottom, w - 2 * L - 36);
+        var bh0 = bl.length * 14 + 32;
+        doc.setFillColor(234, 242, 248); doc.roundedRect(L, y - 14, w - 2 * L, bh0, 4, 4, "F");
+        doc.setFillColor(95, 161, 208); doc.rect(L, y - 14, 4, bh0, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(30, 80, 120);
+        doc.text("THE BOTTOM LINE", L + 16, y + 2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(30);
+        doc.text(bl, L + 16, y + 19, { lineHeightFactor: 1.15 });
+        y += bh0 + 12;
+      }
+
       section("What you entered");
       row("Purchase price", money(m.price));
-      row("Total loan", money(m.loan) + "  (" + m.lvr.toFixed(0) + "% of price)");
+      row("Total loan", money(m.loan) + "  (" + (m.lvr % 1 ? m.lvr.toFixed(1) : m.lvr.toFixed(0)) + "% of price)");
       row("Deposit", money(m.deposit));
       var sState = document.getElementById("stampState").value;
       var sComm = document.getElementById("stampCommercial").checked;
@@ -899,7 +917,7 @@
         y = 56;
         section("Year by year");
         var cols = ["Yr", "Net rent", "Interest", "Debt cut", "Cash kept", "Loan bal.", "Value", "Equity"];
-        var cx = [L, L + 30, L + 108, L + 186, L + 258, L + 330, L + 408, L + 470];
+        var cx = [L, L + 24, L + 96, L + 166, L + 234, L + 302, L + 376, L + 446];
         doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
         cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
         y += 4; doc.setDrawColor(225); doc.line(L, y, w - L, y); y += 13;
@@ -937,7 +955,7 @@
       var lines = [
         (pn ? "Project: " + pn : null),
         "Purchase price: " + money(m.price),
-        "Total loan: " + money(m.loan) + " (" + m.lvr.toFixed(0) + "%)",
+        "Total loan: " + money(m.loan) + " (" + (m.lvr % 1 ? m.lvr.toFixed(1) : m.lvr.toFixed(0)) + "%)",
         "Deposit: " + money(m.deposit),
         "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + (document.getElementById("stampCommercial").checked ? " commercial" : "") + " estimate)" : "") + ": " + (document.getElementById("stampState").value ? money(num("stampDuty")) : optMoney(num("stampDuty"))),
         "Loan / valuation cost: " + optMoney(num("valuationCost")),
