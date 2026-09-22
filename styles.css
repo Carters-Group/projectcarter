@@ -2387,15 +2387,18 @@ h1, h2, h3 {
 .plan-list svg { flex: 0 0 15px; width: 15px; height: 15px; margin-top: 4px; color: var(--accent); }
 .plan-cta { text-align: center; width: 100%; padding-block: 12px; }
 .pricing-fine {
-  max-width: 1000px; margin-top: clamp(12px, 1.8vh, 20px);
+  max-width: 1000px; margin-top: 0;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px);
   color: var(--muted); font-size: 0.76rem; line-height: 1.5;
 }
-.pricing-fine p { margin: 0; text-shadow: 0 1px 10px rgba(12,16,22,0.95); }
+.pricing-fine p { margin: 0; padding: 12px clamp(18px, 1.8vw, 24px); background: rgba(20, 26, 36, 0.94); border: 1px solid var(--line); border-top: 0; backdrop-filter: blur(6px); }
+.pricing-fine p:last-child { background: rgba(28, 36, 49, 0.96); border-color: rgba(95, 161, 208, 0.6); }
 .pricing-fine strong { color: var(--text); font-weight: 600; }
 .pricing-fine a { color: var(--accent); }
 @media (max-width: 780px) {
   .pricing-page { justify-content: flex-start; }
   .pricing-grid, .pricing-fine { grid-template-columns: 1fr; }
+  .pricing-fine p { border-top: 1px solid var(--line); margin-top: 12px; }
+  .pricing-fine p:last-child { border-top-color: rgba(95, 161, 208, 0.6); }
   .pricing-bg__strip { width: 900px; margin-left: -450px; background-size: 900px auto; height: 5946px; animation-name: pricing-drift-m; }
 }
