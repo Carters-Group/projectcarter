@@ -44,6 +44,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@keyframes pricing-drift-m { from { transform: translateY(0); } to { transform: translateY(-2973px); } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
@@ -538,8 +539,8 @@ h1, h2, h3 {
   .contact-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 780px) {
-  .grid-2x2 { grid-template-columns: 1fr; }
+/* hamburger menu below 1100px: the full nav (with Account + Contact) needs the room */
+@media (max-width: 1100px) {
   .header-cta { display: none; }
   .nav-toggle { display: block; }
   .nav {
@@ -600,7 +601,10 @@ h1, h2, h3 {
     font-size: 15px;
     border-bottom: 1px solid var(--line-soft);
   }
+}
 
+@media (max-width: 780px) {
+  .grid-2x2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
   .hero-scroll { display: none; }
   body { font-size: 16px; }
@@ -2073,7 +2077,7 @@ h1, h2, h3 {
   .brand-sub { letter-spacing: 0.26em; white-space: nowrap; }
 }
 .pm-mock__stats div { display: flex; flex-direction: column; justify-content: space-between; }
-@media (max-width: 780px) {
+@media (max-width: 1100px) {
   /* with both dropdowns open the menu is taller than a small phone - let it scroll */
   .nav { max-height: calc(100vh - 84px); max-height: calc(100dvh - 84px); overflow-y: auto; overscroll-behavior: contain; }
 }
@@ -2357,3 +2361,84 @@ h1, h2, h3 {
   .acct-nav__label { position: static; padding: 0; }
   .acct-nav a { padding-right: 16px; }
 }
+
+/* ---------- Pricing page ---------- */
+.pricing-page { position: relative; padding-top: 84px; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+.pricing-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+/* two stacked copies of the strip (1200px wide x 3964px tall each); sliding by exactly one copy loops seamlessly */
+.pricing-bg__strip {
+  position: absolute; top: 0; left: 50%; margin-left: -600px;
+  width: 1200px; height: 7928px;
+  background: url("assets/images/pricing/demo-dashboard.jpg") top center / 1200px auto repeat-y;
+  opacity: 0.75;
+  will-change: transform;
+  animation: pricing-drift 160s linear infinite;
+}
+@keyframes pricing-drift { from { transform: translateY(0); } to { transform: translateY(-3964px); } }
+.pricing-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 50% 45%, rgba(12,16,22,0.5), rgba(12,16,22,0) 100%),
+    linear-gradient(to bottom, rgba(12,16,22,0.8) 0, rgba(12,16,22,0.35) 28%, rgba(12,16,22,0.12) 70%, rgba(12,16,22,0.6) 100%);
+}
+@media (prefers-reduced-motion: reduce) { .pricing-bg__strip { animation: none; } }
+.pricing-hero, .pricing-plans { position: relative; }
+.pricing-hero { padding: clamp(14px, 2.5vh, 30px) 0 clamp(14px, 2vh, 22px); text-align: center; }
+.pricing-hero h1 { font-size: clamp(28px, 3.8vw, 46px); margin: 0 auto 8px; text-shadow: 0 2px 24px rgba(12,16,22,0.9); }
+.pricing-lead { color: var(--text); opacity: 0.85; font-size: 1.05rem; margin: 0; }
+.pricing-plans { padding-bottom: clamp(20px, 3vh, 36px); }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+  max-width: 1000px;
+  align-items: stretch;
+}
+.plan {
+  display: flex; flex-direction: column;
+  background: rgba(20, 26, 36, 0.94);
+  border: 1px solid var(--line);
+  padding: clamp(18px, 1.8vw, 24px);
+  backdrop-filter: blur(6px);
+}
+.plan-featured { border-color: rgba(95, 161, 208, 0.6); background: rgba(28, 36, 49, 0.96); }
+.plan-name { font-size: 22px; margin: 0 0 6px; }
+.plan-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line-soft); }
+.plan-amt { font-family: var(--font-display); font-weight: 700; font-size: clamp(38px, 3.6vw, 46px); line-height: 1; }
+.plan-amt small { font-family: var(--font-body); font-weight: 500; font-size: 0.9rem; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.plan-per { color: var(--muted); font-size: 0.9rem; }
+.plan-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; flex: 1; align-content: start; font-size: 0.88rem; }
+.plan-list li { display: flex; gap: 10px; align-items: flex-start; }
+.plan-list svg { flex: 0 0 15px; width: 15px; height: 15px; margin-top: 4px; color: var(--accent); }
+.plan-cta { text-align: center; width: 100%; padding-block: 12px; }
+.pricing-fine {
+  max-width: 1000px; margin-top: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px);
+  color: var(--muted); font-size: 0.76rem; line-height: 1.5;
+}
+.pricing-fine p { margin: 0; padding: 12px clamp(18px, 1.8vw, 24px); background: rgba(20, 26, 36, 0.94); border: 1px solid var(--line); border-top: 0; backdrop-filter: blur(6px); }
+.pricing-fine p:last-child { background: rgba(28, 36, 49, 0.96); border-color: rgba(95, 161, 208, 0.6); }
+.pricing-fine strong { color: var(--text); font-weight: 600; }
+.pricing-fine a { color: var(--accent); }
+@media (max-width: 780px) {
+  .pricing-page { justify-content: flex-start; }
+  .pricing-grid, .pricing-fine { grid-template-columns: 1fr; }
+  .pricing-fine p { border-top: 1px solid var(--line); margin-top: 12px; }
+  .pricing-fine p:last-child { border-top-color: rgba(95, 161, 208, 0.6); }
+  .pricing-bg__strip { width: 900px; margin-left: -450px; background-size: 900px auto; height: 5946px; animation-name: pricing-drift-m; }
+}
+
+/* nav labels stay on one line */
+.nav a, .nav-dropdown-toggle { white-space: nowrap; }
+
+/* ---------- Account page: same scrolling dashboard backdrop behind sign-in/create-account, no photo hero ---------- */
+.acct-hero { position: relative; }
+.acct-hero .pricing-bg { display: none; }
+.acct-hero.acct-hero--auth { overflow: hidden; }
+.acct-hero.acct-hero--auth .pricing-bg { display: block; }
+.acct-hero.acct-hero--auth .acct-hero__inner {
+  position: relative; min-height: 100vh;
+  padding: 104px 0 40px;
+  display: flex; align-items: center;
+}
+.acct-hero.acct-hero--auth #acctWrap { position: relative; z-index: 1; width: 100%; }
