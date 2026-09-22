@@ -67,9 +67,10 @@
             <a href="tax-depreciation-calculator">Tax Depreciation (DEP)</a>
           </div>
         </div>
-        <a href="account" class="btn btn-accent nav-cta-mobile">Account</a>
+        <a href="account">Account</a>
+        <a href="enquire" class="btn btn-accent nav-cta-mobile">Contact</a>
       </nav>
-      <a href="account" class="btn btn-accent header-cta">Account</a>
+      <a href="enquire" class="btn btn-accent header-cta">Contact</a>
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
@@ -221,6 +222,21 @@
               <input type="tel" id="phone" name="Phone" autocomplete="tel" required />
             </div>
             <div class="field">
+              <label for="state">Which state do you live in?</label>
+              <select id="state" name="State" autocomplete="address-level1" required>
+                <option value="" disabled selected>Select your state</option>
+                <option>Victoria</option>
+                <option>New South Wales</option>
+                <option>Queensland</option>
+                <option>Western Australia</option>
+                <option>South Australia</option>
+                <option>Tasmania</option>
+                <option>Australian Capital Territory</option>
+                <option>Northern Territory</option>
+                <option>Outside Australia</option>
+              </select>
+            </div>
+            <div class="field">
               <label for="message">Anything else I should know? (optional)</label>
               <textarea id="message" name="Message" rows="3"></textarea>
               <p class="form-note" id="messageNote" aria-live="polite"></p>
@@ -337,7 +353,7 @@
       });
       for (var k in groups) { if (!groups[k]) return false; }
       var ok = true;
-      Array.prototype.forEach.call(step.querySelectorAll('input[required], textarea[required]'), function (el) {
+      Array.prototype.forEach.call(step.querySelectorAll('input[required], textarea[required], select[required]'), function (el) {
         if (!el.value.trim()) ok = false;
         else if (el.type === "email" && !el.checkValidity()) ok = false;
       });

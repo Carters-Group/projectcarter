@@ -32,7 +32,7 @@
 
   /* Calculators dropdown */
   var dropdowns = document.querySelectorAll(".nav-dropdown");
-  var desktopQuery = window.matchMedia("(min-width: 781px)");
+  var desktopQuery = window.matchMedia("(min-width: 1101px)");
   Array.prototype.forEach.call(dropdowns, function (dd) {
     var ddToggle = dd.querySelector(".nav-dropdown-toggle");
     var menu = dd.querySelector(".nav-dropdown-menu");
