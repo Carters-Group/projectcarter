@@ -2068,37 +2068,89 @@
       return table;
     }
 
+    /* Same plain, downward layout as the calculator PDFs: brand header,
+       "What you entered"-style rows read top to bottom, one boxed figure
+       at the end for the answer. No colour-coding - a deduction reads as
+       a negative number, same as every other report on the site. */
     function downloadWorkingsPdf(name, rows, note) {
       if (!window.jspdf || !window.jspdf.jsPDF) { window.alert("The PDF tool did not load. Check your connection and try again."); return; }
       var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
-      var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 48, y = 60;
+      var w = doc.internal.pageSize.getWidth(), h = doc.internal.pageSize.getHeight(), L = 48, y = 56;
       function pdfText(t) { return String(t).replace(/[\u2013\u2014]/g, "-").replace(/[^\x20-\x7E]/g, ""); }
-      function ensure(h) { if (y + h > H - 60) { doc.addPage(); y = 60; } }
+      function ensure(need) { if (y + need > h - 60) { doc.addPage(); y = 56; } }
+
+      doc.setFillColor(95, 161, 208); doc.rect(0, 0, w, 6, "F");
       doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(95, 161, 208);
-      doc.text("PROJECT CARTER", M, y); y += 22;
-      doc.setFontSize(17); doc.setTextColor(20, 30, 45);
-      doc.text(pdfText("Sale estimate: " + name), M, y); y += 16;
-      doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(110, 120, 130);
-      doc.text("Prepared " + new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }), M, y); y += 22;
+      doc.text("PROJECT CARTER", L, y);
+      doc.setFont("helvetica", "normal"); doc.setTextColor(120);
+      doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
+      doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
+
+      doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+      doc.text(pdfText("Sale estimate: " + name), L, y + 44);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
+      doc.text("Prepared " + new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }), L, y + 61);
+      y += 92;
+
+      function section(title) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20);
+        doc.text(title, L, y); y += 7;
+        doc.setDrawColor(220); doc.line(L, y, w - L, y); y += 17;
+      }
+      function row(k, v, strong) {
+        var label = doc.splitTextToSize(pdfText(k), w - L * 2 - 170);
+        var val = doc.splitTextToSize(pdfText(v), 160);
+        var lh = 15, need = Math.max(label.length, val.length) * lh + 3;
+        ensure(need);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
+        doc.text(label, L, y);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(20);
+        doc.text(val, w - L, y, { align: "right" });
+        y += need;
+      }
+      /* the one figure this report is building toward, boxed the same way
+         the other calculators box their headline number */
+      function bigrow(k, v) {
+        ensure(46);
+        var top = y - 18, bh = 36;
+        doc.setFillColor(234, 242, 248);
+        doc.roundedRect(L, top, w - 2 * L, bh, 4, 4, "F");
+        doc.setFillColor(95, 161, 208);
+        doc.rect(L, top, 4, bh, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(30);
+        doc.text(pdfText(k), L + 16, y + 2);
+        doc.setFontSize(15); doc.setTextColor(30, 80, 120);
+        doc.text(pdfText(v), w - L - 12, y + 2, { align: "right" });
+        y += bh + 10;
+      }
+
+      section("How the sale works out");
+      var last = rows[rows.length - 1];
+      var bigKey = last && last[2] ? last[0] : null;
       rows.forEach(function (x) {
-        var label = doc.splitTextToSize(pdfText(x[0]), W - M * 2 - 170);
-        var val = doc.splitTextToSize(pdfText(x[1]), 160);
-        var h = Math.max(label.length, val.length) * 12 + 8;
-        ensure(h);
-        if (x[2]) { doc.setFillColor(238, 243, 248); doc.rect(M - 4, y - 10, W - M * 2 + 8, h, "F"); }
-        var ded = !x[2] && String(x[1]).charAt(0) === "-";
-        doc.setFont("helvetica", x[2] ? "bold" : "normal"); doc.setFontSize(10); doc.setTextColor(30, 40, 55);
-        doc.text(label, M, y);
-        if (ded) doc.setTextColor(185, 48, 48);
-        doc.text(ded ? val.map(function (v) { return v + "  (deduction)"; }) : val, W - M, y, { align: "right" });
-        y += h;
+        if (x === last && bigKey) return;
+        row(x[0], x[1], x[2]);
       });
-      y += 14;
-      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(110, 120, 130);
+      if (bigKey) { y += 6; bigrow(bigKey, last[1]); }
+
+      y += 8;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var fine = doc.splitTextToSize(pdfText((note ? note + " " : "") +
-        "This is a planning estimate to help you understand your position. It is not financial, tax or legal advice and is not a tax calculation. Confirm the figures with your accountant before you sell."), W - M * 2);
+        "This is a planning estimate to help you understand your position. It is not financial, tax or legal advice and is not a tax calculation. Confirm the figures with your accountant before you sell."), w - 2 * L);
       ensure(fine.length * 10);
-      doc.text(fine, M, y);
+      doc.text(fine, L, y);
+
+      var totalPages = doc.internal.getNumberOfPages();
+      for (var p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        var ph = doc.internal.pageSize.getHeight();
+        doc.setDrawColor(95, 161, 208); doc.setLineWidth(0.6); doc.line(L, ph - 34, w - L, ph - 34); doc.setLineWidth(0.2);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140);
+        doc.text("Project Carter", L, ph - 22);
+        doc.text("Page " + p + " of " + totalPages, w - L, ph - 22, { align: "right" });
+      }
+
       doc.save("sale-estimate-" + (name || "property").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".pdf");
     }
 
