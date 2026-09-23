@@ -626,6 +626,8 @@
         tax_rate_pct: clamp(s.tax_rate_pct, 0, 60),
         selling_cost_pct: clamp(s.selling_cost_pct, 0, 10)
       };
+      /* a super fund is taxed differently in accumulation and pension phase */
+      if (s.super_phase === "pension" || s.super_phase === "accumulation") clean.super_phase = s.super_phase;
       /* the signed disclaimer rides along in the same jsonb column */
       if (typeof s.disclaimer_accepted_at === "string") clean.disclaimer_accepted_at = s.disclaimer_accepted_at.slice(0, 40);
       if (typeof s.disclaimer_name === "string") clean.disclaimer_name = s.disclaimer_name.slice(0, 120);

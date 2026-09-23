@@ -64,7 +64,8 @@ var pcPortfolio = (function () {
     return {
       taxRatePct: s && s.tax_rate_pct != null ? s.tax_rate_pct : null,
       cpiPct: s && s.cpi_pct != null ? s.cpi_pct : 2.5,
-      sellingCostPct: s && s.selling_cost_pct != null ? s.selling_cost_pct : 2
+      sellingCostPct: s && s.selling_cost_pct != null ? s.selling_cost_pct : 2,
+      superPhase: s && s.super_phase === "pension" ? "pension" : "accumulation"
     };
   }
 

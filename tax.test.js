@@ -190,6 +190,14 @@ test("super fund: one-third discount at 15%", function () {
   near(r.currentLaw.tax, 360000 * (2 / 3) * 0.15, 0.01);
 });
 
+test("super fund in pension phase pays no tax on the gain", function () {
+  var r = T.cgtEstimate(Object.assign({}, base, { owner: "super" }), Object.assign({}, settings, { superPhase: "pension" }));
+  assert.equal(r.currentLaw.tax, 0);
+  assert.equal(r.superPension, true);
+  var acc = T.cgtEstimate(Object.assign({}, base, { owner: "super" }), Object.assign({}, settings, { superPhase: "accumulation" }));
+  near(acc.currentLaw.tax, 360000 * (2 / 3) * 0.15, 0.01);
+});
+
 test("a loss produces no tax and reports the loss", function () {
   var r = T.cgtEstimate(Object.assign({}, base, { salePrice: 700000 }), settings);
   assert.equal(r.currentLaw.tax, 0);

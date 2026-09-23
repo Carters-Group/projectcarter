@@ -385,6 +385,14 @@
                 <div class="field"><label for="taxRate">Your marginal tax rate <span>(including Medicare, for properties in your own name or a trust)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="47" /></div></div>
                 <div class="field"><label for="taxSellPct">Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
               </div>
+              <div class="acct-plan__row acct-plan__row--aligned acct-plan__row--two">
+                <div class="field"><label for="taxSuperPhase">Super fund phase <span>(only matters for properties held in a super fund)</span></label>
+                  <select id="taxSuperPhase">
+                    <option value="accumulation">Accumulation phase: 15% tax, one-third discount on a gain</option>
+                    <option value="pension">Pension phase: no tax on income or a gain</option>
+                  </select>
+                </div>
+              </div>
               <div class="acct-property__actions">
                 <button type="button" class="btn btn-accent btn-sm" id="taxSaveSettings">Save tax settings</button>
               </div>
@@ -1532,7 +1540,7 @@
        sold" scenario. Each property is entered once here; every portfolio
        figure (see portfolio.js) is derived from these fields. Tax fields
        use data-t (not data-f) so they never mix with the lease rows. */
-    var TAX_DEFAULTS = { tax_rate_pct: null, cpi_pct: 2.5, selling_cost_pct: 2 };
+    var TAX_DEFAULTS = { tax_rate_pct: null, cpi_pct: 2.5, selling_cost_pct: 2, super_phase: "accumulation" };
     var taxSettings = Object.assign({}, TAX_DEFAULTS);
     var taxSettingsProblem = "";
     /* the latest pcPortfolio.build() result - rebuilt whenever the register
@@ -1984,6 +1992,7 @@
     function fillTaxSettingsInputs() {
       document.getElementById("taxRate").value = taxSettings.tax_rate_pct == null ? "" : taxSettings.tax_rate_pct;
       document.getElementById("taxSellPct").value = taxSettings.selling_cost_pct == null ? "" : taxSettings.selling_cost_pct;
+      document.getElementById("taxSuperPhase").value = taxSettings.super_phase === "pension" ? "pension" : "accumulation";
       positionPct(document.getElementById("portfolioTax"));
     }
 
@@ -2076,7 +2085,7 @@
       } else if (r.gain > 0) {
         var cl = r.currentLaw;
         var rateText = r.owner === "company" ? "30% flat (company, your personal rate is not used)"
-          : (r.owner === "super" ? "15% (super fund)" : (taxSettings.tax_rate_pct != null ? taxSettings.tax_rate_pct + "% (your marginal rate)" : "Add your tax rate"));
+          : (r.owner === "super" ? (r.superPension ? "Nil (super fund in pension phase)" : "15% (super fund)") : (taxSettings.tax_rate_pct != null ? taxSettings.tax_rate_pct + "% (your marginal rate)" : "Add your tax rate"));
         row("Tax rate", rateText);
         if (r.rules === "new") {
           var rf = r.reform;
@@ -2329,7 +2338,7 @@
           nameTd.appendChild(tEl("span", null, x.p.name || "Untitled property"));
           var bits = [];
           if (r.owner === "company") bits.push("company: 30%, no discount");
-          else if (r.owner === "super") bits.push("super fund: one-third discount at 15%");
+          else if (r.owner === "super") bits.push(r.superPension ? "super fund in pension phase: no tax" : "super fund: one-third discount at 15%");
           else if (r.rules === "new") bits.push("new rules from 1 July 2027: indexation and 30% minimum");
           else if (r.over12) bits.push("50% discount (sale before 1 July 2027)");
           else bits.push("held 12 months or less, no discount");
@@ -2358,7 +2367,7 @@
 
       sec.appendChild(tEl("p", "acct-tax-fine",
         "The rules follow each property's sale date. Sales before 1 July 2027 still get the 50% discount (individuals and trusts, held over 12 months). From 1 July 2027 the discount is replaced (Treasury Laws Amendment (Tax Reform No. 1) Act 2026) by cost-base indexation with a 30% minimum tax, and the gain up to 1 July 2027 keeps the discount while only later growth is indexed. " +
-        "Companies never had the discount, so they pay 30% either way; a super fund keeps its one-third discount at 15%; anything held 12 months or less gets no discount."));
+        "Companies never had the discount, so they pay 30% either way; a super fund in accumulation phase keeps its one-third discount at 15%, and in pension phase pays no tax on the gain; anything held 12 months or less gets no discount."));
       sec.appendChild(tEl("p", "acct-tax-fine",
         "Assumptions: individuals and trusts are taxed at the flat marginal rate you enter above (Medicare levy included), with the cost base indexed at a 2.5% CPI assumption; a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
         "the 30% minimum applies to the taxable gain, so a lower rate is lifted to 30%. " +
@@ -2402,11 +2411,18 @@
       updateStartHere(leaseProperties.length);
     }
 
+    document.getElementById("taxSuperPhase").addEventListener("change", function () {
+      taxSettings = Object.assign({}, taxSettings, { super_phase: this.value });
+      recomputePortfolio();
+      document.getElementById("taxSaveSettings").click();
+    });
+
     document.getElementById("taxSaveSettings").addEventListener("click", function () {
       setMsg(taxMsgEl, "Saving…");
       window.pcAuth.saveTaxSettings({
         tax_rate_pct: taxNum(document.getElementById("taxRate").value),
         selling_cost_pct: taxNum(document.getElementById("taxSellPct").value),
+        super_phase: document.getElementById("taxSuperPhase").value,
         disclaimer_accepted_at: taxSettings.disclaimer_accepted_at,
         disclaimer_name: taxSettings.disclaimer_name
       }).then(function (res) {
