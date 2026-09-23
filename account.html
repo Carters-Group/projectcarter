@@ -566,6 +566,19 @@
     </div>
   </div>
 
+  <div class="acct-modal" id="lockModal" role="dialog" aria-modal="true" aria-labelledby="lockModalTitle" hidden>
+    <div class="acct-modal__box">
+      <h2 id="lockModalTitle">Before you save</h2>
+      <p>Your free property is saved as set at acquisition. Once saved, these details can't be edited on the free plan:</p>
+      <ul class="acct-lock-list" id="lockModalList"></ul>
+      <p>Everything else stays editable: current value, loan balance, interest rate, rent, running costs and the rest. Check the details above before you continue.</p>
+      <div class="acct-modal__actions">
+        <button type="button" class="btn btn-ghost" id="lockModalBack">Go back and check</button>
+        <button type="button" class="btn btn-accent" id="lockModalOk">Save and lock</button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
@@ -1985,7 +1998,7 @@
         deleteThisProperty();
       });
 
-      details.querySelector('[data-act="save"]').addEventListener("click", function () {
+      function doSave() {
         setMsg(msgEl, "Saving…");
         delete details.dataset.dirty;
         details.querySelector("[data-unsaved]").hidden = true;
@@ -2022,6 +2035,10 @@
             });
           });
         });
+      }
+
+      details.querySelector('[data-act="save"]').addEventListener("click", function () {
+        confirmLocks(details, nameInput, typeSelect).then(function (ok) { if (ok) doSave(); });
       });
 
       return details;
@@ -2089,7 +2106,7 @@
     function taxErrMsg(err) {
       var m = (err && err.message) || "Something went wrong.";
       if (/pc_free_used/.test(m)) return "The free plan covers your first property, and that has been used. Add more from $250 a year and everything unlocks.";
-      if (/pc_property_limit/.test(m)) return "You have reached the number of properties your plan covers. Upgrade to add more.";
+      if (/pc_property_limit/.test(m)) return "You have reached the number of properties your plan covers. Contact us to add more.";
       if (/pc_locked_field/.test(m)) return "That detail is set at acquisition, so it is locked on the free plan. Upgrade to change it.";
       if (/tax_settings|column|schema cache/i.test(m)) {
         return "The tax features need the latest database update. Run supabase-schema.sql in the Supabase SQL editor, then reload this page.";
@@ -2706,9 +2723,11 @@
 
     function planLimitText() {
       return plan.paid
-        ? "Your plan covers " + plan.limit + (plan.limit === 1 ? " property" : " properties") + ". Upgrade to add more."
+        ? "Your plan covers " + plan.limit + (plan.limit === 1 ? " property" : " properties") + ". Need more?"
         : "The free plan covers your first property. Add more from $250 a year and everything unlocks.";
     }
+    /* a paid plan tops out at five properties self-serve; beyond that is a conversation */
+    function planLimitLink() { return plan.paid ? { href: "enquire", text: "Contact us" } : { href: "pricing", text: "See plans" }; }
 
     function renderPlanLine(alertText) {
       var el = document.getElementById("acctPlanLine");
@@ -2729,8 +2748,9 @@
       }
       if (alertText) el.appendChild(document.createTextNode(alertText + " "));
       var a = document.createElement("a");
-      a.href = "pricing";
-      a.textContent = "See plans";
+      var lk = alertText ? planLimitLink() : { href: "pricing", text: "See plans" };
+      a.href = lk.href;
+      a.textContent = lk.text;
       el.appendChild(a);
       el.hidden = false;
     }
@@ -2768,6 +2788,60 @@
       lock(details.querySelector('[data-t="purchase_price"]'), property.purchase_price != null);
       lock(details.querySelector('[data-t="acquisition_costs"]'), property.acquisition_costs != null);
       if (note) note.hidden = !n;
+    }
+
+    /* free plan: before the acquisition facts are saved (and so locked),
+       show exactly what will lock and ask for a yes. Resolves true when
+       nothing new would lock, so the caller can always just chain on it. */
+    var lockModalEl = document.getElementById("lockModal");
+    function confirmLocks(details, nameInput, typeSelect) {
+      if (!plan.enforced || plan.paid) return Promise.resolve(true);
+      var items = [];
+      function editable(sel) { var el = details.querySelector(sel); return el && !el.disabled ? String(el.value || "").trim() : ""; }
+      var name = nameInput.disabled ? "" : nameInput.value.trim();
+      if (name) {
+        items.push(["Property name", name]);
+        var tb = details.querySelector("[data-type-btn]");
+        if (tb && !tb.disabled) items.push(["Type", typeSelect.value === "commercial" ? "Commercial" : "Residential"]);
+      }
+      var st = editable('[data-t="state"]'); if (st) items.push(["State", st]);
+      var pd = editable('[data-t="purchase_date"]'); if (pd) items.push(["Purchase contract date", pd]);
+      var pp = editable('[data-t="purchase_price"]'); if (pp) items.push(["Purchase price", "$" + pp]);
+      var ac = editable('[data-t="acquisition_costs"]'); if (ac) items.push(["Buying costs", "$" + ac]);
+      if (!items.length) return Promise.resolve(true);
+
+      var list = document.getElementById("lockModalList");
+      list.innerHTML = "";
+      items.forEach(function (it) {
+        var li = document.createElement("li");
+        var b = document.createElement("strong");
+        b.textContent = it[0] + ": ";
+        li.appendChild(b);
+        li.appendChild(document.createTextNode(it[1]));
+        list.appendChild(li);
+      });
+      return new Promise(function (resolve) {
+        var okBtn = document.getElementById("lockModalOk");
+        var backBtn = document.getElementById("lockModalBack");
+        function done(v) {
+          lockModalEl.hidden = true;
+          okBtn.removeEventListener("click", onOk);
+          backBtn.removeEventListener("click", onBack);
+          lockModalEl.removeEventListener("click", onBackdrop);
+          document.removeEventListener("keydown", onKey);
+          resolve(v);
+        }
+        function onOk() { done(true); }
+        function onBack() { done(false); }
+        function onBackdrop(e) { if (e.target === lockModalEl) done(false); }
+        function onKey(e) { if (e.key === "Escape") done(false); }
+        okBtn.addEventListener("click", onOk);
+        backBtn.addEventListener("click", onBack);
+        lockModalEl.addEventListener("click", onBackdrop);
+        document.addEventListener("keydown", onKey);
+        lockModalEl.hidden = false;
+        backBtn.focus();
+      });
     }
 
     function addProperty() {

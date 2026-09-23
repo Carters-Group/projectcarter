@@ -2511,3 +2511,13 @@ h1, h2, h3 {
 .acct-lock-note { margin: 0 0 16px; padding: 10px 14px; border-left: 2px solid var(--accent); background: rgba(95, 161, 208, 0.06); }
 .acct-lock-note a { color: var(--accent); }
 .acct-lock-note[hidden] { display: none; }
+
+/* ---------- Free-plan lock confirmation + contact chip ---------- */
+.acct-modal__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.acct-modal__actions .btn { flex: 1 1 180px; text-align: center; }
+.acct-lock-list { list-style: none; padding-left: 0 !important; border: 1px solid var(--line); background: rgba(95, 161, 208, 0.06); }
+.acct-lock-list li { margin: 0; padding: 8px 12px; border-bottom: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+.acct-lock-list li:last-child { border-bottom: 0; }
+.acct-lock-list strong { color: var(--muted); font-weight: 500; }
+.plan-ladder .is-contact a { color: var(--accent-2); text-decoration: none; }
+.plan-ladder .is-contact a:hover { text-decoration: underline; }
