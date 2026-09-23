@@ -223,6 +223,7 @@
               </div>
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
+            <p class="acct-plan-line" id="acctPlanLine" hidden></p>
 
             <div id="portfolioSet">
               <p class="acct-report__date" id="portfolioBasis"></p>
@@ -390,6 +391,14 @@
               <div class="acct-plan__row acct-plan__row--aligned acct-plan__row--two">
                 <div class="field"><label for="taxRate">Your marginal tax rate <span>(including Medicare, for properties in your own name or a trust)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxRate" autocomplete="off" placeholder="47" /></div></div>
                 <div class="field"><label for="taxSellPct">Selling costs <span>(agent, legals, % of sale price)</span></label><div class="input-pct"><input type="text" inputmode="decimal" id="taxSellPct" autocomplete="off" placeholder="2" /></div></div>
+              </div>
+              <div class="acct-plan__row acct-plan__row--aligned acct-plan__row--two">
+                <div class="field"><label for="taxSuperPhase">Super fund phase <span>(only matters for properties held in a super fund)</span></label>
+                  <select id="taxSuperPhase">
+                    <option value="accumulation">Accumulation phase: 15% tax, one-third discount on a gain</option>
+                    <option value="pension">Pension phase: no tax on income or a gain</option>
+                  </select>
+                </div>
               </div>
               <div class="acct-property__actions">
                 <button type="button" class="btn btn-accent btn-sm" id="taxSaveSettings">Save tax settings</button>
@@ -1570,7 +1579,7 @@
        sold" scenario. Each property is entered once here; every portfolio
        figure (see portfolio.js) is derived from these fields. Tax fields
        use data-t (not data-f) so they never mix with the lease rows. */
-    var TAX_DEFAULTS = { tax_rate_pct: null, cpi_pct: 2.5, selling_cost_pct: 2 };
+    var TAX_DEFAULTS = { tax_rate_pct: null, cpi_pct: 2.5, selling_cost_pct: 2, super_phase: "accumulation" };
     var taxSettings = Object.assign({}, TAX_DEFAULTS);
     var taxSettingsProblem = "";
     /* the latest pcPortfolio.build() result - rebuilt whenever the register
@@ -1615,6 +1624,7 @@
           '<span class="acct-property__strip" data-strip></span>' +
         '</summary>' +
         '<div class="acct-property__body">' +
+          '<p class="field-hint acct-lock-note" data-lock-note hidden>Set at acquisition, so these lock once saved on the free plan: name, type, state, purchase date, purchase price and buying costs. Your figures that change (value, loan, rent, running costs) stay editable. Paid plans can edit everything. <a href="pricing">See plans</a></p>' +
           '<p class="acct-subhead">The property</p>' +
           fRow(
             '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>',
@@ -1813,6 +1823,7 @@
       typeSelect.value = property.property_type === "commercial" ? "commercial" : "residential";
       notesInput.value = property.notes || "";
       fillTaxFields(details, property);
+      applyFreeLocks(details, property);
 
       var newBuildWrap = details.querySelector("[data-new-build]");
       var v27Wrap = details.querySelector("[data-v27]");
@@ -2077,6 +2088,9 @@
 
     function taxErrMsg(err) {
       var m = (err && err.message) || "Something went wrong.";
+      if (/pc_free_used/.test(m)) return "The free plan covers your first property, and that has been used. Add more from $250 a year and everything unlocks.";
+      if (/pc_property_limit/.test(m)) return "You have reached the number of properties your plan covers. Upgrade to add more.";
+      if (/pc_locked_field/.test(m)) return "That detail is set at acquisition, so it is locked on the free plan. Upgrade to change it.";
       if (/tax_settings|column|schema cache/i.test(m)) {
         return "The tax features need the latest database update. Run supabase-schema.sql in the Supabase SQL editor, then reload this page.";
       }
@@ -2086,6 +2100,7 @@
     function fillTaxSettingsInputs() {
       document.getElementById("taxRate").value = taxSettings.tax_rate_pct == null ? "" : taxSettings.tax_rate_pct;
       document.getElementById("taxSellPct").value = taxSettings.selling_cost_pct == null ? "" : taxSettings.selling_cost_pct;
+      document.getElementById("taxSuperPhase").value = taxSettings.super_phase === "pension" ? "pension" : "accumulation";
       positionPct(document.getElementById("portfolioTax"));
     }
 
@@ -2180,7 +2195,7 @@
       } else if (r.gain > 0) {
         var cl = r.currentLaw;
         var rateText = r.owner === "company" ? "30% flat (company, your personal rate is not used)"
-          : (r.owner === "super" ? "15% (super fund)" : (taxSettings.tax_rate_pct != null ? taxSettings.tax_rate_pct + "% (your marginal rate)" : "Add your tax rate"));
+          : (r.owner === "super" ? (r.superPension ? "Nil (super fund in pension phase)" : "15% (super fund)") : (taxSettings.tax_rate_pct != null ? taxSettings.tax_rate_pct + "% (your marginal rate)" : "Add your tax rate"));
         row("Tax rate", rateText);
         if (r.rules === "new") {
           var rf = r.reform;
@@ -2422,7 +2437,7 @@
         nameTd.appendChild(tEl("span", null, x.p.name || "Untitled property"));
         var bits = [];
         if (r.owner === "company") bits.push("company: 30%, no discount");
-        else if (r.owner === "super") bits.push("super fund: one-third discount at 15%");
+        else if (r.owner === "super") bits.push(r.superPension ? "super fund in pension phase: no tax" : "super fund: one-third discount at 15%");
         else if (r.rules === "new") bits.push("new rules from 1 July 2027: indexation and 30% minimum");
         else if (r.over12) bits.push("50% discount (sale before 1 July 2027)");
         else bits.push("held 12 months or less, no discount");
@@ -2529,7 +2544,7 @@
 
       sec.appendChild(tEl("p", "acct-tax-fine",
         "The rules follow each property's sale date. Sales before 1 July 2027 still get the 50% discount (individuals and trusts, held over 12 months). From 1 July 2027 the discount is replaced (Treasury Laws Amendment (Tax Reform No. 1) Act 2026) by cost-base indexation with a 30% minimum tax, and the gain up to 1 July 2027 keeps the discount while only later growth is indexed. " +
-        "Companies never had the discount, so they pay 30% either way; a super fund keeps its one-third discount at 15%; anything held 12 months or less gets no discount."));
+        "Companies never had the discount, so they pay 30% either way; a super fund in accumulation phase keeps its one-third discount at 15%, and in pension phase pays no tax on the gain; anything held 12 months or less gets no discount."));
       sec.appendChild(tEl("p", "acct-tax-fine",
         "Assumptions: individuals and trusts are taxed at the flat marginal rate you enter above (Medicare levy included), with the cost base indexed at a 2.5% CPI assumption; a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
         "the 30% minimum applies to the taxable gain, so a lower rate is lifted to 30%. " +
@@ -2578,6 +2593,7 @@
       window.pcAuth.saveTaxSettings({
         tax_rate_pct: taxNum(document.getElementById("taxRate").value),
         selling_cost_pct: taxNum(document.getElementById("taxSellPct").value),
+        super_phase: document.getElementById("taxSuperPhase").value,
         disclaimer_accepted_at: taxSettings.disclaimer_accepted_at,
         disclaimer_name: taxSettings.disclaimer_name
       }).then(function (res) {
@@ -2588,6 +2604,12 @@
         setMsg(taxMsgEl, "Saved.", "ok");
         recomputePortfolio();
       });
+    });
+
+    document.getElementById("taxSuperPhase").addEventListener("change", function () {
+      taxSettings = Object.assign({}, taxSettings, { super_phase: this.value });
+      recomputePortfolio();
+      document.getElementById("taxSaveSettings").click();
     });
 
     /* the rate and selling costs update every figure as they are typed, and
@@ -2643,11 +2665,14 @@
     function loadLeaseRegister(keepMsg) {
       return Promise.all([
         window.pcAuth.listProperties(),
-        window.pcAuth.getTaxSettings()
+        window.pcAuth.getTaxSettings(),
+        window.pcAuth.getPlan ? window.pcAuth.getPlan() : Promise.resolve(null)
       ]).then(function (results) {
         var res = results[0], taxRes = results[1];
+        if (results[2] && results[2].data) plan = results[2].data;
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         leaseProperties = res.data || [];
+        renderPlanLine();
         if (taxRes && !taxRes.error) {
           taxSettings = Object.assign({}, TAX_DEFAULTS, taxRes.data);
           taxSettingsProblem = "";
@@ -2668,7 +2693,85 @@
       });
     }
 
+    /* ---- Plan rules ------------------------------------------------------
+       The database enforces these (supabase-schema.sql, "PLANS"); this only
+       mirrors them so the page can explain instead of erroring. Until
+       plans_enforced is switched on, enforced is false and none of it shows. */
+    var plan = { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0 };
+
+    function atPropertyLimit() {
+      if (!plan.enforced) return false;
+      return plan.paid ? leaseProperties.length >= plan.limit : plan.created >= 1;
+    }
+
+    function planLimitText() {
+      return plan.paid
+        ? "Your plan covers " + plan.limit + (plan.limit === 1 ? " property" : " properties") + ". Upgrade to add more."
+        : "The free plan covers your first property. Add more from $250 a year and everything unlocks.";
+    }
+
+    function renderPlanLine(alertText) {
+      var el = document.getElementById("acctPlanLine");
+      el.classList.toggle("is-alert", !!alertText);
+      if (!plan.enforced) { el.hidden = true; return; }
+      el.textContent = "";
+      var strong = document.createElement("strong");
+      if (plan.paid) {
+        strong.textContent = "Your plan";
+        el.appendChild(strong);
+        el.appendChild(document.createTextNode(" · " + leaseProperties.length + " of " + plan.limit + " properties. "));
+      } else {
+        strong.textContent = "Free plan";
+        el.appendChild(strong);
+        el.appendChild(document.createTextNode(plan.created >= 1 && leaseProperties.length === 0
+          ? " · your free property has been used. "
+          : " · " + Math.min(leaseProperties.length, 1) + " of 1 property used. "));
+      }
+      if (alertText) el.appendChild(document.createTextNode(alertText + " "));
+      var a = document.createElement("a");
+      a.href = "pricing";
+      a.textContent = "See plans";
+      el.appendChild(a);
+      el.hidden = false;
+    }
+
+    /* every "Add a property" path goes through here */
+    function guardAdd() {
+      if (!atPropertyLimit()) return true;
+      renderPlanLine(planLimitText());
+      document.getElementById("acctPlanLine").scrollIntoView({ block: "center", behavior: "smooth" });
+      return false;
+    }
+
+    /* free plan: acquisition facts lock once saved (the database refuses
+       changes too, this just shows it up front) */
+    function applyFreeLocks(details, property) {
+      var note = details.querySelector("[data-lock-note]");
+      if (!plan.enforced || plan.paid) { if (note) note.hidden = true; return; }
+      var n = 0;
+      function lock(el, on) {
+        if (!on || !el) return;
+        el.disabled = true;
+        var f = el.closest(".field");
+        if (f) f.classList.add("is-locked");
+        n++;
+      }
+      var named = !!property.name && property.name !== "Untitled property";
+      lock(details.querySelector('[data-f="name"]'), named);
+      if (named) {
+        var typeBtns = details.querySelectorAll("[data-type-btn]");
+        typeBtns.forEach(function (b) { b.disabled = true; });
+        if (typeBtns[0]) { var tf = typeBtns[0].closest(".field"); if (tf) tf.classList.add("is-locked"); n++; }
+      }
+      lock(details.querySelector('[data-t="state"]'), !!property.state);
+      lock(details.querySelector('[data-t="purchase_date"]'), !!property.purchase_date);
+      lock(details.querySelector('[data-t="purchase_price"]'), property.purchase_price != null);
+      lock(details.querySelector('[data-t="acquisition_costs"]'), property.acquisition_costs != null);
+      if (note) note.hidden = !n;
+    }
+
     function addProperty() {
+      if (!guardAdd()) return;
       if (leaseProperties.length >= MAX_PROPERTIES) return;
       window.pcAuth.saveProperty({ name: "", property_type: "residential" }).then(function (res) {
         if (res.error) { setMsg(leaseMsgEl, taxErrMsg(res.error), "error"); return; }
@@ -2810,6 +2913,7 @@
     }
 
     function startAdd(preferId) {
+      if (!guardAdd()) return;
       if (leaseProperties.length >= MAX_PROPERTIES) return;
       window.pcAuth.listReports("pr").then(function (res) {
         var reports = (res && !res.error ? res.data || [] : []).filter(function (r) { return prCards(r).length; });
@@ -2825,6 +2929,8 @@
       var picked = [];
       document.querySelectorAll("#prImportList input:checked").forEach(function (b) { picked.push(cards[Number(b.value)]); });
       if (!picked.length) { prShowMsg("Tick at least one property, or add a new one instead.", "error"); return; }
+      if (plan.enforced && !plan.paid && plan.created + picked.length > 1) { prShowMsg("The free plan covers one property. Tick just one, or see plans to add more.", "error"); return; }
+      if (plan.enforced && plan.paid && leaseProperties.length + picked.length > plan.limit) { prShowMsg("That would go over the " + plan.limit + " properties your plan covers.", "error"); return; }
       if (leaseProperties.length + picked.length > MAX_PROPERTIES) { prShowMsg("That would go over the " + MAX_PROPERTIES + " property limit.", "error"); return; }
       var goBtn = document.getElementById("prImportGo");
       goBtn.disabled = true;
@@ -3248,6 +3354,22 @@
       });
     });
 
+    /* Screens out disposable / undeliverable addresses before an account is
+       made (same-origin api/email-reputation, AbstractAPI). Fails open: if the
+       check errors or is not configured, sign-up carries on. */
+    var EMAIL_REJECTED = "That email address doesn't look reachable. Please use a real, permanent one.";
+    function emailLooksReal(email) {
+      return fetch("/api/email-reputation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ email: email })
+      }).then(function (resp) {
+        return resp.json().then(function (d) { return d; }, function () { return {}; }).then(function (d) {
+          return !(resp.status === 200 && d && d.ok === false);
+        });
+      }).catch(function () { return true; });
+    }
+
     magicForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var email = document.getElementById("acctEmail").value.trim();
@@ -3259,9 +3381,11 @@
       }
       magicBtn.disabled = true;
       setMsg(magicMsg, "Sending your link…");
-      window.pcAuth.signInWithMagicLink(email, {
-        full_name: name, phone: phone
+      emailLooksReal(email).then(function (ok) {
+        if (!ok) { magicBtn.disabled = false; setMsg(magicMsg, EMAIL_REJECTED, "error"); return null; }
+        return window.pcAuth.signInWithMagicLink(email, { full_name: name, phone: phone });
       }).then(function (res) {
+        if (!res) return;
         magicBtn.disabled = false;
         if (res && res.error) { setMsg(magicMsg, res.error.message, "error"); return; }
         setMsg(magicMsg, "Check your inbox for " + email + " and click the link to finish signing in. You can close this tab.", "ok");
@@ -3313,9 +3437,11 @@
       }
       signupBtn.disabled = true;
       setMsg(signupMsg, "Creating your account…");
-      window.pcAuth.signUpWithPassword(email, password, {
-        full_name: name, phone: phone
+      emailLooksReal(email).then(function (ok) {
+        if (!ok) { signupBtn.disabled = false; setMsg(signupMsg, EMAIL_REJECTED, "error"); return null; }
+        return window.pcAuth.signUpWithPassword(email, password, { full_name: name, phone: phone });
       }).then(function (res) {
+        if (!res) return;
         signupBtn.disabled = false;
         if (res && res.error) { setMsg(signupMsg, res.error.message, "error"); return; }
         if (res && res.data && res.data.session) {

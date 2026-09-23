@@ -611,6 +611,21 @@
       });
     },
 
+    /* The plan rules (free first property, paid limit) live in the database:
+       pc_plan() in supabase-schema.sql. Nothing here enforces anything, it
+       only tells the page what to show. Fails safe: if the function is not
+       installed yet, or the switch is off, the answer is "not enforced" and
+       the page behaves exactly as it always has. */
+    getPlan: function () {
+      var open = { data: { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0 }, error: null };
+      var bad = requireClient();
+      if (bad) return Promise.resolve(open);
+      return client.rpc("pc_plan").then(function (res) {
+        if (res.error || !res.data || typeof res.data !== "object") return open;
+        return { data: res.data, error: null };
+      }, function () { return open; });
+    },
+
     /* Portfolio-level tax settings live in profiles.tax_settings (jsonb).
        Read/written on their own, never through PROFILE_COLS, so a missing
        migration only disables the Tax position card instead of sign-in. */
@@ -634,6 +649,8 @@
         tax_rate_pct: clamp(s.tax_rate_pct, 0, 60),
         selling_cost_pct: clamp(s.selling_cost_pct, 0, 10)
       };
+      /* a super fund is taxed differently in accumulation and pension phase */
+      if (s.super_phase === "pension" || s.super_phase === "accumulation") clean.super_phase = s.super_phase;
       /* the signed disclaimer rides along in the same jsonb column */
       if (typeof s.disclaimer_accepted_at === "string") clean.disclaimer_accepted_at = s.disclaimer_accepted_at.slice(0, 40);
       if (typeof s.disclaimer_name === "string") clean.disclaimer_name = s.disclaimer_name.slice(0, 120);

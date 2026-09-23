@@ -2405,6 +2405,15 @@ h1, h2, h3 {
 .plan-amt { font-family: var(--font-display); font-weight: 700; font-size: clamp(38px, 3.6vw, 46px); line-height: 1; }
 .plan-amt small { font-family: var(--font-body); font-weight: 500; font-size: 0.9rem; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
 .plan-per { color: var(--muted); font-size: 0.9rem; }
+.plan-for { margin: -4px 0 12px; color: var(--muted); font-size: 0.88rem; }
+.plan-ladder-cap { margin: 0 0 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.plan-ladder { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.7fr); gap: 6px; }
+.plan-ladder li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; border: 1px solid var(--line); background: rgba(12, 16, 22, 0.55); text-align: center; }
+.plan-ladder b { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); }
+.plan-ladder span { font-size: 0.86rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+.plan-ladder .is-anchor { border-color: rgba(95, 161, 208, 0.6); background: rgba(95, 161, 208, 0.12); }
+.plan-ladder .is-anchor span { color: var(--accent-2); }
+@media (max-width: 420px) { .plan-ladder span { font-size: 0.78rem; } .plan-ladder li:last-child span { white-space: normal; line-height: 1.15; } }
 .plan-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; flex: 1; align-content: start; font-size: 0.88rem; }
 .plan-list li { display: flex; gap: 10px; align-items: flex-start; }
 .plan-list svg { flex: 0 0 15px; width: 15px; height: 15px; margin-top: 4px; color: var(--accent); }
@@ -2475,3 +2484,30 @@ h1, h2, h3 {
 .acct-placeholder-cta[hidden] { display: none; }
 .acct-placeholder-cta span { font-size: 13px; color: var(--muted); }
 .acct-placeholder-cta .btn { flex: 0 0 auto; }
+
+/* ---------- Plans: locked acquisition fields + plan line (account.html) ---------- */
+.acct-plan-line {
+  margin: 0 0 14px; padding: 10px 14px;
+  font-size: 13px; color: var(--muted);
+  background: rgba(95, 161, 208, 0.06);
+  border: 1px solid var(--line);
+}
+.acct-plan-line strong { color: var(--text); font-weight: 600; }
+.acct-plan-line a { color: var(--accent); }
+.acct-plan-line.is-alert { border-color: rgba(95, 161, 208, 0.6); background: rgba(95, 161, 208, 0.12); color: var(--text); }
+.acct-plan-line[hidden] { display: none; }
+
+.field.is-locked > label::after {
+  content: "Locked";
+  margin-left: 8px; padding: 2px 7px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(95, 161, 208, 0.45);
+  vertical-align: 1px;
+}
+.field.is-locked input,
+.field.is-locked select,
+.field.is-locked .acct-type-toggle { opacity: 0.6; cursor: not-allowed; }
+.field.is-locked .acct-type-toggle button { cursor: not-allowed; }
+.acct-lock-note { margin: 0 0 16px; padding: 10px 14px; border-left: 2px solid var(--accent); background: rgba(95, 161, 208, 0.06); }
+.acct-lock-note a { color: var(--accent); }
+.acct-lock-note[hidden] { display: none; }
