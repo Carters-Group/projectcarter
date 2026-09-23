@@ -238,17 +238,18 @@ var pcTax = (function () {
   }
 
   /* tax on a taxable amount for one owner type */
-  function taxOn(owner, amount, ratePct) {
+  function taxOn(owner, amount, ratePct, superPension) {
     if (amount <= 0) return 0;
     if (owner === "company") return amount * 0.30;
-    if (owner === "super") return amount * 0.15;
+    if (owner === "super") return superPension ? 0 : amount * 0.15;
     if (ratePct == null) return null;
     return amount * ratePct / 100;
   }
 
   /* p: { owner, purchaseDate, purchasePrice, acqCosts, improvements,
           worksClaimed, saleDate, salePrice, newBuild, v27 }
-     s: { taxRatePct (marginal rate incl. Medicare, number|null), cpiPct, sellingCostPct } */
+     s: { taxRatePct (marginal rate incl. Medicare, number|null), cpiPct, sellingCostPct,
+          superPhase ("pension" = a super fund in retirement phase pays no tax on the gain) } */
   function cgtEstimateRaw(p, s) {
     var owner = p.owner || "individual";
     var missing = [];
@@ -294,7 +295,9 @@ var pcTax = (function () {
 
     var disc = currentDiscount(owner, over12);
     var taxable = gain * (1 - disc);
-    var tax = taxOn(owner, taxable, rate);
+    var superPension = owner === "super" && s.superPhase === "pension";
+    res.superPension = superPension;
+    var tax = taxOn(owner, taxable, rate, superPension);
     if (tax == null) res.needsRate = true;
     res.currentLaw = { discountPct: disc * 100, taxableGain: taxable, tax: tax };
 
