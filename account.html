@@ -563,6 +563,7 @@
   <script src="tax.js"></script>
   <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script>
   (function () {
     "use strict";
@@ -1547,6 +1548,9 @@
           if (!window.confirm("Remove this lease? This can't be undone.")) return;
           window.pcAuth.deleteLease(row.dataset.leaseId).then(function (res) {
             if (res.error) { window.alert(res.error.message); return; }
+            /* take the row out here too: a card with unsaved changes is kept as is on reload */
+            row.remove();
+            renumberLeaseRows(container);
             loadLeaseRegister();
           });
         } else {
@@ -1603,6 +1607,7 @@
           '<span class="acct-property__name"></span>' +
           '<span class="acct-tag"></span>' +
           '<span class="acct-property__meta"></span>' +
+          '<span class="acct-property__unsaved" data-unsaved hidden>Unsaved changes</span>' +
           '<span class="acct-property__side">' +
             '<button type="button" class="acct-property__del" data-act="quick-delete" title="Delete this property" aria-label="Delete this property">Delete</button>' +
             '<span class="acct-property__caret" aria-hidden="true"></span>' +
@@ -1919,6 +1924,15 @@
       }, true);
       body.addEventListener("input", refreshLive);
       body.addEventListener("change", function () { syncWaMetro(); refreshLive(); });
+      /* anything typed but not saved marks the card, so a reload of the list
+         (another card saved or added) keeps it as it is instead of wiping it */
+      function markDirty() {
+        if (details.dataset.dirty) return;
+        details.dataset.dirty = "1";
+        details.querySelector("[data-unsaved]").hidden = false;
+      }
+      body.addEventListener("input", markDirty);
+      body.addEventListener("change", markDirty);
       positionPct(details);
 
       details.querySelector('[data-act="add-lease"]').addEventListener("click", function () {
@@ -1962,6 +1976,8 @@
 
       details.querySelector('[data-act="save"]').addEventListener("click", function () {
         setMsg(msgEl, "Saving…");
+        delete details.dataset.dirty;
+        details.querySelector("[data-unsaved]").hidden = true;
         var propWarning = "";
         var fields = readTaxFields(details);
         /* an actual sale keeps its date; a "what if" sale today stays floating */
@@ -1972,7 +1988,7 @@
           property_type: typeSelect.value,
           notes: notesInput.value
         }, fields)).then(function (res) {
-          if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); return; }
+          if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); markDirty(); return; }
           propWarning = res.warning || "";
           var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
@@ -2008,18 +2024,21 @@
       var openIds = {};
       document.querySelectorAll("#leaseProperties .acct-property[open], #soldProperties .acct-property[open]").forEach(function (d) { openIds[d.dataset.propertyId] = true; });
 
+      /* cards with unsaved changes are moved across as they are, not rebuilt */
+      var keep = {};
+      document.querySelectorAll("#leaseProperties .acct-property[data-dirty], #soldProperties .acct-property[data-dirty]").forEach(function (d) { keep[d.dataset.propertyId] = d; });
       wrap.innerHTML = "";
       soldWrap.innerHTML = "";
       var held = (properties || []).filter(function (p) { return !p.is_sold; });
       var sold = (properties || []).filter(function (p) { return p.is_sold; });
       emptyEl.hidden = held.length > 0;
       held.forEach(function (property) {
-        var el = buildPropertyEl(property);
+        var el = keep[property.id] || buildPropertyEl(property);
         if (openIds[property.id]) el.open = true;
         wrap.appendChild(el);
       });
       sold.forEach(function (property) {
-        var el = buildPropertyEl(property);
+        var el = keep[property.id] || buildPropertyEl(property);
         if (openIds[property.id]) el.open = true;
         soldWrap.appendChild(el);
       });
@@ -2270,18 +2289,7 @@
 
       /* the answer first, in one plain sentence, before any workings */
       if (bottomLine) {
-        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-        var bl = doc.splitTextToSize(pdfText(bottomLine), w - 2 * L - 36);
-        var bh0 = bl.length * 14 + 32;
-        doc.setFillColor(234, 242, 248);
-        doc.roundedRect(L, y - 14, w - 2 * L, bh0, 4, 4, "F");
-        doc.setFillColor(95, 161, 208);
-        doc.rect(L, y - 14, 4, bh0, "F");
-        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(30, 80, 120);
-        doc.text("THE BOTTOM LINE", L + 16, y + 2);
-        doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(30);
-        doc.text(bl, L + 16, y + 19, { lineHeightFactor: 1.15 });
-        y += bh0 + 10;
+        y = window.pcPdf.bottomLine(doc, L, y, bottomLine) - 2;
       }
 
       /* three short steps instead of one long list: the gain, the tax on
@@ -2865,6 +2873,13 @@
     document.getElementById("prImportMore").addEventListener("click", function () { prImportShown += PR_IMPORT_PAGE; applyPrImportFilter(); });
 
     document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () { startAdd(); });
+
+    /* leaving (or reloading) with a property half-edited asks first */
+    window.addEventListener("beforeunload", function (e) {
+      if (!document.querySelector(".acct-property[data-dirty]")) return;
+      e.preventDefault();
+      e.returnValue = "";
+    });
     /* "Start here - Add" goes straight to a new property, not just to the list */
     document.getElementById("acctStartHere").addEventListener("click", function (e) { e.preventDefault(); startAdd(); });
     document.getElementById("portfolioAddBtn").addEventListener("click", function () { startAdd(); });

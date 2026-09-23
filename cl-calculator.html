@@ -378,6 +378,7 @@
   <script src="tax.js"></script>
   <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script src="stamp.js"></script>
   <script>
   (function () {
@@ -722,7 +723,7 @@
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         var lines = doc.splitTextToSize(String(v), w - 2 * L - 190);
         doc.text(lines, w - L, y, { align: "right" });
-        y += 16 * lines.length + 2;
+        y += 15 * lines.length + 2;
       }
       /* the one figure this report is building toward - boxed off in brand
          colour so it reads as the answer, not another line in the list */
@@ -737,6 +738,25 @@
         doc.setFontSize(15); doc.setTextColor(30, 80, 120);
         doc.text(String(v), w - L - 12, y + 2, { align: "right" });
         y += h + 10;
+      }
+
+      /* the answer first, in plain words: cash needed with each kind of lender */
+      if (m.price > 0 && window.pcPdf) {
+        var mj = m.major, t2 = m.tier2;
+        var bottom = "For a " + money(m.price) + " purchase (" + m.type.label + "), ";
+        if (mj.available && t2.available && mj.lvr === t2.lvr) {
+          bottom += "major banks and tier 2 lenders would both typically lend up to " + pct(mj.lvr) + " (" + money(mj.loan) + "), so you would need about " +
+            money(mj.cash) + " in cash including purchase costs. The majors are usually cheaper, at about " + rateRange(mj.rate) + " against " + rateRange(t2.rate) + " from tier 2.";
+        } else {
+          if (mj.available) bottom += "a major bank would typically lend up to " + pct(mj.lvr) + " (" + money(mj.loan) + " at about " + rateRange(mj.rate) + "), so you would need about " + money(mj.cash) + " in cash including purchase costs.";
+          else bottom += "the major banks generally don't lend on this.";
+          if (t2.available) bottom += " A tier 2 or non-bank lender may go to " + pct(t2.lvr) + " (" + money(t2.loan) + " at about " + rateRange(t2.rate) + "), " + (mj.available && t2.cash < mj.cash ? "cutting the cash needed to " : "needing about ") + money(t2.cash) + ".";
+        }
+        /* measure the funds against the cheapest cash option on offer */
+        var best = mj.available && (!t2.available || mj.cash <= t2.cash) ? mj : (t2.available ? t2 : null);
+        if (m.fundsAvailable > 0 && best) bottom += " With the " + money(m.fundsAvailable) + " you have available, that leaves you " + money(Math.abs(best.shortfall)) + (best.shortfall >= 0 ? " to spare." : " short.");
+        if (m.rentalCover && m.rentalCover.ratio != null) bottom += " The rent covers the interest " + m.rentalCover.ratio.toFixed(2) + " times (" + (m.rentalCover.covers ? "enough for most lenders" : "short of what most lenders want") + ").";
+        y = window.pcPdf.bottomLine(doc, L, y, bottom);
       }
 
       section("The deal");
@@ -783,10 +803,13 @@
         row("Cover ratio", (m.rentalCover.ratio != null ? m.rentalCover.ratio.toFixed(2) + "x" : "n/a") + "  (" + (m.rentalCover.covers ? "covers debt cost" : "falls short") + ")", true);
       }
 
-      y += 14;
+      y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This is a deposit / equity planning guide only, not a borrowing capacity estimate, credit decision or loan offer. The minimum deposit levels shown assume a lender's full assessment is met (income servicing the debt, acceptable liabilities and security), not just a deposit threshold on its own. Loan-to-value ratios, deposit percentages and rate ranges are indicative starting points based on typical market settings and the loan type selected, and will vary by lender, deal and security. The rental cover check for build to rent is a rough guide only and does not reflect a lender's actual serviceability assessment. Speak to Project Carter and a registered mortgage broker before acting.";
-      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+      /* the fine print never runs into the footer: if it won't fit, it moves to a new page */
+      var discLines = doc.splitTextToSize(disc, w - 2 * L);
+      if (y + (discLines.length - 1) * 9.5 > doc.internal.pageSize.getHeight() - 42) { doc.addPage(); y = 56; }
+      doc.text(discLines, L, y);
 
       var totalPages = doc.internal.getNumberOfPages();
       for (var p = 1; p <= totalPages; p++) {

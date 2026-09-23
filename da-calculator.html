@@ -757,6 +757,7 @@
   <script src="tax.js"></script>
   <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script src="stamp.js"></script>
   <script>
   (function () {
@@ -1401,6 +1402,19 @@
         doc.setFontSize(13); doc.setTextColor(30, 80, 120);
         doc.text(String(v), w - L - 10, y + 4, { align: "right" });
         y += h + 8;
+      }
+
+      /* the answer first, in plain words */
+      if (m.price > 0 && window.pcPdf) {
+        var bottom = "Taking this " + money(m.price) + " site to an approved DA is estimated at " + money(m.totalCostToDA) +
+          " all up: the land and buying costs, plus " + money(m.costExclLand) + " to reach approval" + (m.months > 0 ? " over " + m.months + " month" + (m.months === 1 ? "" : "s") : "") +
+          (m.costOnPrice != null ? " (" + m.costOnPrice.toFixed(1) + "% on top of the land price)" : "") + ". ";
+        bottom += "You would need " + money(m.equityRequired) + " in cash" + (m.debtAtDA > 0 ? " and would owe " + money(m.debtAtDA) + " at approval, interest included" : "") + ".";
+        if (m.fundsAvailable > 0) bottom += " Against the " + money(m.fundsAvailable) + " you have available, that is " + money(Math.abs(m.shortfall)) + (m.shortfall >= 0 ? " to spare." : " short.");
+        var likelyN = Object.keys(RULES).filter(function (id) { return reportTier(id) === "likely"; }).length;
+        if (likelyN) bottom += " The site notes point to " + likelyN + " specialist report" + (likelyN === 1 ? "" : "s") + " likely to be needed on top of the standard set (listed under Reports flagged for this site).";
+        if (checked("scNoServices")) bottom += " The block is marked as having no mains water or sewer, which can add a six-figure servicing cost not counted here.";
+        y = window.pcPdf.bottomLine(doc, L, y, bottom);
       }
 
       section("The site");

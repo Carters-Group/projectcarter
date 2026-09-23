@@ -318,6 +318,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script src="stamp.js"></script>
   <script>
   (function () {
@@ -1618,16 +1619,7 @@
           ? "After tax and depreciation you are ahead by " + money(T.annual) + " a year, about " + money(T.weekly) + " a week."
           : "After tax and depreciation it costs you " + money(-T.annual) + " a year, about " + money(-T.weekly) + " a week" +
             (T.toNeutral > 0 ? ", and it would take " + money(T.toNeutral) + " more rent a week to break even." : ".");
-        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-        var bl = doc.splitTextToSize(bottom, w - 2 * L - 36);
-        var bh0 = bl.length * 14 + 32;
-        doc.setFillColor(234, 242, 248); doc.roundedRect(L, y - 14, w - 2 * L, bh0, 4, 4, "F");
-        doc.setFillColor(95, 161, 208); doc.rect(L, y - 14, 4, bh0, "F");
-        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(30, 80, 120);
-        doc.text("THE BOTTOM LINE", L + 16, y + 2);
-        doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(30);
-        doc.text(bl, L + 16, y + 19, { lineHeightFactor: 1.15 });
-        y += bh0 + 12;
+        y = window.pcPdf ? window.pcPdf.bottomLine(doc, L, y, bottom) : y;
       }
 
       section("Portfolio at a glance");

@@ -351,6 +351,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script>
   (function () {
     "use strict";
@@ -688,7 +689,7 @@
         doc.text(k, L, y);
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         doc.text(String(v), w - L, y, { align: "right" });
-        y += 18;
+        y += 15;
       }
       function bigrow(k, v) {
         var top = y - 18, h = 36;
@@ -704,6 +705,16 @@
       }
 
       var o = m.o;
+      /* the answer first, in plain words */
+      if (m.valid && window.pcPdf) {
+        var bottom = "This " + m.T.label + " should give you about " + money(m.y1) + " of tax deductions in its first year (realistically " +
+          money(m.lo1) + " to " + money(m.hi1) + "), saving about " + money(m.tax1) + " in tax at your " + o.taxRate.toFixed(o.taxRate % 1 ? 1 : 0) + "% rate. " +
+          "Over ten years that adds up to about " + money(m.y10) + " of deductions and " + money(m.tax10) + " of tax saved.";
+        /* the reason fixtures come to nil goes straight into the answer, not a footnote */
+        var whyNil = !(m.plant1 > 0) ? (document.getElementById("depNote").textContent || "").trim() : "";
+        if (whyNil) bottom += " " + whyNil;
+        y = window.pcPdf.bottomLine(doc, L, y, bottom);
+      }
       section("The property");
       row("Type", m.T.label.charAt(0).toUpperCase() + m.T.label.slice(1));
       row("Condition", condText(m));
@@ -726,22 +737,23 @@
         bigrow("YEAR 1 DEDUCTION (ESTIMATE)", money(m.y1));
 
         section("Year by year");
-        var cols = [L, L + 60, L + 190, L + 320, L + 440];
+        /* right edges of each money column; the last one sits on the right margin */
+        var cols = [L, L + 170, L + 290, L + 400, w - L];
         doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(90);
         ["Year", "Building", "Fixtures & fittings", "Total deduction", "Tax saved"].forEach(function (h, i) {
-          doc.text(h, i === 0 ? cols[i] : cols[i] + 110, y, { align: i === 0 ? "left" : "right" });
+          doc.text(h, cols[i], y, { align: i === 0 ? "left" : "right" });
         });
         y += 14;
         doc.setFont("helvetica", "normal"); doc.setTextColor(30);
         m.rows.forEach(function (r) {
           [String(r.n), money(r.works), money(r.plant), money(r.total), money(r.tax)].forEach(function (v, i) {
-            doc.text(v, i === 0 ? cols[i] : cols[i] + 110, y, { align: i === 0 ? "left" : "right" });
+            doc.text(v, cols[i], y, { align: i === 0 ? "left" : "right" });
           });
-          y += 15;
+          y += 13;
         });
         y += 4;
         var why = document.getElementById("depNote").textContent;
-        if (why) {
+        if (why && m.plant1 > 0) {
           doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.setTextColor(90);
           var wl = doc.splitTextToSize(why, w - 2 * L);
           doc.text(wl, L, y); y += wl.length * 11 + 4;
@@ -750,10 +762,13 @@
         row("Not enough information entered", "-");
       }
 
-      y += 10;
+      y += 4;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This is a guide only, a desk estimate and not a depreciation schedule. Capital works deductions are 2.5% of estimated original construction cost for up to 40 years, and fixtures and fittings are estimated as a share of construction cost written off over an average ten-year effective life using the method selected (diminishing value at 20% a year, or prime cost at 10% a year). For residential property bought on or after 9 May 2017, second-hand fixtures and fittings in an established home are not claimable, and this estimate shows nil for them. Real deductions depend on the actual building, its history, your ownership dates and your circumstances, and are best confirmed by a quantity surveyor and your accountant. Capital works claimed reduce the property's cost base for capital gains tax. This is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
-      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+      /* the fine print never runs into the footer: if it won't fit, it moves to a new page */
+      var discLines = doc.splitTextToSize(disc, w - 2 * L);
+      if (y + (discLines.length - 1) * 9.5 > doc.internal.pageSize.getHeight() - 42) { doc.addPage(); y = 56; }
+      doc.text(discLines, L, y);
 
       var totalPages = doc.internal.getNumberOfPages();
       for (var p = 1; p <= totalPages; p++) {
