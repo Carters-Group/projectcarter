@@ -28,7 +28,8 @@ var PLANS = {
 };
 
 function env(name) {
-  var v = process.env[name];
+  /* forgive a value pasted into Vercel with its quotes or a stray space */
+  var v = String(process.env[name] || "").trim().replace(/^["']+|["']+$/g, "").trim();
   if (!v) {
     var err = new Error("not configured: " + name);
     err.notConfigured = true;

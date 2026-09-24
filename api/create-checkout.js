@@ -78,7 +78,7 @@ module.exports = async function handler(req, res) {
       metadata: { user_id: user.id, plan: plan }
     };
     /* GST: switch on once Stripe Tax is set up in the dashboard */
-    if (process.env.STRIPE_AUTOMATIC_TAX === "on") {
+    if (String(process.env.STRIPE_AUTOMATIC_TAX || "").replace(/["'\s]/g, "").toLowerCase() === "on") {
       params.automatic_tax = { enabled: true };
       params.customer_update = { address: "auto", name: "auto" };
       params.tax_id_collection = { enabled: true };
