@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pricing | Project Carter</title>
-  <meta name="description" content="Your first property is free. Add more at $250 a year each, or $997 for five. Six or more, get in touch. Done For You setup with Trent for $4,997 a year." />
+  <meta name="description" content="Your first property is free. Add more from $250 a year, or $997 for five. Larger and more complex portfolios get a Done For You setup with Trent, quoted after we look at what you have." />
   <meta name="theme-color" content="#0c1016" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Pricing | Project Carter" />
-  <meta property="og:description" content="First property free, then $250 a year per property (five for $997). Six or more, get in touch. Done For You setup for larger portfolios." />
+  <meta property="og:description" content="First property free, then from $250 a year (five properties for $997). Done For You setup for larger and more complex portfolios, quoted case by case." />
   <meta property="og:image" content="assets/og-image.svg" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -100,7 +100,6 @@
                 <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="3" data-plan="diy_3_properties_annual" data-price="500"><b>3</b><span>$500</span></button>
                 <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="4" data-plan="diy_4_properties_annual" data-price="750"><b>4</b><span>$750</span></button>
                 <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="5" data-plan="diy_5_properties_annual" data-price="997"><b>5</b><span>$997</span></button>
-                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="6"><b>6+</b><span>Talk to us</span></button>
               </div>
             </div>
             <ul class="plan-list">
@@ -119,9 +118,6 @@
                   if (!plan && n === 1) {
                     amt.innerHTML = "Free"; per.textContent = "Your first property, no card needed";
                     cta.textContent = "Start free"; cta.href = "account"; cta.setAttribute("data-plan", "diy");
-                  } else if (!plan) {
-                    amt.innerHTML = "Let\u2019s talk"; per.textContent = "Six or more properties is a conversation";
-                    cta.textContent = "Contact us"; cta.href = "enquire"; cta.setAttribute("data-plan", "diy-contact");
                   } else {
                     amt.innerHTML = "$" + Number(price).toLocaleString("en-AU") + "<small>/year</small>";
                     per.textContent = n + " properties, 12 months, GST included";
@@ -136,9 +132,9 @@
           <article class="plan plan-featured">
             <div class="plan-head">
               <h2 class="plan-name">Done For You</h2>
-              <p class="plan-for">For portfolios of 5 or more properties</p>
+              <p class="plan-for">For larger and more complex portfolios</p>
             </div>
-            <p class="plan-price"><span class="plan-amt">$416<small>/month</small></span><span class="plan-per">Billed annually at $4,997</span></p>
+            <p class="plan-price"><span class="plan-amt plan-amt--text">Quoted for you</span><span class="plan-per">After we look at what you have</span></p>
             <div class="plan-pick">
               <p class="plan-ladder-cap">What is included</p>
               <div class="plan-includes"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Everything in Do It Yourself</span></div>
@@ -148,7 +144,7 @@
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>One-on-one meeting with Trent to walk you through</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>General advice on portfolio health and direction</span></li>
             </ul>
-            <a href="enquire" class="btn btn-accent plan-cta" data-plan="done-for-you">Book your setup meeting</a>
+            <a href="enquire" class="btn btn-accent plan-cta" data-plan="done-for-you">Tell us about your portfolio</a>
           </article>
 
         </div>

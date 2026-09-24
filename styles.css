@@ -1759,6 +1759,12 @@ h1, h2, h3 {
   .acct-dash-portfolio, .acct-dash-risk { grid-column: span 6; }
   .acct-dash-props { grid-column: span 7; }
   .acct-dash-leases { grid-column: span 5; }
+  /* adding or editing a property: the form takes the full width and the leases card drops
+     underneath, rather than squeezing the form into a narrow column beside it */
+  .acct-dash-props:has(.acct-property[open]),
+  .acct-dash-props:has(#prImportPanel:not([hidden])) { grid-column: 1 / -1; }
+  .acct-dash-props:has(.acct-property[open]) + .acct-dash-leases,
+  .acct-dash-props:has(#prImportPanel:not([hidden])) + .acct-dash-leases { grid-column: 1 / -1; }
   .acct-dash-tax, .acct-dash-exit { grid-column: span 6; }
   .acct-dash-details, .acct-dash-security { grid-column: span 6; }
   .acct-dash-billing, .acct-dash-danger { grid-column: span 6; }
@@ -2408,7 +2414,7 @@ h1, h2, h3 {
 .plan-per { color: var(--muted); font-size: 0.9rem; }
 .plan-for { margin: -4px 0 12px; color: var(--muted); font-size: 0.88rem; }
 .plan-ladder-cap { margin: 0 0 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.plan-ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.plan-ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
 .plan-ladder li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; border: 1px solid var(--line); background: rgba(12, 16, 22, 0.55); text-align: center; }
 .plan-ladder b { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); }
 .plan-ladder span { font-size: 0.86rem; font-weight: 600; color: var(--text); white-space: nowrap; }
@@ -2448,6 +2454,7 @@ h1, h2, h3 {
   .plan { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; }
 }
 .plan-price { flex-direction: column; align-items: flex-start; gap: 6px; }
+.plan-amt--text { font-size: clamp(30px, 2.9vw, 38px); }
 .acct-billing-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .acct-billing-head .calc-subhead { margin: 0; }
 .acct-pill {
