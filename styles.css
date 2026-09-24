@@ -2535,6 +2535,14 @@ h1, h2, h3 {
 .acct-chip.is-on b, .acct-chip.is-on span { color: var(--accent-2); }
 .acct-upgrade__quote { margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(95, 161, 208, 0.4); background: rgba(95, 161, 208, 0.08); }
 .acct-upgrade__quote[hidden] { display: none; }
+.acct-upgrade__confirm {
+  margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(232, 184, 92, 0.45); border-left: 3px solid #e8b85c;
+  background: rgba(232, 184, 92, 0.08);
+}
+.acct-upgrade__confirm[hidden] { display: none; }
+.acct-upgrade__confirm p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+#acctBillingCard { scroll-margin-top: 150px; }
+.acct-billing-actions .btn[hidden] { display: none; }
 .acct-upgrade__amt { margin: 0 0 4px; font-size: 15px; color: var(--text); }
 .acct-upgrade__amt strong { font-size: 22px; font-weight: 700; color: var(--accent-2); }
 .acct-upgrade__why { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--muted); }

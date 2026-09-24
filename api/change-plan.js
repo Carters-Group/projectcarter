@@ -8,7 +8,8 @@
  * Price it -> { amount_due, currency, properties }
  *   the amount charged today: the new price less credit for the unused part of
  *   the current plan (Stripe works this out).
- * Do it    -> { ok: true, properties }
+ * Do it    -> { ok: true, properties }, or { ok: false, pay_url } when the bank
+ *             wants the customer to confirm first (see below)
  *   the subscription moves to the new price, a fresh 12 months starts today and
  *   the credit is applied, so nobody pays twice for the same time. The webhook
  *   then writes the new property limit and dates, as for any other change.
@@ -65,13 +66,21 @@ module.exports = async function handler(req, res) {
       return b.send(res, 200, { amount_due: preview.amount_due, currency: preview.currency, properties: target });
     }
 
-    await b.stripe("POST", "/subscriptions/" + encodeURIComponent(sub.id), {
+    /* pending_if_incomplete: the new plan only takes effect once the invoice is
+       paid. When the bank wants the customer to confirm (3D Secure) or the card
+       is declined, nothing changes yet and they finish on Stripe's secure
+       invoice page; the webhook then writes the new plan as usual. */
+    var updated = await b.stripe("POST", "/subscriptions/" + encodeURIComponent(sub.id), {
       items: [{ id: item.id, price: price.id }],
       billing_cycle_anchor: "now",
       proration_behavior: "always_invoice",
-      payment_behavior: "error_if_incomplete",
-      metadata: { user_id: user.id, plan: plan }
+      payment_behavior: "pending_if_incomplete",
+      expand: ["latest_invoice"]
     });
+    var inv = updated.latest_invoice;
+    if (updated.pending_update && inv && typeof inv === "object" && inv.status !== "paid" && inv.hosted_invoice_url) {
+      return b.send(res, 200, { ok: false, pay_url: inv.hosted_invoice_url, properties: target });
+    }
     return b.send(res, 200, { ok: true, properties: target });
   } catch (e) {
     /* a declined card is worth saying plainly; anything else stays generic */
