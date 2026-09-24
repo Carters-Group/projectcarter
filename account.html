@@ -224,6 +224,8 @@
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
             <p class="acct-plan-line" id="acctPlanLine" hidden></p>
+            <p class="acct-billing-line" id="acctBillingLine" hidden><span id="acctBillingText"></span> <button type="button" class="linklike" id="acctBillingBtn">Manage billing</button></p>
+            <p class="acct-msg" id="acctBuyMsg" hidden></p>
 
             <div id="portfolioSet">
               <p class="acct-report__date" id="portfolioBasis"></p>
@@ -2729,7 +2731,85 @@
     /* a paid plan tops out at five properties self-serve; beyond that is a conversation */
     function planLimitLink() { return plan.paid ? { href: "enquire", text: "Contact us" } : { href: "pricing", text: "See plans" }; }
 
+    /* paid plan: show what they have and a way to change or cancel it (Stripe's portal) */
+    function renderBillingLine() {
+      var line = document.getElementById("acctBillingLine");
+      line.hidden = !plan.paid;
+      if (plan.paid) {
+        document.getElementById("acctBillingText").textContent =
+          "Your plan covers " + plan.limit + (plan.limit === 1 ? " property." : " properties.");
+      }
+    }
+
+    function buyMsg(text, kind) { setMsg(document.getElementById("acctBuyMsg"), text, kind); }
+
+    document.getElementById("acctBillingBtn").addEventListener("click", function () {
+      var btn = this;
+      btn.disabled = true;
+      window.pcAuth.openBillingPortal().then(function (r) {
+        btn.disabled = false;
+        if (r.error) { buyMsg(r.error.message, "error"); return; }
+        window.location.href = r.url;
+      });
+    });
+
+    /* arriving from the pricing page with ?buy=<plan>: remember the choice
+       (sign-up takes a detour through email) and start checkout once signed in */
+    var BUY_KEY = "pc_buy_plan";
+    var BUY_PLANS = /^diy_[2-5]_properties_annual$/;
+    function rememberBuyIntent() {
+      try {
+        var q = new URL(window.location.href).searchParams.get("buy");
+        if (q && BUY_PLANS.test(q)) {
+          window.localStorage.setItem(BUY_KEY, JSON.stringify({ plan: q, at: Date.now() }));
+          var u = new URL(window.location.href); u.searchParams.delete("buy");
+          history.replaceState(null, "", u.toString());
+        }
+      } catch (e) {}
+    }
+    function resumeBuyIntent() {
+      var intent = null;
+      try { intent = JSON.parse(window.localStorage.getItem(BUY_KEY) || "null"); } catch (e) {}
+      if (!intent || !BUY_PLANS.test(intent.plan) || Date.now() - intent.at > 3600000) {
+        try { window.localStorage.removeItem(BUY_KEY); } catch (e) {}
+        return;
+      }
+      try { window.localStorage.removeItem(BUY_KEY); } catch (e) {}
+      if (plan.paid) { buyMsg("You already have a plan. Use Manage billing to change it.", "ok"); return; }
+      buyMsg("Taking you to secure payment\u2026");
+      window.pcAuth.startCheckout(intent.plan).then(function (r) {
+        if (r.error) { buyMsg(r.error.message, "error"); return; }
+        window.location.href = r.url;
+      });
+    }
+
+    /* back from Stripe: the plan is written a few seconds later by the webhook */
+    function checkPaymentReturn() {
+      var flag = null;
+      try {
+        var u = new URL(window.location.href);
+        flag = u.searchParams.get("checkout");
+        if (flag) { u.searchParams.delete("checkout"); history.replaceState(null, "", u.toString()); }
+      } catch (e) {}
+      if (flag !== "success") return;
+      buyMsg("Thank you. Confirming your payment\u2026", "ok");
+      var tries = 0;
+      (function poll() {
+        window.pcAuth.getPlan().then(function (r) {
+          if (r && r.data) { plan = r.data; }
+          if (plan.paid) {
+            renderPlanLine(); renderBillingLine();
+            buyMsg("Payment received. Your plan is now active.", "ok");
+            return;
+          }
+          if (++tries < 15) setTimeout(poll, 2000);
+          else buyMsg("Your payment went through. Your plan can take a minute to appear; refresh this page shortly.", "ok");
+        });
+      })();
+    }
+
     function renderPlanLine(alertText) {
+      renderBillingLine();
       var el = document.getElementById("acctPlanLine");
       el.classList.toggle("is-alert", !!alertText);
       if (!plan.enforced) { el.hidden = true; return; }
@@ -3157,6 +3237,8 @@
     }
     function renderQuickLaunch(rows) { renderCalcGrid("quickLaunchGrid", rows); }
 
+    rememberBuyIntent();
+
     function load() {
       var u = window.pcAuth.user();
       var from = fromParam();
@@ -3203,6 +3285,8 @@
           document.getElementById("acctRecentGroup").open = false;
         }
         loadLeaseRegister().then(function () {
+          checkPaymentReturn();
+          resumeBuyIntent();
           var want = importParam();
           if (want) {
             try { var u2 = new URL(window.location.href); u2.searchParams.delete("import"); history.replaceState(null, "", u2.toString()); } catch (e) {}

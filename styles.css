@@ -2418,6 +2418,12 @@ h1, h2, h3 {
 .plan-list li { display: flex; gap: 10px; align-items: flex-start; }
 .plan-list svg { flex: 0 0 15px; width: 15px; height: 15px; margin-top: 4px; color: var(--accent); }
 .plan-cta { text-align: center; width: 100%; padding-block: 12px; }
+.plan-buy { display: grid; gap: 8px; margin: 0 0 10px; }
+.plan-buy label { font-size: 13px; color: var(--muted); }
+.plan-buy select { width: 100%; }
+.plan-cta--free { margin-top: 10px; }
+.acct-billing-line { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
+.acct-billing-line[hidden] { display: none; }
 .pricing-fine {
   max-width: 1000px; margin-top: 0;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px);

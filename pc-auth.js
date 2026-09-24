@@ -254,6 +254,28 @@
   }
 
   /* ---- reports API ---------------------------------------------------------- */
+  /* Stripe billing runs on same-origin serverless functions (api/). The browser
+     only sends who it is (its Supabase token); the plan a customer ends up on
+     is written by the Stripe webhook, never by the page. */
+  function billingCall(path, body) {
+    var bad = requireClient();
+    if (bad) return Promise.resolve(bad);
+    return client.auth.getSession().then(function (res) {
+      var token = res.data && res.data.session && res.data.session.access_token;
+      if (!token) return { error: { message: "Please sign in first." } };
+      return fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify(body || {})
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok || !j.url) return { error: { message: j.error || "Something went wrong. Please try again." } };
+          return { url: j.url };
+        });
+      });
+    }, function () { return { error: { message: "Something went wrong. Please try again." } }; });
+  }
+
   function requireClient() {
     if (!CONFIGURED) return { error: { message: "Accounts are not set up yet." } };
     if (!client) return { error: { message: "Auth client not ready." } };
@@ -616,6 +638,9 @@
        only tells the page what to show. Fails safe: if the function is not
        installed yet, or the switch is off, the answer is "not enforced" and
        the page behaves exactly as it always has. */
+    startCheckout: function (plan) { return billingCall("/api/create-checkout", { plan: plan }); },
+    openBillingPortal: function () { return billingCall("/api/billing-portal", {}); },
+
     getPlan: function () {
       var open = { data: { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0 }, error: null };
       var bad = requireClient();

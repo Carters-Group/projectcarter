@@ -103,7 +103,24 @@
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Paying unlocks calculators, PDFs, tax and CGT</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Property and lease register with expiry tracking</span></li>
             </ul>
-            <a href="account" class="btn btn-accent plan-cta" data-plan="diy">Start free</a>
+            <div class="plan-buy">
+              <label for="planSize">Need more than one property?</label>
+              <select id="planSize" aria-label="Number of properties">
+                <option value="diy_2_properties_annual">2 properties, $250 a year</option>
+                <option value="diy_3_properties_annual">3 properties, $500 a year</option>
+                <option value="diy_4_properties_annual">4 properties, $750 a year</option>
+                <option value="diy_5_properties_annual">5 properties, $997 a year</option>
+              </select>
+              <a href="account" class="btn btn-accent plan-cta" id="planBuy" data-plan="diy-paid">Choose this plan</a>
+            </div>
+            <a href="account" class="btn btn-ghost plan-cta plan-cta--free" data-plan="diy">Start free</a>
+            <script>
+              (function () {
+                var sel = document.getElementById("planSize"), a = document.getElementById("planBuy");
+                function set() { a.href = "account?buy=" + encodeURIComponent(sel.value); }
+                sel.addEventListener("change", set); set();
+              })();
+            </script>
           </article>
 
           <article class="plan plan-featured">
