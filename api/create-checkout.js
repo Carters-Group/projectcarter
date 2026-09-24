@@ -67,6 +67,13 @@ module.exports = async function handler(req, res) {
       success_url: origin + "/account?checkout=success",
       cancel_url: origin + "/pricing?checkout=cancelled",
       allow_promotion_codes: true,
+      /* shown above the Pay button, so renewal and refunds are clear before paying */
+      custom_text: {
+        submit: {
+          message: "Renews automatically every 12 months, with a reminder email first. Cancel any time from your account and your plan runs to the end of the paid year. Payments are not refundable. " +
+            "[Plans and Billing terms](" + origin + "/billing-terms)"
+        }
+      },
       subscription_data: { metadata: { user_id: user.id, plan: plan } },
       metadata: { user_id: user.id, plan: plan }
     };
