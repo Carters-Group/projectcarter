@@ -188,14 +188,6 @@
             <a href="#acctQuickCard" data-nav="acctQuickCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Calculators</span></a>
             <a href="#acctDetailsCard" data-nav="acctDetailsCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Profile</span></a>
           </nav>
-          <a class="acct-starthere-bar acct-dash-start" id="acctStartHere" href="#acctLeaseCard" hidden>
-            <span class="acct-starthere-bar__icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" aria-hidden="true"></span>
-            <span class="acct-starthere-bar__text">
-              <strong>Start here - add your first property</strong>
-              <span>Enter each property once and your equity, cash flow, land tax and sale position are worked out for you. Every calculator can then pull your equity straight from it.</span>
-            </span>
-            <span class="link-arrow">Add</span>
-          </a>
 
           <div class="acct-starthere-bar acct-dash-pwnudge" id="acctPasswordNudge" hidden>
             <span class="acct-starthere-bar__text">
@@ -217,6 +209,10 @@
                 <div id="acctStripUntilWrap" hidden><dt>Paid until</dt><dd id="acctStripUntil"></dd></div>
               </dl>
               <a class="link-arrow acct-planstrip__link" id="acctStripLink" href="#acctBillingCard">Plan and billing</a>
+              <div class="acct-planstrip__start" id="acctStartHere" hidden>
+                <p><strong>Start here: add your first property.</strong> Your equity, cash flow, land tax and sale position are all worked out from it, and every calculator can pull your figures across.</p>
+                <button type="button" class="btn btn-sm acct-planstrip__startbtn" id="acctStartHereBtn">Add your first property</button>
+              </div>
             </div>
 
             <div class="acct-card-head">
@@ -883,7 +879,12 @@
        portfolio card can sit straight under the hero instead */
     function updateStartHere(propertyCount) {
       var bar = document.getElementById("acctStartHere");
-      if (propertyCount > 0) hide(bar); else show(bar);
+      /* only invite a first property they can actually add (a free slot already
+         used, then deleted, cannot be re-used) */
+      var invite = !(propertyCount > 0) && !atPropertyLimit();
+      if (invite) show(bar); else hide(bar);
+      /* while the amber prompt shows it is the one way in; the usual button otherwise */
+      document.getElementById("portfolioAddBtn").hidden = invite;
     }
 
     /* nudges a magic-link-only visitor to set a password, once - stays gone
@@ -3357,7 +3358,7 @@
       e.returnValue = "";
     });
     /* "Start here - Add" goes straight to a new property, not just to the list */
-    document.getElementById("acctStartHere").addEventListener("click", function (e) { e.preventDefault(); startAdd(); });
+    document.getElementById("acctStartHereBtn").addEventListener("click", function () { startAdd(); });
     document.getElementById("portfolioAddBtn").addEventListener("click", function () { startAdd(); });
 
     /* arriving from the Portfolio Review calculator right after saving:

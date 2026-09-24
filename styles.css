@@ -1731,6 +1731,18 @@ h1, h2, h3 {
 .acct-planstrip__facts dd { margin: 4px 0 0; font-size: 15px; font-weight: 600; color: var(--text); }
 .acct-planstrip__facts [hidden] { display: none; }
 .acct-planstrip__link { grid-column: 2; grid-row: 1; justify-self: end; margin-top: 2px; white-space: nowrap; }
+/* no properties yet: the one "start here" prompt, in amber so it reads as a to-do */
+.acct-planstrip__start {
+  grid-column: 1 / -1; grid-row: 3;
+  display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap;
+  padding: 14px 16px; border: 1px solid rgba(232, 184, 92, 0.45); border-left: 3px solid #e8b85c;
+  background: rgba(232, 184, 92, 0.08);
+}
+.acct-planstrip__start[hidden], .acct-card-head__actions .btn[hidden] { display: none; }
+.acct-planstrip__start p { flex: 1 1 260px; margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.acct-planstrip__start strong { display: block; margin-bottom: 2px; font-size: 15px; color: #f0c878; }
+.acct-planstrip__startbtn { flex: none; background: #e8b85c; border-color: #e8b85c; color: #16110a; }
+.acct-planstrip__startbtn:hover { background: #f0c878; border-color: #f0c878; color: #16110a; }
 .acct-signedin-as { margin: -8px 0 18px; font-size: 14px; color: var(--muted); }
 .acct-signedin-as strong { color: var(--text); font-weight: 600; word-break: break-all; }
 
