@@ -2408,7 +2408,7 @@ h1, h2, h3 {
 .plan-per { color: var(--muted); font-size: 0.9rem; }
 .plan-for { margin: -4px 0 12px; color: var(--muted); font-size: 0.88rem; }
 .plan-ladder-cap { margin: 0 0 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.plan-ladder { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.7fr); gap: 6px; }
+.plan-ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .plan-ladder li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; border: 1px solid var(--line); background: rgba(12, 16, 22, 0.55); text-align: center; }
 .plan-ladder b { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); }
 .plan-ladder span { font-size: 0.86rem; font-weight: 600; color: var(--text); white-space: nowrap; }
@@ -2419,23 +2419,69 @@ h1, h2, h3 {
 .plan-list li { display: flex; gap: 10px; align-items: flex-start; }
 .plan-list svg { flex: 0 0 15px; width: 15px; height: 15px; margin-top: 4px; color: var(--accent); }
 .plan-cta { text-align: center; width: 100%; padding-block: 12px; }
-.plan-buy { display: grid; gap: 8px; margin: 0 0 10px; }
-.plan-buy label { font-size: 13px; color: var(--muted); }
-.plan-buy select { width: 100%; }
-.plan-cta--free { margin-top: 10px; }
-.acct-billing-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 20px; margin: 0 0 14px; }
-.acct-billing-facts dt { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.acct-billing-facts dd { margin: 2px 0 0; font-size: 16px; font-weight: 600; color: var(--text); }
-.acct-upgrade { margin: 16px 0 4px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
-.acct-upgrade[hidden] { display: none; }
-.acct-upgrade label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--muted); }
-.acct-upgrade__row { display: flex; flex-wrap: wrap; gap: 10px; }
-.acct-upgrade__row select { flex: 1; min-width: 180px; }
-#acctUpgradeConfirm { margin-top: 12px; }
-#acctUpgradeConfirm p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--text); }
-.acct-billing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 6px; }
+/* the price ladder is the picker: pick a size, one button below does the rest */
+.plan-head { margin: 0 0 12px; }
+.plan-head .plan-name { margin: 0 0 4px; }
+.plan-head .plan-for { margin: 0; }
+.plan-pick { margin: 0 0 16px; }
+.plan-opt {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 54px; padding: 6px 4px; cursor: pointer; font-family: inherit;
+  border: 1px solid var(--line); background: rgba(12, 16, 22, 0.55); color: var(--text); text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.plan-opt b { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); }
+.plan-opt span { font-size: 0.86rem; font-weight: 600; white-space: nowrap; }
+.plan-opt:hover { border-color: rgba(95, 161, 208, 0.55); }
+.plan-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.plan-opt.is-on { border-color: var(--accent); background: rgba(95, 161, 208, 0.16); }
+.plan-opt.is-on b, .plan-opt.is-on span { color: var(--accent-2); }
+.plan-includes {
+  display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 6px 14px;
+  border: 1px solid rgba(95, 161, 208, 0.45); background: rgba(95, 161, 208, 0.1);
+  font-size: 0.9rem; font-weight: 600; color: var(--accent-2);
+}
+.plan-includes svg { flex: 0 0 16px; width: 16px; height: 16px; }
+/* both cards share the same rows, so the price, the picker, the list and the button line up */
+@media (min-width: 781px) {
+  .pricing-grid { grid-template-rows: auto auto auto 1fr auto; }
+  .plan { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; }
+}
+.plan-price { flex-direction: column; align-items: flex-start; gap: 6px; }
+.acct-billing-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.acct-billing-head .calc-subhead { margin: 0; }
+.acct-pill {
+  padding: 4px 12px; border: 1px solid rgba(95, 161, 208, 0.55); background: rgba(95, 161, 208, 0.12);
+  color: var(--accent-2); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+}
+.acct-pill[hidden] { display: none; }
+.acct-billing-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px 20px; margin: 0 0 14px; padding: 14px 0; border-block: 1px solid var(--line-soft); }
+.acct-billing-facts dt { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.acct-billing-facts dd { margin: 4px 0 0; font-size: 16px; font-weight: 600; color: var(--text); }
+.acct-billing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 0; }
 .acct-billing-actions [hidden] { display: none; }
-.acct-billing-fine { margin: 14px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.acct-upgrade { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+.acct-upgrade[hidden] { display: none; }
+.acct-upgrade .acct-subhead-sm { margin: 0 0 10px; }
+.acct-upgrade__opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.acct-chip {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 56px; padding: 8px 6px; cursor: pointer; font-family: inherit;
+  border: 1px solid var(--line); background: var(--bg-2); color: var(--text); text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.acct-chip b { font-size: 13px; font-weight: 600; }
+.acct-chip span { font-size: 12.5px; color: var(--muted); }
+.acct-chip:hover { border-color: rgba(95, 161, 208, 0.55); }
+.acct-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.acct-chip.is-on { border-color: var(--accent); background: rgba(95, 161, 208, 0.16); }
+.acct-chip.is-on b, .acct-chip.is-on span { color: var(--accent-2); }
+.acct-upgrade__quote { margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(95, 161, 208, 0.4); background: rgba(95, 161, 208, 0.08); }
+.acct-upgrade__quote[hidden] { display: none; }
+.acct-upgrade__amt { margin: 0 0 4px; font-size: 15px; color: var(--text); }
+.acct-upgrade__amt strong { font-size: 22px; font-weight: 700; color: var(--accent-2); }
+.acct-upgrade__why { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.acct-billing-fine { margin: 16px 0 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
 .pricing-fine {
   max-width: 1000px; margin-top: 0;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px);

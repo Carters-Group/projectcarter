@@ -500,27 +500,27 @@
           </div>
 
           <div class="card acct-card acct-dash-billing" id="acctBillingCard">
-            <h2 class="calc-subhead">Your plan and billing</h2>
+            <div class="acct-billing-head">
+              <h2 class="calc-subhead">Your plan and billing</h2>
+              <span class="acct-pill" id="acctBillingPill" hidden></span>
+            </div>
             <dl class="acct-billing-facts" id="acctBillingFacts"></dl>
             <p class="field-hint" id="acctBillingHint"></p>
-            <div class="acct-upgrade" id="acctUpgrade" hidden>
-              <label for="acctUpgradeSel">Need more properties?</label>
-              <div class="acct-upgrade__row">
-                <select id="acctUpgradeSel"></select>
-                <button type="button" class="btn btn-ghost" id="acctUpgradePriceBtn">See the price</button>
-              </div>
-              <div id="acctUpgradeConfirm" hidden>
-                <p id="acctUpgradeText"></p>
-                <button type="button" class="btn btn-accent" id="acctUpgradeGo">Confirm upgrade</button>
-                <button type="button" class="linklike" id="acctUpgradeCancel">Cancel</button>
-              </div>
-            </div>
             <div class="acct-billing-actions">
               <button type="button" class="btn btn-accent" id="acctBillingBtn" hidden>Manage billing</button>
               <a href="pricing" class="btn btn-ghost" id="acctPlansLink">See plans</a>
             </div>
+            <div class="acct-upgrade" id="acctUpgrade" hidden>
+              <h3 class="acct-subhead-sm">Add more properties</h3>
+              <div class="acct-upgrade__opts" id="acctUpgradeOpts" role="radiogroup" aria-label="Choose a bigger plan"></div>
+              <div class="acct-upgrade__quote" id="acctUpgradeQuote" hidden>
+                <p class="acct-upgrade__amt">Pay <strong id="acctUpgradeAmt"></strong> today</p>
+                <p class="acct-upgrade__why">We credit the time you have left on your current plan against the new price, and your 12 months start again today.</p>
+                <button type="button" class="btn btn-accent" id="acctUpgradeGo">Upgrade</button>
+              </div>
+            </div>
             <p class="acct-msg" id="acctBillingMsg" hidden></p>
-            <p class="acct-billing-fine">Payments are handled securely by Stripe, and we never see your card details. Prices are in Australian dollars and include GST. Each payment gives you 12 months of access.</p>
+            <p class="acct-billing-fine">Payments are handled securely by Stripe. Prices are in AUD and include GST. Each payment covers 12 months.</p>
           </div>
 
           <div class="card acct-card acct-danger acct-dash-danger" id="acctDangerCard">
@@ -2756,8 +2756,11 @@
     function planLimitLink() { return plan.paid ? { href: "enquire", text: "Contact us" } : { href: "pricing", text: "See plans" }; }
 
     /* "Your plan and billing" card: what they have, what it covers, when it runs to,
-       and the buttons for changing it. Reads the cached plan + billing row. */
+       and one step to add more properties. Reads the cached plan + billing row. */
     var billing = null;
+    var UPGRADE_PRICES = { 2: 250, 3: 500, 4: 750, 5: 997 };
+    var upgradePick = null;     /* the plan key chosen in the chips */
+    var upgradeSeq = 0;         /* ignores a price that arrives after a newer pick */
 
     function billingFact(dl, label, value) {
       var d = document.createElement("div");
@@ -2771,102 +2774,98 @@
       var hint = document.getElementById("acctBillingHint");
       var manage = document.getElementById("acctBillingBtn");
       var plansLink = document.getElementById("acctPlansLink");
+      var pill = document.getElementById("acctBillingPill");
       if (!dl) return;
       dl.innerHTML = "";
       var status = (billing && billing.subscription_status) || (plan.paid ? "active" : "free");
       var hasCustomer = !!(billing && billing.stripe_customer_id);
-      var used = leaseProperties.length;
       var limit = plan.paid ? plan.limit : 1;
 
       billingFact(dl, "Plan", plan.paid ? "Do It Yourself" : "Free");
-      billingFact(dl, "Properties", used + " of " + limit + " used");
-      if (plan.paid) {
-        billingFact(dl, "Status", "Active");
-        if (billing && billing.plan_period_end) billingFact(dl, "Paid until", fmtDate(billing.plan_period_end));
-      } else if (status === "past_due") {
-        billingFact(dl, "Status", "Payment failed");
-      } else if (status === "canceled") {
-        billingFact(dl, "Status", "Cancelled");
-      }
+      billingFact(dl, "Properties", leaseProperties.length + " of " + limit + " used");
+      if (plan.paid && billing && billing.plan_period_end) billingFact(dl, "Paid until", fmtDate(billing.plan_period_end));
 
-      var text;
-      if (plan.paid) {
-        text = "Your plan covers " + limit + (limit === 1 ? " property" : " properties") + ", with the full calculators, PDF reports, tax and CGT. " +
-          "Manage billing opens Stripe, where you can update your card, download invoices and receipts, or cancel.";
-      } else if (status === "past_due") {
-        text = "Your last payment did not go through. Open Manage billing to update your card and your plan will come back.";
-      } else if (status === "canceled") {
-        text = "Your paid plan has ended. You still have your first property free, and you can pick a plan again any time.";
-      } else {
-        text = "The free plan covers your first property, with the full dashboard. Paying unlocks the calculators, PDFs, tax and CGT for more properties, from $250 a year.";
-      }
-      hint.textContent = text;
+      var pillText = plan.paid ? "Active" : status === "past_due" ? "Payment failed" : status === "canceled" ? "Cancelled" : "";
+      pill.textContent = pillText;
+      pill.hidden = !pillText;
+
+      hint.textContent = plan.paid
+        ? "Update your card, download invoices or cancel in Stripe."
+        : status === "past_due" ? "Your last payment failed. Update your card in Manage billing."
+        : status === "canceled" ? "Your paid plan has ended. Your first property is still free."
+        : "Your first property is free. Paid plans start at $250 a year.";
 
       manage.hidden = !(plan.paid || hasCustomer);
       var canUpgrade = plan.paid && limit < 5;
       plansLink.hidden = canUpgrade;
-      if (plan.paid && limit >= 5) {
-        plansLink.textContent = "More than five? Contact us";
-        plansLink.href = "enquire";
-      } else {
-        plansLink.textContent = "See plans";
-        plansLink.href = "pricing";
-      }
+      if (plan.paid && limit >= 5) { plansLink.textContent = "More than five? Contact us"; plansLink.href = "enquire"; }
+      else { plansLink.textContent = "See plans"; plansLink.href = "pricing"; }
       paintUpgrade(canUpgrade, limit);
     }
 
-    /* upgrade on the same plan: the price is shown first, then confirmed. Stripe takes
-       credit for the unused time off the new price and starts a fresh 12 months. */
-    var UPGRADE_PRICES = { 2: 250, 3: 500, 4: 750, 5: 997 };
     function paintUpgrade(show, limit) {
       var box = document.getElementById("acctUpgrade");
       box.hidden = !show;
       if (!show) return;
-      var sel = document.getElementById("acctUpgradeSel");
-      var keep = sel.value;
-      sel.innerHTML = "";
+      var wrap = document.getElementById("acctUpgradeOpts");
+      /* only rebuild when the choices change, so a picked size is not lost on a repaint */
+      var sig = "from" + limit;
+      if (wrap.getAttribute("data-sig") === sig) return;
+      wrap.setAttribute("data-sig", sig);
+      wrap.innerHTML = "";
+      upgradePick = null;
+      document.getElementById("acctUpgradeQuote").hidden = true;
       for (var n = limit + 1; n <= 5; n++) {
-        var o = document.createElement("option");
-        o.value = "diy_" + n + "_properties_annual";
-        o.textContent = n + " properties, $" + UPGRADE_PRICES[n] + " a year";
-        sel.appendChild(o);
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "acct-chip";
+        chip.setAttribute("role", "radio");
+        chip.setAttribute("aria-checked", "false");
+        chip.setAttribute("data-plan", "diy_" + n + "_properties_annual");
+        chip.setAttribute("data-n", String(n));
+        var b1 = document.createElement("b"); b1.textContent = n + " properties";
+        var s1 = document.createElement("span"); s1.textContent = "$" + UPGRADE_PRICES[n] + " a year";
+        chip.appendChild(b1); chip.appendChild(s1);
+        chip.addEventListener("click", function () { pickUpgrade(this); });
+        wrap.appendChild(chip);
       }
-      if (keep) sel.value = keep;
-      document.getElementById("acctUpgradeConfirm").hidden = true;
     }
 
-    function upgradeProperties(planKey) { var m = /^diy_(\d)_/.exec(planKey); return m ? Number(m[1]) : 0; }
-
-    document.getElementById("acctUpgradePriceBtn").addEventListener("click", function () {
-      var btn = this, msg = document.getElementById("acctBillingMsg");
-      var planKey = document.getElementById("acctUpgradeSel").value;
-      btn.disabled = true; setMsg(msg, "Working out the price\u2026");
-      window.pcAuth.changePlan(planKey, false).then(function (r) {
-        btn.disabled = false;
-        if (r.error) { setMsg(msg, r.error.message, "error"); return; }
-        setMsg(msg, "");
-        var d = r.data;
-        document.getElementById("acctUpgradeText").textContent =
-          "Upgrading to " + d.properties + " properties charges " + fmtMoney(d.amount_due / 100) +
-          " today to your card on file. That is the new price less credit for the time you have not used on your current plan, " +
-          "and it starts a fresh 12 months from today.";
-        document.getElementById("acctUpgradeConfirm").hidden = false;
+    function pickUpgrade(chip) {
+      var msg = document.getElementById("acctBillingMsg");
+      document.querySelectorAll("#acctUpgradeOpts .acct-chip").forEach(function (c) {
+        var on = c === chip;
+        c.classList.toggle("is-on", on);
+        c.setAttribute("aria-checked", on ? "true" : "false");
       });
-    });
-
-    document.getElementById("acctUpgradeCancel").addEventListener("click", function () {
-      document.getElementById("acctUpgradeConfirm").hidden = true;
-    });
+      upgradePick = chip.getAttribute("data-plan");
+      var n = chip.getAttribute("data-n");
+      var quote = document.getElementById("acctUpgradeQuote");
+      var go = document.getElementById("acctUpgradeGo");
+      var seq = ++upgradeSeq;
+      go.disabled = true;
+      go.textContent = "Upgrade to " + n + " properties";
+      document.getElementById("acctUpgradeAmt").textContent = "\u2026";
+      quote.hidden = false;
+      setMsg(msg, "");
+      window.pcAuth.changePlan(upgradePick, false).then(function (r) {
+        if (seq !== upgradeSeq) return;
+        if (r.error) { quote.hidden = true; setMsg(msg, r.error.message, "error"); return; }
+        document.getElementById("acctUpgradeAmt").textContent =
+          "$" + (r.data.amount_due / 100).toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        go.disabled = false;
+      });
+    }
 
     document.getElementById("acctUpgradeGo").addEventListener("click", function () {
       var btn = this, msg = document.getElementById("acctBillingMsg");
-      var planKey = document.getElementById("acctUpgradeSel").value;
-      var want = upgradeProperties(planKey);
+      var planKey = upgradePick;
+      if (!planKey) return;
+      var m = /^diy_(\d)_/.exec(planKey), want = m ? Number(m[1]) : 0;
       btn.disabled = true; setMsg(msg, "Upgrading your plan\u2026");
       window.pcAuth.changePlan(planKey, true).then(function (r) {
-        btn.disabled = false;
-        if (r.error) { setMsg(msg, r.error.message, "error"); return; }
-        document.getElementById("acctUpgradeConfirm").hidden = true;
+        if (r.error) { btn.disabled = false; setMsg(msg, r.error.message, "error"); return; }
+        document.getElementById("acctUpgradeQuote").hidden = true;
         setMsg(msg, "Upgraded. Confirming your new plan\u2026", "ok");
         var tries = 0;
         (function poll() {
@@ -2874,11 +2873,11 @@
             if (p && p.data) plan = p.data;
             if (plan.paid && plan.limit >= want) {
               renderPlanLine(); refreshBilling();
-              setMsg(msg, "Your plan now covers " + plan.limit + " properties.", "ok");
+              setMsg(msg, "Done. Your plan now covers " + plan.limit + " properties.", "ok");
               return;
             }
             if (++tries < 15) setTimeout(poll, 2000);
-            else setMsg(msg, "Your upgrade went through. It can take a minute to show; refresh this page shortly.", "ok");
+            else setMsg(msg, "Your upgrade went through. It can take a minute to show, so refresh this page shortly.", "ok");
           });
         })();
       });

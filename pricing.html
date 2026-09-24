@@ -87,48 +87,63 @@
         <div class="wrap pricing-grid">
 
           <article class="plan">
-            <h2 class="plan-name">Do It Yourself</h2>
-            <p class="plan-price"><span class="plan-amt">Free</span><span class="plan-per">Your first property, no card needed</span></p>
-            <p class="plan-ladder-cap">Cost per year, by number of properties</p>
-            <ul class="plan-ladder" aria-label="Cost per year, by number of properties">
-              <li><b>1</b><span>Free</span></li>
-              <li><b>2</b><span>$250</span></li>
-              <li><b>3</b><span>$500</span></li>
-              <li><b>4</b><span>$750</span></li>
-              <li class="is-anchor"><b>5</b><span>$997</span></li>
-              <li class="is-contact"><b>6+</b><span><a href="enquire">Contact us</a></span></li>
-            </ul>
+            <div class="plan-head">
+              <h2 class="plan-name">Do It Yourself</h2>
+              <p class="plan-for">For investors who run their own portfolio</p>
+            </div>
+            <p class="plan-price"><span class="plan-amt" id="planAmt">Free</span><span class="plan-per" id="planPer">Your first property, no card needed</span></p>
+            <div class="plan-pick">
+              <p class="plan-ladder-cap" id="planPickCap">How many properties?</p>
+              <div class="plan-ladder" role="radiogroup" aria-labelledby="planPickCap">
+                <button type="button" role="radio" aria-checked="true" class="plan-opt is-on" data-n="1"><b>1</b><span>Free</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="2" data-plan="diy_2_properties_annual" data-price="250"><b>2</b><span>$250</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="3" data-plan="diy_3_properties_annual" data-price="500"><b>3</b><span>$500</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="4" data-plan="diy_4_properties_annual" data-price="750"><b>4</b><span>$750</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="5" data-plan="diy_5_properties_annual" data-price="997"><b>5</b><span>$997</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="6"><b>6+</b><span>Talk to us</span></button>
+              </div>
+            </div>
             <ul class="plan-list">
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>First property free, with the full dashboard</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Paying unlocks calculators, PDFs, tax and CGT</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Property and lease register with expiry tracking</span></li>
             </ul>
-            <div class="plan-buy">
-              <label for="planSize">Need more than one property?</label>
-              <select id="planSize" aria-label="Number of properties">
-                <option value="diy_2_properties_annual">2 properties, $250 a year</option>
-                <option value="diy_3_properties_annual">3 properties, $500 a year</option>
-                <option value="diy_4_properties_annual">4 properties, $750 a year</option>
-                <option value="diy_5_properties_annual">5 properties, $997 a year</option>
-              </select>
-              <a href="account" class="btn btn-accent plan-cta" id="planBuy" data-plan="diy-paid">Choose this plan</a>
-            </div>
-            <a href="account" class="btn btn-ghost plan-cta plan-cta--free" data-plan="diy">Start free</a>
+            <a href="account" class="btn btn-accent plan-cta" id="planCta" data-plan="diy">Start free</a>
             <script>
               (function () {
-                var sel = document.getElementById("planSize"), a = document.getElementById("planBuy");
-                function set() { a.href = "account?buy=" + encodeURIComponent(sel.value); }
-                sel.addEventListener("change", set); set();
+                var opts = document.querySelectorAll(".plan-opt");
+                var amt = document.getElementById("planAmt"), per = document.getElementById("planPer"), cta = document.getElementById("planCta");
+                function pick(btn) {
+                  opts.forEach(function (o) { var on = o === btn; o.classList.toggle("is-on", on); o.setAttribute("aria-checked", on ? "true" : "false"); });
+                  var n = Number(btn.getAttribute("data-n")), price = btn.getAttribute("data-price"), plan = btn.getAttribute("data-plan");
+                  if (!plan && n === 1) {
+                    amt.innerHTML = "Free"; per.textContent = "Your first property, no card needed";
+                    cta.textContent = "Start free"; cta.href = "account"; cta.setAttribute("data-plan", "diy");
+                  } else if (!plan) {
+                    amt.innerHTML = "Let\u2019s talk"; per.textContent = "Six or more properties is a conversation";
+                    cta.textContent = "Contact us"; cta.href = "enquire"; cta.setAttribute("data-plan", "diy-contact");
+                  } else {
+                    amt.innerHTML = "$" + Number(price).toLocaleString("en-AU") + "<small>/year</small>";
+                    per.textContent = n + " properties, 12 months, GST included";
+                    cta.textContent = "Choose " + n + " properties"; cta.href = "account?buy=" + encodeURIComponent(plan); cta.setAttribute("data-plan", "diy-paid");
+                  }
+                }
+                opts.forEach(function (o) { o.addEventListener("click", function () { pick(o); }); });
               })();
             </script>
           </article>
 
           <article class="plan plan-featured">
-            <h2 class="plan-name">Done For You</h2>
-            <p class="plan-for">For portfolios of 5 or more properties</p>
+            <div class="plan-head">
+              <h2 class="plan-name">Done For You</h2>
+              <p class="plan-for">For portfolios of 5 or more properties</p>
+            </div>
             <p class="plan-price"><span class="plan-amt">$416<small>/month</small></span><span class="plan-per">Billed annually at $4,997</span></p>
+            <div class="plan-pick">
+              <p class="plan-ladder-cap">What is included</p>
+              <div class="plan-includes"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Everything in Do It Yourself</span></div>
+            </div>
             <ul class="plan-list">
-              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span><strong>Everything in Do It Yourself</strong></span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>We build your portfolio in the platform for you</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>One-on-one meeting with Trent to walk you through</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>General advice on portfolio health and direction</span></li>
