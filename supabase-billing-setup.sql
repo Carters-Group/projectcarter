@@ -9,10 +9,15 @@ alter table public.pc_config enable row level security;   -- no policies: only t
 insert into public.pc_config (key, value) values ('plans_enforced', 'false')
   on conflict (key) do nothing;
 
-alter table public.pc_config enable row level security;
-
 alter table public.profiles add column if not exists property_limit     integer not null default 1;
 alter table public.profiles add column if not exists properties_created integer not null default 0;
+
+-- Stripe billing: written only by the webhook (service role). The trigger below
+-- refers to all three, so they must exist before it is created.
+alter table public.profiles add column if not exists stripe_customer_id     text;
+alter table public.profiles add column if not exists stripe_subscription_id text;
+alter table public.profiles add column if not exists plan_period_end        timestamptz;
+create index if not exists profiles_stripe_customer_idx on public.profiles (stripe_customer_id);
 
 update public.profiles p
    set properties_created = greatest(p.properties_created, s.n)
@@ -29,7 +34,17 @@ $$;
 create or replace function public.pc_is_paid(status text)
 returns boolean
 language sql immutable
-as $$ select coalesce(status, 'free') in ('active', 'trialing'); $$;
+as $$ select coalesce(status, 'free') in ('active', 'trialing', 'past_due'); $$;
+
+-- a lapsed paid plan holding more than the free property is read-only (see supabase-schema.sql)
+create or replace function public.pc_is_read_only(uid uuid)
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select public.pc_plans_enforced()
+     and coalesce((select subscription_status = 'canceled' from public.profiles where id = uid), false)
+     and (select count(*) from public.properties where user_id = uid) > 1;
+$$;
 
 create or replace function public.pc_protect_plan_columns()
 returns trigger
@@ -73,7 +88,8 @@ as $$
     'paid',     public.pc_is_paid(p.subscription_status),
     'limit',    case when public.pc_is_paid(p.subscription_status) then p.property_limit else 1 end,
     'created',  p.properties_created,
-    'count',    (select count(*) from public.properties where user_id = p.id)
+    'count',    (select count(*) from public.properties where user_id = p.id),
+    'readonly', public.pc_is_read_only(p.id)
   )
   from public.profiles p where p.id = auth.uid();
 $$;

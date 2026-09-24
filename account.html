@@ -2132,7 +2132,8 @@
       var m = (err && err.message) || "Something went wrong.";
       if (/pc_free_used/.test(m)) return "The free plan covers your first property, and that has been used. Add more from $250 a year and everything unlocks.";
       if (/pc_property_limit/.test(m)) return "You have reached the number of properties your plan covers. Contact us to add more.";
-      if (/pc_locked_field/.test(m)) return "That detail is set at acquisition, so it is locked on the free plan. Upgrade to change it.";
+      if (/pc_read_only/.test(m)) return "Your paid plan has ended, so your properties are read-only. Renew to edit them again.";
+      if (/pc_locked_field/.test(m)) return"That detail is set at acquisition, so it is locked on the free plan. Upgrade to change it.";
       if (/tax_settings|column|schema cache/i.test(m)) {
         return "The tax features need the latest database update. Run supabase-schema.sql in the Supabase SQL editor, then reload this page.";
       }
@@ -2400,7 +2401,7 @@
       var pick = tEl("div", "acct-workings__pick");
       var lab = tEl("label", null, "Property");
       lab.setAttribute("for", "workingsSelect");
-      var sel = tEl("select");
+      var sel = tEl("select", "pc-pull__select");
       sel.id = "workingsSelect";
       ready.forEach(function (x, i) {
         var o = tEl("option", null, (x.p.name || "Untitled property") + (x.m.sold ? " (sold)" : ""));
@@ -2740,20 +2741,22 @@
        The database enforces these (supabase-schema.sql, "PLANS"); this only
        mirrors them so the page can explain instead of erroring. Until
        plans_enforced is switched on, enforced is false and none of it shows. */
-    var plan = { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0 };
+    var plan = { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0, readonly: false };
 
     function atPropertyLimit() {
       if (!plan.enforced) return false;
+      if (plan.readonly) return true;
       return plan.paid ? leaseProperties.length >= plan.limit : plan.created >= 1;
     }
 
     function planLimitText() {
+      if (plan.readonly) return "Your paid plan has ended, so your properties are read-only until you renew.";
       return plan.paid
         ? "Your plan covers " + plan.limit + (plan.limit === 1 ? " property" : " properties") + ". Need more?"
         : "The free plan covers your first property. Add more from $250 a year and everything unlocks.";
     }
     /* a paid plan tops out at five properties self-serve; beyond that is a conversation */
-    function planLimitLink() { return plan.paid ? { href: "enquire", text: "Contact us" } : { href: "pricing", text: "See plans" }; }
+    function planLimitLink() { if (plan.readonly) return { href: "pricing", text: "Renew" }; return plan.paid ?{ href: "enquire", text: "Contact us" } : { href: "pricing", text: "See plans" }; }
 
     /* "Your plan and billing" card: what they have, what it covers, when it runs to,
        and one step to add more properties. Reads the cached plan + billing row. */
@@ -2785,20 +2788,22 @@
       billingFact(dl, "Properties", leaseProperties.length + " of " + limit + " used");
       if (plan.paid && billing && billing.plan_period_end) billingFact(dl, "Paid until", fmtDate(billing.plan_period_end));
 
-      var pillText = plan.paid ? "Active" : status === "past_due" ? "Payment failed" : status === "canceled" ? "Cancelled" : "";
+      /* past_due still counts as paid (Stripe is retrying the card), so check it first */
+      var pillText = status === "past_due" ? "Payment failed" : plan.paid ? "Active" : status === "canceled" ? "Ended" : "";
       pill.textContent = pillText;
       pill.hidden = !pillText;
 
-      hint.textContent = plan.paid
-        ? "Update your card, download invoices or cancel in Stripe."
-        : status === "past_due" ? "Your last payment failed. Update your card in Manage billing."
+      hint.textContent = status === "past_due" ? "Your last payment did not go through. Everything keeps working while Stripe tries again, so update your card in Manage billing."
+        : plan.paid ? "Update your card, download invoices or cancel in Stripe."
+        : plan.readonly ? "Your paid plan has ended, so your properties are read-only. Renew with a plan that covers all " + leaseProperties.length + " to edit them again."
         : status === "canceled" ? "Your paid plan has ended. Your first property is still free."
         : "Your first property is free. Paid plans start at $250 a year.";
 
       manage.hidden = !(plan.paid || hasCustomer);
-      var canUpgrade = plan.paid && limit < 5;
+      var canUpgrade = plan.paid && status !== "past_due" && limit < 5;
       plansLink.hidden = canUpgrade;
       if (plan.paid && limit >= 5) { plansLink.textContent = "More than five? Contact us"; plansLink.href = "enquire"; }
+      else if (status === "canceled") { plansLink.textContent = "Renew your plan"; plansLink.href = "pricing"; }
       else { plansLink.textContent = "See plans"; plansLink.href = "pricing"; }
       paintUpgrade(canUpgrade, limit);
     }
@@ -2905,16 +2910,6 @@
 
     function buyMsg(text, kind) { setMsg(document.getElementById("acctBuyMsg"), text, kind); }
 
-    document.getElementById("acctBillingBtn").addEventListener("click", function () {
-      var btn = this;
-      btn.disabled = true;
-      window.pcAuth.openBillingPortal().then(function (r) {
-        btn.disabled = false;
-        if (r.error) { buyMsg(r.error.message, "error"); return; }
-        window.location.href = r.url;
-      });
-    });
-
     /* arriving from the pricing page with ?buy=<plan>: remember the choice
        (sign-up takes a detour through email) and start checkout once signed in */
     var BUY_KEY = "pc_buy_plan";
@@ -2977,7 +2972,15 @@
       if (!plan.enforced) { el.hidden = true; return; }
       el.textContent = "";
       var strong = document.createElement("strong");
-      if (plan.paid) {
+      if (plan.readonly) {
+        strong.textContent = "Plan ended";
+        el.appendChild(strong);
+        el.appendChild(document.createTextNode(" · your " + leaseProperties.length + " properties are read-only until you renew. "));
+        if (!alertText) {
+          var rn = document.createElement("a"); rn.href = "pricing"; rn.textContent = "Renew";
+          el.appendChild(rn); el.hidden = false; return;
+        }
+      } else if (plan.paid) {
         strong.textContent = "Your plan";
         el.appendChild(strong);
         el.appendChild(document.createTextNode(" · " + leaseProperties.length + " of " + plan.limit + " properties. "));
@@ -3009,6 +3012,22 @@
        changes too, this just shows it up front) */
     function applyFreeLocks(details, property) {
       var note = details.querySelector("[data-lock-note]");
+      /* a paid plan that has ended: look, download and delete, but no edits */
+      if (plan.enforced && plan.readonly) {
+        details.querySelectorAll("input, select, textarea, button").forEach(function (el) {
+          if (!el.matches('[data-act="delete-property"], [data-act="quick-delete"]')) el.disabled = true;
+        });
+        details.classList.add("is-read-only");
+        if (note) {
+          note.textContent = "Your paid plan has ended, so this property is read-only. Renew to edit it again, or delete down to one property to keep using the free plan. ";
+          var renew = document.createElement("a");
+          renew.href = "pricing";
+          renew.textContent = "Renew";
+          note.appendChild(renew);
+          note.hidden = false;
+        }
+        return;
+      }
       if (!plan.enforced || plan.paid) { if (note) note.hidden = true; return; }
       var n = 0;
       function lock(el, on) {

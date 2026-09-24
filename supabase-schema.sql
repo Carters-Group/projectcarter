@@ -518,10 +518,25 @@ as $$
   select coalesce((select value = 'true' from public.pc_config where key = 'plans_enforced'), false);
 $$;
 
+-- past_due counts as paid: a failed renewal keeps working while Stripe retries
+-- the card. Once Stripe gives up the subscription is cancelled and the webhook
+-- writes 'canceled'.
 create or replace function public.pc_is_paid(status text)
 returns boolean
 language sql immutable
-as $$ select coalesce(status, 'free') in ('active', 'trialing'); $$;
+as $$ select coalesce(status, 'free') in ('active', 'trialing', 'past_due'); $$;
+
+-- a paid plan that has ended, on an account holding more than the free
+-- property: everything stays visible and can be deleted, nothing can be
+-- edited or added until they renew. Down to one property it is a free account.
+create or replace function public.pc_is_read_only(uid uuid)
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select public.pc_plans_enforced()
+     and coalesce((select subscription_status = 'canceled' from public.profiles where id = uid), false)
+     and (select count(*) from public.properties where user_id = uid) > 1;
+$$;
 
 -- one address, one free property: collapse the tricks people use for "new" emails
 create or replace function public.pc_email_key(e text)
@@ -606,6 +621,10 @@ begin
   select subscription_status, property_limit, properties_created, email
     into prof from public.profiles where id = new.user_id;
 
+  if public.pc_is_read_only(new.user_id) then
+    raise exception 'pc_read_only: your plan has ended, renew to add or edit properties';
+  end if;
+
   if public.pc_is_paid(prof.subscription_status) then
     select count(*) into cnt from public.properties where user_id = new.user_id;
     if cnt >= coalesce(prof.property_limit, 1) then
@@ -685,6 +704,10 @@ begin
   select subscription_status into status from public.profiles where id = new.user_id;
   if public.pc_is_paid(status) then return new; end if;
 
+  if public.pc_is_read_only(new.user_id) then
+    raise exception 'pc_read_only: your plan has ended, renew to add or edit properties';
+  end if;
+
   named := coalesce(nullif(trim(old.name), ''), 'Untitled property') <> 'Untitled property';
   if named and new.name is distinct from old.name then
     raise exception 'pc_locked_field: the property name is set once on the free plan';
@@ -713,6 +736,26 @@ create trigger properties_before_update_plan
   before update on public.properties
   for each row execute function public.pc_properties_before_update();
 
+-- leases follow their property: read-only while a lapsed plan is read-only
+-- (deleting stays allowed, as for properties)
+create or replace function public.pc_leases_before_write()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if auth.uid() is null then return new; end if;
+  if public.pc_is_read_only(new.user_id) then
+    raise exception 'pc_read_only: your plan has ended, renew to add or edit properties';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists leases_before_write_plan on public.leases;
+create trigger leases_before_write_plan
+  before insert or update on public.leases
+  for each row execute function public.pc_leases_before_write();
+
 -- what the page asks: {enforced, status, paid, limit, created, count}
 create or replace function public.pc_plan()
 returns jsonb
@@ -724,7 +767,8 @@ as $$
     'paid',     public.pc_is_paid(p.subscription_status),
     'limit',    case when public.pc_is_paid(p.subscription_status) then p.property_limit else 1 end,
     'created',  p.properties_created,
-    'count',    (select count(*) from public.properties where user_id = p.id)
+    'count',    (select count(*) from public.properties where user_id = p.id),
+    'readonly', public.pc_is_read_only(p.id)
   )
   from public.profiles p where p.id = auth.uid();
 $$;

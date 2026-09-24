@@ -9,6 +9,10 @@
      $env:STRIPE_SECRET_KEY = "sk_test_..."     (a TEST key, pasted here only)
      node tools/stripe-setup.js
 
+   Then register the webhook for a deployment (prints the signing secret):
+
+     node tools/stripe-setup.js --webhook https://<your-site>/api/stripe-webhook
+
    The key is read from the environment and never written anywhere. It refuses
    to run with a live key unless you also set STRIPE_ALLOW_LIVE=yes.
 
@@ -116,8 +120,51 @@ async function ensurePrice(productId, pr) {
   return made;
 }
 
+/* the events api/stripe-webhook.js acts on */
+var WEBHOOK_EVENTS = [
+  "checkout.session.completed",
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "invoice.paid",
+  "invoice.payment_failed"
+];
+
+/* node tools/stripe-setup.js --webhook https://<site>/api/stripe-webhook
+   Registers the webhook and prints its signing secret (Stripe only shows it
+   once, at creation) for Vercel's STRIPE_WEBHOOK_SECRET. */
+async function ensureWebhook(url) {
+  /* a protected Vercel preview needs ?x-vercel-protection-bypass=<secret> on the end */
+  if (!/^https:\/\/[^/]+\/api\/stripe-webhook(\?[^#\s]*)?$/.test(url)) {
+    throw new Error("The webhook URL should look like https://<your-site>/api/stripe-webhook");
+  }
+  var list = await stripe("GET", "/webhook_endpoints?limit=100");
+  var existing = (list.data || []).filter(function (w) { return w.url === url; })[0];
+  if (existing) {
+    await stripe("POST", "/webhook_endpoints/" + existing.id, { enabled_events: WEBHOOK_EVENTS });
+    console.log("webhook exists   " + existing.id + "  " + url + "  (events refreshed)");
+    console.log("\nIts signing secret was shown when it was created. If you no longer have it,");
+    console.log("open it in the Stripe dashboard (Developers, Webhooks) and reveal or roll it.");
+    return;
+  }
+  var made = await stripe("POST", "/webhook_endpoints", {
+    url: url,
+    enabled_events: WEBHOOK_EVENTS,
+    description: "Project Carter plans",
+    api_version: "2025-09-30.clover"
+  });
+  console.log("created webhook  " + made.id + "  " + url);
+  console.log("\nPut this in Vercel as STRIPE_WEBHOOK_SECRET (it is only shown now):\n\n  " + made.secret + "\n");
+}
+
 (async function () {
   var mode = /_live_/.test(KEY) ? "LIVE" : "TEST";
+  var at = process.argv.indexOf("--webhook");
+  if (at !== -1) {
+    console.log("Setting up the Project Carter webhook in " + mode + " mode\n");
+    await ensureWebhook(String(process.argv[at + 1] || ""));
+    return;
+  }
   console.log("Setting up Project Carter products in " + mode + " mode\n");
   for (var i = 0; i < PRODUCTS.length; i++) {
     await ensureProduct(PRODUCTS[i]);

@@ -32,6 +32,9 @@ module.exports = async function handler(req, res) {
     var rows = await b.supabaseAdmin("GET", "profiles?id=eq." + encodeURIComponent(user.id) +
       "&select=subscription_status,property_limit,stripe_subscription_id");
     var profile = rows && rows[0];
+    if (profile && profile.subscription_status === "past_due") {
+      return b.send(res, 409, { error: "Your last payment did not go through. Update your card in Manage billing first." });
+    }
     var paid = profile && (profile.subscription_status === "active" || profile.subscription_status === "trialing");
     if (!paid || !profile.stripe_subscription_id) {
       return b.send(res, 409, { error: "You do not have an active plan to change." });

@@ -232,10 +232,40 @@ columns, `profiles.tax_settings` and `properties.is_sold`); until then saving a 
 prompt to do so. Run `node --test portfolio.test.js tax.test.js stamp.test.js`
 for the estimator tests.
 
-Everything is **free**. `profiles.subscription_status` (defaults to `'free'`)
-and the `pc_can_save()` SQL function are the hooks for a future paywall - today
-`pc_can_save()` always returns true. Wiring Stripe later is a contained change
-(flip the column, tighten that one function and the `reports` INSERT policy).
+Calculators and saved reports stay free (they are the email-list lead source).
+What is paid is the number of properties in the register: the first is free,
+more need a Do It Yourself plan (Stripe). The rules live in the database
+(`supabase-schema.sql`, "PLANS") and stay dormant until `plans_enforced` is on.
+
+### Stripe billing (plans)
+
+- `api/create-checkout.js`, `api/billing-portal.js`, `api/change-plan.js`:
+  checkout, Stripe's billing page, upgrade to a bigger plan.
+- `api/stripe-webhook.js`: the only thing that writes a plan to `profiles`.
+- A failed renewal (`past_due`) keeps working while Stripe retries the card.
+  An ended plan on an account with more than one property is read-only
+  (view, download, delete; no edits or new properties) until renewed.
+- Done For You is sold through the enquiry form. Set its property limit by hand
+  in `profiles.property_limit`; the webhook will not overwrite it.
+
+The browser always talks to the Supabase project hard-coded in `pc-auth.js`
+(and allowed in the CSP in `vercel.json`), so `SUPABASE_URL` in every Vercel
+environment must be that same project. Test on a preview with Stripe **test**
+keys and a separate test account, not your real one: a test-mode customer id
+saved on an account would not exist in live mode.
+
+Setting it up, per environment (Preview / test mode first, then Production / live):
+
+1. Run `supabase-schema.sql` in that Supabase project's SQL editor.
+2. `node tools/stripe-setup.js` with that mode's `STRIPE_SECRET_KEY` (products and prices).
+3. `node tools/stripe-setup.js --webhook https://<site>/api/stripe-webhook` (prints the signing secret).
+4. Vercel env vars for that environment: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+   `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and
+   `STRIPE_AUTOMATIC_TAX=on` once Stripe Tax is set up. Redeploy.
+5. Test a purchase with card `4242 4242 4242 4242`, then
+   `update public.pc_config set value = 'true' where key = 'plans_enforced';`
+
+Run `node --test api/stripe-webhook.test.js` for the webhook tests.
 
 ### One-time setup
 

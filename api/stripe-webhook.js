@@ -56,18 +56,21 @@ function planFrom(sub) {
   var price = item && item.price;
   var limit = price && price.metadata && parseInt(price.metadata.property_limit, 10);
   var status = sub.status;
-  var paid = status === "active" || status === "trialing";
+  /* past_due keeps the plan while Stripe retries the card (pc_is_paid agrees) */
+  var paid = status === "active" || status === "trialing" || status === "past_due";
   var mapped = paid ? status
-    : status === "past_due" ? "past_due"
     : (status === "canceled" || status === "unpaid" || status === "incomplete_expired") ? "canceled"
     : "free";
   var end = sub.current_period_end || (item && item.current_period_end) || null;
-  return {
+  var out = {
     subscription_status: mapped,
-    property_limit: paid && limit > 0 ? limit : 1,
     stripe_subscription_id: sub.id,
     plan_period_end: end ? new Date(end * 1000).toISOString() : null
   };
+  /* a paid price without a property_limit (Done For You) leaves the limit set by hand alone */
+  if (!paid) out.property_limit = 1;
+  else if (limit > 0) out.property_limit = limit;
+  return out;
 }
 
 async function syncSubscription(subscriptionId, hintedUserId) {

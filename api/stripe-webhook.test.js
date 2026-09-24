@@ -40,8 +40,20 @@ test("a cancelled or unpaid subscription drops back to the free limit", function
   var c = t.planFrom(Object.assign({ status: "canceled" }, base));
   assert.equal(c.subscription_status, "canceled");
   assert.equal(c.property_limit, 1);
-  assert.equal(t.planFrom(Object.assign({ status: "past_due" }, base)).subscription_status, "past_due");
+  assert.equal(t.planFrom(Object.assign({ status: "unpaid" }, base)).subscription_status, "canceled");
   assert.equal(t.planFrom(Object.assign({ status: "incomplete" }, base)).subscription_status, "free");
+});
+
+test("a failed renewal keeps the plan while Stripe retries the card", function () {
+  var p = t.planFrom({ id: "sub_1", status: "past_due", items: { data: [{ price: { metadata: { property_limit: "5" } } }] } });
+  assert.equal(p.subscription_status, "past_due");
+  assert.equal(p.property_limit, 5);
+});
+
+test("a paid price with no property limit leaves the limit set by hand alone", function () {
+  var p = t.planFrom({ id: "sub_1", status: "active", items: { data: [{ price: { metadata: {} } }] } });
+  assert.equal(p.subscription_status, "active");
+  assert.equal("property_limit" in p, false);
 });
 
 test("events find their subscription", function () {

@@ -672,7 +672,7 @@
     openBillingPortal: function () { return billingCall("/api/billing-portal", {}); },
 
     getPlan: function () {
-      var open = { data: { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0 }, error: null };
+      var open = { data: { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0, readonly: false }, error: null };
       var bad = requireClient();
       if (bad) return Promise.resolve(open);
       return client.rpc("pc_plan").then(function (res) {

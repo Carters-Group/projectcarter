@@ -32,6 +32,16 @@ module.exports = async function handler(req, res) {
     if (profile.subscription_status === "active" || profile.subscription_status === "trialing") {
       return b.send(res, 409, { error: "You already have a plan. Use Manage billing to change it." });
     }
+    if (profile.subscription_status === "past_due") {
+      return b.send(res, 409, { error: "Your last payment did not go through. Update your card in Manage billing." });
+    }
+
+    /* renewing after a plan ended: the new plan has to cover what they already hold */
+    var held = await b.supabaseAdmin("GET", "properties?user_id=eq." + encodeURIComponent(user.id) + "&select=id");
+    var count = (held && held.length) || 0;
+    if (b.PLANS[plan].properties < count) {
+      return b.send(res, 400, { error: "You have " + count + " properties, so choose a plan that covers at least " + count + "." });
+    }
 
     var customerId = profile.stripe_customer_id;
     if (!customerId) {
