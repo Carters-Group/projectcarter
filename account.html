@@ -218,6 +218,7 @@
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your portfolio</h2>
               <div class="acct-card-head__actions">
+                <button type="button" class="btn btn-ghost btn-sm" id="portfolioPdfBtn" hidden>Download portfolio PDF</button>
                 <button type="button" class="btn btn-accent btn-sm" id="portfolioAddBtn">Add a property</button>
               </div>
             </div>
@@ -614,6 +615,7 @@
   <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
   <script src="pc-pdf.js"></script>
+  <script src="portfolio-pdf.js"></script>
   <script>
   (function () {
     "use strict";
@@ -1040,7 +1042,8 @@
       var riskCardEl = document.getElementById("acctRiskCard");
       var planCardEl = document.getElementById("acctPlanCard");
       if (!portfolio) { hide(riskCardEl); hide(planCardEl); return; }
-      if (heldProperties().length) show(planCardEl); else hide(planCardEl);
+      var pdfBtn = document.getElementById("portfolioPdfBtn");
+      if (heldProperties().length) { show(planCardEl); show(pdfBtn); } else { hide(planCardEl); hide(pdfBtn); }
       var t = portfolio.totals, m = portfolio.missing;
       var ready = t.counted > 0;
 
@@ -3657,6 +3660,26 @@
       var hit = (rows || []).filter(function (r) { return r.calculator === "roi" && r.title === PLAN_TITLE; })[0];
       if (hit) seededPlanReportId = hit.id;
     }
+
+    /* the whole register as one PDF (portfolio-pdf.js), using the growth
+       assumptions currently set on the ROI card for its projection */
+    document.getElementById("portfolioPdfBtn").addEventListener("click", function () {
+      if (!portfolio || !heldProperties().length) return;
+      function pctIn(id, dflt) { var v = parseFloat((document.getElementById(id).value || "").replace(/[^0-9.\-]/g, "")); return isFinite(v) ? v : dflt; }
+      window.pcPortfolioPdf.download({
+        portfolio: portfolio,
+        properties: leaseProperties,
+        holder: (document.getElementById("profName").value || "").trim(),
+        computeWale: computeWale,
+        leaseEvents: leaseEvents,
+        projection: {
+          years: Math.max(1, Math.min(30, Math.round(parseFloat(document.getElementById("planYears").value) || 5))),
+          capGrowthPct: pctIn("planCapGrowth", 5),
+          rentGrowthPct: pctIn("planRentGrowth", 5),
+          build: buildPortfolioPlan
+        }
+      });
+    });
 
     document.getElementById("portfolioRoiBtn").addEventListener("click", function () {
       var roiMsg = document.getElementById("portfolioRoiMsg");
