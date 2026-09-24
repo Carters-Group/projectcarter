@@ -1712,6 +1712,40 @@ h1, h2, h3 {
 }
 .acct-identity-row__text { flex: 1; min-width: 160px; }
 
+/* plan summary at the top of the dashboard (replaces "Signed in as") */
+/* two rows at every width: plan name with the billing link level on the right,
+   then the facts beneath, so nothing wraps into an odd spot in a narrow card */
+.acct-planstrip {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 14px 20px;
+  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line);
+}
+.acct-planstrip__main { grid-column: 1; grid-row: 1; min-width: 0; }
+.acct-planstrip__facts { grid-column: 1 / -1; grid-row: 2; }
+.acct-planstrip__main .acct-eyebrow { margin: 0 0 4px; }
+.acct-planstrip__name {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0;
+  font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; color: var(--text);
+}
+.acct-planstrip__facts { display: flex; gap: 12px 28px; flex-wrap: wrap; margin: 0; }
+.acct-planstrip__facts dt { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.acct-planstrip__facts dd { margin: 4px 0 0; font-size: 15px; font-weight: 600; color: var(--text); }
+.acct-planstrip__facts [hidden] { display: none; }
+.acct-planstrip__link { grid-column: 2; grid-row: 1; justify-self: end; margin-top: 2px; white-space: nowrap; }
+/* no properties yet: the one "start here" prompt, in amber so it reads as a to-do */
+.acct-planstrip__start {
+  grid-column: 1 / -1; grid-row: 3;
+  display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap;
+  padding: 14px 16px; border: 1px solid rgba(232, 184, 92, 0.45); border-left: 3px solid #e8b85c;
+  background: rgba(232, 184, 92, 0.08);
+}
+.acct-planstrip__start[hidden], .acct-card-head__actions .btn[hidden] { display: none; }
+.acct-planstrip__start p { flex: 1 1 260px; margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.acct-planstrip__start strong { display: block; margin-bottom: 2px; font-size: 15px; color: #f0c878; }
+.acct-planstrip__startbtn { flex: none; background: #e8b85c; border-color: #e8b85c; color: #16110a; }
+.acct-planstrip__startbtn:hover { background: #f0c878; border-color: #f0c878; color: #16110a; }
+.acct-signedin-as { margin: -8px 0 18px; font-size: 14px; color: var(--muted); }
+.acct-signedin-as strong { color: var(--text); font-weight: 600; word-break: break-all; }
+
 .acct-card-head {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   margin-bottom: 18px;
@@ -1759,8 +1793,15 @@ h1, h2, h3 {
   .acct-dash-portfolio, .acct-dash-risk { grid-column: span 6; }
   .acct-dash-props { grid-column: span 7; }
   .acct-dash-leases { grid-column: span 5; }
+  /* adding or editing a property: the form takes the full width and the leases card drops
+     underneath, rather than squeezing the form into a narrow column beside it */
+  .acct-dash-props:has(.acct-property[open]),
+  .acct-dash-props:has(#prImportPanel:not([hidden])) { grid-column: 1 / -1; }
+  .acct-dash-props:has(.acct-property[open]) + .acct-dash-leases,
+  .acct-dash-props:has(#prImportPanel:not([hidden])) + .acct-dash-leases { grid-column: 1 / -1; }
   .acct-dash-tax, .acct-dash-exit { grid-column: span 6; }
   .acct-dash-details, .acct-dash-security { grid-column: span 6; }
+  .acct-dash-billing, .acct-dash-danger { grid-column: span 6; }
   /* no risk card yet (no properties): the portfolio card takes the full row */
   .acct-dash-portfolio:has(+ .acct-dash-risk[hidden]) { grid-column: 1 / -1; }
   .acct-dashboard .acct-card,
@@ -1784,11 +1825,9 @@ h1, h2, h3 {
 .acct-collapsible[open] > summary::after { content: "\2212"; }
 .acct-collapsible[open] > summary { margin-bottom: 20px; }
 
-/* On mobile "My saved reports" adds too much scroll for what it's worth on
-   a small screen - hide the whole toggle, it's still on desktop. */
-@media (max-width: 900px) {
-  .acct-collapsible { display: none; }
-}
+/* On mobile the saved reports start folded away (see load() in
+   account.html) so they don't add scroll, but stay one tap from being
+   renamed, duplicated or deleted. */
 
 /* ---- Lease register (WALE tracker) --------------------------------- */
 .acct-tag {
@@ -1871,9 +1910,20 @@ h1, h2, h3 {
   text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 400; line-height: 1.3;
 }
 .field .acct-periodic-check input {
-  flex: none; width: 22px; height: 22px; margin: 0;
-  accent-color: var(--accent); cursor: pointer;
+  flex: none; width: 22px; height: 22px; margin: 0; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background: var(--bg); border: 1.5px solid rgba(95, 161, 208, 0.55); border-radius: 4px;
+  display: grid; place-content: center; transition: background .15s, border-color .15s;
 }
+.field .acct-periodic-check input::before {
+  content: ""; width: 11px; height: 6px; margin-top: -3px;
+  border: solid var(--bg); border-width: 0 0 2.5px 2.5px;
+  transform: rotate(-45deg) scale(0); transition: transform .12s;
+}
+.field .acct-periodic-check input:checked { background: var(--accent); border-color: var(--accent); }
+.field .acct-periodic-check input:checked::before { transform: rotate(-45deg) scale(1); }
+.field .acct-periodic-check input:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.field .acct-periodic-check:hover { border-color: rgba(95, 161, 208, 0.45); }
 .acct-periodic-check__text { display: grid; gap: 2px; }
 .acct-periodic-check__text strong { font-weight: 600; color: var(--text); }
 .acct-periodic-check__text small { font-size: 12px; color: var(--muted); }
@@ -2185,7 +2235,7 @@ h1, h2, h3 {
 /* Sale workings: one collapsible with a property picker */
 .acct-workings__pick { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line-soft); }
 .acct-workings__pick label { font-size: 13px; color: var(--muted); }
-.acct-workings__pick select { flex: 1; min-width: 180px; }
+.acct-workings__pick select { flex: 1; min-width: 180px; width: auto; margin-top: 0; }
 
 /* Disclaimer popup */
 .acct-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(4, 8, 14, 0.78); }
@@ -2407,10 +2457,88 @@ h1, h2, h3 {
 .plan-amt { font-family: var(--font-display); font-weight: 700; font-size: clamp(38px, 3.6vw, 46px); line-height: 1; }
 .plan-amt small { font-family: var(--font-body); font-weight: 500; font-size: 0.9rem; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
 .plan-per { color: var(--muted); font-size: 0.9rem; }
+.plan-for { margin: -4px 0 12px; color: var(--muted); font-size: 0.88rem; }
+.plan-ladder-cap { margin: 0 0 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.plan-ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.plan-ladder li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; border: 1px solid var(--line); background: rgba(12, 16, 22, 0.55); text-align: center; }
+.plan-ladder b { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); }
+.plan-ladder span { font-size: 0.86rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+.plan-ladder .is-anchor { border-color: rgba(95, 161, 208, 0.6); background: rgba(95, 161, 208, 0.12); }
+.plan-ladder .is-anchor span { color: var(--accent-2); }
+@media (max-width: 420px) { .plan-ladder span { font-size: 0.78rem; } .plan-ladder li:last-child span { white-space: normal; line-height: 1.15; } }
 .plan-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; flex: 1; align-content: start; font-size: 0.88rem; }
 .plan-list li { display: flex; gap: 10px; align-items: flex-start; }
 .plan-list svg { flex: 0 0 15px; width: 15px; height: 15px; margin-top: 4px; color: var(--accent); }
 .plan-cta { text-align: center; width: 100%; padding-block: 12px; }
+/* the price ladder is the picker: pick a size, one button below does the rest */
+.plan-head { margin: 0 0 12px; }
+.plan-head .plan-name { margin: 0 0 4px; }
+.plan-head .plan-for { margin: 0; }
+.plan-pick { margin: 0 0 16px; }
+.plan-opt {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 54px; padding: 6px 4px; cursor: pointer; font-family: inherit;
+  border: 1px solid var(--line); background: rgba(12, 16, 22, 0.55); color: var(--text); text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.plan-opt b { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); }
+.plan-opt span { font-size: 0.86rem; font-weight: 600; white-space: nowrap; }
+.plan-opt:hover { border-color: rgba(95, 161, 208, 0.55); }
+.plan-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.plan-opt.is-on { border-color: var(--accent); background: rgba(95, 161, 208, 0.16); }
+.plan-opt.is-on b, .plan-opt.is-on span { color: var(--accent-2); }
+.plan-includes {
+  display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 6px 14px;
+  border: 1px solid rgba(95, 161, 208, 0.45); background: rgba(95, 161, 208, 0.1);
+  font-size: 0.9rem; font-weight: 600; color: var(--accent-2);
+}
+.plan-includes svg { flex: 0 0 16px; width: 16px; height: 16px; }
+/* both cards share the same rows, so the price, the picker, the list and the button line up */
+@media (min-width: 781px) {
+  .pricing-grid { grid-template-rows: auto auto auto 1fr auto; }
+  .plan { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; }
+}
+.plan-price { flex-direction: column; align-items: flex-start; gap: 6px; }
+.plan-amt--text { font-size: clamp(30px, 2.9vw, 38px); }
+.acct-billing-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.acct-billing-head .calc-subhead { margin: 0; }
+.acct-pill {
+  padding: 4px 12px; border: 1px solid rgba(95, 161, 208, 0.55); background: rgba(95, 161, 208, 0.12);
+  color: var(--accent-2); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+}
+.acct-pill[hidden] { display: none; }
+.acct-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; }
+.acct-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.acct-pill.is-active { border-color: rgba(74, 194, 128, 0.6); background: rgba(74, 194, 128, 0.14); color: #6fd49c; }
+.acct-pill.is-failed { border-color: rgba(227, 138, 138, 0.6); background: rgba(227, 138, 138, 0.12); color: #e38a8a; }
+.acct-pill.is-ended  { border-color: var(--line); background: var(--bg-2); color: var(--muted); }
+.acct-billing-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px 20px; margin: 0 0 14px; padding: 14px 0; border-block: 1px solid var(--line-soft); }
+.acct-billing-facts dt { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.acct-billing-facts dd { margin: 4px 0 0; font-size: 16px; font-weight: 600; color: var(--text); }
+.acct-billing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 0; }
+.acct-billing-actions [hidden] { display: none; }
+.acct-upgrade { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+.acct-upgrade[hidden] { display: none; }
+.acct-upgrade .acct-subhead-sm { margin: 0 0 10px; }
+.acct-upgrade__opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.acct-chip {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 56px; padding: 8px 6px; cursor: pointer; font-family: inherit;
+  border: 1px solid var(--line); background: var(--bg-2); color: var(--text); text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.acct-chip b { font-size: 13px; font-weight: 600; }
+.acct-chip span { font-size: 12.5px; color: var(--muted); }
+.acct-chip:hover { border-color: rgba(95, 161, 208, 0.55); }
+.acct-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.acct-chip.is-on { border-color: var(--accent); background: rgba(95, 161, 208, 0.16); }
+.acct-chip.is-on b, .acct-chip.is-on span { color: var(--accent-2); }
+.acct-upgrade__quote { margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(95, 161, 208, 0.4); background: rgba(95, 161, 208, 0.08); }
+.acct-upgrade__quote[hidden] { display: none; }
+.acct-upgrade__amt { margin: 0 0 4px; font-size: 15px; color: var(--text); }
+.acct-upgrade__amt strong { font-size: 22px; font-weight: 700; color: var(--accent-2); }
+.acct-upgrade__why { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.acct-billing-fine { margin: 16px 0 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
 .pricing-fine {
   max-width: 1000px; margin-top: 0;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px);
@@ -2442,6 +2570,29 @@ h1, h2, h3 {
   display: flex; align-items: center;
 }
 .acct-hero.acct-hero--auth #acctWrap { position: relative; z-index: 1; width: 100%; }
+/* signed in on a phone or tablet: the dashboard starts just under the header
+   (the calculator pages' tall top padding left a dead band here) */
+@media (max-width: 1099px) {
+  .acct-hero:not(.acct-hero--auth) .acct-hero__inner { padding-top: 104px; }
+}
+/* blank portfolio on a phone: one example risk card is enough to show the idea */
+@media (max-width: 640px) {
+  #portfolioRiskWrap.is-placeholder .acct-risk-card + .acct-risk-card { display: none; }
+}
+
+/* a property card with changes that have not been saved yet */
+.acct-property__unsaved {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: #e0c43c; border: 1px solid rgba(224, 196, 60, 0.45); border-radius: 3px; padding: 2px 8px;
+}
+.acct-property__unsaved[hidden] { display: none; }
+
+/* ---------- Sold properties (account.html) ---------- */
+.acct-sold { margin-top: 18px; }
+.acct-sold__count { margin-left: 6px; color: var(--muted); font-weight: 400; }
+.acct-sold__hint { padding: 0 14px; margin: 10px 0 12px; }
+#soldProperties { padding: 0 12px 2px; }
+.acct-dashboard .acct-card .acct-property.is-sold { border-left-color: var(--muted); background-image: none; }
 
 /* ---------- Blank-portfolio placeholders (account.html) ---------- */
 .acct-placeholder-wrap.is-placeholder { filter: blur(3px); opacity: 0.55; pointer-events: none; user-select: none; }
@@ -2454,3 +2605,40 @@ h1, h2, h3 {
 .acct-placeholder-cta[hidden] { display: none; }
 .acct-placeholder-cta span { font-size: 13px; color: var(--muted); }
 .acct-placeholder-cta .btn { flex: 0 0 auto; }
+
+/* ---------- Plans: locked acquisition fields + plan line (account.html) ---------- */
+.acct-plan-line {
+  margin: 0 0 14px; padding: 10px 14px;
+  font-size: 13px; color: var(--muted);
+  background: rgba(95, 161, 208, 0.06);
+  border: 1px solid var(--line);
+}
+.acct-plan-line strong { color: var(--text); font-weight: 600; }
+.acct-plan-line a { color: var(--accent); }
+.acct-plan-line.is-alert { border-color: rgba(95, 161, 208, 0.6); background: rgba(95, 161, 208, 0.12); color: var(--text); }
+.acct-plan-line[hidden] { display: none; }
+
+.field.is-locked > label::after {
+  content: "Locked";
+  margin-left: 8px; padding: 2px 7px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(95, 161, 208, 0.45);
+  vertical-align: 1px;
+}
+.field.is-locked input,
+.field.is-locked select,
+.field.is-locked .acct-type-toggle { opacity: 0.6; cursor: not-allowed; }
+.field.is-locked .acct-type-toggle button { cursor: not-allowed; }
+.acct-lock-note { margin: 0 0 16px; padding: 10px 14px; border-left: 2px solid var(--accent); background: rgba(95, 161, 208, 0.06); }
+.acct-lock-note a { color: var(--accent); }
+.acct-lock-note[hidden] { display: none; }
+
+/* ---------- Free-plan lock confirmation + contact chip ---------- */
+.acct-modal__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.acct-modal__actions .btn { flex: 1 1 180px; text-align: center; }
+.acct-lock-list { list-style: none; padding-left: 0 !important; border: 1px solid var(--line); background: rgba(95, 161, 208, 0.06); }
+.acct-lock-list li { margin: 0; padding: 8px 12px; border-bottom: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+.acct-lock-list li:last-child { border-bottom: 0; }
+.acct-lock-list strong { color: var(--muted); font-weight: 500; }
+.plan-ladder .is-contact a { color: var(--accent-2); text-decoration: none; }
+.plan-ladder .is-contact a:hover { text-decoration: underline; }

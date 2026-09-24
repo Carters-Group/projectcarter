@@ -296,7 +296,7 @@
       </nav>
     </div>
     <div class="wrap footer-legal">
-      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="billing-terms">Plans and Billing</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
@@ -318,6 +318,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script src="stamp.js"></script>
   <script>
   (function () {
@@ -1595,7 +1596,7 @@
         doc.text(k, L, y);
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         doc.text(String(v), w - L, y, { align: "right" });
-        y += 18;
+        y += 16;
       }
       function subrule() {
         doc.setDrawColor(225); doc.line(w - L - 150, y - 12, w - L, y - 12);
@@ -1617,6 +1618,21 @@
       }
       /* only print a cost line when it has a value */
       function costRow(k, v) { if (v > 0) row("  less " + k, money(v)); }
+
+      /* the answer first, in plain words, before any of the workings */
+      if (T.n > 0 && T.value > 0) {
+        var props = T.n + (T.n === 1 ? " property" : " properties");
+        var bottom = "Your " + props + (T.n === 1 ? " is" : " are") + " worth " + money(T.value) + " with " + money(T.loan) + " of debt, so you own " +
+          money(T.equity) + (T.lvr != null ? " (a " + pct(T.lvr) + " LVR)" : "") + ". ";
+        bottom += T.preTax >= 0
+          ? "The rent covers every running cost and the interest with " + money(T.preTax) + " a year to spare before tax. "
+          : "The rent falls " + money(-T.preTax) + " a year short of the running costs and interest before tax. ";
+        bottom += T.annual >= 0
+          ? "After tax and depreciation you are ahead by " + money(T.annual) + " a year, about " + money(T.weekly) + " a week."
+          : "After tax and depreciation it costs you " + money(-T.annual) + " a year, about " + money(-T.weekly) + " a week" +
+            (T.toNeutral > 0 ? ", and it would take " + money(T.toNeutral) + " more rent a week to break even." : ".");
+        y = window.pcPdf ? window.pcPdf.bottomLine(doc, L, y, bottom) : y;
+      }
 
       section("Portfolio at a glance");
       row("Properties", String(T.n));
@@ -1697,7 +1713,7 @@
       y += 8;
       section("Property by property");
       var cols = ["Property", "Type", "Value", "Debt", "LVR", "Net", "Cash/yr", "Cash/wk"];
-      var cx = [L, L + 120, L + 178, L + 258, L + 330, L + 386, L + 442, L + 500];
+      var cx = [L, L + 118, L + 158, L + 232, L + 302, L + 352, L + 400, L + 460];
       doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
       cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
       y += 4; doc.setDrawColor(225); doc.line(L, y, w - L, y); y += 13;

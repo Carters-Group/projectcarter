@@ -232,6 +232,12 @@ alter table public.profiles add column if not exists tax_settings jsonb;
 -- its own threshold. Blank = held in the owner's own name.
 alter table public.properties add column if not exists holding_entity text;
 
+-- A property that has been sold. It leaves every portfolio figure (value,
+-- debt, cash flow, land tax, leases) but stays on the account so its capital
+-- gains workings are there for the accountant. The sale itself is the
+-- existing planned_sale_date (sale contract date) and expected_sale_price.
+alter table public.properties add column if not exists is_sold boolean not null default false;
+
 create index if not exists properties_user_idx
   on public.properties (user_id, name);
 
@@ -452,3 +458,319 @@ create policy "avatars - delete own"
   );
 
 
+
+
+-- ============================================================================
+--  PLANS  -  free first property, paid property limit, no recycling the free slot
+-- ----------------------------------------------------------------------------
+--  Everything below is DORMANT until you switch enforcement on:
+--
+--      update public.pc_config set value = 'true' where key = 'plans_enforced';
+--
+--  Until then the site behaves exactly as before (no limits, nothing locked),
+--  so this section is safe to run on production ahead of Stripe going live.
+--  Run it on the STAGING project first and flip the switch there to test.
+--
+--  The rules (once enforced)
+--    free account   one property, ever. The counter never goes down when a
+--                   property is deleted, so delete-and-re-add gains nothing
+--                   (an untouched blank card is the one exception, so clicking
+--                   "Add a property" by mistake does not burn the slot).
+--                   Name, type, state, purchase date, purchase price and buying
+--                   costs lock once saved, so the one property cannot be edited
+--                   into a different one. Figures that really change (value,
+--                   loan, rent, running costs) stay editable.
+--    paid account   subscription_status active/trialing. Up to property_limit
+--                   properties at once, edit anything. The Stripe webhook (service
+--                   role) writes subscription_status and property_limit.
+--    a second account by the same person is caught by pc_email_key(): dots and
+--    +tags in Gmail addresses collapse to one key, and the claim survives the
+--    account being deleted.
+-- ============================================================================
+
+create table if not exists public.pc_config (
+  key   text primary key,
+  value text not null
+);
+alter table public.pc_config enable row level security;   -- no policies: only the functions below can read it
+insert into public.pc_config (key, value) values ('plans_enforced', 'false')
+  on conflict (key) do nothing;
+
+alter table public.profiles add column if not exists property_limit    integer not null default 1;
+alter table public.profiles add column if not exists properties_created integer not null default 0;
+
+-- Stripe billing: written only by the webhook (service role), see the trigger below
+alter table public.profiles add column if not exists stripe_customer_id     text;
+alter table public.profiles add column if not exists stripe_subscription_id text;
+alter table public.profiles add column if not exists plan_period_end        timestamptz;
+create index if not exists profiles_stripe_customer_idx on public.profiles (stripe_customer_id);
+
+-- existing accounts: count what they already have so the counter starts true
+update public.profiles p
+   set properties_created = greatest(p.properties_created, s.n)
+  from (select user_id, count(*)::int as n from public.properties group by user_id) s
+ where s.user_id = p.id;
+
+create or replace function public.pc_plans_enforced()
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select coalesce((select value = 'true' from public.pc_config where key = 'plans_enforced'), false);
+$$;
+
+-- past_due counts as paid: a failed renewal keeps working while Stripe retries
+-- the card. Once Stripe gives up the subscription is cancelled and the webhook
+-- writes 'canceled'.
+create or replace function public.pc_is_paid(status text)
+returns boolean
+language sql immutable
+as $$ select coalesce(status, 'free') in ('active', 'trialing', 'past_due'); $$;
+
+-- a paid plan that has ended, on an account holding more than the free
+-- property: everything stays visible and can be deleted, nothing can be
+-- edited or added until they renew. Down to one property it is a free account.
+create or replace function public.pc_is_read_only(uid uuid)
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select public.pc_plans_enforced()
+     and coalesce((select subscription_status = 'canceled' from public.profiles where id = uid), false)
+     and (select count(*) from public.properties where user_id = uid) > 1;
+$$;
+
+-- one address, one free property: collapse the tricks people use for "new" emails
+create or replace function public.pc_email_key(e text)
+returns text
+language plpgsql immutable
+as $$
+declare
+  local_part text;
+  dom text;
+begin
+  e := lower(trim(coalesce(e, '')));
+  if position('@' in e) = 0 then return e; end if;
+  local_part := split_part(split_part(e, '@', 1), '+', 1);
+  dom := split_part(e, '@', 2);
+  if dom in ('gmail.com', 'googlemail.com') then
+    dom := 'gmail.com';
+    local_part := replace(local_part, '.', '');
+  end if;
+  return local_part || '@' || dom;
+end;
+$$;
+
+-- who has used their free property. No foreign key on purpose: it must outlive
+-- the account. No policies: only the security definer functions touch it.
+create table if not exists public.pc_free_claims (
+  email_key  text primary key,
+  user_id    uuid not null,
+  claimed_at timestamptz not null default now()
+);
+alter table public.pc_free_claims enable row level security;
+
+-- Clients (anon/authenticated) can never write the plan columns themselves.
+-- Without this, "profiles - update own" would let anyone set their own
+-- subscription_status to 'active' from the browser console. The service role
+-- (Stripe webhook) and the SQL editor are not "authenticated"/"anon", so they pass.
+create or replace function public.pc_protect_plan_columns()
+returns trigger
+language plpgsql
+as $$
+begin
+  if current_user in ('authenticated', 'anon') then
+    if tg_op = 'INSERT' then
+      new.subscription_status := 'free';
+      new.property_limit := 1;
+      new.properties_created := 0;
+      new.stripe_customer_id := null;
+      new.stripe_subscription_id := null;
+      new.plan_period_end := null;
+    else
+      new.subscription_status := old.subscription_status;
+      new.property_limit := old.property_limit;
+      new.properties_created := old.properties_created;
+      /* a browser must never be able to point its account at someone else's Stripe customer */
+      new.stripe_customer_id := old.stripe_customer_id;
+      new.stripe_subscription_id := old.stripe_subscription_id;
+      new.plan_period_end := old.plan_period_end;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_plan on public.profiles;
+create trigger profiles_protect_plan
+  before insert or update on public.profiles
+  for each row execute function public.pc_protect_plan_columns();
+
+-- adding a property
+create or replace function public.pc_properties_before_insert()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+declare
+  prof   record;
+  claim  record;
+  ekey   text;
+  cnt    integer;
+begin
+  if not public.pc_plans_enforced() then return new; end if;
+  if auth.uid() is null then return new; end if;   -- service role / SQL editor
+
+  select subscription_status, property_limit, properties_created, email
+    into prof from public.profiles where id = new.user_id;
+
+  if public.pc_is_read_only(new.user_id) then
+    raise exception 'pc_read_only: your plan has ended, renew to add or edit properties';
+  end if;
+
+  if public.pc_is_paid(prof.subscription_status) then
+    select count(*) into cnt from public.properties where user_id = new.user_id;
+    if cnt >= coalesce(prof.property_limit, 1) then
+      raise exception 'pc_property_limit: your plan covers % properties', coalesce(prof.property_limit, 1);
+    end if;
+    return new;
+  end if;
+
+  if coalesce(prof.properties_created, 0) >= 1 then
+    raise exception 'pc_free_used: the free plan covers your first property';
+  end if;
+
+  ekey := public.pc_email_key(coalesce(prof.email, (select email from auth.users where id = new.user_id)));
+  select * into claim from public.pc_free_claims where email_key = ekey;
+  if found and claim.user_id <> new.user_id then
+    raise exception 'pc_free_used: the free property for this email address has already been used';
+  end if;
+  insert into public.pc_free_claims (email_key, user_id) values (ekey, new.user_id)
+    on conflict (email_key) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists properties_before_insert_plan on public.properties;
+create trigger properties_before_insert_plan
+  before insert on public.properties
+  for each row execute function public.pc_properties_before_insert();
+
+-- the counter only ever goes up (always on, so it is accurate when you enforce)
+create or replace function public.pc_properties_after_insert()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+begin
+  update public.profiles set properties_created = properties_created + 1 where id = new.user_id;
+  return new;
+end;
+$$;
+
+drop trigger if exists properties_after_insert_plan on public.properties;
+create trigger properties_after_insert_plan
+  after insert on public.properties
+  for each row execute function public.pc_properties_after_insert();
+
+-- deleting a card that was never filled in gives the slot back; anything real does not
+create or replace function public.pc_properties_after_delete()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if coalesce(nullif(trim(old.name), ''), 'Untitled property') = 'Untitled property'
+     and old.purchase_price is null and old.purchase_date is null
+     and old.current_value is null and old.loan_balance is null then
+    update public.profiles set properties_created = greatest(0, properties_created - 1) where id = old.user_id;
+  end if;
+  return old;
+end;
+$$;
+
+drop trigger if exists properties_after_delete_plan on public.properties;
+create trigger properties_after_delete_plan
+  after delete on public.properties
+  for each row execute function public.pc_properties_after_delete();
+
+-- editing: on the free plan the acquisition facts lock once they are set
+create or replace function public.pc_properties_before_update()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+declare
+  status text;
+  named  boolean;
+begin
+  if not public.pc_plans_enforced() then return new; end if;
+  if auth.uid() is null then return new; end if;
+
+  select subscription_status into status from public.profiles where id = new.user_id;
+  if public.pc_is_paid(status) then return new; end if;
+
+  if public.pc_is_read_only(new.user_id) then
+    raise exception 'pc_read_only: your plan has ended, renew to add or edit properties';
+  end if;
+
+  named := coalesce(nullif(trim(old.name), ''), 'Untitled property') <> 'Untitled property';
+  if named and new.name is distinct from old.name then
+    raise exception 'pc_locked_field: the property name is set once on the free plan';
+  end if;
+  if named and new.property_type is distinct from old.property_type then
+    raise exception 'pc_locked_field: the property type is set once on the free plan';
+  end if;
+  if old.state is not null and new.state is distinct from old.state then
+    raise exception 'pc_locked_field: the state is set once on the free plan';
+  end if;
+  if old.purchase_date is not null and new.purchase_date is distinct from old.purchase_date then
+    raise exception 'pc_locked_field: the purchase date is set once on the free plan';
+  end if;
+  if old.purchase_price is not null and new.purchase_price is distinct from old.purchase_price then
+    raise exception 'pc_locked_field: the purchase price is set once on the free plan';
+  end if;
+  if old.acquisition_costs is not null and new.acquisition_costs is distinct from old.acquisition_costs then
+    raise exception 'pc_locked_field: the buying costs are set once on the free plan';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists properties_before_update_plan on public.properties;
+create trigger properties_before_update_plan
+  before update on public.properties
+  for each row execute function public.pc_properties_before_update();
+
+-- leases follow their property: read-only while a lapsed plan is read-only
+-- (deleting stays allowed, as for properties)
+create or replace function public.pc_leases_before_write()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if auth.uid() is null then return new; end if;
+  if public.pc_is_read_only(new.user_id) then
+    raise exception 'pc_read_only: your plan has ended, renew to add or edit properties';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists leases_before_write_plan on public.leases;
+create trigger leases_before_write_plan
+  before insert or update on public.leases
+  for each row execute function public.pc_leases_before_write();
+
+-- what the page asks: {enforced, status, paid, limit, created, count}
+create or replace function public.pc_plan()
+returns jsonb
+language sql stable security definer set search_path = public
+as $$
+  select jsonb_build_object(
+    'enforced', public.pc_plans_enforced(),
+    'status',   coalesce(p.subscription_status, 'free'),
+    'paid',     public.pc_is_paid(p.subscription_status),
+    'limit',    case when public.pc_is_paid(p.subscription_status) then p.property_limit else 1 end,
+    'created',  p.properties_created,
+    'count',    (select count(*) from public.properties where user_id = p.id),
+    'readonly', public.pc_is_read_only(p.id)
+  )
+  from public.profiles p where p.id = auth.uid();
+$$;
+
+grant execute on function public.pc_plan() to authenticated;

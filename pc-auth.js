@@ -254,6 +254,28 @@
   }
 
   /* ---- reports API ---------------------------------------------------------- */
+  /* Stripe billing runs on same-origin serverless functions (api/). The browser
+     only sends who it is (its Supabase token); the plan a customer ends up on
+     is written by the Stripe webhook, never by the page. */
+  function billingCall(path, body) {
+    var bad = requireClient();
+    if (bad) return Promise.resolve(bad);
+    return client.auth.getSession().then(function (res) {
+      var token = res.data && res.data.session && res.data.session.access_token;
+      if (!token) return { error: { message: "Please sign in first." } };
+      return fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify(body || {})
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok || !j.url) return { error: { message: j.error || "Something went wrong. Please try again." } };
+          return { url: j.url };
+        });
+      });
+    }, function () { return { error: { message: "Something went wrong. Please try again." } }; });
+  }
+
   function requireClient() {
     if (!CONFIGURED) return { error: { message: "Accounts are not set up yet." } };
     if (!client) return { error: { message: "Auth client not ready." } };
@@ -566,24 +588,32 @@
       if (has("loan_balance")) row.loan_balance = money(property.loan_balance);
       if (has("interest_rate")) { var r = money(property.interest_rate); row.interest_rate = r != null && r <= 100 ? r : null; }
       if (has("annual_running_costs")) row.annual_running_costs = money(property.annual_running_costs);
-      var withEntity = has("holding_entity");
-      if (withEntity) row.holding_entity = String(property.holding_entity || "").trim().slice(0, 120) || null;
+      if (has("holding_entity")) row.holding_entity = String(property.holding_entity || "").trim().slice(0, 120) || null;
+      if (has("is_sold")) row.is_sold = !!property.is_sold;
       function write(r) {
         return property.id
           ? client.from("properties").update(r).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
           : client.from("properties").insert(r).select().maybeSingle();
       }
-      return write(row).then(function (res) {
-        /* the entity column comes from a database update; if it has not been run yet,
-           save everything else and say so instead of failing the whole save */
-        if (res.error && withEntity && /holding_entity/i.test(res.error.message || "")) {
-          var rest = Object.assign({}, row); delete rest.holding_entity;
-          return write(rest).then(function (r2) {
-            return { data: r2.data, error: r2.error, warning: "Saved, but the entity name needs the latest database update (run supabase-schema.sql), so it was not kept." };
-          });
-        }
-        return { data: res.data, error: res.error };
-      });
+      /* these columns come from later database updates; if one has not been run
+         yet, save everything else and say so instead of failing the whole save */
+      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status" };
+      var dropped = [];
+      function attempt(r) {
+        return write(r).then(function (res) {
+          var msg = (res.error && res.error.message) || "";
+          var k = Object.keys(LATER_COLS).filter(function (c) { return c in r && msg.indexOf(c) !== -1; })[0];
+          if (k) {
+            var rest = Object.assign({}, r); delete rest[k];
+            dropped.push(LATER_COLS[k]);
+            return attempt(rest);
+          }
+          var out = { data: res.data, error: res.error };
+          if (dropped.length && !res.error) out.warning = "Saved, but " + dropped.join(" and ") + " needs the latest database update (run supabase-schema.sql), so it was not kept.";
+          return out;
+        });
+      }
+      return attempt(row);
     },
 
     /* The portfolio summary the calculators pull "funds available" from
@@ -601,6 +631,54 @@
         var built = pcPortfolio.build(props.data || [], (settings && settings.data) || {});
         return { data: built.totals.counted > 0 ? built.summary : null, error: null };
       });
+    },
+
+    /* The plan rules (free first property, paid limit) live in the database:
+       pc_plan() in supabase-schema.sql. Nothing here enforces anything, it
+       only tells the page what to show. Fails safe: if the function is not
+       installed yet, or the switch is off, the answer is "not enforced" and
+       the page behaves exactly as it always has. */
+    /* what the "Your plan and billing" card shows: read from the signed-in user's own profile row */
+    /* upgrade on the existing subscription: confirm=false only prices it */
+    changePlan: function (plan, confirm) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.auth.getSession().then(function (res) {
+        var token = res.data && res.data.session && res.data.session.access_token;
+        if (!token) return { error: { message: "Please sign in first." } };
+        return fetch("/api/change-plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+          body: JSON.stringify({ plan: plan, confirm: !!confirm })
+        }).then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            if (!r.ok) return { error: { message: j.error || "Something went wrong. Please try again." } };
+            return { data: j };
+          });
+        });
+      }, function () { return { error: { message: "Something went wrong. Please try again." } }; });
+    },
+
+    getBilling: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve({ data: null, error: bad.error });
+      return client.from("profiles").select("subscription_status,property_limit,plan_period_end,stripe_customer_id")
+        .eq("id", currentUser.id).maybeSingle()
+        .then(function (res) { return { data: res.data || null, error: res.error || null }; },
+              function () { return { data: null, error: { message: "Could not load billing." } }; });
+    },
+
+    startCheckout: function (plan) { return billingCall("/api/create-checkout", { plan: plan }); },
+    openBillingPortal: function () { return billingCall("/api/billing-portal", {}); },
+
+    getPlan: function () {
+      var open = { data: { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0, readonly: false }, error: null };
+      var bad = requireClient();
+      if (bad) return Promise.resolve(open);
+      return client.rpc("pc_plan").then(function (res) {
+        if (res.error || !res.data || typeof res.data !== "object") return open;
+        return { data: res.data, error: null };
+      }, function () { return open; });
     },
 
     /* Portfolio-level tax settings live in profiles.tax_settings (jsonb).

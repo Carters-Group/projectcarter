@@ -34,6 +34,7 @@ account.html                    sign in / sign up (magic link or password) + the
 pc-auth.js                      shared Supabase client - window.pcAuth (auth, save/list/get/rename/delete/duplicate report, properties + leases CRUD, tax settings, getPortfolioSummary for the calculators' funds-available, update profile incl. occupation), auth status bar, subscription gate (canSave, always true for now)
 tax.js                          land tax + capital gains tax estimators (window.pcTax, pure functions, unit-tested in tax.test.js) - see "Property register and tax position" below
 portfolio.js                    portfolio metrics from the property register (window.pcPortfolio, pure, unit-tested in portfolio.test.js): equity / LVR / useable equity, yield, cash flow, growth, land tax share, cash in hand if sold, portfolio totals and the summary the calculators pull
+pc-pdf.js                       shared PDF pieces (window.pcPdf): the "THE BOTTOM LINE" box every calculator PDF and the account sale estimates open with, the answer in one or two plain sentences before any workings
 pc-report.js                    shared per-calculator wiring - "Project name or address" field, "Save report" button, ?report=<id> rehydration
 supabase-schema.sql             one-time SQL for the Supabase project: profiles (incl. occupation, tax_settings) + reports + properties/leases tables (properties carry the land tax / CGT fields), row-level security, subscription_status column, one-master-portfolio-per-user constraint
 styles.css                      design system + layout (home, project pages, landing, calculator, account)
@@ -150,7 +151,9 @@ entered" and `0` means "none" (a loan balance of 0 is a property with no loan).
 `portfolio.test.js`) derives every figure from those fields, so no number is
 ever asked for twice and none can disagree: per property, equity, LVR, useable
 equity at 70% and 80%, gross yield, cash flow before tax (rent from current
-leases less running costs less interest), growth since purchase, land tax share
+leases less running costs, its share of the estimated land tax, and interest;
+land tax is a recurring holding cost, so it also comes off the portfolio's net
+rental income that the ROI projection grows), growth since purchase, land tax share
 and cash in hand if sold (net proceeds less the loan less capital gains tax);
 for the portfolio, the sums plus land tax by state, a blended interest rate and
 the cash in hand if everything were sold. Totals only count properties that
@@ -158,6 +161,16 @@ have what each figure needs, and a "To complete your picture" list names who is
 missing what rather than guessing. Each collapsed property shows a one-line
 summary strip (value, equity, LVR, yield, cash flow, cash if sold) that updates
 live as the form is edited.
+
+**Sold properties.** Ticking "I have sold this property" (`properties.is_sold`)
+turns the "If you sold" block into the actual sale (contract date and price)
+and moves the property into a collapsed "Sold properties" group. It drops out of
+every portfolio figure, land tax, the leases summary and the equity the
+calculators pull, but its realised capital gains tax stays under Exit strategy,
+grouped by the financial year of the sale contract, with a "Capital gains on
+sale" PDF for the accountant. Unticking brings it back. Cash in hand for a
+property owned by a company, trust or super fund carries a note that it stays
+with that entity and paying it out can carry further tax.
 
 The "Your portfolio" card on top of the page reads from that, and so do its
 debt-reduction goal, portfolio plan (which also seeds a saved ROI projection)
@@ -215,14 +228,44 @@ property form):
 
 Re-run `supabase-schema.sql` before deploying this (it adds the property tax
 columns, the current value / loan balance / interest rate / running costs
-columns and `profiles.tax_settings`); until then saving a property shows a
+columns, `profiles.tax_settings` and `properties.is_sold`); until then saving a property shows a
 prompt to do so. Run `node --test portfolio.test.js tax.test.js stamp.test.js`
 for the estimator tests.
 
-Everything is **free**. `profiles.subscription_status` (defaults to `'free'`)
-and the `pc_can_save()` SQL function are the hooks for a future paywall - today
-`pc_can_save()` always returns true. Wiring Stripe later is a contained change
-(flip the column, tighten that one function and the `reports` INSERT policy).
+Calculators and saved reports stay free (they are the email-list lead source).
+What is paid is the number of properties in the register: the first is free,
+more need a Do It Yourself plan (Stripe). The rules live in the database
+(`supabase-schema.sql`, "PLANS") and stay dormant until `plans_enforced` is on.
+
+### Stripe billing (plans)
+
+- `api/create-checkout.js`, `api/billing-portal.js`, `api/change-plan.js`:
+  checkout, Stripe's billing page, upgrade to a bigger plan.
+- `api/stripe-webhook.js`: the only thing that writes a plan to `profiles`.
+- A failed renewal (`past_due`) keeps working while Stripe retries the card.
+  An ended plan on an account with more than one property is read-only
+  (view, download, delete; no edits or new properties) until renewed.
+- Done For You is sold through the enquiry form. Set its property limit by hand
+  in `profiles.property_limit`; the webhook will not overwrite it.
+
+The browser always talks to the Supabase project hard-coded in `pc-auth.js`
+(and allowed in the CSP in `vercel.json`), so `SUPABASE_URL` in every Vercel
+environment must be that same project. Test on a preview with Stripe **test**
+keys and a separate test account, not your real one: a test-mode customer id
+saved on an account would not exist in live mode.
+
+Setting it up, per environment (Preview / test mode first, then Production / live):
+
+1. Run `supabase-schema.sql` in that Supabase project's SQL editor.
+2. `node tools/stripe-setup.js` with that mode's `STRIPE_SECRET_KEY` (products and prices).
+3. `node tools/stripe-setup.js --webhook https://<site>/api/stripe-webhook` (prints the signing secret).
+4. Vercel env vars for that environment: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+   `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and
+   `STRIPE_AUTOMATIC_TAX=on` once Stripe Tax is set up. Redeploy.
+5. Test a purchase with card `4242 4242 4242 4242`, then
+   `update public.pc_config set value = 'true' where key = 'plans_enforced';`
+
+Run `node --test api/stripe-webhook.test.js` for the webhook tests.
 
 ### One-time setup
 

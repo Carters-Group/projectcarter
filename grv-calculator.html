@@ -680,7 +680,7 @@
       </nav>
     </div>
     <div class="wrap footer-legal">
-      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="billing-terms">Plans and Billing</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
@@ -702,6 +702,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script>
   (function () {
     "use strict";
@@ -1442,6 +1443,21 @@
       /* accounting style: a loss shows in brackets, no minus sign */
       function acct(n) { return n < 0 ? "(" + money(Math.abs(n)) + ")" : money(n); }
 
+      /* the answer first, in plain words */
+      if (m.grv > 0 && window.pcPdf) {
+        var bottom = "Building " + m.n + " dwelling" + (m.n === 1 ? "" : "s") + " that sell for " + money(m.grv) + " (" + money(m.netSales) +
+          " after selling costs and GST), against a total cost of " + money(m.totalCost) + ", is expected to make a " +
+          (m.profit < 0 ? "loss of " + money(-m.profit) : "profit of " + money(m.profit)) +
+          (m.margin != null ? ", " + m.margin.toFixed(1) + "% on cost (many funders look for roughly 15 to 20%)" : "") + ". ";
+        if (m.equityTotal > 0) {
+          bottom += "You put in " + money(m.equityTotal) + " of equity and borrow the rest, with debt peaking at " + money(m.peakDebt) +
+            (m.coc != null ? ", a " + m.coc.toFixed(1) + "% return on your cash" : "") + ". ";
+        }
+        bottom += "If sale prices fell " + (m.sDrop * 100).toFixed(0) + "% and costs rose " + (m.cRise * 100).toFixed(0) + "%, the result would be a " +
+          (m.worstProfit < 0 ? "loss of " + money(-m.worstProfit) : "profit of " + money(m.worstProfit)) + ".";
+        y = window.pcPdf.bottomLine(doc, L, y, bottom);
+      }
+
       section("Inputs & assumptions");
       row("Building contract", m.dc ? "Design & construct" : "Construct only / trade contracts");
       var r = buildRate();
@@ -1498,8 +1514,8 @@
       row("Peak debt (end of period)", money(m.peakDebt), true);
       row("Cash-on-cash return", m.coc != null ? m.coc.toFixed(2) + "%" : "-", true);
 
-      doc.addPage();
-      y = 56;
+      /* a fresh page for the finance detail, unless the funding block already spilled onto one */
+      if (y > PAGE_H * 0.5) { doc.addPage(); y = 56; } else { y += 6; }
       section("Finance charges");
       if (!m.financeRows.length) row("None entered", "-");
       m.financeRows.forEach(function (fr) {

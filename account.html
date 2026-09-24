@@ -188,14 +188,6 @@
             <a href="#acctQuickCard" data-nav="acctQuickCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Calculators</span></a>
             <a href="#acctDetailsCard" data-nav="acctDetailsCard"><span class="acct-nav__dot"></span><span class="acct-nav__label">Profile</span></a>
           </nav>
-          <a class="acct-starthere-bar acct-dash-start" id="acctStartHere" href="#acctLeaseCard" hidden>
-            <span class="acct-starthere-bar__icon" style="background-image:url('assets/images/calculators/pr-icon.svg')" aria-hidden="true"></span>
-            <span class="acct-starthere-bar__text">
-              <strong>Start here - add your first property</strong>
-              <span>Enter each property once and your equity, cash flow, land tax and sale position are worked out for you. Every calculator can then pull your equity straight from it.</span>
-            </span>
-            <span class="link-arrow">Add</span>
-          </a>
 
           <div class="acct-starthere-bar acct-dash-pwnudge" id="acctPasswordNudge" hidden>
             <span class="acct-starthere-bar__text">
@@ -207,22 +199,32 @@
           </div>
 
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
-            <div class="acct-identity-row">
-              <div class="acct-identity-row__text">
-                <p class="acct-eyebrow">Signed in as</p>
-                <p class="acct-email" id="acctWhoEmail">&mdash;</p>
-                <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
+            <div class="acct-planstrip" id="acctPlanStrip">
+              <div class="acct-planstrip__main">
+                <p class="acct-eyebrow">Your plan</p>
+                <p class="acct-planstrip__name"><span id="acctStripPlan">Free</span><span class="acct-pill" id="acctStripPill" hidden></span></p>
               </div>
-              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
+              <dl class="acct-planstrip__facts">
+                <div><dt>Properties</dt><dd id="acctStripProps">&mdash;</dd></div>
+                <div id="acctStripUntilWrap" hidden><dt>Paid until</dt><dd id="acctStripUntil"></dd></div>
+              </dl>
+              <a class="link-arrow acct-planstrip__link" id="acctStripLink" href="#acctBillingCard">Plan and billing</a>
+              <div class="acct-planstrip__start" id="acctStartHere" hidden>
+                <p><strong>Start here: add your first property.</strong> Your equity, cash flow, land tax and sale position are all worked out from it, and every calculator can pull your figures across.</p>
+                <button type="button" class="btn btn-sm acct-planstrip__startbtn" id="acctStartHereBtn">Add your first property</button>
+              </div>
             </div>
 
             <div class="acct-card-head">
               <h2 class="calc-subhead">Your portfolio</h2>
               <div class="acct-card-head__actions">
+                <button type="button" class="btn btn-ghost btn-sm" id="portfolioPdfBtn" hidden>Download portfolio PDF</button>
                 <button type="button" class="btn btn-accent btn-sm" id="portfolioAddBtn">Add a property</button>
               </div>
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
+            <p class="acct-plan-line" id="acctPlanLine" hidden></p>
+            <p class="acct-msg" id="acctBuyMsg" hidden></p>
 
             <div id="portfolioSet">
               <p class="acct-report__date" id="portfolioBasis"></p>
@@ -245,7 +247,7 @@
                   <span>Example figures &mdash; add a lease with a rent figure to see your real ones.</span>
                   <button type="button" class="btn btn-accent btn-sm" data-placeholder-add>Add a property</button>
                 </div>
-                <p class="field-hint">Rent from your current leases, less the running costs and loan interest you have entered. Tax on that income is not included.</p>
+                <p class="field-hint">Rent from your current leases, less running costs, land tax (worked out for you under Tax and land tax) and loan interest. Income tax on what is left is not included.</p>
               </div>
 
               <div id="portfolioGaps" hidden></div>
@@ -354,6 +356,12 @@
               No properties yet. Add your first one to see your portfolio, land tax and sale position.
             </p>
 
+            <details class="acct-workings acct-sold" id="soldGroup" hidden>
+              <summary>Sold properties <span class="acct-sold__count" id="soldCount"></span></summary>
+              <p class="field-hint acct-sold__hint">Kept out of your portfolio figures, land tax and leases. Their capital gains tax is under Exit strategy, grouped by financial year, with a PDF of each for your accountant. Untick "I have sold this property" to bring one back.</p>
+              <div id="soldProperties"></div>
+            </details>
+
             <div class="acct-property__actions acct-addprop">
               <button type="button" class="btn btn-accent btn-sm" id="leaseAddPropertyBtn">Add a property</button>
             </div>
@@ -408,7 +416,8 @@
               <div class="acct-debt-goal" id="portfolioIfSold" hidden>
                 <p class="acct-eyebrow">If you sold everything</p>
                 <div class="acct-overview acct-overview--modes" id="portfolioIfSoldStats"></div>
-                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under current law. The full workings are further down this card.</p>
+                <p class="field-hint">Each property sold on its own sale date and price (today and current value unless you set them), less selling costs, the loan balance and capital gains tax under the rules for each sale date. The full workings, and a PDF of each, are further down this card.</p>
+                <p class="field-hint" id="portfolioIfSoldEntity" hidden></p>
               </div>
 
 
@@ -437,7 +446,11 @@
           </div>
 
           <div class="card acct-card acct-dash-details" id="acctDetailsCard">
-            <h2 class="calc-subhead">Your details</h2>
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Your details</h2>
+              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
+            </div>
+            <p class="acct-signedin-as">Signed in as <strong id="acctWhoEmail">&mdash;</strong></p>
             <form id="profileForm">
               <div class="field">
                 <label for="profName">Name</label>
@@ -490,6 +503,30 @@
             <p class="acct-msg" id="passMsg" hidden></p>
           </div>
 
+          <div class="card acct-card acct-dash-billing" id="acctBillingCard">
+            <div class="acct-billing-head">
+              <h2 class="calc-subhead">Your plan and billing</h2>
+              <span class="acct-pill" id="acctBillingPill" hidden></span>
+            </div>
+            <dl class="acct-billing-facts" id="acctBillingFacts"></dl>
+            <p class="field-hint" id="acctBillingHint"></p>
+            <div class="acct-billing-actions">
+              <button type="button" class="btn btn-accent" id="acctBillingBtn" hidden>Manage billing</button>
+              <a href="pricing" class="btn btn-ghost" id="acctPlansLink">See plans</a>
+            </div>
+            <div class="acct-upgrade" id="acctUpgrade" hidden>
+              <h3 class="acct-subhead-sm">Add more properties</h3>
+              <div class="acct-upgrade__opts" id="acctUpgradeOpts" role="radiogroup" aria-label="Choose a bigger plan"></div>
+              <div class="acct-upgrade__quote" id="acctUpgradeQuote" hidden>
+                <p class="acct-upgrade__amt">Pay <strong id="acctUpgradeAmt"></strong> today</p>
+                <p class="acct-upgrade__why">We credit the time you have left on your current plan against the new price, and your 12 months start again today.</p>
+                <button type="button" class="btn btn-accent" id="acctUpgradeGo">Upgrade</button>
+              </div>
+            </div>
+            <p class="acct-msg" id="acctBillingMsg" hidden></p>
+            <p class="acct-billing-fine">Payments are handled securely by Stripe. Prices are in AUD and include GST. Each payment covers 12 months and renews automatically; cancel any time and your plan runs to the end of the paid year. Payments are not refundable. <a href="billing-terms">Plans and Billing terms</a></p>
+          </div>
+
           <div class="card acct-card acct-danger acct-dash-danger" id="acctDangerCard">
             <h2 class="calc-subhead">Request account deletion</h2>
             <p class="acct-empty">This wipes all your saved reports now and clears your name, phone and occupation from your profile, then signs you out. We'll email Trent to close your sign-in. Your login may still work until he does. Wiped reports can't be restored.</p>
@@ -525,7 +562,7 @@
       </nav>
     </div>
     <div class="wrap footer-legal">
-      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="billing-terms">Plans and Billing</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
@@ -558,12 +595,27 @@
     </div>
   </div>
 
+  <div class="acct-modal" id="lockModal" role="dialog" aria-modal="true" aria-labelledby="lockModalTitle" hidden>
+    <div class="acct-modal__box">
+      <h2 id="lockModalTitle">Before you save</h2>
+      <p>Your free property is saved as set at acquisition. Once saved, these details can't be edited on the free plan:</p>
+      <ul class="acct-lock-list" id="lockModalList"></ul>
+      <p>Everything else stays editable: current value, loan balance, interest rate, rent, running costs and the rest. Check the details above before you continue.</p>
+      <div class="acct-modal__actions">
+        <button type="button" class="btn btn-ghost" id="lockModalBack">Go back and check</button>
+        <button type="button" class="btn btn-accent" id="lockModalOk">Save and lock</button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="tax.js"></script>
   <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
+  <script src="portfolio-pdf.js"></script>
   <script>
   (function () {
     "use strict";
@@ -829,7 +881,12 @@
        portfolio card can sit straight under the hero instead */
     function updateStartHere(propertyCount) {
       var bar = document.getElementById("acctStartHere");
-      if (propertyCount > 0) hide(bar); else show(bar);
+      /* only invite a first property they can actually add (a free slot already
+         used, then deleted, cannot be re-used) */
+      var invite = !(propertyCount > 0) && !atPropertyLimit();
+      if (invite) show(bar); else hide(bar);
+      /* while the amber prompt shows it is the one way in; the usual button otherwise */
+      document.getElementById("portfolioAddBtn").hidden = invite;
     }
 
     /* nudges a magic-link-only visitor to set a password, once - stays gone
@@ -956,12 +1013,14 @@
     var SAMPLE_CASHFLOW = [
       ["Rent / yr", fmtMoney(156400)],
       ["Running costs / yr", fmtMoney(38900)],
+      ["Land tax / yr", fmtMoney(6200)],
+      ["Net rental income / yr", fmtMoney(111300)],
       ["Loan interest / yr", fmtMoney(91700)],
-      ["Cash flow / yr", fmtSignedMoney(25800)],
-      ["Cash flow / wk", fmtSignedMoney(496)],
+      ["Cash flow / yr", fmtSignedMoney(19600)],
+      ["Cash flow / wk", fmtSignedMoney(377)],
       ["Yield on value", fmtPct(6.0)]
     ];
-    var SAMPLE_RISK_BASIS = { portfolioDebt: 1528000, annualSurplus: 25800, grossRentalIncome: 156400 };
+    var SAMPLE_RISK_BASIS = { portfolioDebt: 1528000, annualSurplus: 19600, grossRentalIncome: 156400 };
 
     /* Toggles the blur on a placeholder block and its matching CTA row
        (id + "Cta"), wiring the CTA's "Add a property" button once. */
@@ -983,15 +1042,17 @@
       var riskCardEl = document.getElementById("acctRiskCard");
       var planCardEl = document.getElementById("acctPlanCard");
       if (!portfolio) { hide(riskCardEl); hide(planCardEl); return; }
-      if (leaseProperties.length) show(planCardEl); else hide(planCardEl);
+      var pdfBtn = document.getElementById("portfolioPdfBtn");
+      if (heldProperties().length) { show(planCardEl); show(pdfBtn); } else { hide(planCardEl); hide(pdfBtn); }
       var t = portfolio.totals, m = portfolio.missing;
       var ready = t.counted > 0;
 
-      document.getElementById("portfolioBasis").textContent = ready
+      var soldNote = t.soldProperties ? " Sold properties (" + t.soldProperties + ") are not included." : "";
+      document.getElementById("portfolioBasis").textContent = (ready
         ? (t.counted === t.count
           ? "All " + t.count + (t.count === 1 ? " property" : " properties") + " counted."
           : "Based on " + t.counted + " of " + t.count + " properties that have a current value and loan balance.")
-        : "Add a current value and loan balance to a property below to see your position. The figures below are examples.";
+        : "Add a current value and loan balance to a property below to see your position. The figures below are examples.") + (ready ? soldNote : "");
 
       var statsEl = document.getElementById("portfolioStats");
       var modesEl = document.getElementById("portfolioEquityModes");
@@ -1025,11 +1086,15 @@
       var cf = cfReady ? (function () {
         var c = [
           ["Rent / yr", fmtMoney(t.rent)],
-          ["Running costs / yr", fmtMoney(t.runningCosts)],
+          ["Running costs / yr", fmtMoney(t.runningCosts)]
+        ];
+        if (t.landTaxFlow > 0) c.push(["Land tax / yr", fmtMoney(t.landTaxFlow)]);
+        c = c.concat([
+          ["Net rental income / yr", fmtMoney(t.rent - t.runningCosts - (t.landTaxFlow || 0))],
           ["Loan interest / yr", fmtMoney(t.interest)],
           ["Cash flow / yr", fmtSignedMoney(t.cashFlow)],
           ["Cash flow / wk", fmtSignedMoney(t.cashFlowWeekly)]
-        ];
+        ]);
         if (t.grossYield != null) c.push([t.yieldKind === "net" ? "Net yield on value" : (t.yieldKind === "mixed" ? "Yield on value" : "Gross yield on value"), fmtPct(t.grossYield)]);
         return c;
       })() : SAMPLE_CASHFLOW;
@@ -1045,12 +1110,16 @@
           ["Capital gains tax", fmtMoney(t.cgtTax)]
         ];
         fillStats(document.getElementById("portfolioIfSoldStats"), sold);
+        var entNote = document.getElementById("portfolioIfSoldEntity");
+        var hasEntity = portfolio.props.some(function (p) { return !p.sold && p.sale.cashIfSold != null && p.owner !== "individual"; });
+        entNote.textContent = hasEntity ? ENTITY_NOTE : "";
+        entNote.hidden = !hasEntity;
         show(soldEl);
       } else { hide(soldEl); }
 
       var gapsEl = document.getElementById("portfolioGaps");
       var refs = portfolio.missingRefs || { value: [], loan: [], rent: [], rate: [] };
-      var noPurchaseRefs = portfolio.props.filter(function (p) { return p.value != null && p.sale.cgt && !p.sale.cgt.ready; }).map(function (p) { return { id: p.id, name: p.name }; });
+      var noPurchaseRefs = portfolio.props.filter(function (p) { return !p.sold && p.value != null && p.sale.cgt && !p.sale.cgt.ready; }).map(function (p) { return { id: p.id, name: p.name }; });
       var gapGroups = [
         { text: "Add a current value", refs: refs.value, field: "current_value" },
         { text: "Add a loan balance (0 if none)", refs: refs.loan, field: "loan_balance" },
@@ -1121,6 +1190,9 @@
        open with a blank lease row already in it, instead of a collapsed
        card the visitor has to expand and then add a lease into. */
     var pendingOpenPropertyId = null;
+
+    /* the properties still owned; sold ones only feed the capital gains section */
+    function heldProperties() { return leaseProperties.filter(function (p) { return !p.is_sold; }); }
 
     function daysUntil(dateStr) {
       if (!dateStr) return null;
@@ -1451,6 +1523,19 @@
       return lease;
     }
 
+    /* annual_rent is the one figure WALE and cash flow weight by, whichever
+       template built the row - residential enters a weekly/monthly amount,
+       so it is annualised here (for saving and for the live strip). */
+    function leaseForSave(row) {
+      var lease = serializeLeaseRow(row);
+      if (lease.is_periodic) lease.lease_expiry = null;
+      if (lease.rent_amount !== undefined) {
+        var amt = parseFloat((lease.rent_amount || "").toString().replace(/[^0-9.]/g, ""));
+        lease.annual_rent = isFinite(amt) ? amt * (lease.rent_frequency === "monthly" ? 12 : 52) : null;
+      }
+      return lease;
+    }
+
     function addLeaseRowEl(container, lease, propertyType) {
       lease = lease || {};
       var wrap = document.createElement("div");
@@ -1521,6 +1606,9 @@
           if (!window.confirm("Remove this lease? This can't be undone.")) return;
           window.pcAuth.deleteLease(row.dataset.leaseId).then(function (res) {
             if (res.error) { window.alert(res.error.message); return; }
+            /* take the row out here too: a card with unsaved changes is kept as is on reload */
+            row.remove();
+            renumberLeaseRows(container);
             loadLeaseRegister();
           });
         } else {
@@ -1577,6 +1665,7 @@
           '<span class="acct-property__name"></span>' +
           '<span class="acct-tag"></span>' +
           '<span class="acct-property__meta"></span>' +
+          '<span class="acct-property__unsaved" data-unsaved hidden>Unsaved changes</span>' +
           '<span class="acct-property__side">' +
             '<button type="button" class="acct-property__del" data-act="quick-delete" title="Delete this property" aria-label="Delete this property">Delete</button>' +
             '<span class="acct-property__caret" aria-hidden="true"></span>' +
@@ -1584,6 +1673,7 @@
           '<span class="acct-property__strip" data-strip></span>' +
         '</summary>' +
         '<div class="acct-property__body">' +
+          '<p class="field-hint acct-lock-note" data-lock-note hidden>Set at acquisition, so these lock once saved on the free plan: name, type, state, purchase date, purchase price and buying costs. Your figures that change (value, loan, rent, running costs) stay editable. Paid plans can edit everything. <a href="pricing">See plans</a></p>' +
           '<p class="acct-subhead">The property</p>' +
           fRow(
             '<div class="field"><label>Property name / address</label><input type="text" data-f="name" autocomplete="off" placeholder="e.g. 12 Smith St, Fitzroy" /></div>',
@@ -1626,7 +1716,7 @@
           ) +
           fRow(
             fPct("interest_rate", "Interest rate"),
-            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs. On a commercial lease, only what your net rent does not already cover")
+            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs. Not land tax, that is worked out for you. On a commercial lease, only what your net rent does not already cover")
           ) +
 
           '<p class="acct-subhead">What it earns</p>' +
@@ -1634,7 +1724,10 @@
           '<button type="button" class="linklike" data-act="add-lease">+ Add another lease</button>' +
           '<p class="field-hint" data-res-hint>A single house usually has one lease. For a duplex, unit block, townhouses or a granny flat, add a lease for each unit or dwelling.</p>' +
 
-          '<p class="acct-subhead">If you sold</p>' +
+          '<p class="acct-subhead" data-sale-head>If you sold</p>' +
+          fRow(
+            fTick("is_sold", "Status", "I have sold this property", "Takes it out of your portfolio figures and keeps its capital gains tax for your tax return")
+          ) +
           fRow(
             fDate("planned_sale_date", "Sale contract date", "starts at today, change it for a later sale"),
             fMoney("expected_sale_price", "Sale price", "starts at today's value"),
@@ -1686,6 +1779,8 @@
     /* what selling this property would leave you with, in one sentence */
     function salePreviewText(m) {
       var s = m.sale, c = s.cgt;
+      /* an entity's sale leaves the cash with the entity, not the owner personally */
+      var hand = m.owner && m.owner !== "individual" ? " with the " + (m.owner === "super" ? "super fund" : m.owner) : " in your hand";
       if (s.price == null) return "Add a current value, or a sale price, to see what selling would leave you with.";
       var before = s.cashBeforeTax != null ? " Before tax you would have about " + fmtMoney(s.cashBeforeTax) + " after selling costs and the loan." : "";
       if (!c || !c.ready) {
@@ -1695,15 +1790,24 @@
       if (c.preCgt) return "Bought before 20 September 1985, so generally outside capital gains tax today. Ask your accountant how the 2027 changes treat later growth." + before;
       var head = "Sold for " + fmtMoney(s.price) + ", you keep " + fmtMoney(c.proceeds) + " after selling costs";
       if (m.loan != null) head += " and owe " + fmtMoney(m.loan) + " to the lender";
-      if (c.loss) return head + ". There is no gain (a loss of " + fmtMoney(c.loss) + "), so no capital gains tax" + (m.loan != null ? ", leaving " + fmtMoney(c.proceeds - m.loan) + " in your hand" : "") + ".";
+      if (c.loss) return head + ". There is no gain (a loss of " + fmtMoney(c.loss) + "), so no capital gains tax" + (m.loan != null ? ", leaving " + fmtMoney(c.proceeds - m.loan) + hand : "") + ".";
       if (c.needsRate) return head + ". The capital gain is " + fmtMoney(c.gain) + ". Add your marginal tax rate under Tax and land tax to see the tax and your cash in hand.";
       var out = head + ". Capital gains tax is " + fmtMoney(c.tax) + (c.rules === "new" ? " under the rules from 1 July 2027" : "");
-      out += s.cashIfSold != null ? ", leaving " + fmtMoney(s.cashIfSold) + " in your hand." : ".";
+      out += s.cashIfSold != null ? ", leaving " + fmtMoney(s.cashIfSold) + hand + "." : ".";
       return out;
     }
 
     function stripItems(m) {
       var items = [];
+      if (m.sold) {
+        var c = m.sale.cgt;
+        if (c && c.saleDate) items.push(["Sold", fmtDate(c.saleDate + "T00:00:00")]);
+        if (m.sale.price != null) items.push(["For", fmtMoney(m.sale.price)]);
+        if (m.sale.tax != null) items.push(["Capital gains tax", fmtMoney(m.sale.tax)]);
+        else if (c && c.ready && c.loss) items.push(["Capital loss", fmtMoney(c.loss)]);
+        if (m.sale.cashIfSold != null) items.push(["Cash in hand", fmtMoney(m.sale.cashIfSold)]);
+        return items;
+      }
       if (m.value != null) items.push(["Value", fmtMoney(m.value)]);
       if (m.equity != null) { items.push(["Equity", fmtMoney(m.equity)]); items.push(["LVR", fmtPct(m.lvr)]); }
       if (m.grossYield != null) items.push([m.type === "commercial" ? "Net yield" : "Yield", fmtPct(m.grossYield)]);
@@ -1717,7 +1821,9 @@
       el.innerHTML = "";
       var items = stripItems(m);
       if (!items.length) {
-        el.appendChild(tEl("span", "acct-strip__empty", "Add the current value and loan balance to see this property's position."));
+        el.appendChild(tEl("span", "acct-strip__empty", m.sold
+          ? "Add the sale date and price, and the purchase date and price, to see the tax on this sale."
+          : "Add the current value and loan balance to see this property's position."));
         return;
       }
       items.forEach(function (pair) {
@@ -1732,7 +1838,7 @@
       details.querySelector(".acct-property__name").textContent = property.name || "Untitled property";
       var tag = details.querySelector(".acct-tag");
       var isCommercial = (details.querySelector('[data-f="property_type"]') || {}).value === "commercial";
-      tag.textContent = isCommercial ? "Commercial" : "Residential";
+      tag.textContent = (property.is_sold ? "Sold · " : "") + (isCommercial ? "Commercial" : "Residential");
       tag.className = "acct-tag " + (isCommercial ? "is-commercial" : "is-residential");
       details.classList.toggle("is-commercial", isCommercial);
       details.classList.toggle("is-residential", !isCommercial);
@@ -1761,10 +1867,12 @@
       var waWrap = details.querySelector("[data-wa-metro]");
       var typeButtons = Array.prototype.slice.call(details.querySelectorAll("[data-type-btn]"));
 
-      nameInput.value = property.name || "";
+      /* a brand-new property is stored as "Untitled property"; show an empty box to type into */
+      nameInput.value = property.name && property.name !== "Untitled property" ? property.name : "";
       typeSelect.value = property.property_type === "commercial" ? "commercial" : "residential";
       notesInput.value = property.notes || "";
       fillTaxFields(details, property);
+      applyFreeLocks(details, property);
 
       var newBuildWrap = details.querySelector("[data-new-build]");
       var v27Wrap = details.querySelector("[data-v27]");
@@ -1773,12 +1881,16 @@
       var salePriceEl = details.querySelector('[data-t="expected_sale_price"]');
       var v27El = details.querySelector('[data-t="value_at_jul_2027"]');
       var follow = { price: false, v27: false };
+      /* the date the box was auto-filled with, if it was - left blank on save
+         so "sell today" keeps meaning today instead of freezing on the day
+         the property was first saved */
+      var autoSaleDate = "";
       /* the "if sold" scenario starts from today's numbers instead of blanks;
          the price and 1 July 2027 value follow the current value until edited */
       function prefillSale() {
         if (!saleDateEl.value) {
           var now = new Date();
-          saleDateEl.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2);
+          saleDateEl.value = autoSaleDate = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2);
         }
         if (!salePriceEl.value && curValEl.value) salePriceEl.value = curValEl.value;
         if (typeSelect.value !== "commercial" && !v27El.value && curValEl.value) v27El.value = curValEl.value;
@@ -1800,12 +1912,32 @@
         });
       }
       function syncWaMetro() { waWrap.hidden = stateSel.value !== "WA"; }
+      /* once sold, the "if you sold" scenario becomes the actual sale */
+      var soldTick = details.querySelector('[data-t="is_sold"]');
+      var saleHead = details.querySelector("[data-sale-head]");
+      function hintOf(el) { return el.closest(".field").querySelector("label span"); }
+      function syncSold() {
+        var sold = soldTick.checked;
+        saleHead.textContent = sold ? "The sale" : "If you sold";
+        hintOf(saleDateEl).textContent = sold ? "(the date you signed the sale contract)" : "(starts at today, change it for a later sale)";
+        hintOf(salePriceEl).textContent = sold ? "(what it sold for)" : "(starts at today's value)";
+        hintOf(details.querySelector('[data-t="loan_balance"]')).textContent = sold ? "(what was repaid at settlement, 0 if none)" : "(enter 0 if none)";
+        details.classList.toggle("is-sold", sold);
+      }
+      soldTick.addEventListener("change", syncSold);
+      syncSold();
       function refreshLive() {
         var row = readTaxFields(details);
         row.id = property.id;
         row.name = nameInput.value.trim() || "Untitled property";
-        row.leases = property.leases || [];
-        var m = pcPortfolio.propertyMetrics(row, taxSettings);
+        /* the leases as typed, not as last saved, so rent shows in the strip straight away */
+        row.leases = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row")).map(leaseForSave);
+        /* run the whole portfolio with this card's typed values swapped in,
+           so its land tax share (which depends on the others in the same
+           state and entity) comes off its cash flow like it does above */
+        var others = leaseProperties.filter(function (p) { return p.id !== property.id; });
+        var built = pcPortfolio.build(others.concat([row]), taxSettings);
+        var m = built.props[built.props.length - 1];
         renderStrip(details, m);
         details.querySelector("[data-sale-preview]").textContent = salePreviewText(m);
         details.querySelector(".acct-property__name").textContent = row.name;
@@ -1852,6 +1984,15 @@
       }, true);
       body.addEventListener("input", refreshLive);
       body.addEventListener("change", function () { syncWaMetro(); refreshLive(); });
+      /* anything typed but not saved marks the card, so a reload of the list
+         (another card saved or added) keeps it as it is instead of wiping it */
+      function markDirty() {
+        if (details.dataset.dirty) return;
+        details.dataset.dirty = "1";
+        details.querySelector("[data-unsaved]").hidden = false;
+      }
+      body.addEventListener("input", markDirty);
+      body.addEventListener("change", markDirty);
       positionPct(details);
 
       details.querySelector('[data-act="add-lease"]').addEventListener("click", function () {
@@ -1881,7 +2022,7 @@
       }
 
       function deleteThisProperty() {
-        if (!window.confirm('Delete "' + (property.name || "this property") + '" and all its leases? This cannot be undone.')) return;
+        if (!window.confirm('Delete "' + (property.name || "this property") + '" and all its leases? This cannot be undone.' + (property.is_sold ? '' : '\n\nIf you have sold it, cancel and tick "I have sold this property" under If you sold instead. That keeps its capital gains tax for your tax return.'))) return;
         window.pcAuth.deleteProperty(property.id).then(function (res) {
           if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
           loadLeaseRegister();
@@ -1893,29 +2034,26 @@
         deleteThisProperty();
       });
 
-      details.querySelector('[data-act="save"]').addEventListener("click", function () {
+      function doSave() {
         setMsg(msgEl, "Saving…");
+        delete details.dataset.dirty;
+        details.querySelector("[data-unsaved]").hidden = true;
         var propWarning = "";
+        var fields = readTaxFields(details);
+        /* an actual sale keeps its date; a "what if" sale today stays floating */
+        if (!fields.is_sold && autoSaleDate && fields.planned_sale_date === autoSaleDate) fields.planned_sale_date = "";
         window.pcAuth.saveProperty(Object.assign({
           id: property.id,
           name: nameInput.value.trim() || "Untitled property",
           property_type: typeSelect.value,
           notes: notesInput.value
-        }, readTaxFields(details))).then(function (res) {
-          if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); return; }
+        }, fields)).then(function (res) {
+          if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); markDirty(); return; }
           propWarning = res.warning || "";
           var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
-            var lease = serializeLeaseRow(row);
+            var lease = leaseForSave(row);
             lease.property_id = property.id;
-            if (lease.is_periodic) lease.lease_expiry = null;
-            /* annual_rent is the one figure WALE and cash flow weight by,
-               whichever template built this row - residential enters a
-               weekly/monthly amount, so annualise it here before saving. */
-            if (lease.rent_amount !== undefined) {
-              var amt = parseFloat((lease.rent_amount || "").toString().replace(/[^0-9.]/g, ""));
-              lease.annual_rent = isFinite(amt) ? amt * (lease.rent_frequency === "monthly" ? 12 : 52) : null;
-            }
             return window.pcAuth.saveLease(lease);
           });
           Promise.all(saves).then(function (results) {
@@ -1924,13 +2062,19 @@
                lease row failed. keepMsg so the reload doesn't clear the
                result message before the visitor sees it. */
             details.open = false; /* saved: tuck the card away again */
+            var nowSold = !!fields.is_sold && !property.is_sold;
             loadLeaseRegister(true).then(function () {
               if (failed) setMsg(leaseMsgEl, "Property saved, but a lease didn't: " + failed.error.message, "error");
               else if (propWarning) setMsg(leaseMsgEl, propWarning, "error");
+              else if (nowSold) setMsg(leaseMsgEl, "Marked as sold. It has moved to Sold properties below, and its capital gains tax is under Exit strategy.", "ok");
               else setMsg(leaseMsgEl, "Saved.", "ok");
             });
           });
         });
+      }
+
+      details.querySelector('[data-act="save"]').addEventListener("click", function () {
+        confirmLocks(details, nameInput, typeSelect).then(function (ok) { if (ok) doSave(); });
       });
 
       return details;
@@ -1938,18 +2082,32 @@
 
     function renderLeaseProperties(properties) {
       var wrap = document.getElementById("leaseProperties");
+      var soldWrap = document.getElementById("soldProperties");
+      var soldGroup = document.getElementById("soldGroup");
       var emptyEl = document.getElementById("leaseEmpty");
       var openIds = {};
-      wrap.querySelectorAll(".acct-property[open]").forEach(function (d) { openIds[d.dataset.propertyId] = true; });
+      document.querySelectorAll("#leaseProperties .acct-property[open], #soldProperties .acct-property[open]").forEach(function (d) { openIds[d.dataset.propertyId] = true; });
 
+      /* cards with unsaved changes are moved across as they are, not rebuilt */
+      var keep = {};
+      document.querySelectorAll("#leaseProperties .acct-property[data-dirty], #soldProperties .acct-property[data-dirty]").forEach(function (d) { keep[d.dataset.propertyId] = d; });
       wrap.innerHTML = "";
-      if (!properties || !properties.length) { show(emptyEl); return; }
-      hide(emptyEl);
-      properties.forEach(function (property) {
-        var el = buildPropertyEl(property);
+      soldWrap.innerHTML = "";
+      var held = (properties || []).filter(function (p) { return !p.is_sold; });
+      var sold = (properties || []).filter(function (p) { return p.is_sold; });
+      emptyEl.hidden = held.length > 0;
+      held.forEach(function (property) {
+        var el = keep[property.id] || buildPropertyEl(property);
         if (openIds[property.id]) el.open = true;
         wrap.appendChild(el);
       });
+      sold.forEach(function (property) {
+        var el = keep[property.id] || buildPropertyEl(property);
+        if (openIds[property.id]) el.open = true;
+        soldWrap.appendChild(el);
+      });
+      soldGroup.hidden = !sold.length;
+      document.getElementById("soldCount").textContent = sold.length ? "(" + sold.length + ")" : "";
     }
 
     /* ---- Tax and land tax section (land tax by state + CGT if sold) ------------
@@ -1983,6 +2141,10 @@
 
     function taxErrMsg(err) {
       var m = (err && err.message) || "Something went wrong.";
+      if (/pc_free_used/.test(m)) return "The free plan covers your first property, and that has been used. Add more from $250 a year and everything unlocks.";
+      if (/pc_property_limit/.test(m)) return "You have reached the number of properties your plan covers. Contact us to add more.";
+      if (/pc_read_only/.test(m)) return "Your paid plan has ended, so your properties are read-only. Renew to edit them again.";
+      if (/pc_locked_field/.test(m)) return"That detail is set at acquisition, so it is locked on the free plan. Upgrade to change it.";
       if (/tax_settings|column|schema cache/i.test(m)) {
         return "The tax features need the latest database update. Run supabase-schema.sql in the Supabase SQL editor, then reload this page.";
       }
@@ -2000,7 +2162,7 @@
       var sec = tEl("div", "acct-tax-section");
       sec.appendChild(tEl("h3", "calc-subhead acct-tax-title", "Land tax"));
 
-      var props = leaseProperties.map(function (p) {
+      var props = heldProperties().map(function (p) {
         return {
           id: p.id, name: p.name || "Untitled property", state: p.state,
           owner: p.ownership_type || "individual", entity: p.holding_entity || "", landValue: Number(p.land_value) || 0, waMetro: !!p.wa_metro
@@ -2070,12 +2232,14 @@
       var rows = [];
       function row(label, value, strong) { rows.push([label, value, !!strong]); }
       var i = r.inputs;
+      row("Owned by", (pcTax.OWNERS[r.owner] || "Individual(s)") + (m && m.entity ? ", " + m.entity : ""));
       row("Purchase price", fmtMoney(i.purchasePrice));
       if (i.acqCosts) row("Plus buying costs", fmtMoney(i.acqCosts));
       if (i.improvements) row("Plus capital improvements", fmtMoney(i.improvements));
       if (i.worksClaimed) row("Less building write-off (Division 43)", fmtSignedMoney(-i.worksClaimed));
       row("Cost base", fmtMoney(r.costBase), true);
       row("Sale price", fmtMoney(i.salePrice));
+      row("Sale contract date", fmtDate(r.saleDate + "T00:00:00"));
       row("Less selling costs (" + i.sellingCostPct + "% of sale price)", fmtSignedMoney(-r.sellingCosts));
       row("Net sale proceeds", fmtMoney(r.proceeds), true);
       row(r.gain > 0 ? "Capital gain" : "Capital loss", fmtMoney(Math.abs(r.gain)), true);
@@ -2116,9 +2280,10 @@
     }
 
     function workingsNote(r) {
-      return r.reform && r.reform.v27Estimated
-        ? "The 1 July 2027 value is a steady-growth estimate. If you might sell after that date, a registered valuer's valuation as at 1 July 2027 will replace it with a firm figure."
-        : "";
+      var notes = [];
+      if (r.reform && r.reform.v27Estimated) notes.push("The 1 July 2027 value is a steady-growth estimate. If you might sell after that date, a registered valuer's valuation as at 1 July 2027 will replace it with a firm figure.");
+      if (r.owner && r.owner !== "individual") notes.push(ENTITY_NOTE);
+      return notes.join(" ");
     }
 
     function workingsTable(rows) {
@@ -2138,7 +2303,7 @@
        "What you entered"-style rows read top to bottom, one boxed figure
        at the end for the answer. No colour-coding - a deduction reads as
        a negative number, same as every other report on the site. */
-    function downloadWorkingsPdf(name, rows, note) {
+    function downloadWorkingsPdf(name, rows, note, bottomLine, sold) {
       if (!window.jspdf || !window.jspdf.jsPDF) { window.alert("The PDF tool did not load. Check your connection and try again."); return; }
       var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
       var w = doc.internal.pageSize.getWidth(), h = doc.internal.pageSize.getHeight(), L = 48, y = 56;
@@ -2153,7 +2318,7 @@
       doc.setDrawColor(95, 161, 208); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
 
       doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
-      doc.text(pdfText("Sale estimate: " + name), L, y + 44);
+      doc.text(pdfText((sold ? "Capital gains on sale: " : "Sale estimate: ") + name), L, y + 44);
       doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
       doc.text("Prepared " + new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }), L, y + 61);
       y += 92;
@@ -2166,7 +2331,7 @@
       function row(k, v, strong) {
         var label = doc.splitTextToSize(pdfText(k), w - L * 2 - 170);
         var val = doc.splitTextToSize(pdfText(v), 160);
-        var lh = 15, need = Math.max(label.length, val.length) * lh + 3;
+        var lh = 14, need = Math.max(label.length, val.length) * lh + 2;
         ensure(need);
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal"); doc.setTextColor(strong ? 20 : 90);
@@ -2191,14 +2356,33 @@
         y += bh + 10;
       }
 
-      section("How the sale works out");
+      /* the answer first, in one plain sentence, before any workings */
+      if (bottomLine) {
+        y = window.pcPdf.bottomLine(doc, L, y, bottomLine) - 2;
+      }
+
+      /* three short steps instead of one long list: the gain, the tax on
+         it, and what is left once the loan and tax are paid */
       var last = rows[rows.length - 1];
       var bigKey = last && last[2] ? last[0] : null;
-      rows.forEach(function (x) {
-        if (x === last && bigKey) return;
-        row(x[0], x[1], x[2]);
+      var gainAt = -1, keepAt = rows.length;
+      rows.forEach(function (x, idx) {
+        if (gainAt < 0 && /^Capital (gain|loss)/.test(x[0])) gainAt = idx;
+        if (keepAt === rows.length && /^Less loan balance/.test(x[0])) keepAt = idx;
       });
-      if (bigKey) { y += 6; bigrow(bigKey, last[1]); }
+      function block(title, from, to) {
+        if (from >= to) return;
+        section(title);
+        for (var k = from; k < to; k++) {
+          if (rows[k] === last && bigKey) continue;
+          row(rows[k][0], rows[k][1], rows[k][2]);
+        }
+        y += 10;
+      }
+      block("1. Your gain", 0, gainAt + 1);
+      block("2. The tax on it", gainAt + 1, keepAt);
+      block("3. What you keep", keepAt, rows.length);
+      if (bigKey) { y += 2; bigrow(bigKey, last[1]); }
 
       y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
@@ -2217,7 +2401,7 @@
         doc.text("Page " + p + " of " + totalPages, w - L, ph - 22, { align: "right" });
       }
 
-      doc.save("sale-estimate-" + (name || "property").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".pdf");
+      doc.save((sold ? "capital-gains-" : "sale-estimate-") + (name || "property").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".pdf");
     }
 
     /* One collapsible for every property's workings: pick a property, read
@@ -2228,10 +2412,10 @@
       var pick = tEl("div", "acct-workings__pick");
       var lab = tEl("label", null, "Property");
       lab.setAttribute("for", "workingsSelect");
-      var sel = tEl("select");
+      var sel = tEl("select", "pc-pull__select");
       sel.id = "workingsSelect";
       ready.forEach(function (x, i) {
-        var o = tEl("option", null, x.p.name || "Untitled property");
+        var o = tEl("option", null, (x.p.name || "Untitled property") + (x.m.sold ? " (sold)" : ""));
         o.value = String(i);
         sel.appendChild(o);
       });
@@ -2252,7 +2436,7 @@
       sel.addEventListener("change", paint);
       dl.addEventListener("click", function () {
         var x = current();
-        downloadWorkingsPdf(x.p.name || "Untitled property", workingsRows(x.r, x.m), workingsNote(x.r));
+        downloadWorkingsPdf(x.p.name || "Untitled property", workingsRows(x.r, x.m), workingsNote(x.r), salePreviewText(x.m), x.m.sold);
       });
       paint();
       return det;
@@ -2289,20 +2473,93 @@
       return box;
     }
 
+    /* one row per property: gain, tax and cash in hand, with the rule that applied */
+    function cgtTable(list, dateHead) {
+      var table = tEl("table", "acct-taxtable");
+      var thead = tEl("thead");
+      var hr = tEl("tr");
+      ["Property", dateHead, "Gain", "Tax", "Cash in hand"].forEach(function (h, i) {
+        hr.appendChild(tEl("th", i > 1 ? "is-num" : null, h));
+      });
+      thead.appendChild(hr);
+      table.appendChild(thead);
+      var tb = tEl("tbody");
+      list.forEach(function (x) {
+        var r = x.r;
+        var tr = tEl("tr");
+        var nameTd = tEl("td");
+        nameTd.appendChild(tEl("span", null, x.p.name || "Untitled property"));
+        var bits = [];
+        if (r.owner === "company") bits.push("company: 30%, no discount");
+        else if (r.owner === "super") bits.push(r.superPension ? "super fund in pension phase: no tax" : "super fund: one-third discount at 15%");
+        else if (r.rules === "new") bits.push("new rules from 1 July 2027: indexation and 30% minimum");
+        else if (r.over12) bits.push("50% discount (sale before 1 July 2027)");
+        else bits.push("held 12 months or less, no discount");
+        if (r.reform && r.reform.v27Estimated) bits.push("1 Jul 2027 value estimated at " + fmtMoney(r.reform.v27));
+        if (r.reform && r.reform.election) bits.push("new build: " + (r.reform.election === "discount" ? "keeping the 50% discount is cheaper" : "the new rules are cheaper"));
+        if (bits.length) nameTd.appendChild(tEl("small", "acct-taxtable__sub", bits.join(" · ")));
+        tr.appendChild(nameTd);
+        tr.appendChild(tEl("td", null, fmtDate(r.saleDate)));
+        tr.appendChild(tEl("td", "is-num", r.loss ? "Loss " + fmtMoney(r.loss) : fmtMoney(r.gain)));
+        tr.appendChild(tEl("td", "is-num", r.needsRate ? "—" : fmtMoney(r.tax)));
+        tr.appendChild(tEl("td", "is-num", x.m.sale.cashIfSold != null ? fmtMoney(x.m.sale.cashIfSold) : "—"));
+        tb.appendChild(tr);
+      });
+      table.appendChild(tb);
+      return table;
+    }
+
+    /* cash in hand for a property owned by an entity is the entity's cash */
+    var ENTITY_NOTE = "Cash in hand for a property owned by a company, trust or super fund is worked out at that entity's level: the money stays with the entity. Paying it out to you (as a dividend, trust distribution or super benefit) can carry further tax, which is not included here.";
+
     function renderCgtSection() {
       var sec = tEl("div", "acct-tax-section");
-      sec.appendChild(tEl("h3", "calc-subhead acct-tax-title", "Capital gains tax if sold"));
 
       var rows = leaseProperties.map(function (p, i) {
         var m = portfolio.props[i];
         return { p: p, m: m, r: m.sale.cgt };
       });
-      var ready = rows.filter(function (x) { return x.r && x.r.ready; });
-      var notReady = rows.filter(function (x) { return x.r && !x.r.ready; });
+      var heldRows = rows.filter(function (x) { return !x.m.sold; });
+      var soldRows = rows.filter(function (x) { return x.m.sold; });
+      var ready = heldRows.filter(function (x) { return x.r && x.r.ready; });
+      var notReady = heldRows.filter(function (x) { return x.r && !x.r.ready; });
+      var soldReady = soldRows.filter(function (x) { return x.r && x.r.ready; });
       var totals = pcTax.cgtPortfolio(ready.map(function (x) { return x.r; }));
 
+      /* sales that have happened, by the financial year of the sale contract:
+         the figure the accountant needs for that year's return */
+      if (soldRows.length) {
+        sec.appendChild(tEl("h3", "calc-subhead acct-tax-title", "Properties you have sold"));
+        var real = portfolio.realised;
+        real.years.forEach(function (fy) {
+          var yr = real.byYear[fy];
+          var list = soldReady.filter(function (x) { return yr.props.indexOf(x.m) !== -1; });
+          if (!list.length) return;
+          var box = tEl("div", "acct-taxgroup");
+          var head = tEl("div", "acct-taxgroup__head");
+          head.appendChild(tEl("strong", null, fy + " financial year"));
+          head.appendChild(tEl("span", null, "Gain " + fmtMoney(yr.gain)));
+          head.appendChild(tEl("span", "acct-taxgroup__tax", yr.needsRate ? "Add your tax rate" : "Tax " + fmtMoney(yr.tax)));
+          box.appendChild(head);
+          box.appendChild(cgtTable(list, "Sold"));
+          sec.appendChild(box);
+        });
+        var soldMissing = soldRows.filter(function (x) { return !(x.r && x.r.ready); });
+        if (soldMissing.length) {
+          sec.appendChild(tNotes([gapLine("Add the purchase date and price, and the sale date and price, to: ",
+            soldMissing.map(function (x) { return x.p.name || "Untitled property"; }))]));
+        }
+        sec.appendChild(tEl("p", "acct-tax-fine", "Take these to your accountant for the tax return of the year each sale contract was signed. A capital loss can be carried forward against later gains."));
+      }
+
+      var ifHead = tEl("h3", "calc-subhead acct-tax-title", "Capital gains tax if sold");
+      if (soldRows.length) ifHead.style.marginTop = "28px";
+      sec.appendChild(ifHead);
+
       if (!ready.length) {
-        sec.appendChild(tEl("p", "acct-empty", "Add a purchase date, purchase price and current value to a property to estimate its capital gains tax."));
+        sec.appendChild(tEl("p", "acct-empty", heldRows.length
+          ? "Add a purchase date, purchase price and current value to a property to estimate its capital gains tax."
+          : "No properties held right now."));
       } else {
         var noRate = totals.needsRate;
         var stats = [
@@ -2322,47 +2579,21 @@
             " the flat company (30%) or super (15%) rate and " + (otherOwners === 1 ? "ignores" : "ignore") + " your personal rate above."]));
         }
 
-        var table = tEl("table", "acct-taxtable");
-        var thead = tEl("thead");
-        var hr = tEl("tr");
-        ["Property", "Sale date", "Gain", "Tax", "Cash in hand"].forEach(function (h, i) {
-          hr.appendChild(tEl("th", i > 1 ? "is-num" : null, h));
-        });
-        thead.appendChild(hr);
-        table.appendChild(thead);
-        var tb = tEl("tbody");
-        ready.forEach(function (x) {
-          var r = x.r;
-          var tr = tEl("tr");
-          var nameTd = tEl("td");
-          nameTd.appendChild(tEl("span", null, x.p.name || "Untitled property"));
-          var bits = [];
-          if (r.owner === "company") bits.push("company: 30%, no discount");
-          else if (r.owner === "super") bits.push(r.superPension ? "super fund in pension phase: no tax" : "super fund: one-third discount at 15%");
-          else if (r.rules === "new") bits.push("new rules from 1 July 2027: indexation and 30% minimum");
-          else if (r.over12) bits.push("50% discount (sale before 1 July 2027)");
-          else bits.push("held 12 months or less, no discount");
-          if (r.reform && r.reform.v27Estimated) bits.push("1 Jul 2027 value estimated at " + fmtMoney(r.reform.v27));
-          if (r.reform && r.reform.election) bits.push("new build: " + (r.reform.election === "discount" ? "keeping the 50% discount is cheaper" : "the new rules are cheaper"));
-          if (bits.length) nameTd.appendChild(tEl("small", "acct-taxtable__sub", bits.join(" · ")));
-          tr.appendChild(nameTd);
-          tr.appendChild(tEl("td", null, fmtDate(r.saleDate)));
-          tr.appendChild(tEl("td", "is-num", r.loss ? "Loss " + fmtMoney(r.loss) : fmtMoney(r.gain)));
-          tr.appendChild(tEl("td", "is-num", r.needsRate ? "\u2014" : fmtMoney(r.tax)));
-          tr.appendChild(tEl("td", "is-num", x.m.sale.cashIfSold != null ? fmtMoney(x.m.sale.cashIfSold) : "\u2014"));
-          tb.appendChild(tr);
-        });
-        table.appendChild(tb);
-        sec.appendChild(table);
-
-        sec.appendChild(workingsPanel(ready));
-
+        sec.appendChild(cgtTable(ready, "Sale date"));
         if (noRate) sec.appendChild(tNotes(["Add your marginal tax rate above to see the tax on an individual's or trust's gain."]));
       }
 
       if (notReady.length) {
         sec.appendChild(tNotes([gapLine("Not included yet, add the purchase date and price (and a current value): ",
           notReady.map(function (x) { return x.p.name || "Untitled property"; }))]));
+      }
+
+      /* one panel for every sale's workings (actual and "what if"), each with a PDF */
+      var panelRows = soldReady.concat(ready);
+      if (panelRows.length) sec.appendChild(workingsPanel(panelRows));
+
+      if (rows.some(function (x) { return x.r && x.r.ready && x.r.owner !== "individual"; })) {
+        sec.appendChild(tEl("p", "acct-tax-fine acct-entity-note", ENTITY_NOTE));
       }
 
       sec.appendChild(tEl("p", "acct-tax-fine",
@@ -2395,7 +2626,7 @@
     }
 
     function refreshAllLive() {
-      document.querySelectorAll("#leaseProperties .acct-property").forEach(function (d) {
+      document.querySelectorAll("#leaseProperties .acct-property, #soldProperties .acct-property").forEach(function (d) {
         if (d.refreshLive) d.refreshLive();
       });
     }
@@ -2408,14 +2639,8 @@
       renderPortfolio();
       renderTaxPosition();
       refreshAllLive();
-      updateStartHere(leaseProperties.length);
+      updateStartHere(heldProperties().length);
     }
-
-    document.getElementById("taxSuperPhase").addEventListener("change", function () {
-      taxSettings = Object.assign({}, taxSettings, { super_phase: this.value });
-      recomputePortfolio();
-      document.getElementById("taxSaveSettings").click();
-    });
 
     document.getElementById("taxSaveSettings").addEventListener("click", function () {
       setMsg(taxMsgEl, "Saving…");
@@ -2433,6 +2658,33 @@
         setMsg(taxMsgEl, "Saved.", "ok");
         recomputePortfolio();
       });
+    });
+
+    document.getElementById("taxSuperPhase").addEventListener("change", function () {
+      taxSettings = Object.assign({}, taxSettings, { super_phase: this.value });
+      recomputePortfolio();
+      document.getElementById("taxSaveSettings").click();
+    });
+
+    /* the rate and selling costs update every figure as they are typed, and
+       save on their own when the box is left - the button stays as a visible
+       confirmation, but forgetting to press it no longer loses the change */
+    var taxLiveTimer = null;
+    ["taxRate", "taxSellPct"].forEach(function (id) {
+      var box = document.getElementById(id);
+      box.addEventListener("input", function () {
+        clearTimeout(taxLiveTimer);
+        taxLiveTimer = setTimeout(function () {
+          var r = taxNum(document.getElementById("taxRate").value);
+          var sp = taxNum(document.getElementById("taxSellPct").value);
+          taxSettings = Object.assign({}, taxSettings, {
+            tax_rate_pct: r == null ? null : Math.min(60, r),
+            selling_cost_pct: sp == null ? null : Math.min(10, sp)
+          });
+          recomputePortfolio();
+        }, 250);
+      });
+      box.addEventListener("change", function () { document.getElementById("taxSaveSettings").click(); });
     });
 
     /* ---- Disclaimer ---------------------------------------------------------
@@ -2467,11 +2719,15 @@
     function loadLeaseRegister(keepMsg) {
       return Promise.all([
         window.pcAuth.listProperties(),
-        window.pcAuth.getTaxSettings()
+        window.pcAuth.getTaxSettings(),
+        window.pcAuth.getPlan ? window.pcAuth.getPlan() : Promise.resolve(null)
       ]).then(function (results) {
         var res = results[0], taxRes = results[1];
+        if (results[2] && results[2].data) plan = results[2].data;
+        refreshBilling();
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         leaseProperties = res.data || [];
+        renderPlanLine();
         if (taxRes && !taxRes.error) {
           taxSettings = Object.assign({}, TAX_DEFAULTS, taxRes.data);
           taxSettingsProblem = "";
@@ -2481,18 +2737,415 @@
         portfolio = pcPortfolio.build(leaseProperties, taxSettings);
         if (!keepMsg) setMsg(leaseMsgEl, "");
         renderPortfolio();
-        renderLeaseStats(leaseProperties);
+        renderLeaseStats(heldProperties());
         renderLeaseProperties(leaseProperties);
         fillTaxSettingsInputs();
         if (taxSettingsProblem) setMsg(taxMsgEl, taxSettingsProblem, "error");
         else if (!keepMsg) setMsg(taxMsgEl, "");
         renderTaxPosition();
-        updateStartHere(leaseProperties.length);
+        updateStartHere(heldProperties().length);
         maybeShowDisclaimer();
       });
     }
 
+    /* ---- Plan rules ------------------------------------------------------
+       The database enforces these (supabase-schema.sql, "PLANS"); this only
+       mirrors them so the page can explain instead of erroring. Until
+       plans_enforced is switched on, enforced is false and none of it shows. */
+    var plan = { enforced: false, status: "free", paid: false, limit: 1, created: 0, count: 0, readonly: false };
+
+    function atPropertyLimit() {
+      if (!plan.enforced) return false;
+      if (plan.readonly) return true;
+      return plan.paid ? leaseProperties.length >= plan.limit : plan.created >= 1;
+    }
+
+    function planLimitText() {
+      if (plan.readonly) return "Your paid plan has ended, so your properties are read-only until you renew.";
+      return plan.paid
+        ? "Your plan covers " + plan.limit + (plan.limit === 1 ? " property" : " properties") + ". Need more?"
+        : "The free plan covers your first property. Add more from $250 a year and everything unlocks.";
+    }
+    /* a paid plan tops out at five properties self-serve; beyond that is a conversation */
+    function planLimitLink() { if (plan.readonly) return { href: "pricing", text: "Renew" }; return plan.paid ?{ href: "enquire", text: "Contact us" } : { href: "pricing", text: "See plans" }; }
+
+    /* "Your plan and billing" card: what they have, what it covers, when it runs to,
+       and one step to add more properties. Reads the cached plan + billing row. */
+    var billing = null;
+    var UPGRADE_PRICES = { 2: 250, 3: 500, 4: 750, 5: 997 };
+    var upgradePick = null;     /* the plan key chosen in the chips */
+    var upgradeSeq = 0;         /* ignores a price that arrives after a newer pick */
+
+    function billingFact(dl, label, value) {
+      var d = document.createElement("div");
+      var dt = document.createElement("dt"); dt.textContent = label;
+      var dd = document.createElement("dd"); dd.textContent = value;
+      d.appendChild(dt); d.appendChild(dd); dl.appendChild(d);
+    }
+
+    function paintBilling() {
+      var dl = document.getElementById("acctBillingFacts");
+      var hint = document.getElementById("acctBillingHint");
+      var manage = document.getElementById("acctBillingBtn");
+      var plansLink = document.getElementById("acctPlansLink");
+      var pill = document.getElementById("acctBillingPill");
+      if (!dl) return;
+      dl.innerHTML = "";
+      var status = (billing && billing.subscription_status) || (plan.paid ? "active" : "free");
+      var hasCustomer = !!(billing && billing.stripe_customer_id);
+      var limit = plan.paid ? plan.limit : 1;
+
+      billingFact(dl, "Plan", plan.paid ? "Do It Yourself" : "Free");
+      billingFact(dl, "Properties", leaseProperties.length + " of " + limit + " used");
+      if (plan.paid && billing && billing.plan_period_end) billingFact(dl, "Paid until", fmtDate(billing.plan_period_end));
+
+      /* past_due still counts as paid (Stripe is retrying the card), so check it first */
+      var pillText = status === "past_due" ? "Payment failed" : plan.paid ? "Active" : status === "canceled" ? "Ended" : "";
+      pill.textContent = pillText;
+      pill.hidden = !pillText;
+      pill.classList.toggle("is-active", pillText === "Active");
+      pill.classList.toggle("is-failed", pillText === "Payment failed");
+      pill.classList.toggle("is-ended", pillText === "Ended");
+      paintPlanStrip(pillText, limit, plan.paid && billing && billing.plan_period_end);
+
+      hint.textContent = status === "past_due" ? "Your last payment did not go through. Everything keeps working while Stripe tries again, so update your card in Manage billing."
+        : plan.paid ? "Update your card, download invoices or cancel in Stripe."
+        : plan.readonly ? "Your paid plan has ended, so your properties are read-only. Renew with a plan that covers all " + leaseProperties.length + " to edit them again."
+        : status === "canceled" ? "Your paid plan has ended. Your first property is still free."
+        : "Your first property is free. Paid plans start at $250 a year.";
+
+      manage.hidden = !(plan.paid || hasCustomer);
+      var canUpgrade = plan.paid && status !== "past_due" && limit < 5;
+      plansLink.hidden = canUpgrade;
+      if (plan.paid && limit >= 5) { plansLink.textContent = "More than five? Contact us"; plansLink.href = "enquire"; }
+      else if (status === "canceled") { plansLink.textContent = "Renew your plan"; plansLink.href = "pricing"; }
+      else { plansLink.textContent = "See plans"; plansLink.href = "pricing"; }
+      paintUpgrade(canUpgrade, limit);
+    }
+
+    /* the one-line summary at the top of the dashboard, same facts as the billing card */
+    function paintPlanStrip(pillText, limit, paidUntil) {
+      var pill = document.getElementById("acctStripPill");
+      if (!pill) return;
+      document.getElementById("acctStripPlan").textContent = plan.paid ? "Do It Yourself" : "Free";
+      pill.textContent = pillText;
+      pill.hidden = !pillText;
+      pill.className = "acct-pill" + (pillText === "Active" ? " is-active" : pillText === "Payment failed" ? " is-failed" : pillText === "Ended" ? " is-ended" : "");
+      document.getElementById("acctStripProps").textContent = leaseProperties.length + " of " + limit + " used";
+      document.getElementById("acctStripUntilWrap").hidden = !paidUntil;
+      if (paidUntil) document.getElementById("acctStripUntil").textContent = fmtDate(paidUntil);
+      document.getElementById("acctStripLink").textContent = plan.paid ? "Plan and billing" : "See plans";
+    }
+
+    document.getElementById("acctStripLink").addEventListener("click", function (e) {
+      var card = document.getElementById("acctBillingCard");
+      if (!card) return;
+      e.preventDefault();
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    function paintUpgrade(show, limit) {
+      var box = document.getElementById("acctUpgrade");
+      box.hidden = !show;
+      if (!show) return;
+      var wrap = document.getElementById("acctUpgradeOpts");
+      /* only rebuild when the choices change, so a picked size is not lost on a repaint */
+      var sig = "from" + limit;
+      if (wrap.getAttribute("data-sig") === sig) return;
+      wrap.setAttribute("data-sig", sig);
+      wrap.innerHTML = "";
+      upgradePick = null;
+      document.getElementById("acctUpgradeQuote").hidden = true;
+      for (var n = limit + 1; n <= 5; n++) {
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "acct-chip";
+        chip.setAttribute("role", "radio");
+        chip.setAttribute("aria-checked", "false");
+        chip.setAttribute("data-plan", "diy_" + n + "_properties_annual");
+        chip.setAttribute("data-n", String(n));
+        var b1 = document.createElement("b"); b1.textContent = n + " properties";
+        var s1 = document.createElement("span"); s1.textContent = "$" + UPGRADE_PRICES[n] + " a year";
+        chip.appendChild(b1); chip.appendChild(s1);
+        chip.addEventListener("click", function () { pickUpgrade(this); });
+        wrap.appendChild(chip);
+      }
+    }
+
+    function pickUpgrade(chip) {
+      var msg = document.getElementById("acctBillingMsg");
+      document.querySelectorAll("#acctUpgradeOpts .acct-chip").forEach(function (c) {
+        var on = c === chip;
+        c.classList.toggle("is-on", on);
+        c.setAttribute("aria-checked", on ? "true" : "false");
+      });
+      upgradePick = chip.getAttribute("data-plan");
+      var n = chip.getAttribute("data-n");
+      var quote = document.getElementById("acctUpgradeQuote");
+      var go = document.getElementById("acctUpgradeGo");
+      var seq = ++upgradeSeq;
+      go.disabled = true;
+      go.textContent = "Upgrade to " + n + " properties";
+      document.getElementById("acctUpgradeAmt").textContent = "\u2026";
+      quote.hidden = false;
+      setMsg(msg, "");
+      window.pcAuth.changePlan(upgradePick, false).then(function (r) {
+        if (seq !== upgradeSeq) return;
+        if (r.error) { quote.hidden = true; setMsg(msg, r.error.message, "error"); return; }
+        document.getElementById("acctUpgradeAmt").textContent =
+          "$" + (r.data.amount_due / 100).toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        go.disabled = false;
+      });
+    }
+
+    document.getElementById("acctUpgradeGo").addEventListener("click", function () {
+      var btn = this, msg = document.getElementById("acctBillingMsg");
+      var planKey = upgradePick;
+      if (!planKey) return;
+      var m = /^diy_(\d)_/.exec(planKey), want = m ? Number(m[1]) : 0;
+      btn.disabled = true; setMsg(msg, "Upgrading your plan\u2026");
+      window.pcAuth.changePlan(planKey, true).then(function (r) {
+        if (r.error) { btn.disabled = false; setMsg(msg, r.error.message, "error"); return; }
+        document.getElementById("acctUpgradeQuote").hidden = true;
+        setMsg(msg, "Upgraded. Confirming your new plan\u2026", "ok");
+        var tries = 0;
+        (function poll() {
+          window.pcAuth.getPlan().then(function (p) {
+            if (p && p.data) plan = p.data;
+            if (plan.paid && plan.limit >= want) {
+              renderPlanLine(); refreshBilling();
+              setMsg(msg, "Done. Your plan now covers " + plan.limit + " properties.", "ok");
+              return;
+            }
+            if (++tries < 15) setTimeout(poll, 2000);
+            else setMsg(msg, "Your upgrade went through. It can take a minute to show, so refresh this page shortly.", "ok");
+          });
+        })();
+      });
+    });
+
+    function refreshBilling() {
+      if (!window.pcAuth.getBilling) return Promise.resolve();
+      return window.pcAuth.getBilling().then(function (r) {
+        if (r && r.data) billing = r.data;
+        paintBilling();
+      });
+    }
+
+    function renderBillingLine() { paintBilling(); }
+
+    document.getElementById("acctBillingBtn").addEventListener("click", function () {
+      var btn = this, msg = document.getElementById("acctBillingMsg");
+      btn.disabled = true;
+      window.pcAuth.openBillingPortal().then(function (r) {
+        btn.disabled = false;
+        if (r.error) { setMsg(msg, r.error.message, "error"); return; }
+        window.location.href = r.url;
+      });
+    });
+
+    function buyMsg(text, kind) { setMsg(document.getElementById("acctBuyMsg"), text, kind); }
+
+    /* arriving from the pricing page with ?buy=<plan>: remember the choice
+       (sign-up takes a detour through email) and start checkout once signed in */
+    var BUY_KEY = "pc_buy_plan";
+    var BUY_PLANS = /^diy_[2-5]_properties_annual$/;
+    function rememberBuyIntent() {
+      try {
+        var q = new URL(window.location.href).searchParams.get("buy");
+        if (q && BUY_PLANS.test(q)) {
+          window.localStorage.setItem(BUY_KEY, JSON.stringify({ plan: q, at: Date.now() }));
+          var u = new URL(window.location.href); u.searchParams.delete("buy");
+          history.replaceState(null, "", u.toString());
+        }
+      } catch (e) {}
+    }
+    function resumeBuyIntent() {
+      var intent = null;
+      try { intent = JSON.parse(window.localStorage.getItem(BUY_KEY) || "null"); } catch (e) {}
+      if (!intent || !BUY_PLANS.test(intent.plan) || Date.now() - intent.at > 3600000) {
+        try { window.localStorage.removeItem(BUY_KEY); } catch (e) {}
+        return;
+      }
+      try { window.localStorage.removeItem(BUY_KEY); } catch (e) {}
+      if (plan.paid) { buyMsg("You already have a plan. Use Manage billing to change it.", "ok"); return; }
+      buyMsg("Taking you to secure payment\u2026");
+      window.pcAuth.startCheckout(intent.plan).then(function (r) {
+        if (r.error) { buyMsg(r.error.message, "error"); return; }
+        window.location.href = r.url;
+      });
+    }
+
+    /* back from Stripe: the plan is written a few seconds later by the webhook */
+    function checkPaymentReturn() {
+      var flag = null;
+      try {
+        var u = new URL(window.location.href);
+        flag = u.searchParams.get("checkout");
+        if (flag) { u.searchParams.delete("checkout"); history.replaceState(null, "", u.toString()); }
+      } catch (e) {}
+      if (flag !== "success") return;
+      buyMsg("Thank you. Confirming your payment\u2026", "ok");
+      var tries = 0;
+      (function poll() {
+        window.pcAuth.getPlan().then(function (r) {
+          if (r && r.data) { plan = r.data; }
+          if (plan.paid) {
+            renderPlanLine(); refreshBilling();
+            buyMsg("Payment received. Your plan is now active.", "ok");
+            return;
+          }
+          if (++tries < 15) setTimeout(poll, 2000);
+          else buyMsg("Your payment went through. Your plan can take a minute to appear; refresh this page shortly.", "ok");
+        });
+      })();
+    }
+
+    function renderPlanLine(alertText) {
+      renderBillingLine();
+      var el = document.getElementById("acctPlanLine");
+      el.classList.toggle("is-alert", !!alertText);
+      if (!plan.enforced) { el.hidden = true; return; }
+      /* the plan strip at the top already says the plan and count; this line
+         only shows when there is something to act on */
+      if (!alertText && !plan.readonly) { el.hidden = true; return; }
+      el.textContent = "";
+      var strong = document.createElement("strong");
+      if (plan.readonly) {
+        strong.textContent = "Plan ended";
+        el.appendChild(strong);
+        el.appendChild(document.createTextNode(" · your " + leaseProperties.length + " properties are read-only until you renew. "));
+        if (!alertText) {
+          var rn = document.createElement("a"); rn.href = "pricing"; rn.textContent = "Renew";
+          el.appendChild(rn); el.hidden = false; return;
+        }
+      } else if (plan.paid) {
+        strong.textContent = "Your plan";
+        el.appendChild(strong);
+        el.appendChild(document.createTextNode(" · " + leaseProperties.length + " of " + plan.limit + " properties. "));
+      } else {
+        strong.textContent = "Free plan";
+        el.appendChild(strong);
+        el.appendChild(document.createTextNode(plan.created >= 1 && leaseProperties.length === 0
+          ? " · your free property has been used. "
+          : " · " + Math.min(leaseProperties.length, 1) + " of 1 property used. "));
+      }
+      if (alertText) el.appendChild(document.createTextNode(alertText + " "));
+      var a = document.createElement("a");
+      var lk = alertText ? planLimitLink() : { href: "pricing", text: "See plans" };
+      a.href = lk.href;
+      a.textContent = lk.text;
+      el.appendChild(a);
+      el.hidden = false;
+    }
+
+    /* every "Add a property" path goes through here */
+    function guardAdd() {
+      if (!atPropertyLimit()) return true;
+      renderPlanLine(planLimitText());
+      document.getElementById("acctPlanLine").scrollIntoView({ block: "center", behavior: "smooth" });
+      return false;
+    }
+
+    /* free plan: acquisition facts lock once saved (the database refuses
+       changes too, this just shows it up front) */
+    function applyFreeLocks(details, property) {
+      var note = details.querySelector("[data-lock-note]");
+      /* a paid plan that has ended: look, download and delete, but no edits */
+      if (plan.enforced && plan.readonly) {
+        details.querySelectorAll("input, select, textarea, button").forEach(function (el) {
+          if (!el.matches('[data-act="delete-property"], [data-act="quick-delete"]')) el.disabled = true;
+        });
+        details.classList.add("is-read-only");
+        if (note) {
+          note.textContent = "Your paid plan has ended, so this property is read-only. Renew to edit it again, or delete down to one property to keep using the free plan. ";
+          var renew = document.createElement("a");
+          renew.href = "pricing";
+          renew.textContent = "Renew";
+          note.appendChild(renew);
+          note.hidden = false;
+        }
+        return;
+      }
+      if (!plan.enforced || plan.paid) { if (note) note.hidden = true; return; }
+      var n = 0;
+      function lock(el, on) {
+        if (!on || !el) return;
+        el.disabled = true;
+        var f = el.closest(".field");
+        if (f) f.classList.add("is-locked");
+        n++;
+      }
+      var named = !!property.name && property.name !== "Untitled property";
+      lock(details.querySelector('[data-f="name"]'), named);
+      if (named) {
+        var typeBtns = details.querySelectorAll("[data-type-btn]");
+        typeBtns.forEach(function (b) { b.disabled = true; });
+        if (typeBtns[0]) { var tf = typeBtns[0].closest(".field"); if (tf) tf.classList.add("is-locked"); n++; }
+      }
+      lock(details.querySelector('[data-t="state"]'), !!property.state);
+      lock(details.querySelector('[data-t="purchase_date"]'), !!property.purchase_date);
+      lock(details.querySelector('[data-t="purchase_price"]'), property.purchase_price != null);
+      lock(details.querySelector('[data-t="acquisition_costs"]'), property.acquisition_costs != null);
+      if (note) note.hidden = !n;
+    }
+
+    /* free plan: before the acquisition facts are saved (and so locked),
+       show exactly what will lock and ask for a yes. Resolves true when
+       nothing new would lock, so the caller can always just chain on it. */
+    var lockModalEl = document.getElementById("lockModal");
+    function confirmLocks(details, nameInput, typeSelect) {
+      if (!plan.enforced || plan.paid) return Promise.resolve(true);
+      var items = [];
+      function editable(sel) { var el = details.querySelector(sel); return el && !el.disabled ? String(el.value || "").trim() : ""; }
+      var name = nameInput.disabled ? "" : nameInput.value.trim();
+      if (name) {
+        items.push(["Property name", name]);
+        var tb = details.querySelector("[data-type-btn]");
+        if (tb && !tb.disabled) items.push(["Type", typeSelect.value === "commercial" ? "Commercial" : "Residential"]);
+      }
+      var st = editable('[data-t="state"]'); if (st) items.push(["State", st]);
+      var pd = editable('[data-t="purchase_date"]'); if (pd) items.push(["Purchase contract date", pd]);
+      var pp = editable('[data-t="purchase_price"]'); if (pp) items.push(["Purchase price", "$" + pp]);
+      var ac = editable('[data-t="acquisition_costs"]'); if (ac) items.push(["Buying costs", "$" + ac]);
+      if (!items.length) return Promise.resolve(true);
+
+      var list = document.getElementById("lockModalList");
+      list.innerHTML = "";
+      items.forEach(function (it) {
+        var li = document.createElement("li");
+        var b = document.createElement("strong");
+        b.textContent = it[0] + ": ";
+        li.appendChild(b);
+        li.appendChild(document.createTextNode(it[1]));
+        list.appendChild(li);
+      });
+      return new Promise(function (resolve) {
+        var okBtn = document.getElementById("lockModalOk");
+        var backBtn = document.getElementById("lockModalBack");
+        function done(v) {
+          lockModalEl.hidden = true;
+          okBtn.removeEventListener("click", onOk);
+          backBtn.removeEventListener("click", onBack);
+          lockModalEl.removeEventListener("click", onBackdrop);
+          document.removeEventListener("keydown", onKey);
+          resolve(v);
+        }
+        function onOk() { done(true); }
+        function onBack() { done(false); }
+        function onBackdrop(e) { if (e.target === lockModalEl) done(false); }
+        function onKey(e) { if (e.key === "Escape") done(false); }
+        okBtn.addEventListener("click", onOk);
+        backBtn.addEventListener("click", onBack);
+        lockModalEl.addEventListener("click", onBackdrop);
+        document.addEventListener("keydown", onKey);
+        lockModalEl.hidden = false;
+        backBtn.focus();
+      });
+    }
+
     function addProperty() {
+      if (!guardAdd()) return;
       if (leaseProperties.length >= MAX_PROPERTIES) return;
       window.pcAuth.saveProperty({ name: "", property_type: "residential" }).then(function (res) {
         if (res.error) { setMsg(leaseMsgEl, taxErrMsg(res.error), "error"); return; }
@@ -2634,6 +3287,7 @@
     }
 
     function startAdd(preferId) {
+      if (!guardAdd()) return;
       if (leaseProperties.length >= MAX_PROPERTIES) return;
       window.pcAuth.listReports("pr").then(function (res) {
         var reports = (res && !res.error ? res.data || [] : []).filter(function (r) { return prCards(r).length; });
@@ -2649,6 +3303,8 @@
       var picked = [];
       document.querySelectorAll("#prImportList input:checked").forEach(function (b) { picked.push(cards[Number(b.value)]); });
       if (!picked.length) { prShowMsg("Tick at least one property, or add a new one instead.", "error"); return; }
+      if (plan.enforced && !plan.paid && plan.created + picked.length > 1) { prShowMsg("The free plan covers one property. Tick just one, or see plans to add more.", "error"); return; }
+      if (plan.enforced && plan.paid && leaseProperties.length + picked.length > plan.limit) { prShowMsg("That would go over the " + plan.limit + " properties your plan covers.", "error"); return; }
       if (leaseProperties.length + picked.length > MAX_PROPERTIES) { prShowMsg("That would go over the " + MAX_PROPERTIES + " property limit.", "error"); return; }
       var goBtn = document.getElementById("prImportGo");
       goBtn.disabled = true;
@@ -2697,6 +3353,15 @@
     document.getElementById("prImportMore").addEventListener("click", function () { prImportShown += PR_IMPORT_PAGE; applyPrImportFilter(); });
 
     document.getElementById("leaseAddPropertyBtn").addEventListener("click", function () { startAdd(); });
+
+    /* leaving (or reloading) with a property half-edited asks first */
+    window.addEventListener("beforeunload", function (e) {
+      if (!document.querySelector(".acct-property[data-dirty]")) return;
+      e.preventDefault();
+      e.returnValue = "";
+    });
+    /* "Start here - Add" goes straight to a new property, not just to the list */
+    document.getElementById("acctStartHereBtn").addEventListener("click", function () { startAdd(); });
     document.getElementById("portfolioAddBtn").addEventListener("click", function () { startAdd(); });
 
     /* arriving from the Portfolio Review calculator right after saving:
@@ -2792,6 +3457,8 @@
     }
     function renderQuickLaunch(rows) { renderCalcGrid("quickLaunchGrid", rows); }
 
+    rememberBuyIntent();
+
     function load() {
       var u = window.pcAuth.user();
       var from = fromParam();
@@ -2816,9 +3483,6 @@
       if (u) {
         hide(elSignedOut); show(elSignedIn);
         document.getElementById("acctWhoEmail").textContent = u.email;
-        var occEl = document.getElementById("acctWhoOccupation");
-        occEl.textContent = u.occupation || "";
-        occEl.hidden = !u.occupation;
         paintAvatars(u);
         document.getElementById("profName").value = u.full_name || "";
         document.getElementById("profEmail").value = u.email || "";
@@ -2831,8 +3495,15 @@
           if (res.error) { setMsg(reportsMsg, res.error.message, "error"); return; }
           renderReports(res.data);
           renderQuickLaunch(res.data);
+          rememberPlanReport(res.data);
         });
+        /* phones start with the saved reports folded away */
+        if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
+          document.getElementById("acctRecentGroup").open = false;
+        }
         loadLeaseRegister().then(function () {
+          checkPaymentReturn();
+          resumeBuyIntent();
           var want = importParam();
           if (want) {
             try { var u2 = new URL(window.location.href); u2.searchParams.delete("import"); history.replaceState(null, "", u2.toString()); } catch (e) {}
@@ -2981,6 +3652,35 @@
     }
 
     var seededPlanReportId = null;
+    var PLAN_TITLE = "Your portfolio - ROI projection";
+    /* re-generating the plan updates the one saved projection instead of
+       adding another copy each visit */
+    function rememberPlanReport(rows) {
+      if (seededPlanReportId) return;
+      var hit = (rows || []).filter(function (r) { return r.calculator === "roi" && r.title === PLAN_TITLE; })[0];
+      if (hit) seededPlanReportId = hit.id;
+    }
+
+    /* the whole register as one PDF (portfolio-pdf.js), using the growth
+       assumptions currently set on the ROI card for its projection */
+    document.getElementById("portfolioPdfBtn").addEventListener("click", function () {
+      if (!portfolio || !heldProperties().length) return;
+      function pctIn(id, dflt) { var v = parseFloat((document.getElementById(id).value || "").replace(/[^0-9.\-]/g, "")); return isFinite(v) ? v : dflt; }
+      window.pcPortfolioPdf.download({
+        portfolio: portfolio,
+        properties: leaseProperties,
+        /* the account name, or the email when no name is set */
+        holder: (document.getElementById("profName").value || "").trim() || ((window.pcAuth.user() || {}).email || ""),
+        computeWale: computeWale,
+        leaseEvents: leaseEvents,
+        projection: {
+          years: Math.max(1, Math.min(30, Math.round(parseFloat(document.getElementById("planYears").value) || 5))),
+          capGrowthPct: pctIn("planCapGrowth", 5),
+          rentGrowthPct: pctIn("planRentGrowth", 5),
+          build: buildPortfolioPlan
+        }
+      });
+    });
 
     document.getElementById("portfolioRoiBtn").addEventListener("click", function () {
       var roiMsg = document.getElementById("portfolioRoiMsg");
@@ -2999,9 +3699,10 @@
       var btn = document.getElementById("portfolioRoiBtn");
       btn.disabled = true;
       setMsg(roiMsg, "Building your plan…");
-      var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 100)) : 0;
-      var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 1000) / 10) : 6.5;
-      var title = "Your portfolio - ROI projection";
+      /* one decimal so the calculator's loan matches the real combined debt */
+      var lvr = s.portfolioDebt > 0 ? Math.min(95, Math.round(s.portfolioDebt / s.portfolioValue * 1000) / 10) : 0;
+      var rate = s.blendedRate > 0 ? (Math.round(s.blendedRate * 10000) / 100) : 6.5;
+      var title = PLAN_TITLE;
       var inputs = {
         v: 2, calc: "roi", projectName: title,
         fields: {
@@ -3040,8 +3741,30 @@
         renderRoiGrowthChart(plan.rows);
         document.getElementById("portfolioRoiOpenLink").href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
         show(resultEl);
+        /* the saved projection shows up in Quick access and saved reports straight away */
+        window.pcAuth.listReports().then(function (r2) {
+          if (r2.error) return;
+          renderReports(r2.data);
+          renderQuickLaunch(r2.data);
+        });
       });
     });
+
+    /* Screens out disposable / undeliverable addresses before an account is
+       made (same-origin api/email-reputation, AbstractAPI). Fails open: if the
+       check errors or is not configured, sign-up carries on. */
+    var EMAIL_REJECTED = "That email address doesn't look reachable. Please use a real, permanent one.";
+    function emailLooksReal(email) {
+      return fetch("/api/email-reputation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ email: email })
+      }).then(function (resp) {
+        return resp.json().then(function (d) { return d; }, function () { return {}; }).then(function (d) {
+          return !(resp.status === 200 && d && d.ok === false);
+        });
+      }).catch(function () { return true; });
+    }
 
     magicForm.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -3054,9 +3777,11 @@
       }
       magicBtn.disabled = true;
       setMsg(magicMsg, "Sending your link…");
-      window.pcAuth.signInWithMagicLink(email, {
-        full_name: name, phone: phone
+      emailLooksReal(email).then(function (ok) {
+        if (!ok) { magicBtn.disabled = false; setMsg(magicMsg, EMAIL_REJECTED, "error"); return null; }
+        return window.pcAuth.signInWithMagicLink(email, { full_name: name, phone: phone });
       }).then(function (res) {
+        if (!res) return;
         magicBtn.disabled = false;
         if (res && res.error) { setMsg(magicMsg, res.error.message, "error"); return; }
         setMsg(magicMsg, "Check your inbox for " + email + " and click the link to finish signing in. You can close this tab.", "ok");
@@ -3108,9 +3833,11 @@
       }
       signupBtn.disabled = true;
       setMsg(signupMsg, "Creating your account…");
-      window.pcAuth.signUpWithPassword(email, password, {
-        full_name: name, phone: phone
+      emailLooksReal(email).then(function (ok) {
+        if (!ok) { signupBtn.disabled = false; setMsg(signupMsg, EMAIL_REJECTED, "error"); return null; }
+        return window.pcAuth.signUpWithPassword(email, password, { full_name: name, phone: phone });
       }).then(function (res) {
+        if (!res) return;
         signupBtn.disabled = false;
         if (res && res.error) { setMsg(signupMsg, res.error.message, "error"); return; }
         if (res && res.data && res.data.session) {

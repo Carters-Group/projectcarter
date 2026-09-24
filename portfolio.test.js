@@ -118,7 +118,14 @@ test("portfolio totals and blended rate", function () {
   assert.equal(t.rent, 70000);
   assert.equal(t.interest, 30000 + 15000);
   near(t.blendedRate, 45000 / 800000, 1e-9);
-  assert.equal(t.cashFlow, 70000 - 13000 - 45000);
+  /* land tax on the pair (NSW, $1.1M combined land) comes off cash flow too */
+  near(t.landTaxFlow, 500, 0.001);
+  near(t.cashFlow, 70000 - 13000 - 500 - 45000, 0.001);
+});
+
+test("each property's cash flow in the portfolio carries its share of land tax", function () {
+  var r = P.build([houseA, houseB], settings, TODAY);
+  near(r.props[0].cashFlow, 40000 - 8000 - 30000 - r.props[0].landTaxShare, 0.001);
 });
 
 test("land tax aggregates across properties in the same state", function () {
@@ -141,9 +148,9 @@ test("summary carries the fields the calculators and plan read", function () {
   assert.equal(s.usableEquity80, 400000);
   assert.equal(s.portfolioValue, 1500000);
   assert.equal(s.portfolioDebt, 800000);
-  assert.equal(s.netRentalIncome, 70000 - 13000);
+  assert.equal(s.netRentalIncome, 70000 - 13000 - 500);
   assert.equal(s.grossRentalIncome, 70000);
-  assert.equal(s.annualSurplus, 12000);
+  assert.equal(s.annualSurplus, 11500);
   assert.equal(s.propertyCount, 2);
 });
 
@@ -175,4 +182,27 @@ test("an empty portfolio is safe", function () {
   assert.equal(r.totals.value, 0);
   assert.equal(r.totals.lvr, null);
   assert.equal(r.summary.usableEquity70, 0);
+});
+
+test("a sold property leaves every portfolio figure but keeps its realised tax", function () {
+  var soldA = Object.assign({}, houseA, { is_sold: true, planned_sale_date: "2026-08-01", expected_sale_price: 950000 });
+  var r = P.build([soldA, houseB], settings, TODAY);
+  assert.equal(r.totals.count, 1);
+  assert.equal(r.totals.value, 600000);
+  assert.equal(r.totals.rent, 30000);
+  assert.equal(r.totals.soldProperties, 1);
+  assert.equal(r.props.length, 2);
+  assert.equal(r.props[0].sold, true);
+  /* land tax is only on what is still held: houseB's $500k is under the NSW threshold */
+  assert.equal(r.totals.landTax, 0);
+  assert.deepEqual(r.realised.years, ["2026-27"]);
+  var y = r.realised.byYear["2026-27"];
+  assert.equal(y.props.length, 1);
+  assert.ok(y.tax > 0);
+  assert.equal(y.tax, r.props[0].sale.tax);
+});
+
+test("financial year follows the contract date", function () {
+  assert.equal(P.financialYear("2026-06-30"), "2025-26");
+  assert.equal(P.financialYear("2026-07-01"), "2026-27");
 });

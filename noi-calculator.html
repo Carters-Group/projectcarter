@@ -322,7 +322,7 @@
       </nav>
     </div>
     <div class="wrap footer-legal">
-      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="billing-terms">Plans and Billing</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
@@ -344,6 +344,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha256-hO6b9FaVwd07oVlba8+w8JZyQ0YxNR/8jr6RQFRdX/Y=" crossorigin="anonymous"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script>
   (function () {
     "use strict";
@@ -569,7 +570,7 @@
         doc.text(k, L, y);
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         doc.text(String(v), w - L, y, { align: "right" });
-        y += 18;
+        y += 16;
       }
       /* the one figure this report is building toward - boxed off in brand
          colour so it reads as the answer, not another line in the list */
@@ -584,6 +585,20 @@
         doc.setFontSize(15); doc.setTextColor(30, 80, 120);
         doc.text(String(v), w - L - 12, y + 2, { align: "right" });
         y += h + 10;
+      }
+
+      /* the answer first, in plain words */
+      if (m.valid && window.pcPdf) {
+        var bottom = "This property brings in " + money(m.gross) + " a year. After " + money(m.opex) + " of operating expenses" +
+          (m.recoveredTotal > 0 ? " (the " + money(m.recoveredTotal) + " the tenant pays back is left out)" : "") +
+          ", its net operating income is " + signedMoney(m.noi) + ", " + (m.noiPct != null ? m.noiPct.toFixed(1) + "% of its income" : "") +
+          (m.noiOnPrice != null ? " and a " + m.noiOnPrice.toFixed(2) + "% return on the " + money(m.price) + " price" : "") + ".";
+        if (m.impliedValue != null) {
+          bottom += " At a " + m.capRate.toFixed(2) + "% cap rate that points to a value of about " + money(m.impliedValue) +
+            (m.price > 0 ? ", " + money(Math.abs(m.impliedValue - m.price)) + (m.impliedValue >= m.price ? " above" : " below") + " the price" : "") + ".";
+        }
+        if (m.usableEquity70 != null) bottom += " Lending to 70% of " + (m.price > 0 ? "the price" : "that value") + (m.existingLoan > 0 ? ", less the " + money(m.existingLoan) + " loan," : "") + " would free up about " + money(m.usableEquity70) + ".";
+        y = window.pcPdf.bottomLine(doc, L, y, bottom);
       }
 
       section("Income");

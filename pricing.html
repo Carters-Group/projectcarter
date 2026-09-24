@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pricing | Project Carter</title>
-  <meta name="description" content="Two ways to take control of your property portfolio: the self-serve platform for $997 a year (DIY), or done-for-you setup with Trent for $4,997 a year." />
+  <meta name="description" content="Your first property is free. Add more from $250 a year, or $997 for five. Larger and more complex portfolios get a Done For You setup with Trent, quoted after we look at what you have." />
   <meta name="theme-color" content="#0c1016" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Pricing | Project Carter" />
-  <meta property="og:description" content="DIY platform access or done-for-you portfolio setup. Annual plans, paid upfront." />
+  <meta property="og:description" content="First property free, then from $250 a year (five properties for $997). Done For You setup for larger and more complex portfolios, quoted case by case." />
   <meta property="og:image" content="assets/og-image.svg" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -87,34 +87,71 @@
         <div class="wrap pricing-grid">
 
           <article class="plan">
-            <h2 class="plan-name">Do It Yourself</h2>
-            <p class="plan-price"><span class="plan-amt">$83<small>/month</small></span><span class="plan-per">Billed annually at $997</span></p>
+            <div class="plan-head">
+              <h2 class="plan-name">Do It Yourself</h2>
+              <p class="plan-for">For investors who run their own portfolio</p>
+            </div>
+            <p class="plan-price"><span class="plan-amt" id="planAmt">Free</span><span class="plan-per" id="planPer">Your first property, no card needed</span></p>
+            <div class="plan-pick">
+              <p class="plan-ladder-cap" id="planPickCap">How many properties?</p>
+              <div class="plan-ladder" role="radiogroup" aria-labelledby="planPickCap">
+                <button type="button" role="radio" aria-checked="true" class="plan-opt is-on" data-n="1"><b>1</b><span>Free</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="2" data-plan="diy_2_properties_annual" data-price="250"><b>2</b><span>$250</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="3" data-plan="diy_3_properties_annual" data-price="500"><b>3</b><span>$500</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="4" data-plan="diy_4_properties_annual" data-price="750"><b>4</b><span>$750</span></button>
+                <button type="button" role="radio" aria-checked="false" class="plan-opt" data-n="5" data-plan="diy_5_properties_annual" data-price="997"><b>5</b><span>$997</span></button>
+              </div>
+            </div>
             <ul class="plan-list">
-              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Portfolio dashboard: value, equity, debt, cash flow</span></li>
-              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Risk stress tests for rate rises and vacancy</span></li>
+              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>First property free, with the full dashboard</span></li>
+              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Paying unlocks calculators, PDFs, tax and CGT</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Property and lease register with expiry tracking</span></li>
-              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Land tax and capital gains position</span></li>
-              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>All seven calculators, unlimited reports and PDFs</span></li>
             </ul>
-            <a href="account" class="btn btn-accent plan-cta" data-plan="diy">Get started</a>
+            <a href="account" class="btn btn-accent plan-cta" id="planCta" data-plan="diy">Start free</a>
+            <script>
+              (function () {
+                var opts = document.querySelectorAll(".plan-opt");
+                var amt = document.getElementById("planAmt"), per = document.getElementById("planPer"), cta = document.getElementById("planCta");
+                function pick(btn) {
+                  opts.forEach(function (o) { var on = o === btn; o.classList.toggle("is-on", on); o.setAttribute("aria-checked", on ? "true" : "false"); });
+                  var n = Number(btn.getAttribute("data-n")), price = btn.getAttribute("data-price"), plan = btn.getAttribute("data-plan");
+                  if (!plan && n === 1) {
+                    amt.innerHTML = "Free"; per.textContent = "Your first property, no card needed";
+                    cta.textContent = "Start free"; cta.href = "account"; cta.setAttribute("data-plan", "diy");
+                  } else {
+                    amt.innerHTML = "$" + Number(price).toLocaleString("en-AU") + "<small>/year</small>";
+                    per.textContent = n + " properties, 12 months, GST included";
+                    cta.textContent = "Choose " + n + " properties"; cta.href = "account?buy=" + encodeURIComponent(plan); cta.setAttribute("data-plan", "diy-paid");
+                  }
+                }
+                opts.forEach(function (o) { o.addEventListener("click", function () { pick(o); }); });
+              })();
+            </script>
           </article>
 
           <article class="plan plan-featured">
-            <h2 class="plan-name">Done For You</h2>
-            <p class="plan-price"><span class="plan-amt">$416<small>/month</small></span><span class="plan-per">Billed annually at $4,997</span></p>
+            <div class="plan-head">
+              <h2 class="plan-name">Done For You</h2>
+              <p class="plan-for">For larger and more complex portfolios</p>
+            </div>
+            <p class="plan-price"><span class="plan-amt plan-amt--text">Quoted for you</span><span class="plan-per">After we look at what you have</span></p>
+            <div class="plan-pick">
+              <p class="plan-ladder-cap">What is included</p>
+              <div class="plan-includes"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Everything in Do It Yourself</span></div>
+            </div>
             <ul class="plan-list">
-              <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span><strong>Everything in Do It Yourself</strong></span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>We build your portfolio in the platform for you</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>One-on-one meeting with Trent to walk you through</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>General advice on portfolio health and direction</span></li>
             </ul>
-            <a href="enquire" class="btn btn-accent plan-cta" data-plan="done-for-you">Book your setup meeting</a>
+            <a href="enquire" class="btn btn-accent plan-cta" data-plan="done-for-you">Tell us about your portfolio</a>
           </article>
 
         </div>
 
         <div class="wrap pricing-fine">
-          <p><strong>Your details stay private.</strong> Project Carter has no visibility of your account or portfolio. We only get in touch if you request a review or pay for one. Each payment gives you 12 months of access.</p>
+          <p><strong>Your details stay private.</strong> Project Carter has no visibility of your account or portfolio. We only get in touch if you request a review or pay for one.</p>
+          <p><strong>12 months at a time, cancel any time.</strong> Each payment covers 12 months and renews automatically, with a reminder email before each renewal. Cancel whenever you like from your account and your plan runs to the end of the year you have paid for. Your first property is free to try, so payments are not refundable. <a href="billing-terms">Plans and Billing terms</a></p>
           <p><strong>Not a buyers agent service.</strong> We do not find, negotiate or buy property for you. This is for investors who want more control and a clearer understanding of where they are at. Advice is general in nature. <a href="privacy-policy">Privacy Policy</a></p>
         </div>
       </section>

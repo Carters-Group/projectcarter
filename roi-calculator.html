@@ -432,7 +432,7 @@
       </nav>
     </div>
     <div class="wrap footer-legal">
-      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="billing-terms">Plans and Billing</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
@@ -456,6 +456,7 @@
   <script src="tax.js"></script>
   <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script src="stamp.js"></script>
   <script>
   (function () {
@@ -691,11 +692,11 @@
       function put(key, str, teaser) {
         setOut(key, (unlocked || teaser) ? str : mask(str));
       }
-      put("loan", m.price > 0 ? money(m.loan) + "  (" + m.lvr.toFixed(0) + "%)" : "—", true);
+      put("loan", m.price > 0 ? money(m.loan) + "  (" + (m.lvr % 1 ? m.lvr.toFixed(1) : m.lvr.toFixed(0)) + "%)" : "—", true);
       put("deposit", m.price > 0 ? money(m.deposit) : "—", true);
       put("cashRequired", m.cashRequired > 0 ? money(m.cashRequired) : "—", true);
       put("fundsAvailableOut", m.fundsAvailable > 0 ? money(m.fundsAvailable) : "—", true);
-      put("shortfall", (m.valid && m.fundsAvailable > 0) ? signedMoney(m.shortfall) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
+      put("shortfall", (m.valid && m.fundsAvailable > 0) ? money(Math.abs(m.shortfall)) + (m.shortfall >= 0 ? " surplus" : " short") : "—");
       put("entryYield", m.entryYield ? pct(m.entryYield * 100) : "—", true);
       put("exitCap", m.isRes ? (m.capGrowth ? pct(m.capGrowth * 100) : "—") : (m.exitCap ? pct(m.exitCap * 100) : "—"), true);
       put("saleValue", m.valid ? money(m.saleValue) : "—");
@@ -832,7 +833,7 @@
         doc.text(k, L, y);
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         doc.text(String(v), w - L, y, { align: "right" });
-        y += 18;
+        y += 16;
       }
       /* the one figure this report is building toward - boxed off in brand
          colour so it reads as the answer, not another line in the list */
@@ -849,9 +850,18 @@
         y += h + 10;
       }
 
+      /* the answer first, in one plain sentence, before any inputs */
+      if (m.totalProfit != null) {
+        var bottom = "Putting in " + money(m.cashRequired) + " and holding for " + m.term + " year" + (m.term === 1 ? "" : "s") +
+          ", the sale is modelled to leave " + money(m.netProceeds) + " after repaying the loan, plus " + signedMoney(m.totalKept) +
+          " of rental cash kept along the way. That is a " + (m.totalProfit >= 0 ? "profit of " + money(m.totalProfit) : "loss of " + money(-m.totalProfit)) +
+          (m.irr != null ? ", or " + (m.irr * 100).toFixed(1) + "% a year compounded (IRR)." : ".");
+        y = window.pcPdf ? window.pcPdf.bottomLine(doc, L, y, bottom) : y;
+      }
+
       section("What you entered");
       row("Purchase price", money(m.price));
-      row("Total loan", money(m.loan) + "  (" + m.lvr.toFixed(0) + "% of price)");
+      row("Total loan", money(m.loan) + "  (" + (m.lvr % 1 ? m.lvr.toFixed(1) : m.lvr.toFixed(0)) + "% of price)");
       row("Deposit", money(m.deposit));
       var sState = document.getElementById("stampState").value;
       var sComm = document.getElementById("stampCommercial").checked;
@@ -899,7 +909,7 @@
         y = 56;
         section("Year by year");
         var cols = ["Yr", "Net rent", "Interest", "Debt cut", "Cash kept", "Loan bal.", "Value", "Equity"];
-        var cx = [L, L + 30, L + 108, L + 186, L + 258, L + 330, L + 408, L + 470];
+        var cx = [L, L + 24, L + 96, L + 166, L + 234, L + 302, L + 376, L + 446];
         doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(90);
         cols.forEach(function (c, i) { doc.text(c, cx[i], y); });
         y += 4; doc.setDrawColor(225); doc.line(L, y, w - L, y); y += 13;
@@ -937,7 +947,7 @@
       var lines = [
         (pn ? "Project: " + pn : null),
         "Purchase price: " + money(m.price),
-        "Total loan: " + money(m.loan) + " (" + m.lvr.toFixed(0) + "%)",
+        "Total loan: " + money(m.loan) + " (" + (m.lvr % 1 ? m.lvr.toFixed(1) : m.lvr.toFixed(0)) + "%)",
         "Deposit: " + money(m.deposit),
         "Stamp duty" + (document.getElementById("stampState").value ? " (" + document.getElementById("stampState").value + (document.getElementById("stampCommercial").checked ? " commercial" : "") + " estimate)" : "") + ": " + (document.getElementById("stampState").value ? money(num("stampDuty")) : optMoney(num("stampDuty"))),
         "Loan / valuation cost: " + optMoney(num("valuationCost")),

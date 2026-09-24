@@ -354,7 +354,7 @@
       </nav>
     </div>
     <div class="wrap footer-legal">
-      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
+      <p><a href="privacy-policy">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="billing-terms">Plans and Billing</a> &nbsp;&middot;&nbsp; &copy; <span id="year">2026</span> Project Carter. All Rights Reserved.</p>
       <div class="footer-social">
         <a href="https://www.facebook.com/profile.php?id=61591797982172" aria-label="Trent Macartney on Facebook">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.86c0-2.4 1.43-3.72 3.62-3.72 1.05 0 2.15.19 2.15.19v2.36h-1.21c-1.2 0-1.57.74-1.57 1.5v1.8h2.67l-.43 2.91h-2.24V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
@@ -378,6 +378,7 @@
   <script src="tax.js"></script>
   <script src="portfolio.js"></script>
   <script src="pc-auth.js"></script>
+  <script src="pc-pdf.js"></script>
   <script src="stamp.js"></script>
   <script>
   (function () {
@@ -607,7 +608,7 @@
       } else {
         function shortfallText(t) {
           if (!t.available || !(m.fundsAvailable > 0)) return "n/a";
-          return signedMoney(t.shortfall) + (t.shortfall >= 0 ? " surplus" : " short");
+          return money(Math.abs(t.shortfall)) + (t.shortfall >= 0 ? " surplus" : " short");
         }
         var rows = [
           ["Max lend (loan-to-value ratio)", m.major.available ? pct(m.major.lvr) : "n/a", m.tier2.available ? pct(m.tier2.lvr) : "n/a"],
@@ -722,7 +723,7 @@
         doc.setFont("helvetica", "bold"); doc.setTextColor(20);
         var lines = doc.splitTextToSize(String(v), w - 2 * L - 190);
         doc.text(lines, w - L, y, { align: "right" });
-        y += 16 * lines.length + 2;
+        y += 15 * lines.length + 2;
       }
       /* the one figure this report is building toward - boxed off in brand
          colour so it reads as the answer, not another line in the list */
@@ -739,6 +740,25 @@
         y += h + 10;
       }
 
+      /* the answer first, in plain words: cash needed with each kind of lender */
+      if (m.price > 0 && window.pcPdf) {
+        var mj = m.major, t2 = m.tier2;
+        var bottom = "For a " + money(m.price) + " purchase (" + m.type.label + "), ";
+        if (mj.available && t2.available && mj.lvr === t2.lvr) {
+          bottom += "major banks and tier 2 lenders would both typically lend up to " + pct(mj.lvr) + " (" + money(mj.loan) + "), so you would need about " +
+            money(mj.cash) + " in cash including purchase costs. The majors are usually cheaper, at about " + rateRange(mj.rate) + " against " + rateRange(t2.rate) + " from tier 2.";
+        } else {
+          if (mj.available) bottom += "a major bank would typically lend up to " + pct(mj.lvr) + " (" + money(mj.loan) + " at about " + rateRange(mj.rate) + "), so you would need about " + money(mj.cash) + " in cash including purchase costs.";
+          else bottom += "the major banks generally don't lend on this.";
+          if (t2.available) bottom += " A tier 2 or non-bank lender may go to " + pct(t2.lvr) + " (" + money(t2.loan) + " at about " + rateRange(t2.rate) + "), " + (mj.available && t2.cash < mj.cash ? "cutting the cash needed to " : "needing about ") + money(t2.cash) + ".";
+        }
+        /* measure the funds against the cheapest cash option on offer */
+        var best = mj.available && (!t2.available || mj.cash <= t2.cash) ? mj : (t2.available ? t2 : null);
+        if (m.fundsAvailable > 0 && best) bottom += " With the " + money(m.fundsAvailable) + " you have available, that leaves you " + money(Math.abs(best.shortfall)) + (best.shortfall >= 0 ? " to spare." : " short.");
+        if (m.rentalCover && m.rentalCover.ratio != null) bottom += " The rent covers the interest " + m.rentalCover.ratio.toFixed(2) + " times (" + (m.rentalCover.covers ? "enough for most lenders" : "short of what most lenders want") + ").";
+        y = window.pcPdf.bottomLine(doc, L, y, bottom);
+      }
+
       section("The deal");
       row("Loan type", m.type.label, true);
       row(m.type.unit, money(m.price), true);
@@ -752,7 +772,7 @@
         row("Indicative loan amount", money(m.major.loan));
         row("Indicative rate range", rateRange(m.major.rate));
         row("What to expect", m.major.note);
-        if (m.fundsAvailable > 0) row("Shortfall / surplus", signedMoney(m.major.shortfall) + (m.major.shortfall >= 0 ? " surplus" : " short"), true);
+        if (m.fundsAvailable > 0) row("Shortfall / surplus", money(Math.abs(m.major.shortfall)) + (m.major.shortfall >= 0 ? " surplus" : " short"), true);
         row("Min deposit / equity", pct(m.major.depositPct) + "  (" + money(m.major.deposit) + ")", true);
         row("Total cash required", money(m.major.cash), true);
       } else {
@@ -766,7 +786,7 @@
         row("Indicative loan amount", money(m.tier2.loan));
         row("Indicative rate range", rateRange(m.tier2.rate));
         row("What to expect", m.tier2.note);
-        if (m.fundsAvailable > 0) row("Shortfall / surplus", signedMoney(m.tier2.shortfall) + (m.tier2.shortfall >= 0 ? " surplus" : " short"), true);
+        if (m.fundsAvailable > 0) row("Shortfall / surplus", money(Math.abs(m.tier2.shortfall)) + (m.tier2.shortfall >= 0 ? " surplus" : " short"), true);
         row("Min deposit / equity", pct(m.tier2.depositPct) + "  (" + money(m.tier2.deposit) + ")", true);
         y += 6;
         bigrow("TOTAL CASH REQUIRED (TIER 2 / NON-BANK)", money(m.tier2.cash));
@@ -783,10 +803,13 @@
         row("Cover ratio", (m.rentalCover.ratio != null ? m.rentalCover.ratio.toFixed(2) + "x" : "n/a") + "  (" + (m.rentalCover.covers ? "covers debt cost" : "falls short") + ")", true);
       }
 
-      y += 14;
+      y += 8;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
       var disc = "This is a deposit / equity planning guide only, not a borrowing capacity estimate, credit decision or loan offer. The minimum deposit levels shown assume a lender's full assessment is met (income servicing the debt, acceptable liabilities and security), not just a deposit threshold on its own. Loan-to-value ratios, deposit percentages and rate ranges are indicative starting points based on typical market settings and the loan type selected, and will vary by lender, deal and security. The rental cover check for build to rent is a rough guide only and does not reflect a lender's actual serviceability assessment. Speak to Project Carter and a registered mortgage broker before acting.";
-      doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
+      /* the fine print never runs into the footer: if it won't fit, it moves to a new page */
+      var discLines = doc.splitTextToSize(disc, w - 2 * L);
+      if (y + (discLines.length - 1) * 9.5 > doc.internal.pageSize.getHeight() - 42) { doc.addPage(); y = 56; }
+      doc.text(discLines, L, y);
 
       var totalPages = doc.internal.getNumberOfPages();
       for (var p = 1; p <= totalPages; p++) {
@@ -811,10 +834,10 @@
         (m.fundsAvailable > 0 ? "Funds available: " + money(m.fundsAvailable) : null),
         "----",
         "Major banks: " + (m.major.available
-          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), total cash " + money(m.major.cash) + ", loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate) + (m.fundsAvailable > 0 ? ", " + (m.major.shortfall >= 0 ? "surplus " : "short ") + signedMoney(m.major.shortfall) : "")
+          ? pct(m.major.depositPct) + " deposit (" + money(m.major.deposit) + "), total cash " + money(m.major.cash) + ", loan " + money(m.major.loan) + ", rate " + rateRange(m.major.rate) + (m.fundsAvailable > 0 ? ", " + (m.major.shortfall >= 0 ? "surplus " : "short ") + money(Math.abs(m.major.shortfall)) : "")
           : m.major.note),
         "Tier 2 / non-bank: " + (m.tier2.available
-          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), total cash " + money(m.tier2.cash) + ", loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate) + (m.fundsAvailable > 0 ? ", " + (m.tier2.shortfall >= 0 ? "surplus " : "short ") + signedMoney(m.tier2.shortfall) : "")
+          ? pct(m.tier2.depositPct) + " deposit (" + money(m.tier2.deposit) + "), total cash " + money(m.tier2.cash) + ", loan " + money(m.tier2.loan) + ", rate " + rateRange(m.tier2.rate) + (m.fundsAvailable > 0 ? ", " + (m.tier2.shortfall >= 0 ? "surplus " : "short ") + money(Math.abs(m.tier2.shortfall)) : "")
           : m.tier2.note)
       ];
       if (m.rentalCover) {
