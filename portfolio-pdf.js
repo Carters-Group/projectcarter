@@ -133,10 +133,14 @@ var pcPortfolioPdf = (function () {
     doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
     doc.setDrawColor(BLUE[0], BLUE[1], BLUE[2]); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
     doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
-    doc.text("Portfolio report", L, y + 44);
+    doc.text("Portfolio Review", L, y + 44);
+    if (opts.holder) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+      doc.text(clean(opts.holder), L, y + 64);
+      y += 20;
+    }
     doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110);
-    var who = opts.holder ? "Prepared for " + opts.holder + ", " : "Prepared ";
-    doc.text(clean(who + new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })), L, y + 61);
+    doc.text(clean("Prepared " + new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })), L, y + 61);
     var basis = t.counted === t.count
       ? t.count + (t.count === 1 ? " property" : " properties") + " held"
       : t.counted + " of " + t.count + " properties counted (the rest are missing a value or loan balance)";
@@ -334,11 +338,11 @@ var pcPortfolioPdf = (function () {
       doc.setPage(p);
       doc.setDrawColor(BLUE[0], BLUE[1], BLUE[2]); doc.setLineWidth(0.6); doc.line(L, h - 34, w - L, h - 34); doc.setLineWidth(0.2);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140);
-      doc.text("Project Carter  |  Portfolio report", L, h - 22);
+      doc.text("Project Carter  |  Portfolio Review", L, h - 22);
       doc.text("Page " + p + " of " + pages, w - L, h - 22, { align: "right" });
     }
 
-    doc.save("portfolio-report-" + slug(new Date().toISOString().slice(0, 10)) + ".pdf");
+    doc.save("portfolio-review-" + (opts.holder ? slug(opts.holder) + "-" : "") + new Date().toISOString().slice(0, 10) + ".pdf");
   }
 
   return { download: download };

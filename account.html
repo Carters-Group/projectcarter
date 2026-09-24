@@ -3669,7 +3669,8 @@
       window.pcPortfolioPdf.download({
         portfolio: portfolio,
         properties: leaseProperties,
-        holder: (document.getElementById("profName").value || "").trim(),
+        /* the account name, or the email when no name is set */
+        holder: (document.getElementById("profName").value || "").trim() || ((window.pcAuth.user() || {}).email || ""),
         computeWale: computeWale,
         leaseEvents: leaseEvents,
         projection: {
