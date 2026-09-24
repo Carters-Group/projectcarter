@@ -1055,6 +1055,7 @@ h1, h2, h3 {
 }
 .project-cta .wrap { display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap; }
 .project-cta h2 { font-size: clamp(28px, 4vw, 48px); max-width: 20ch; }
+.project-cta .pm-hero-actions { margin: 0; }
 
 .back-link {
   display: inline-block;
