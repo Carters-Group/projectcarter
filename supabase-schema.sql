@@ -499,6 +499,12 @@ insert into public.pc_config (key, value) values ('plans_enforced', 'false')
 alter table public.profiles add column if not exists property_limit    integer not null default 1;
 alter table public.profiles add column if not exists properties_created integer not null default 0;
 
+-- Stripe billing: written only by the webhook (service role), see the trigger below
+alter table public.profiles add column if not exists stripe_customer_id     text;
+alter table public.profiles add column if not exists stripe_subscription_id text;
+alter table public.profiles add column if not exists plan_period_end        timestamptz;
+create index if not exists profiles_stripe_customer_idx on public.profiles (stripe_customer_id);
+
 -- existing accounts: count what they already have so the counter starts true
 update public.profiles p
    set properties_created = greatest(p.properties_created, s.n)
@@ -561,10 +567,17 @@ begin
       new.subscription_status := 'free';
       new.property_limit := 1;
       new.properties_created := 0;
+      new.stripe_customer_id := null;
+      new.stripe_subscription_id := null;
+      new.plan_period_end := null;
     else
       new.subscription_status := old.subscription_status;
       new.property_limit := old.property_limit;
       new.properties_created := old.properties_created;
+      /* a browser must never be able to point its account at someone else's Stripe customer */
+      new.stripe_customer_id := old.stripe_customer_id;
+      new.stripe_subscription_id := old.stripe_subscription_id;
+      new.plan_period_end := old.plan_period_end;
     end if;
   end if;
   return new;
