@@ -1712,6 +1712,26 @@ h1, h2, h3 {
 }
 .acct-identity-row__text { flex: 1; min-width: 160px; }
 
+/* plan summary at the top of the dashboard (replaces "Signed in as") */
+.acct-planstrip {
+  display: flex; align-items: center; gap: 14px 32px; flex-wrap: wrap;
+  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line);
+}
+.acct-planstrip__main { min-width: 160px; }
+.acct-planstrip__main .acct-eyebrow { margin: 0 0 4px; }
+.acct-planstrip__name {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0;
+  font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; color: var(--text);
+}
+.acct-planstrip__facts { display: flex; gap: 12px 28px; flex-wrap: wrap; margin: 0; }
+.acct-planstrip__facts dt { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.acct-planstrip__facts dd { margin: 4px 0 0; font-size: 15px; font-weight: 600; color: var(--text); }
+.acct-planstrip__facts [hidden] { display: none; }
+.acct-planstrip__link { margin-left: auto; font-size: 14px; }
+@media (max-width: 640px) { .acct-planstrip__link { margin-left: 0; } }
+.acct-signedin-as { margin: -8px 0 18px; font-size: 14px; color: var(--muted); }
+.acct-signedin-as strong { color: var(--text); font-weight: 600; word-break: break-all; }
+
 .acct-card-head {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   margin-bottom: 18px;

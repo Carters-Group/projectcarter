@@ -207,13 +207,16 @@
           </div>
 
           <div class="card acct-card acct-dash-portfolio" id="acctPortfolioCard">
-            <div class="acct-identity-row">
-              <div class="acct-identity-row__text">
-                <p class="acct-eyebrow">Signed in as</p>
-                <p class="acct-email" id="acctWhoEmail">&mdash;</p>
-                <p class="acct-report__date" id="acctWhoOccupation" hidden></p>
+            <div class="acct-planstrip" id="acctPlanStrip">
+              <div class="acct-planstrip__main">
+                <p class="acct-eyebrow">Your plan</p>
+                <p class="acct-planstrip__name"><span id="acctStripPlan">Free</span><span class="acct-pill" id="acctStripPill" hidden></span></p>
               </div>
-              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
+              <dl class="acct-planstrip__facts">
+                <div><dt>Properties</dt><dd id="acctStripProps">&mdash;</dd></div>
+                <div id="acctStripUntilWrap" hidden><dt>Paid until</dt><dd id="acctStripUntil"></dd></div>
+              </dl>
+              <a class="link-arrow acct-planstrip__link" id="acctStripLink" href="#acctBillingCard">Plan and billing</a>
             </div>
 
             <div class="acct-card-head">
@@ -446,7 +449,11 @@
           </div>
 
           <div class="card acct-card acct-dash-details" id="acctDetailsCard">
-            <h2 class="calc-subhead">Your details</h2>
+            <div class="acct-card-head">
+              <h2 class="calc-subhead">Your details</h2>
+              <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn">Sign out</button>
+            </div>
+            <p class="acct-signedin-as">Signed in as <strong id="acctWhoEmail">&mdash;</strong></p>
             <form id="profileForm">
               <div class="field">
                 <label for="profName">Name</label>
@@ -2795,6 +2802,7 @@
       pill.classList.toggle("is-active", pillText === "Active");
       pill.classList.toggle("is-failed", pillText === "Payment failed");
       pill.classList.toggle("is-ended", pillText === "Ended");
+      paintPlanStrip(pillText, limit, plan.paid && billing && billing.plan_period_end);
 
       hint.textContent = status === "past_due" ? "Your last payment did not go through. Everything keeps working while Stripe tries again, so update your card in Manage billing."
         : plan.paid ? "Update your card, download invoices or cancel in Stripe."
@@ -2810,6 +2818,27 @@
       else { plansLink.textContent = "See plans"; plansLink.href = "pricing"; }
       paintUpgrade(canUpgrade, limit);
     }
+
+    /* the one-line summary at the top of the dashboard, same facts as the billing card */
+    function paintPlanStrip(pillText, limit, paidUntil) {
+      var pill = document.getElementById("acctStripPill");
+      if (!pill) return;
+      document.getElementById("acctStripPlan").textContent = plan.paid ? "Do It Yourself" : "Free";
+      pill.textContent = pillText;
+      pill.hidden = !pillText;
+      pill.className = "acct-pill" + (pillText === "Active" ? " is-active" : pillText === "Payment failed" ? " is-failed" : pillText === "Ended" ? " is-ended" : "");
+      document.getElementById("acctStripProps").textContent = leaseProperties.length + " of " + limit + " used";
+      document.getElementById("acctStripUntilWrap").hidden = !paidUntil;
+      if (paidUntil) document.getElementById("acctStripUntil").textContent = fmtDate(paidUntil);
+      document.getElementById("acctStripLink").textContent = plan.paid ? "Plan and billing" : "See plans";
+    }
+
+    document.getElementById("acctStripLink").addEventListener("click", function (e) {
+      var card = document.getElementById("acctBillingCard");
+      if (!card) return;
+      e.preventDefault();
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
 
     function paintUpgrade(show, limit) {
       var box = document.getElementById("acctUpgrade");
@@ -2973,6 +3002,9 @@
       var el = document.getElementById("acctPlanLine");
       el.classList.toggle("is-alert", !!alertText);
       if (!plan.enforced) { el.hidden = true; return; }
+      /* the plan strip at the top already says the plan and count; this line
+         only shows when there is something to act on */
+      if (!alertText && !plan.readonly) { el.hidden = true; return; }
       el.textContent = "";
       var strong = document.createElement("strong");
       if (plan.readonly) {
@@ -3447,9 +3479,6 @@
       if (u) {
         hide(elSignedOut); show(elSignedIn);
         document.getElementById("acctWhoEmail").textContent = u.email;
-        var occEl = document.getElementById("acctWhoOccupation");
-        occEl.textContent = u.occupation || "";
-        occEl.hidden = !u.occupation;
         paintAvatars(u);
         document.getElementById("profName").value = u.full_name || "";
         document.getElementById("profEmail").value = u.email || "";
