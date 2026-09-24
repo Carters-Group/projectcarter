@@ -2473,6 +2473,11 @@ h1, h2, h3 {
   color: var(--accent-2); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
 }
 .acct-pill[hidden] { display: none; }
+.acct-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; }
+.acct-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.acct-pill.is-active { border-color: rgba(74, 194, 128, 0.6); background: rgba(74, 194, 128, 0.14); color: #6fd49c; }
+.acct-pill.is-failed { border-color: rgba(227, 138, 138, 0.6); background: rgba(227, 138, 138, 0.12); color: #e38a8a; }
+.acct-pill.is-ended  { border-color: var(--line); background: var(--bg-2); color: var(--muted); }
 .acct-billing-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px 20px; margin: 0 0 14px; padding: 14px 0; border-block: 1px solid var(--line-soft); }
 .acct-billing-facts dt { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .acct-billing-facts dd { margin: 4px 0 0; font-size: 16px; font-weight: 600; color: var(--text); }

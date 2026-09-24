@@ -2792,6 +2792,9 @@
       var pillText = status === "past_due" ? "Payment failed" : plan.paid ? "Active" : status === "canceled" ? "Ended" : "";
       pill.textContent = pillText;
       pill.hidden = !pillText;
+      pill.classList.toggle("is-active", pillText === "Active");
+      pill.classList.toggle("is-failed", pillText === "Payment failed");
+      pill.classList.toggle("is-ended", pillText === "Ended");
 
       hint.textContent = status === "past_due" ? "Your last payment did not go through. Everything keeps working while Stripe tries again, so update your card in Manage billing."
         : plan.paid ? "Update your card, download invoices or cancel in Stripe."
