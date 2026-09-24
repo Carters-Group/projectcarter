@@ -224,7 +224,6 @@
             </div>
             <p class="acct-msg" id="portfolioMsg" hidden></p>
             <p class="acct-plan-line" id="acctPlanLine" hidden></p>
-            <p class="acct-billing-line" id="acctBillingLine" hidden><span id="acctBillingText"></span> <button type="button" class="linklike" id="acctBillingBtn">Manage billing</button></p>
             <p class="acct-msg" id="acctBuyMsg" hidden></p>
 
             <div id="portfolioSet">
@@ -498,6 +497,18 @@
               <button type="submit" class="btn btn-ghost" id="passSaveBtn">Update password</button>
             </form>
             <p class="acct-msg" id="passMsg" hidden></p>
+          </div>
+
+          <div class="card acct-card acct-dash-billing" id="acctBillingCard">
+            <h2 class="calc-subhead">Your plan and billing</h2>
+            <dl class="acct-billing-facts" id="acctBillingFacts"></dl>
+            <p class="field-hint" id="acctBillingHint"></p>
+            <div class="acct-billing-actions">
+              <button type="button" class="btn btn-accent" id="acctBillingBtn" hidden>Manage billing</button>
+              <a href="pricing" class="btn btn-ghost" id="acctPlansLink">See plans</a>
+            </div>
+            <p class="acct-msg" id="acctBillingMsg" hidden></p>
+            <p class="acct-billing-fine">Payments are handled securely by Stripe, and we never see your card details. Prices are in Australian dollars and include GST. Each payment gives you 12 months of access.</p>
           </div>
 
           <div class="card acct-card acct-danger acct-dash-danger" id="acctDangerCard">
@@ -2689,6 +2700,7 @@
       ]).then(function (results) {
         var res = results[0], taxRes = results[1];
         if (results[2] && results[2].data) plan = results[2].data;
+        refreshBilling();
         if (res.error) { setMsg(leaseMsgEl, res.error.message, "error"); return; }
         leaseProperties = res.data || [];
         renderPlanLine();
@@ -2731,15 +2743,82 @@
     /* a paid plan tops out at five properties self-serve; beyond that is a conversation */
     function planLimitLink() { return plan.paid ? { href: "enquire", text: "Contact us" } : { href: "pricing", text: "See plans" }; }
 
-    /* paid plan: show what they have and a way to change or cancel it (Stripe's portal) */
-    function renderBillingLine() {
-      var line = document.getElementById("acctBillingLine");
-      line.hidden = !plan.paid;
+    /* "Your plan and billing" card: what they have, what it covers, when it runs to,
+       and the buttons for changing it. Reads the cached plan + billing row. */
+    var billing = null;
+
+    function billingFact(dl, label, value) {
+      var d = document.createElement("div");
+      var dt = document.createElement("dt"); dt.textContent = label;
+      var dd = document.createElement("dd"); dd.textContent = value;
+      d.appendChild(dt); d.appendChild(dd); dl.appendChild(d);
+    }
+
+    function paintBilling() {
+      var dl = document.getElementById("acctBillingFacts");
+      var hint = document.getElementById("acctBillingHint");
+      var manage = document.getElementById("acctBillingBtn");
+      var plansLink = document.getElementById("acctPlansLink");
+      if (!dl) return;
+      dl.innerHTML = "";
+      var status = (billing && billing.subscription_status) || (plan.paid ? "active" : "free");
+      var hasCustomer = !!(billing && billing.stripe_customer_id);
+      var used = leaseProperties.length;
+      var limit = plan.paid ? plan.limit : 1;
+
+      billingFact(dl, "Plan", plan.paid ? "Do It Yourself" : "Free");
+      billingFact(dl, "Properties", used + " of " + limit + " used");
       if (plan.paid) {
-        document.getElementById("acctBillingText").textContent =
-          "Your plan covers " + plan.limit + (plan.limit === 1 ? " property." : " properties.");
+        billingFact(dl, "Status", "Active");
+        if (billing && billing.plan_period_end) billingFact(dl, "Paid until", fmtDate(billing.plan_period_end));
+      } else if (status === "past_due") {
+        billingFact(dl, "Status", "Payment failed");
+      } else if (status === "canceled") {
+        billingFact(dl, "Status", "Cancelled");
+      }
+
+      var text;
+      if (plan.paid) {
+        text = "Your plan covers " + limit + (limit === 1 ? " property" : " properties") + ", with the full calculators, PDF reports, tax and CGT. " +
+          "Manage billing opens Stripe, where you can update your card, download invoices and receipts, or cancel.";
+      } else if (status === "past_due") {
+        text = "Your last payment did not go through. Open Manage billing to update your card and your plan will come back.";
+      } else if (status === "canceled") {
+        text = "Your paid plan has ended. You still have your first property free, and you can pick a plan again any time.";
+      } else {
+        text = "The free plan covers your first property, with the full dashboard. Paying unlocks the calculators, PDFs, tax and CGT for more properties, from $250 a year.";
+      }
+      hint.textContent = text;
+
+      manage.hidden = !(plan.paid || hasCustomer);
+      if (plan.paid && limit >= 5) {
+        plansLink.textContent = "More than five? Contact us";
+        plansLink.href = "enquire";
+      } else {
+        plansLink.textContent = plan.paid ? "Change or upgrade" : "See plans";
+        plansLink.href = "pricing";
       }
     }
+
+    function refreshBilling() {
+      if (!window.pcAuth.getBilling) return Promise.resolve();
+      return window.pcAuth.getBilling().then(function (r) {
+        if (r && r.data) billing = r.data;
+        paintBilling();
+      });
+    }
+
+    function renderBillingLine() { paintBilling(); }
+
+    document.getElementById("acctBillingBtn").addEventListener("click", function () {
+      var btn = this, msg = document.getElementById("acctBillingMsg");
+      btn.disabled = true;
+      window.pcAuth.openBillingPortal().then(function (r) {
+        btn.disabled = false;
+        if (r.error) { setMsg(msg, r.error.message, "error"); return; }
+        window.location.href = r.url;
+      });
+    });
 
     function buyMsg(text, kind) { setMsg(document.getElementById("acctBuyMsg"), text, kind); }
 
@@ -2798,7 +2877,7 @@
         window.pcAuth.getPlan().then(function (r) {
           if (r && r.data) { plan = r.data; }
           if (plan.paid) {
-            renderPlanLine(); renderBillingLine();
+            renderPlanLine(); refreshBilling();
             buyMsg("Payment received. Your plan is now active.", "ok");
             return;
           }

@@ -638,6 +638,16 @@
        only tells the page what to show. Fails safe: if the function is not
        installed yet, or the switch is off, the answer is "not enforced" and
        the page behaves exactly as it always has. */
+    /* what the "Your plan and billing" card shows: read from the signed-in user's own profile row */
+    getBilling: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve({ data: null, error: bad.error });
+      return client.from("profiles").select("subscription_status,property_limit,plan_period_end,stripe_customer_id")
+        .eq("id", currentUser.id).maybeSingle()
+        .then(function (res) { return { data: res.data || null, error: res.error || null }; },
+              function () { return { data: null, error: { message: "Could not load billing." } }; });
+    },
+
     startCheckout: function (plan) { return billingCall("/api/create-checkout", { plan: plan }); },
     openBillingPortal: function () { return billingCall("/api/billing-portal", {}); },
 
