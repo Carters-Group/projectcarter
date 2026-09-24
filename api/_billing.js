@@ -109,7 +109,7 @@ async function supabaseAdmin(method, path, body) {
   var text = await res.text();
   var json = text ? JSON.parse(text) : null;
   if (!res.ok) {
-    var err = new Error("database error " + res.status);
+    var err = new Error("database error " + res.status + (json && json.message ? ": " + json.message : ""));
     err.status = res.status;
     throw err;
   }

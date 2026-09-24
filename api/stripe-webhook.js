@@ -128,7 +128,8 @@ module.exports = async function handler(req, res) {
     return b.send(res, 200, { received: true });
   } catch (e) {
     /* a non-200 makes Stripe retry, which is what we want for a temporary failure */
-    return b.send(res, 500, { error: "Could not process the event" });
+    /* the reason is safe to return: only Stripe's signed events reach this point */
+    return b.send(res, 500, { error: "Could not process the event", detail: String(e && e.message || e).slice(0, 300) });
   }
 };
 
