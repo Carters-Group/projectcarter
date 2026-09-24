@@ -87,6 +87,7 @@ async function stripe(method, path, params) {
   if (!res.ok) {
     var err = new Error((json.error && json.error.message) || ("Stripe error " + res.status));
     err.status = res.status;
+    err.stripe = true;
     throw err;
   }
   return json;
@@ -170,6 +171,10 @@ function readJson(req, max) {
 
 function fail(res, e) {
   if (e && e.notConfigured) return send(res, 503, { error: "Billing is not switched on yet." });
+  /* Stripe's own messages never include keys or card details, and they say
+     exactly what to fix (a missing permission, tax setting, unknown customer) */
+  if (e && e.stripe) return send(res, 502, { error: "Payment setup problem: " + String(e.message || "").slice(0, 300) });
+  if (e && /^database error/.test(String(e.message))) return send(res, 500, { error: "Account lookup failed (" + String(e.message).slice(0, 120) + "). Please try again." });
   return send(res, 500, { error: "Something went wrong. Please try again." });
 }
 
