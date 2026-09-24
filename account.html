@@ -503,6 +503,18 @@
             <h2 class="calc-subhead">Your plan and billing</h2>
             <dl class="acct-billing-facts" id="acctBillingFacts"></dl>
             <p class="field-hint" id="acctBillingHint"></p>
+            <div class="acct-upgrade" id="acctUpgrade" hidden>
+              <label for="acctUpgradeSel">Need more properties?</label>
+              <div class="acct-upgrade__row">
+                <select id="acctUpgradeSel"></select>
+                <button type="button" class="btn btn-ghost" id="acctUpgradePriceBtn">See the price</button>
+              </div>
+              <div id="acctUpgradeConfirm" hidden>
+                <p id="acctUpgradeText"></p>
+                <button type="button" class="btn btn-accent" id="acctUpgradeGo">Confirm upgrade</button>
+                <button type="button" class="linklike" id="acctUpgradeCancel">Cancel</button>
+              </div>
+            </div>
             <div class="acct-billing-actions">
               <button type="button" class="btn btn-accent" id="acctBillingBtn" hidden>Manage billing</button>
               <a href="pricing" class="btn btn-ghost" id="acctPlansLink">See plans</a>
@@ -2791,14 +2803,86 @@
       hint.textContent = text;
 
       manage.hidden = !(plan.paid || hasCustomer);
+      var canUpgrade = plan.paid && limit < 5;
+      plansLink.hidden = canUpgrade;
       if (plan.paid && limit >= 5) {
         plansLink.textContent = "More than five? Contact us";
         plansLink.href = "enquire";
       } else {
-        plansLink.textContent = plan.paid ? "Change or upgrade" : "See plans";
+        plansLink.textContent = "See plans";
         plansLink.href = "pricing";
       }
+      paintUpgrade(canUpgrade, limit);
     }
+
+    /* upgrade on the same plan: the price is shown first, then confirmed. Stripe takes
+       credit for the unused time off the new price and starts a fresh 12 months. */
+    var UPGRADE_PRICES = { 2: 250, 3: 500, 4: 750, 5: 997 };
+    function paintUpgrade(show, limit) {
+      var box = document.getElementById("acctUpgrade");
+      box.hidden = !show;
+      if (!show) return;
+      var sel = document.getElementById("acctUpgradeSel");
+      var keep = sel.value;
+      sel.innerHTML = "";
+      for (var n = limit + 1; n <= 5; n++) {
+        var o = document.createElement("option");
+        o.value = "diy_" + n + "_properties_annual";
+        o.textContent = n + " properties, $" + UPGRADE_PRICES[n] + " a year";
+        sel.appendChild(o);
+      }
+      if (keep) sel.value = keep;
+      document.getElementById("acctUpgradeConfirm").hidden = true;
+    }
+
+    function upgradeProperties(planKey) { var m = /^diy_(\d)_/.exec(planKey); return m ? Number(m[1]) : 0; }
+
+    document.getElementById("acctUpgradePriceBtn").addEventListener("click", function () {
+      var btn = this, msg = document.getElementById("acctBillingMsg");
+      var planKey = document.getElementById("acctUpgradeSel").value;
+      btn.disabled = true; setMsg(msg, "Working out the price\u2026");
+      window.pcAuth.changePlan(planKey, false).then(function (r) {
+        btn.disabled = false;
+        if (r.error) { setMsg(msg, r.error.message, "error"); return; }
+        setMsg(msg, "");
+        var d = r.data;
+        document.getElementById("acctUpgradeText").textContent =
+          "Upgrading to " + d.properties + " properties charges " + fmtMoney(d.amount_due / 100) +
+          " today to your card on file. That is the new price less credit for the time you have not used on your current plan, " +
+          "and it starts a fresh 12 months from today.";
+        document.getElementById("acctUpgradeConfirm").hidden = false;
+      });
+    });
+
+    document.getElementById("acctUpgradeCancel").addEventListener("click", function () {
+      document.getElementById("acctUpgradeConfirm").hidden = true;
+    });
+
+    document.getElementById("acctUpgradeGo").addEventListener("click", function () {
+      var btn = this, msg = document.getElementById("acctBillingMsg");
+      var planKey = document.getElementById("acctUpgradeSel").value;
+      var want = upgradeProperties(planKey);
+      btn.disabled = true; setMsg(msg, "Upgrading your plan\u2026");
+      window.pcAuth.changePlan(planKey, true).then(function (r) {
+        btn.disabled = false;
+        if (r.error) { setMsg(msg, r.error.message, "error"); return; }
+        document.getElementById("acctUpgradeConfirm").hidden = true;
+        setMsg(msg, "Upgraded. Confirming your new plan\u2026", "ok");
+        var tries = 0;
+        (function poll() {
+          window.pcAuth.getPlan().then(function (p) {
+            if (p && p.data) plan = p.data;
+            if (plan.paid && plan.limit >= want) {
+              renderPlanLine(); refreshBilling();
+              setMsg(msg, "Your plan now covers " + plan.limit + " properties.", "ok");
+              return;
+            }
+            if (++tries < 15) setTimeout(poll, 2000);
+            else setMsg(msg, "Your upgrade went through. It can take a minute to show; refresh this page shortly.", "ok");
+          });
+        })();
+      });
+    });
 
     function refreshBilling() {
       if (!window.pcAuth.getBilling) return Promise.resolve();

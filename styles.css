@@ -2426,6 +2426,13 @@ h1, h2, h3 {
 .acct-billing-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 20px; margin: 0 0 14px; }
 .acct-billing-facts dt { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .acct-billing-facts dd { margin: 2px 0 0; font-size: 16px; font-weight: 600; color: var(--text); }
+.acct-upgrade { margin: 16px 0 4px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.acct-upgrade[hidden] { display: none; }
+.acct-upgrade label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--muted); }
+.acct-upgrade__row { display: flex; flex-wrap: wrap; gap: 10px; }
+.acct-upgrade__row select { flex: 1; min-width: 180px; }
+#acctUpgradeConfirm { margin-top: 12px; }
+#acctUpgradeConfirm p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--text); }
 .acct-billing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 6px; }
 .acct-billing-actions [hidden] { display: none; }
 .acct-billing-fine { margin: 14px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }

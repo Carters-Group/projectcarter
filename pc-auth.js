@@ -639,6 +639,26 @@
        installed yet, or the switch is off, the answer is "not enforced" and
        the page behaves exactly as it always has. */
     /* what the "Your plan and billing" card shows: read from the signed-in user's own profile row */
+    /* upgrade on the existing subscription: confirm=false only prices it */
+    changePlan: function (plan, confirm) {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      return client.auth.getSession().then(function (res) {
+        var token = res.data && res.data.session && res.data.session.access_token;
+        if (!token) return { error: { message: "Please sign in first." } };
+        return fetch("/api/change-plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+          body: JSON.stringify({ plan: plan, confirm: !!confirm })
+        }).then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            if (!r.ok) return { error: { message: j.error || "Something went wrong. Please try again." } };
+            return { data: j };
+          });
+        });
+      }, function () { return { error: { message: "Something went wrong. Please try again." } }; });
+    },
+
     getBilling: function () {
       var bad = requireClient();
       if (bad) return Promise.resolve({ data: null, error: bad.error });
