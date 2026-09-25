@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Tax Depreciation Calculator | Project Carter" />
   <meta property="og:description" content="How much could this property deduct each year? Building and fixtures and fittings, year by year, with a realistic range and the reasons behind it." />
-  <meta property="og:image" content="assets/og-image.svg" />
+  <meta property="og:image" content="https://www.projectcarter.com.au/assets/og-image.png" />
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,6 +40,54 @@
     #calcSchedule th:last-child, #calcSchedule td:last-child { padding-right: 2px; }
     #calcSchedule tr.is-total td { font-weight: 600; }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much depreciation can I claim on an investment property?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Two amounts: capital works (Division 43), which is 2.5% of the building's original construction cost a year for 40 years, and plant and equipment (Division 40), the removable fixtures and fittings, which are written off faster. This calculator estimates both from the property type, age, price and your tax rate, as a range, with 5 and 10 year totals."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I claim depreciation on an older or established property?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Usually the building part, yes, if residential construction started after 15 September 1987. For fixtures and fittings, residential property bought on or after 9 May 2017 can only claim items that are new, so second-hand items in an established home are not claimable. Commercial property has no such limit."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between diminishing value and prime cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Both apply to fixtures and fittings. Diminishing value takes a set percentage of the remaining balance each year, so the biggest deductions come first. Prime cost takes an even amount each year. Both add up to the same total over the assets' lives."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need a quantity surveyor's depreciation schedule?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To claim with confidence, yes. A schedule typically costs around $600 to $800, is itself tax deductible and usually pays for itself in the first year. This calculator is a desk estimate to show whether one is worth getting, not a substitute for it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does depreciation affect capital gains tax when I sell?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Capital works deductions you claim reduce the property's cost base, so some of the benefit comes back as capital gains tax on sale. Check the effect with your accountant."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body data-pc-calc="dep">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -304,6 +352,30 @@
             <li><strong>Tax saved</strong> is the deduction multiplied by the marginal tax rate you enter. It assumes you have enough taxable income to use it. Capital works deductions you claim reduce the cost base of the property, so some of the benefit comes back as capital gains tax when you sell. The first year is shown as a full year; in practice it is pro-rated from settlement.</li>
             <li><strong>Is a quantity surveyor's report worth it?</strong> A schedule from a quantity surveyor typically costs around $600 to $800 and is itself tax deductible. The report is what lets you claim with confidence, and it finds things a desk estimate can't. This page is a guide only and is not a substitute for one.</li>
           </ul>
+        </div>
+
+        <div class="calc-faq">
+          <h2 class="calc-subhead">Common questions</h2>
+          <details>
+            <summary>How much depreciation can I claim on an investment property?</summary>
+            <p>Two amounts: capital works (Division 43), which is 2.5% of the building's original construction cost a year for 40 years, and plant and equipment (Division 40), the removable fixtures and fittings, which are written off faster. This calculator estimates both from the property type, age, price and your tax rate, as a range, with 5 and 10 year totals.</p>
+          </details>
+          <details>
+            <summary>Can I claim depreciation on an older or established property?</summary>
+            <p>Usually the building part, yes, if residential construction started after 15 September 1987. For fixtures and fittings, residential property bought on or after 9 May 2017 can only claim items that are new, so second-hand items in an established home are not claimable. Commercial property has no such limit.</p>
+          </details>
+          <details>
+            <summary>What is the difference between diminishing value and prime cost?</summary>
+            <p>Both apply to fixtures and fittings. Diminishing value takes a set percentage of the remaining balance each year, so the biggest deductions come first. Prime cost takes an even amount each year. Both add up to the same total over the assets' lives.</p>
+          </details>
+          <details>
+            <summary>Do I need a quantity surveyor's depreciation schedule?</summary>
+            <p>To claim with confidence, yes. A schedule typically costs around $600 to $800, is itself tax deductible and usually pays for itself in the first year. This calculator is a desk estimate to show whether one is worth getting, not a substitute for it.</p>
+          </details>
+          <details>
+            <summary>Does depreciation affect capital gains tax when I sell?</summary>
+            <p>Yes. Capital works deductions you claim reduce the property's cost base, so some of the benefit comes back as capital gains tax on sale. Check the effect with your accountant.</p>
+          </details>
         </div>
           </div>
         </div>

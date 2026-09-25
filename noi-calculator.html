@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Commercial NOI Calculator | Project Carter" />
   <meta property="og:description" content="Net operating income on a commercial property: income in, operating expenses out, NOI, expense ratio and implied value, plus a one-page PDF." />
-  <meta property="og:image" content="assets/og-image.svg" />
+  <meta property="og:image" content="https://www.projectcarter.com.au/assets/og-image.png" />
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,6 +30,54 @@
     "url": "https://www.projectcarter.com.au/net-operating-income-calculator",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
     "publisher": { "@type": "Organization", "name": "Project Carter" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is net operating income (NOI)?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Net operating income is a property's gross operating income (rent plus other income such as parking or signage) less its operating expenses. It excludes loan interest, income tax, depreciation and one-off capital works, so it measures what the building itself earns."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I value a commercial property from its NOI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Divide the net operating income by the capitalisation rate. For example, $100,000 of NOI at a 6% cap rate implies a value of about $1.67 million. A lower cap rate implies a higher value. Enter a cap rate and the calculator shows the implied value."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which outgoings can be recovered from a commercial tenant?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It depends on the lease. Under a net lease the tenant usually pays most outgoings, such as rates, insurance and maintenance, and sometimes management. Tick \"recovered from tenant\" on any line your lease passes through and it drops out of your operating expenses, so it does not reduce your NOI."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between NOI as a % of income and as a % of price?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "NOI as a % of income shows how much of the rent is left after running costs. NOI as a % of the purchase price is the going-in net yield on what you paid."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this NOI calculator allow for vacancy?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. It is a fully let, single-year figure. If you expect vacancy, reduce the rental income you enter to allow for it."
+        }
+      }
+    ]
   }
   </script>
 </head>
@@ -298,6 +346,30 @@
             <li><strong>Implied property value</strong> is the net operating income divided by the cap rate you enter. Leave the cap rate blank and no value is shown. A lower cap rate implies a higher value.</li>
             <li><strong>Usable equity (up to 70% LVR)</strong> is 70% of the property price (or the implied value, if you haven't entered a price) less any existing loan against the property. It's a guide to how much you could look to release or use as a deposit elsewhere, not a lending decision.</li>
           </ul>
+        </div>
+
+        <div class="calc-faq">
+          <h2 class="calc-subhead">Common questions</h2>
+          <details>
+            <summary>What is net operating income (NOI)?</summary>
+            <p>Net operating income is a property's gross operating income (rent plus other income such as parking or signage) less its operating expenses. It excludes loan interest, income tax, depreciation and one-off capital works, so it measures what the building itself earns.</p>
+          </details>
+          <details>
+            <summary>How do I value a commercial property from its NOI?</summary>
+            <p>Divide the net operating income by the capitalisation rate. For example, $100,000 of NOI at a 6% cap rate implies a value of about $1.67 million. A lower cap rate implies a higher value. Enter a cap rate and the calculator shows the implied value.</p>
+          </details>
+          <details>
+            <summary>Which outgoings can be recovered from a commercial tenant?</summary>
+            <p>It depends on the lease. Under a net lease the tenant usually pays most outgoings, such as rates, insurance and maintenance, and sometimes management. Tick "recovered from tenant" on any line your lease passes through and it drops out of your operating expenses, so it does not reduce your NOI.</p>
+          </details>
+          <details>
+            <summary>What is the difference between NOI as a % of income and as a % of price?</summary>
+            <p>NOI as a % of income shows how much of the rent is left after running costs. NOI as a % of the purchase price is the going-in net yield on what you paid.</p>
+          </details>
+          <details>
+            <summary>Does this NOI calculator allow for vacancy?</summary>
+            <p>No. It is a fully let, single-year figure. If you expect vacancy, reduce the rental income you enter to allow for it.</p>
+          </details>
         </div>
           </div>
         </div>

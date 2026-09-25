@@ -1,0 +1,34 @@
+# Project Carter
+
+> Project Carter is Trent Macartney's corporate property advisory, working Australia-wide with property developers, value-add commercial owners, family offices and managed funds on feasibility, capital structuring and delivery. The site also offers free Australian commercial property calculators and a property portfolio dashboard (first property free).
+
+Everything on this site is general information and planning tools, not financial, tax, legal or planning advice. Figures are estimates built from what the user enters. Enquiries are taken only through the enquiry form.
+
+## About
+
+- [About Trent Macartney](https://www.projectcarter.com.au/about): background, who he works with and service area (Australia-wide)
+- [Approach](https://www.projectcarter.com.au/approach): the four-stage process and the six service areas
+- [Enquire](https://www.projectcarter.com.au/enquire): the only way to contact Project Carter
+
+## Free calculators (Australia)
+
+- [All calculators](https://www.projectcarter.com.au/commercial-calculators): overview of every calculator
+- [Portfolio Review (PR)](https://www.projectcarter.com.au/portfolio-review-calculator): after-tax cash flow, gearing, useable equity and break-even rent across a residential and commercial portfolio, including the 2026 Budget negative gearing change for residential property
+- [Commercial Lending (CL)](https://www.projectcarter.com.au/commercial-lending-calculator): deposit and equity needed by commercial loan type (owner-occupied, investment, SMSF, lease doc, build to rent, build to sell), major banks vs tier 2 and non-bank lenders; not a borrowing capacity tool
+- [Return on Investment (ROI)](https://www.projectcarter.com.au/return-on-investment-calculator): property hold from purchase to sale, with total ROI, return per year, equity multiple and IRR, cap-rate based commercial valuation and value uplift
+- [Net Operating Income (NOI)](https://www.projectcarter.com.au/net-operating-income-calculator): single-year NOI, recoverable outgoings, net yield and implied value from a cap rate
+- [Development Site (DA)](https://www.projectcarter.com.au/development-site-calculator): cost to take a development site to an approved DA, with a site checklist that flags likely consultant reports, typical consultant fee ranges, stamp duty, demolition, council fees, holding costs and land loan interest
+- [Gross Realisation Value (GRV)](https://www.projectcarter.com.au/gross-realisation-value-calculator): development feasibility from DA to settled sales, with 2026 construction cost rates by building type and state, design and construct vs construct only, finance with an S-curve drawdown, margin scheme GST, profit on cost and a worst-case test
+- [Tax Depreciation (DEP)](https://www.projectcarter.com.au/tax-depreciation-calculator): Division 43 capital works and Division 40 fixtures and fittings estimate, including the 1987 and 9 May 2017 residential rules
+
+## Portfolio dashboard
+
+- [Property portfolio management](https://www.projectcarter.com.au/property-portfolio-management): one account for value, debt, equity, cash flow, leases and WALE, land tax and capital gains tax across residential and commercial properties
+- [Pricing](https://www.projectcarter.com.au/pricing): first property free, $250 a year per extra property, $997 a year for five; Done For You service quoted case by case for larger portfolios
+
+## Projects
+
+- [Haig On The Park](https://www.projectcarter.com.au/project-haig-on-the-park): four sustainable homes, South Toowoomba QLD, completed and sold out
+- [Royal Terraces](https://www.projectcarter.com.au/project-royal-terraces): nine Art Deco-inspired terrace homes, Toowoomba City QLD, construction commencing
+- [City West Villas](https://www.projectcarter.com.au/project-city-west-villas): four north-facing villas in a heritage precinct, Toowoomba City QLD, construction commencing
+- [189 Balaclava Road](https://www.projectcarter.com.au/project-balaclava-road): two-level commercial freehold value-add, Caulfield North VIC
