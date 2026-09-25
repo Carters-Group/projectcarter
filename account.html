@@ -238,8 +238,19 @@
                 <button type="button" class="btn btn-accent btn-sm" data-placeholder-add>Add a property</button>
               </div>
 
+              <div class="acct-debt-goal" id="portfolioHome" hidden>
+                <p class="acct-eyebrow">Your home</p>
+                <div class="acct-overview acct-overview--modes" id="portfolioHomeStats"></div>
+                <p class="field-hint">Your home counts in what you own and your useable equity above, but stays out of the investment cash flow, land tax and capital gains tax. The cost to own it is its running costs plus loan interest, before any principal repayments.</p>
+              </div>
+
+              <div class="acct-debt-goal" id="portfolioFirstInvest" hidden>
+                <p class="acct-eyebrow">Your first investment</p>
+                <p>The useable equity above is roughly what a lender may let you borrow against your home toward a deposit and buying costs. Run a purchase through the <a href="return-on-investment-calculator">ROI calculator</a> or check the <a href="commercial-lending-calculator">lending position</a>. Both can pull that equity straight in. Once you buy, add the investment here and its cash flow appears alongside your home.</p>
+              </div>
+
               <div class="acct-debt-goal" id="portfolioCashFlow" hidden>
-                <p class="acct-eyebrow">Cash flow before tax</p>
+                <p class="acct-eyebrow" id="portfolioCashFlowTitle">Cash flow before tax</p>
                 <div class="acct-placeholder-wrap" id="portfolioCashFlowWrap">
                   <div class="acct-overview acct-overview--modes" id="portfolioCashFlowStats"></div>
                 </div>
@@ -286,7 +297,7 @@
             <div class="acct-card-head">
               <h2 class="calc-subhead">Total Portfolio Return on Investment (ROI)</h2>
             </div>
-            <p class="acct-empty" id="portfolioPlanNote" hidden>The ROI projection needs a current value, loan balance, interest rate and rent on every property. Fill in what is missing under Your properties and it appears here.</p>
+            <p class="acct-empty" id="portfolioPlanNote" hidden>The ROI projection needs a current value, loan balance, interest rate and rent on every investment property (your home is left out). Fill in what is missing under Your properties and it appears here.</p>
               <div class="acct-debt-goal" id="portfolioPlanInputs">
                 <p class="acct-eyebrow">Growth assumptions</p>
                 <div class="acct-plan__row">
@@ -1082,8 +1093,30 @@
         ["Higher gearing (80% LVR)", fmtMoney(t.usable80)]
       ] : SAMPLE_EQUITY);
       modesEl.appendChild(wrap);
-      modesEl.appendChild(tEl("p", "field-hint", "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs."));
+      modesEl.appendChild(tEl("p", "field-hint", "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs." +
+        (ready && t.home && t.home.count ? " Includes your home, since its equity is usually what funds the next purchase." : "")));
       setPlaceholder("portfolioStatsWrap", !ready);
+
+      /* your home, on its own: what you own in it and what it costs to hold */
+      var homeEl = document.getElementById("portfolioHome");
+      var h = t.home || { count: 0 };
+      if (ready && h.count) {
+        var hs = [
+          ["Value", fmtMoney(h.value)],
+          ["Loan", fmtMoney(h.debt)],
+          ["Equity", fmtMoney(h.equity)]
+        ];
+        if (h.costed) {
+          hs.push(["Cost to own / yr", fmtMoney(h.cost)]);
+          hs.push(["Cost to own / wk", fmtMoney(h.costWeekly)]);
+        }
+        fillStats(document.getElementById("portfolioHomeStats"), hs);
+        show(homeEl);
+      } else { hide(homeEl); }
+      /* a homeowner with no investment yet: point them at their first one */
+      var homeOnly = ready && h.count > 0 && t.invest && t.invest.count === 0;
+      if (homeOnly) show(document.getElementById("portfolioFirstInvest")); else hide(document.getElementById("portfolioFirstInvest"));
+      document.getElementById("portfolioCashFlowTitle").textContent = h.count ? "Investment cash flow before tax" : "Cash flow before tax";
 
       var cfEl = document.getElementById("portfolioCashFlow");
       var cfReady = t.cashFlowCount > 0;
@@ -1104,7 +1137,7 @@
       })() : SAMPLE_CASHFLOW;
       fillStats(document.getElementById("portfolioCashFlowStats"), cf);
       setPlaceholder("portfolioCashFlowWrap", !cfReady);
-      show(cfEl);
+      if (homeOnly) hide(cfEl); else show(cfEl);
 
       var soldEl = document.getElementById("portfolioIfSold");
       if (t.soldCount > 0) {
@@ -1166,7 +1199,9 @@
       } else { hide(gapsEl); }
 
       var goalEl = document.getElementById("portfolioDebtGoal");
-      if (t.debt > 0 && t.blendedRate > 0) { show(goalEl); renderDebtGoal(t.debt, t.blendedRate); } else { hide(goalEl); }
+      /* every loan counts here, your home's included */
+      var goalRate = t.allBlendedRate || t.blendedRate;
+      if (t.debt > 0 && goalRate > 0) { show(goalEl); renderDebtGoal(t.debt, goalRate); } else { hide(goalEl); }
 
       /* the plan projects value, rent and debt together, so it only makes
          sense once every counted property has its rent and interest */
@@ -1179,6 +1214,11 @@
       renderPortfolioRisk(riskReady ? { portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent } : SAMPLE_RISK_BASIS);
       setPlaceholder("portfolioRiskWrap", !riskReady);
       show(riskCardEl);
+      /* rate-rise and vacancy checks and the ROI projection are about
+         investments; with only a home there is nothing for them to test yet
+         (the debt goal stays, since it works on your home loan too) */
+      if (homeOnly) { hide(document.getElementById("portfolioRisk")); hide(planCardEl); }
+      else show(document.getElementById("portfolioRisk"));
     }
 
     /* ---- Your properties (the register) ---------------------------------
@@ -1691,6 +1731,17 @@
             '<div class="field"><label>State</label><select data-t="state">' + stateOpts + '</select></div>'
           ) +
           fRow(
+            '<div class="field" data-usage-wrap><label>How it is used</label>' +
+              '<div class="acct-type-toggle" role="group">' +
+                '<button type="button" data-usage-btn="investment">Investment</button>' +
+                '<button type="button" data-usage-btn="home">My home</button>' +
+              '</div>' +
+              '<select data-t="usage" hidden><option value="investment">Investment</option><option value="home">My home</option></select>' +
+            '</div>',
+            '<div class="field" data-moved-out><label>' + fLabel("Was it once your home?", "the date you moved out, if so") + '</label><input type="date" data-t="moved_out_date" /></div>'
+          ) +
+          '<p class="field-hint" data-home-only hidden>Your home counts toward what you own and the equity you could borrow against, but not toward rent, cash flow, land tax or capital gains tax. Enter its running costs and loan below to see what it costs you to own.</p>' +
+          fRow(
             '<div class="field"><label>Owned by</label><select data-t="ownership_type">' + ownerOpts + '</select></div>',
             fText("holding_entity", "Holding entity name", "blank if held in your own name", "e.g. Smith Property Pty Ltd")
           ) +
@@ -1709,24 +1760,26 @@
           '<p class="acct-subhead">What you have put in</p>' +
           fRow(
             fMoney("improvements", "Capital improvements", "renovations, extensions; not repairs"),
-            fMoney("capital_works_claimed", "Building depreciation", "estimate from your depreciation schedule, if you have one")
+            fMoney("capital_works_claimed", "Building depreciation", "estimate from your depreciation schedule, if you have one", " data-invest-only")
           ) +
 
           '<p class="acct-subhead">Worth and owed today</p>' +
           fRow(
             fMoney("current_value", "Current value"),
-            fMoney("land_value", "Unimproved land value", "from your council rates or land tax notice"),
+            fMoney("land_value", "Unimproved land value", "from your council rates or land tax notice", " data-invest-only"),
             fMoney("loan_balance", "Loan balance", "enter 0 if none")
           ) +
           fRow(
             fPct("interest_rate", "Interest rate"),
-            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs. Not land tax, that is worked out for you. On a commercial lease, only what your net rent does not already cover")
+            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs. Not land tax, that is worked out for you. On a commercial lease, only what your net rent does not already cover", " data-running-costs")
           ) +
 
+          '<div data-invest-only>' +
           '<p class="acct-subhead">What it earns</p>' +
           '<div data-lease-rows></div>' +
           '<button type="button" class="linklike" data-act="add-lease">+ Add another lease</button>' +
           '<p class="field-hint" data-res-hint>A single house usually has one lease. For a duplex, unit block, townhouses or a granny flat, add a lease for each unit or dwelling.</p>' +
+          '</div>' +
 
           '<p class="acct-subhead" data-sale-head>If you sold</p>' +
           fRow(
@@ -1737,7 +1790,7 @@
             fMoney("expected_sale_price", "Sale price", "starts at today's value"),
             fMoney("value_at_jul_2027", "Value on 1 July 2027", "starts at today's value, use a valuation if you have one", " data-v27")
           ) +
-          '<p class="field-hint">Your cost base is the purchase price plus buying costs and capital improvements, less the building write-off (Division 43), which reduces it whether or not you claimed it. ' +
+          '<p class="field-hint" data-invest-only>Your cost base is the purchase price plus buying costs and capital improvements, less the building write-off (Division 43), which reduces it whether or not you claimed it. ' +
             'Plant and equipment depreciation (Division 40) is handled separately by your accountant when you sell. The tax clock (12 months, and which financial year) runs from the contract dates, not settlement.</p>' +
           '<p class="acct-tax-preview" data-sale-preview></p>' +
 
@@ -1770,6 +1823,7 @@
         var v = property[key];
         if (input.type === "checkbox") { input.checked = !!v; return; }
         if (key === "ownership_type") { input.value = v || "individual"; return; }
+        if (key === "usage") { input.value = v === "home" ? "home" : "investment"; return; }
         input.value = v == null ? "" : v;
         if (input.parentNode.classList.contains("input-money")) input.value = withCommas(input.value);
       });
@@ -1786,6 +1840,13 @@
       /* an entity's sale leaves the cash with the entity, not the owner personally */
       var hand = m.owner && m.owner !== "individual" ? " with the " + (m.owner === "super" ? "super fund" : m.owner) : " in your hand";
       if (s.price == null) return "Add a current value, or a sale price, to see what selling would leave you with.";
+      if (m.home) {
+        return "Your home is generally exempt from capital gains tax (the main residence exemption). Sold for " + fmtMoney(s.price) +
+          ", you keep " + fmtMoney(s.proceeds) + " after selling costs" +
+          (m.loan != null ? " and owe " + fmtMoney(m.loan) + " to the lender, leaving " + fmtMoney(s.cashIfSold) + " in your hand." : ".") +
+          " Part of the gain can be taxable if you rented it out or used it for business, so check with your accountant if so.";
+      }
+      var movedNote = m.movedOut ? " You lived in it until " + fmtDate(m.movedOut + "T00:00:00") + ": the main residence exemption (including the rule that can cover up to six years of renting it out) may reduce or remove this tax. That is not included here, so ask your accountant." : "";
       var before = s.cashBeforeTax != null ? " Before tax you would have about " + fmtMoney(s.cashBeforeTax) + " after selling costs and the loan." : "";
       if (!c || !c.ready) {
         return "Add the " + listJoin(c && c.missing && c.missing.length ? c.missing : ["purchase price", "purchase date"]) + " to see capital gains tax." + before;
@@ -1798,7 +1859,7 @@
       if (c.needsRate) return head + ". The capital gain is " + fmtMoney(c.gain) + ". Add your marginal tax rate under Tax and land tax to see the tax and your cash in hand.";
       var out = head + ". Capital gains tax is " + fmtMoney(c.tax) + (c.rules === "new" ? " under the rules from 1 July 2027" : "");
       out += s.cashIfSold != null ? ", leaving " + fmtMoney(s.cashIfSold) + hand + "." : ".";
-      return out;
+      return out + movedNote;
     }
 
     function stripItems(m) {
@@ -1816,6 +1877,7 @@
       if (m.equity != null) { items.push(["Equity", fmtMoney(m.equity)]); items.push(["LVR", fmtPct(m.lvr)]); }
       if (m.grossYield != null) items.push([m.type === "commercial" ? "Net yield" : "Yield", fmtPct(m.grossYield)]);
       if (m.cashFlow != null) items.push(["Cash flow / yr", fmtSignedMoney(m.cashFlow)]);
+      if (m.homeCost != null) items.push(["Cost to own / wk", fmtMoney(m.homeCost / 52)]);
       if (m.sale.cashIfSold != null) items.push(["Cash if sold", fmtMoney(m.sale.cashIfSold)]);
       return items;
     }
@@ -1842,7 +1904,8 @@
       details.querySelector(".acct-property__name").textContent = property.name || "Untitled property";
       var tag = details.querySelector(".acct-tag");
       var isCommercial = (details.querySelector('[data-f="property_type"]') || {}).value === "commercial";
-      tag.textContent = (property.is_sold ? "Sold · " : "") + (isCommercial ? "Commercial" : "Residential");
+      var isHomeCard = !isCommercial && (details.querySelector('[data-t="usage"]') || {}).value === "home";
+      tag.textContent = (property.is_sold ? "Sold · " : "") + (isCommercial ? "Commercial" : (isHomeCard ? "My home" : "Residential"));
       tag.className = "acct-tag " + (isCommercial ? "is-commercial" : "is-residential");
       details.classList.toggle("is-commercial", isCommercial);
       details.classList.toggle("is-residential", !isCommercial);
@@ -1850,7 +1913,7 @@
       var leaseCount = (property.leases || []).length;
       var hasPeriodic = (property.leases || []).some(function (l) { return l.is_periodic; });
       var tail = wale ? " · WALE " + wale.years.toFixed(1) + " yrs" : (hasPeriodic ? " · periodic lease" : "");
-      details.querySelector(".acct-property__meta").textContent =
+      details.querySelector(".acct-property__meta").textContent = isHomeCard ? (property.state || "") :
         (property.state ? property.state + " · " : "") + leaseCount + (leaseCount === 1 ? " lease" : " leases") + tail;
     }
 
@@ -1870,6 +1933,8 @@
       var stateSel = details.querySelector('[data-t="state"]');
       var waWrap = details.querySelector("[data-wa-metro]");
       var typeButtons = Array.prototype.slice.call(details.querySelectorAll("[data-type-btn]"));
+      var usageSel = details.querySelector('[data-t="usage"]');
+      var usageButtons = Array.prototype.slice.call(details.querySelectorAll("[data-usage-btn]"));
 
       /* a brand-new property is stored as "Untitled property"; show an empty box to type into */
       nameInput.value = property.name && property.name !== "Untitled property" ? property.name : "";
@@ -1905,11 +1970,38 @@
         resHint.hidden = typeSelect.value !== "residential";
         /* the new-build choice and the 1 July 2027 value are residential-only questions */
         var commercial = typeSelect.value === "commercial";
-        newBuildWrap.hidden = commercial;
-        v27Wrap.hidden = commercial;
         if (commercial) newBuildWrap.querySelector("input").checked = false;
+        syncUsage();
         prefillSale();
       }
+      /* only a residential property can be your home; a home drops every
+         investment-only question (leases, land value, depreciation, 2027 CGT) */
+      function syncUsage() {
+        var commercial = typeSelect.value === "commercial";
+        if (commercial) usageSel.value = "investment";
+        var home = usageSel.value === "home";
+        details.querySelector("[data-usage-wrap]").hidden = commercial;
+        details.querySelector("[data-moved-out]").hidden = commercial || home;
+        details.querySelectorAll("[data-invest-only]").forEach(function (el) { el.hidden = home; });
+        details.querySelectorAll("[data-home-only]").forEach(function (el) { el.hidden = !home; });
+        newBuildWrap.hidden = commercial || home;
+        v27Wrap.hidden = commercial || home;
+        usageButtons.forEach(function (btn) { btn.classList.toggle("is-active", btn.getAttribute("data-usage-btn") === usageSel.value); });
+        var rc = details.querySelector("[data-running-costs] label span");
+        if (rc) rc.textContent = home
+          ? "(council and water rates, insurance, strata, repairs)"
+          : "(rates, insurance, management, repairs. Not land tax, that is worked out for you. On a commercial lease, only what your net rent does not already cover)";
+        details.classList.toggle("is-home", home);
+      }
+      usageButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (usageSel.value === btn.getAttribute("data-usage-btn")) return;
+          usageSel.value = btn.getAttribute("data-usage-btn");
+          syncUsage();
+          renderPropertyHead(details, property);
+          usageSel.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      });
       function syncTypeButtons() {
         typeButtons.forEach(function (btn) {
           btn.classList.toggle("is-active", btn.getAttribute("data-type-btn") === typeSelect.value);
@@ -2225,7 +2317,7 @@
 
       sec.appendChild(tEl("p", "acct-tax-fine",
         "Land tax is charged on the owner, per state, on unimproved land value, so thresholds do not stack across states. Each entity (for example a company set up for one large purchase) is its own taxpayer with its own threshold, so give properties in the same entity the same holding entity name. " +
-        "Uses the published general and trust rates; it leaves out exemptions (such as your own home), foreign-owner and absentee surcharges, " +
+        "Uses the published general and trust rates. A property marked My home is left out, since your principal place of residence is exempt; other exemptions, foreign-owner and absentee surcharges, " +
         "and SMSF-specific rules (an SMSF is taxed at general rates outside Queensland). Confirm the figure with your state revenue office or accountant."));
       return sec;
     }
@@ -2560,10 +2652,11 @@
       if (soldRows.length) ifHead.style.marginTop = "28px";
       sec.appendChild(ifHead);
 
+      var homeRows = heldRows.filter(function (x) { return x.m.home; });
       if (!ready.length) {
-        sec.appendChild(tEl("p", "acct-empty", heldRows.length
+        sec.appendChild(tEl("p", "acct-empty", heldRows.length > homeRows.length
           ? "Add a purchase date, purchase price and current value to a property to estimate its capital gains tax."
-          : "No properties held right now."));
+          : (homeRows.length ? "Your home is generally exempt from capital gains tax (the main residence exemption), so there is nothing to estimate yet. Investment properties you add will appear here." : "No properties held right now.")));
       } else {
         var noRate = totals.needsRate;
         var stats = [
@@ -2591,6 +2684,15 @@
         sec.appendChild(tNotes([gapLine("Not included yet, add the purchase date and price (and a current value): ",
           notReady.map(function (x) { return x.p.name || "Untitled property"; }))]));
       }
+      if (homeRows.length && ready.length) {
+        sec.appendChild(tNotes([gapLine("Not included, since your home is generally exempt (main residence): ",
+          homeRows.map(function (x) { return x.p.name || "Untitled property"; }))]));
+      }
+      var movedRows = ready.filter(function (x) { return x.m.movedOut; });
+      if (movedRows.length) {
+        sec.appendChild(tNotes([gapLine("Once your home, so the main residence exemption (including up to six years of renting it out) may reduce the tax shown: ",
+          movedRows.map(function (x) { return x.p.name || "Untitled property"; }))]));
+      }
 
       /* one panel for every sale's workings (actual and "what if"), each with a PDF */
       var panelRows = soldReady.concat(ready);
@@ -2606,7 +2708,7 @@
       sec.appendChild(tEl("p", "acct-tax-fine",
         "Assumptions: individuals and trusts are taxed at the flat marginal rate you enter above (Medicare levy included), with the cost base indexed at a 2.5% CPI assumption; a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
         "the 30% minimum applies to the taxable gain, so a lower rate is lifted to 30%. " +
-        "It leaves out the main residence exemption, foreign-resident rules, carried-forward losses and other concessions. Not tax advice."));
+        "A property marked My home is treated as fully exempt (main residence); partial exemptions (a home that was rented out or used for business, or a former home), foreign-resident rules, carried-forward losses and other concessions are left out. Not tax advice."));
       return sec;
     }
 
@@ -3223,7 +3325,7 @@
             name: p.name, type: p.propertyType === "commercial" ? "commercial" : "residential",
             value: p.value, loan: p.loan, ratePct: p.ratePct, weeklyRent: p.weeklyRent,
             runningCosts: p.runningCosts, state: p.state, owner: p.owner,
-            acqCosts: p.acqCosts, improvements: p.improvements
+            acqCosts: p.acqCosts, improvements: p.improvements, home: p.usage === "home"
           };
         });
       }
@@ -3234,7 +3336,8 @@
           type: p.ptype === "com" ? "commercial" : "residential",
           value: prNum(p.value), loan: prNum(p.loan), ratePct: p.ptype === "own" ? null : prNum(p.rate),
           weeklyRent: p.ptype === "own" ? null : prNum(p.rentwk),
-          runningCosts: null, state: p.stampState || "", owner: null, acqCosts: null, improvements: null
+          runningCosts: null, state: p.stampState || "", owner: null, acqCosts: null, improvements: null,
+          home: p.ptype === "own"
         };
       });
     }
@@ -3364,6 +3467,7 @@
           if (c.owner) row.ownership_type = c.owner;
           if (c.acqCosts) row.acquisition_costs = c.acqCosts;
           if (c.improvements) row.improvements = c.improvements;
+          if (c.home) row.usage = "home";
           return window.pcAuth.saveProperty(row).then(function (res) {
             if (res.error || !res.data) { failed = res.error || { message: "Could not add " + c.name + "." }; return null; }
             if (!firstId) firstId = res.data.id;
@@ -3597,6 +3701,14 @@
       return (lo + hi) / 2;
     }
 
+    function investOnly(s) {
+      if (s.investmentValue == null) return s;
+      return Object.assign({}, s, {
+        portfolioValue: s.investmentValue, portfolioDebt: s.investmentDebt,
+        portfolioEquity: s.investmentValue - s.investmentDebt
+      });
+    }
+
     /* project the portfolio forward at one blended capital-growth rate and
        one blended rental-growth rate (deliberately not split by property or
        residential/commercial - that level of detail lives in the ROI
@@ -3607,6 +3719,8 @@
        mark-to-market terminal value - there's no capital gains tax line
        because nothing here assumes the visitor is actually selling. */
     function buildPortfolioPlan(s, years, capGrowthPct, rentGrowthPct) {
+      /* investments only: your home earns no rent, so it has no place in a return projection */
+      s = investOnly(s);
       var price = s.portfolioValue || 0;
       var rent1 = s.netRentalIncome || 0;
       var rate = s.blendedRate > 0 ? s.blendedRate : 0.065;
@@ -3730,8 +3844,8 @@
       var roiMsg = document.getElementById("portfolioRoiMsg");
       var resultEl = document.getElementById("portfolioRoiResult");
       hide(resultEl);
-      if (!portfolio || !portfolio.totals.complete) { setMsg(roiMsg, "Add a value, loan, interest rate and a lease with rent to every property first.", "error"); return; }
-      var s = portfolio.summary;
+      if (!portfolio || !portfolio.totals.complete) { setMsg(roiMsg, "Add a value, loan, interest rate and a lease with rent to every investment property first.", "error"); return; }
+      var s = investOnly(portfolio.summary);
       if (!(s.portfolioValue > 0)) { setMsg(roiMsg, "This portfolio has no combined value to project yet."); return; }
 
       var years = Math.max(1, Math.min(30, Math.round(parseFloat(document.getElementById("planYears").value) || 5)));

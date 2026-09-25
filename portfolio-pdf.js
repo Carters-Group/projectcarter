@@ -150,12 +150,16 @@ var pcPortfolioPdf = (function () {
 
     var ready = t.counted > 0;
     var flowReady = ready && t.cashFlowCount > 0;
+    var home = t.home || { count: 0 };
+    var hasHome = ready && home.count > 0;
 
     /* ---- the answer first ---------------------------------------------- */
     var bl = [];
     if (ready) {
       bl.push("Your " + (t.counted === 1 ? "property is" : t.counted + " properties are") + " worth " + money(t.value) + " against " + money(t.debt) + " of debt, leaving " + money(t.equity) + " of equity at a " + pct(t.lvr) + " LVR.");
-      if (flowReady) bl.push("Before income tax they " + (t.cashFlow >= 0 ? "pay you " + money(t.cashFlowWeekly) : "cost you " + money(-t.cashFlowWeekly)) + " a week.");
+      if (hasHome) bl.push("That includes your home, which counts toward your equity but not your investment income.");
+      if (flowReady) bl.push("Before income tax " + (hasHome ? "your investments " : "they ") + (t.cashFlow >= 0 ? "pay you " + money(t.cashFlowWeekly) : "cost you " + money(-t.cashFlowWeekly)) + " a week.");
+      if (hasHome && home.costed) bl.push("Your home costs about " + money(home.costWeekly) + " a week to own in running costs and interest.");
       if (t.usable80 > 0) bl.push("A lender could release roughly " + money(t.usable70) + " to " + money(t.usable80) + " of that equity toward your next purchase.");
     } else {
       bl.push("Add a current value and loan balance to your properties to see your position. This report fills in as the register does.");
@@ -173,9 +177,22 @@ var pcPortfolioPdf = (function () {
       y += 6;
     }
 
+    /* ---- your home, on its own ------------------------------------------ */
+    if (hasHome) {
+      section("Your home", "Counted in what you own and your useable equity above, but kept out of the investment cash flow, land tax and capital gains tax.");
+      tiles([["Value", money(home.value)], ["Loan", money(home.debt)], ["Equity", money(home.equity)]]);
+      if (home.costed) {
+        row("Running costs / yr", money(home.runningCosts));
+        row("Loan interest / yr", money(home.interest));
+        row("Cost to own / yr", money(home.cost), true);
+        row("Cost to own / week", money(home.costWeekly));
+      }
+      y += 6;
+    }
+
     /* ---- 2. cash flow --------------------------------------------------- */
     if (flowReady) {
-      section("What it pays you", t.complete ? null : "Based on the " + t.cashFlowCount + " properties with a rent figure, loan and rate.");
+      section(hasHome ? "What your investments pay you" : "What it pays you", t.complete ? null : "Based on the " + t.cashFlowCount + " properties with a rent figure, loan and rate.");
       tiles([["Cash flow / week", money(t.cashFlowWeekly)], ["Cash flow / year", money(t.cashFlow)], [t.yieldKind === "net" ? "Net yield" : "Yield on value", pct(t.grossYield)]]);
       row("Rent from current leases", money(t.rent));
       row("Less running costs", money(-t.runningCosts));
@@ -193,7 +210,7 @@ var pcPortfolioPdf = (function () {
       section("Property by property", "Sorted by equity, largest first.");
       var sorted = held.slice().sort(function (a, b) { return (b.equity || -Infinity) - (a.equity || -Infinity); });
       var rows = sorted.map(function (m) {
-        var tag = (m.type === "commercial" ? "Commercial" : "Residential") + (m.state ? ", " + m.state : "");
+        var tag = (m.type === "commercial" ? "Commercial" : (m.home ? "My home" : "Residential")) + (m.state ? ", " + m.state : "");
         return [m.name + "\n" + tag, money(m.value), money(m.loan), money(m.equity), pct(m.lvr), money(m.cashFlow),
           m.growth ? (m.growth.perYearPct != null ? pct(m.growth.perYearPct) + " pa" : pct(m.growth.pct) + " total") : "-"];
       });
@@ -203,7 +220,7 @@ var pcPortfolioPdf = (function () {
         { head: "Equity", width: 62, num: true }, { head: "LVR", width: 40, num: true },
         { head: "Cash flow / yr", width: 66, num: true }, { head: "Growth", width: 56, num: true }
       ], rows, held.length > 1 && ready);
-      para("Cash flow is after running costs, each property's share of land tax and interest. Growth is from purchase price to current value, per year once held a year or more.", 8, 130);
+      para("Cash flow is after running costs, each property's share of land tax and interest" + (hasHome ? " (your home has none; the portfolio row is investments only)" : "") + ". Growth is from purchase price to current value, per year once held a year or more.", 8, 130);
       y += 6;
     }
 
@@ -238,11 +255,12 @@ var pcPortfolioPdf = (function () {
     }
 
     /* ---- 6. exit -------------------------------------------------------- */
-    var exitRows = held.filter(function (m) { return m.sale && m.sale.cgt && m.sale.cgt.ready; });
+    var exitRows = held.filter(function (m) { return m.sale && ((m.sale.cgt && m.sale.cgt.ready) || (m.home && m.sale.cashIfSold != null)); });
     if (exitRows.length) {
       section("If you sold", "Each property sold at its expected sale price and date (today and current value unless you set them), less selling costs, the loan and capital gains tax under the rules for that date.");
       if (t.soldCount) tiles([["Cash in hand if all sold", money(t.cashIfSold)], ["Capital gains tax", t.cgtNeedsRate ? "Needs tax rate" : money(t.cgtTax)]]);
       var er = exitRows.map(function (m) {
+        if (m.home) return [m.name + " (home)", m.sale.saleDate ? date(m.sale.saleDate) : "Today", money(m.sale.price), "Exempt", money(0), money(m.sale.cashIfSold)];
         var r = m.sale.cgt;
         return [m.name, date(r.saleDate), money(m.sale.price), r.loss ? "Loss " + money(r.loss) : money(r.gain), r.needsRate ? "-" : money(r.tax), money(m.sale.cashIfSold)];
       });
@@ -250,6 +268,7 @@ var pcPortfolioPdf = (function () {
         { head: "Tax", width: 62, num: true }, { head: "Cash in hand", width: 74, num: true }], er);
       var missingCgt = held.filter(function (m) { return m.sale && m.sale.cgt && !m.sale.cgt.ready; }).map(function (m) { return m.name; });
       if (missingCgt.length) para("Not included, missing a purchase price or date: " + missingCgt.join(", ") + ".", 8, 130);
+      if (exitRows.some(function (m) { return m.home; })) para("Your home is treated as exempt from capital gains tax (main residence). Part of the gain can be taxable if it was rented out or used for business.", 8, 130);
       if (held.some(function (m) { return m.owner && m.owner !== "individual"; })) para("Cash in hand for a property owned by a company, trust or super fund stays with that entity. Paying it out to you can carry further tax, which is not included.", 8, 130);
       if (t.cgtNeedsRate) para("Add your marginal tax rate under Tax and land tax to see the tax on properties held in your own name or a trust.", 8, 130);
       y += 6;

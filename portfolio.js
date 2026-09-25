@@ -13,6 +13,13 @@
    Blank means "not entered", zero means "none" (a loan balance of 0 is a
    property with no loan). Totals only count properties that have what each
    figure needs, and report who is missing, rather than guessing.
+
+   A residential property can be the owner's home (usage "home"). It counts
+   toward what you own (value, debt, equity, useable equity), because that is
+   the equity that funds the next purchase, but never toward the investment
+   figures (rent, yield, cash flow, land tax, capital gains tax). Its running
+   costs and loan interest are reported on their own as the cost of owning
+   your home.
    ========================================================================= */
 "use strict";
 
@@ -81,10 +88,12 @@ var pcPortfolio = (function () {
     var rate = num(p.interest_rate);
     var costs = num(p.annual_running_costs);
     var price = pos(p.purchase_price);
-    var rent = annualRent(p, today);
+    var home = isHome(p);
+    var rent = home ? { rent: 0, known: false } : annualRent(p, today);
 
     var m = {
       id: p.id, name: p.name || "Untitled property", sold: !!p.is_sold, entity: (p.holding_entity || "").trim(), type: p.property_type === "commercial" ? "commercial" : "residential", state: p.state || "", owner: p.ownership_type || "individual",
+      home: home, movedOut: !home && p.property_type !== "commercial" && p.moved_out_date ? p.moved_out_date : null,
       value: value, loan: loan, rate: rate, price: price,
       equity: value != null && loan != null ? value - loan : null,
       lvr: value != null && loan != null ? loan / value * 100 : null,
@@ -98,6 +107,13 @@ var pcPortfolio = (function () {
 
     m.interest = loan != null && (loan === 0 || rate != null) ? loan * (rate || 0) / 100 : null;
     m.cashFlow = m.rent != null && m.interest != null ? m.rent - (costs || 0) - m.interest : null;
+    /* your home earns nothing, so what it costs to hold is its own figure:
+       running costs plus loan interest, per year */
+    m.homeCost = home && m.interest != null ? (costs || 0) + m.interest : null;
+
+    /* all-in cost: price plus buying costs (stamp duty, legals) and
+       improvements, the same things that make up a cost base */
+    m.totalCost = price != null ? price + (pos(p.acquisition_costs) || 0) + (pos(p.improvements) || 0) : null;
 
     m.growth = null;
     if (price != null && value != null) {
@@ -105,14 +121,20 @@ var pcPortfolio = (function () {
       m.growth = {
         amount: value - price,
         pct: (value / price - 1) * 100,
-        perYearPct: yrs != null && yrs >= 1 ? (Math.pow(value / price, 1 / yrs) - 1) * 100 : null
+        perYearPct: yrs != null && yrs >= 1 ? (Math.pow(value / price, 1 / yrs) - 1) * 100 : null,
+        afterCosts: value - m.totalCost
       };
     }
 
     var sellPct = cgtSettingsFrom(settings).sellingCostPct;
     var salePrice = pos(p.expected_sale_price) || value;
-    var sale = { price: salePrice, cgt: null, proceeds: null, tax: null, taxReform: null, cashIfSold: null, cashIfSoldReform: null, cashBeforeTax: null };
-    if (salePrice != null) {
+    var sale = { price: salePrice, cgt: null, proceeds: null, tax: null, taxReform: null, cashIfSold: null, cashIfSoldReform: null, cashBeforeTax: null, exempt: home, saleDate: p.planned_sale_date || null };
+    if (salePrice != null && home) {
+      /* main residence exemption: no capital gains tax on your own home */
+      sale.proceeds = salePrice * (1 - sellPct / 100);
+      sale.tax = 0;
+      if (loan != null) sale.cashBeforeTax = sale.cashIfSold = sale.proceeds - loan;
+    } else if (salePrice != null) {
       sale.proceeds = salePrice * (1 - sellPct / 100);
       if (loan != null) sale.cashBeforeTax = sale.proceeds - loan;
       if (typeof pcTax !== "undefined") {
@@ -133,6 +155,9 @@ var pcPortfolio = (function () {
     return m;
   }
 
+  /* only a residential property can be the owner's home */
+  function isHome(p) { return p.usage === "home" && p.property_type !== "commercial"; }
+
   function sum(list, key) { return list.reduce(function (a, x) { return a + (x[key] || 0); }, 0); }
 
   function build(props, settings, today) {
@@ -145,6 +170,7 @@ var pcPortfolio = (function () {
     var metrics = all.filter(function (m) { return !m.sold; });
     var heldProps = (props || []).filter(function (p) { return !p.is_sold; });
 
+    /* your home is exempt from land tax, so it never joins a land tax group */
     var landTax = null;
     if (typeof pcTax !== "undefined") {
       landTax = pcTax.landTaxPortfolio(metrics.map(function (m, i) {
@@ -152,7 +178,7 @@ var pcPortfolio = (function () {
           id: m.id, name: m.name, state: m.state, owner: m.owner,
           landValue: pos(heldProps[i].land_value) || 0, waMetro: !!heldProps[i].wa_metro, entity: heldProps[i].holding_entity || ""
         };
-      }), {});
+      }).filter(function (x, i) { return !metrics[i].home; }), {});
       landTax.groups.forEach(function (g) {
         g.properties.forEach(function (gp) {
           metrics.forEach(function (m) { if (m.id === gp.id) m.landTaxShare = gp.share; });
@@ -168,10 +194,20 @@ var pcPortfolio = (function () {
 
     var withValue = metrics.filter(function (m) { return m.value != null; });
     var counted = metrics.filter(function (m) { return m.value != null && m.loan != null; });
+    /* what you own counts your home; everything about income counts only
+       the investments */
+    var invested = counted.filter(function (m) { return !m.home; });
+    var homes = counted.filter(function (m) { return m.home; });
     /* cash flow is only counted for properties whose balance-sheet figures
        are counted too, so the two halves of the portfolio always describe
        the same set of properties */
-    var flowed = counted.filter(function (m) { return m.cashFlow != null; });
+    var flowed = invested.filter(function (m) { return m.cashFlow != null; });
+    var investValue = sum(invested, "value");
+    var investDebt = sum(invested, "loan");
+    var homeValue = sum(homes, "value");
+    var homeDebt = sum(homes, "loan");
+    var homeCosted = homes.filter(function (m) { return m.homeCost != null; });
+    var homeCost = sum(homeCosted, "homeCost");
 
     var value = sum(counted, "value");
     var debt = sum(counted, "loan");
@@ -185,6 +221,10 @@ var pcPortfolio = (function () {
     var geared = flowed.filter(function (m) { return m.loan > 0 && m.rate != null; });
     var gearedDebt = sum(geared, "loan");
     var blendedRate = gearedDebt > 0 ? sum(geared, "interest") / gearedDebt : null;
+    /* every loan with a rate, your home's included (for paying debt down) */
+    var allGeared = counted.filter(function (m) { return m.loan > 0 && m.rate != null; });
+    var allGearedDebt = sum(allGeared, "loan");
+    var allBlendedRate = allGearedDebt > 0 ? sum(allGeared, "interest") / allGearedDebt : null;
 
     var sold = metrics.filter(function (m) { return m.sale.cashIfSold != null; });
     var cgtItems = metrics.filter(function (m) { return m.sale.cgt; }).map(function (m) { return m.sale.cgt; });
@@ -195,7 +235,7 @@ var pcPortfolio = (function () {
     var soldProps = all.filter(function (m) { return m.sold; });
     var realised = { count: soldProps.length, byYear: {}, years: [] };
     soldProps.forEach(function (m) {
-      var fy = financialYear(m.sale.cgt && m.sale.cgt.saleDate);
+      var fy = financialYear((m.sale.cgt && m.sale.cgt.saleDate) || m.sale.saleDate);
       if (!realised.byYear[fy]) { realised.byYear[fy] = { fy: fy, gain: 0, tax: 0, needsRate: false, props: [] }; realised.years.push(fy); }
       var y = realised.byYear[fy];
       y.props.push(m);
@@ -216,7 +256,19 @@ var pcPortfolio = (function () {
       usable80: Math.max(0, value * 0.80 - debt),
       cashFlowCount: flowed.length,
       flowDebt: sum(flowed, "loan"),
-      complete: counted.length > 0 && flowed.length === counted.length,
+      complete: invested.length > 0 && flowed.length === invested.length,
+      invest: {
+        count: invested.length, value: investValue, debt: investDebt, equity: investValue - investDebt,
+        lvr: investValue > 0 ? investDebt / investValue * 100 : null
+      },
+      home: {
+        count: homes.length, value: homeValue, debt: homeDebt, equity: homeValue - homeDebt,
+        costed: homeCosted.length,
+        runningCosts: homeCosted.reduce(function (a, m) { return a + (m.runningCosts || 0); }, 0),
+        interest: sum(homeCosted, "interest"),
+        cost: homeCost, costWeekly: homeCost / 52
+      },
+      allBlendedRate: allBlendedRate,
       rent: rent, runningCosts: costs, interest: interest, landTaxFlow: landTaxFlow,
       soldProperties: soldProps.length,
       cashFlow: cashFlow, cashFlowWeekly: cashFlow / 52,
@@ -228,7 +280,7 @@ var pcPortfolio = (function () {
       cgtNeedsRate: cgtTotals ? cgtTotals.needsRate : false,
       soldCount: sold.length,
       cashIfSold: sold.reduce(function (a, m) { return a + m.sale.cashIfSold; }, 0),
-      grossYield: value > 0 && flowed.length === counted.length && rent > 0 ? rent / value * 100 : null,
+      grossYield: investValue > 0 && flowed.length === invested.length && rent > 0 ? rent / investValue * 100 : null,
       /* commercial rent is entered net of outgoings, so its yield is a net yield */
       yieldKind: flowed.length && flowed.every(function (m) { return m.type === "commercial"; }) ? "net"
         : (flowed.some(function (m) { return m.type === "commercial"; }) ? "mixed" : "gross")
@@ -238,7 +290,7 @@ var pcPortfolio = (function () {
     var missing = {
       value: names(metrics.filter(function (m) { return m.value == null; })),
       loan: names(metrics.filter(function (m) { return m.value != null && m.loan == null; })),
-      rent: names(metrics.filter(function (m) { return m.rent == null; })),
+      rent: names(metrics.filter(function (m) { return !m.home && m.rent == null; })),
       rate: names(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
     };
     /* the same lists as {id, name} so each can link to the field to fill in */
@@ -246,7 +298,7 @@ var pcPortfolio = (function () {
     var missingRefs = {
       value: refs(metrics.filter(function (m) { return m.value == null; })),
       loan: refs(metrics.filter(function (m) { return m.value != null && m.loan == null; })),
-      rent: refs(metrics.filter(function (m) { return m.rent == null; })),
+      rent: refs(metrics.filter(function (m) { return !m.home && m.rent == null; })),
       rate: refs(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
     };
 
@@ -275,11 +327,18 @@ var pcPortfolio = (function () {
       grossRentalIncome: Math.round(t.rent),
       blendedRate: t.blendedRate,
       portfolioLvr: t.lvr != null ? Math.round(t.lvr * 10) / 10 : null,
+      /* the investments on their own (what an ROI projection should start
+         from) and your home on its own */
+      investmentValue: Math.round(t.invest ? t.invest.value : t.value),
+      investmentDebt: Math.round(t.invest ? t.invest.debt : t.debt),
+      homeValue: t.home ? Math.round(t.home.value) : 0,
+      homeDebt: t.home ? Math.round(t.home.debt) : 0,
+      homeCostAnnual: t.home ? Math.round(t.home.cost) : 0,
       annualSurplus: Math.round(t.cashFlow),
       weeklySurplus: Math.round(t.cashFlowWeekly),
       propertyCount: t.counted
     };
   }
 
-  return { build: build, propertyMetrics: propertyMetrics, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary, financialYear: financialYear };
+  return { build: build, propertyMetrics: propertyMetrics, isHome: isHome, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary, financialYear: financialYear };
 })();

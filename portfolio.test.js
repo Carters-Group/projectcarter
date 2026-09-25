@@ -206,3 +206,72 @@ test("financial year follows the contract date", function () {
   assert.equal(P.financialYear("2026-06-30"), "2025-26");
   assert.equal(P.financialYear("2026-07-01"), "2026-27");
 });
+
+/* ---- your home (usage "home") ------------------------------------------ */
+var myHome = {
+  id: "h", name: "Our home", state: "NSW", ownership_type: "individual", usage: "home",
+  purchase_date: "2018-03-01", purchase_price: 1000000, acquisition_costs: 45000,
+  current_value: 1400000, loan_balance: 600000, interest_rate: 6, annual_running_costs: 7000,
+  land_value: 1100000
+};
+
+test("a home has a holding cost, no rent, no cash flow and no capital gains tax", function () {
+  var m = P.propertyMetrics(myHome, settings, TODAY);
+  assert.equal(m.home, true);
+  assert.equal(m.rent, null);
+  assert.equal(m.cashFlow, null);
+  assert.equal(m.homeCost, 7000 + 36000);
+  assert.equal(m.totalCost, 1045000);
+  assert.equal(m.growth.afterCosts, 355000);
+  assert.equal(m.sale.exempt, true);
+  assert.equal(m.sale.tax, 0);
+  assert.equal(m.sale.cgt, null);
+  assert.equal(m.sale.cashIfSold, 1400000 * 0.98 - 600000);
+});
+
+test("a commercial property is never treated as a home", function () {
+  var shop = Object.assign({}, myHome, { property_type: "commercial" });
+  assert.equal(P.propertyMetrics(shop, settings, TODAY).home, false);
+});
+
+test("the home counts toward what you own but not toward investment figures", function () {
+  var r = P.build([myHome, houseA], settings, TODAY);
+  var t = r.totals;
+  /* what you own: both */
+  assert.equal(t.value, 2300000);
+  assert.equal(t.debt, 1100000);
+  near(t.usable80, 740000, 0.01);
+  assert.equal(r.summary.usableEquity80, Math.round(t.usable80));
+  /* investments: houseA only */
+  assert.equal(t.invest.count, 1);
+  assert.equal(t.invest.value, 900000);
+  assert.equal(t.rent, 40000);
+  assert.equal(t.cashFlowCount, 1);
+  assert.equal(t.complete, true);
+  near(t.grossYield, 40000 / 900000 * 100, 0.0001);
+  assert.equal(r.summary.investmentValue, 900000);
+  assert.equal(r.summary.investmentDebt, 500000);
+  /* home on its own */
+  assert.equal(t.home.count, 1);
+  assert.equal(t.home.cost, 43000);
+  assert.equal(r.summary.homeCostAnnual, 43000);
+  /* no rent to chase on a home, and it is exempt from land tax */
+  assert.deepEqual(r.missing.rent, []);
+  assert.equal(r.props[0].landTaxShare, null);
+  assert.equal(r.props[1].sale.cgt.ready, true);
+});
+
+test("a home on its own: equity to borrow against, no investment portfolio yet", function () {
+  var r = P.build([myHome], settings, TODAY);
+  assert.equal(r.totals.counted, 1);
+  assert.equal(r.totals.invest.count, 0);
+  assert.equal(r.totals.complete, false);
+  assert.equal(r.totals.cashFlowCount, 0);
+  near(r.totals.usable70, 380000, 0.01);
+  assert.equal(r.totals.landTax, 0);
+});
+
+test("a former home keeps its moved-out date for the capital gains note", function () {
+  var rented = Object.assign({}, houseA, { moved_out_date: "2024-01-15" });
+  assert.equal(P.propertyMetrics(rented, settings, TODAY).movedOut, "2024-01-15");
+});

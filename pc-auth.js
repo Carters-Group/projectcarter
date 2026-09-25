@@ -590,6 +590,8 @@
       if (has("annual_running_costs")) row.annual_running_costs = money(property.annual_running_costs);
       if (has("holding_entity")) row.holding_entity = String(property.holding_entity || "").trim().slice(0, 120) || null;
       if (has("is_sold")) row.is_sold = !!property.is_sold;
+      if (has("usage")) row.usage = property.usage === "home" && row.property_type !== "commercial" ? "home" : "investment";
+      if (has("moved_out_date")) row.moved_out_date = day(property.moved_out_date);
       function write(r) {
         return property.id
           ? client.from("properties").update(r).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
@@ -597,7 +599,7 @@
       }
       /* these columns come from later database updates; if one has not been run
          yet, save everything else and say so instead of failing the whole save */
-      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status" };
+      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status", usage: "whether it is your home", moved_out_date: "the moved-out date" };
       var dropped = [];
       function attempt(r) {
         return write(r).then(function (res) {

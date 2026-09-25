@@ -148,6 +148,27 @@ costs), what it earns (the leases, with rent and expiry) and an "if you sold"
 scenario (sale date, sale price, optional 1 July 2027 value). Blank means "not
 entered" and `0` means "none" (a loan balance of 0 is a property with no loan).
 
+**Your home.** A residential property can be marked **My home** ("How it is
+used", `properties.usage` = `'home'`, default `'investment'`). It counts toward
+what you own (combined value, debt, equity, LVR and useable equity at 70% and
+80%, since home equity is usually what funds the next purchase) but never
+toward the investment figures: no leases, rent, yield, cash flow, land tax
+(principal place of residence) or capital gains tax (main residence, treated as
+fully exempt). Its running costs plus loan interest show on their own as the
+**cost to own your home** (per year and per week) in a "Your home" block on the
+portfolio card and the portfolio PDF. With only a home and no investment yet,
+the investment cash flow, risk check and ROI projection are hidden and a "Your
+first investment" prompt points at the ROI and lending calculators. The ROI
+projection starts from the investments only (`summary.investmentValue` /
+`investmentDebt`); the debt goal uses every loan, the home's included. An
+investment can carry a `moved_out_date` ("Was it once your home?"), which adds
+a note that the main residence exemption (and the six-year rule) may reduce the
+capital gains tax shown; that partial exemption is not modelled. A home still
+counts as a property for the plan limit. The Portfolio Review calculator's
+"Owner-occupied (your home)" cards match: an interest rate and yearly running
+costs give a separate cost to own, plus "after-tax cash flow, less your home"
+per week, and a card imported into the register arrives as My home.
+
 `portfolio.js` (`window.pcPortfolio`, pure and unit-tested in
 `portfolio.test.js`) derives every figure from those fields, so no number is
 ever asked for twice and none can disagree: per property, equity, LVR, useable

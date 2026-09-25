@@ -238,6 +238,18 @@ alter table public.properties add column if not exists holding_entity text;
 -- existing planned_sale_date (sale contract date) and expected_sale_price.
 alter table public.properties add column if not exists is_sold boolean not null default false;
 
+-- How a residential property is used: an investment, or the owner's own
+-- home. A home counts toward value, debt and useable equity but not toward
+-- rent, cash flow, land tax or capital gains tax (main residence). Its running
+-- costs and interest show on their own as the cost of owning your home. It
+-- still counts as a property for the plan limit. moved_out_date is for a
+-- former home that is now rented out (a note on the capital gains estimate).
+alter table public.properties add column if not exists usage text not null default 'investment';
+do $$ begin
+  alter table public.properties add constraint properties_usage_check check (usage in ('investment', 'home'));
+exception when duplicate_object then null; end $$;
+alter table public.properties add column if not exists moved_out_date date;
+
 create index if not exists properties_user_idx
   on public.properties (user_id, name);
 
