@@ -195,6 +195,7 @@
               <span>You're signed in via an emailed link. Set a password so you can sign in directly, without waiting on an email.</span>
             </span>
             <button type="button" class="btn btn-ghost btn-sm" id="acctPasswordNudgeGo">Set a password</button>
+            <button type="button" class="linklike" id="acctPasswordNudgeHave">I already have one</button>
             <button type="button" class="linklike" id="acctPasswordNudgeDismiss">Not now</button>
           </div>
 
@@ -238,8 +239,19 @@
                 <button type="button" class="btn btn-accent btn-sm" data-placeholder-add>Add a property</button>
               </div>
 
+              <div class="acct-debt-goal" id="portfolioHome" hidden>
+                <p class="acct-eyebrow">Your home</p>
+                <div class="acct-overview acct-overview--modes" id="portfolioHomeStats"></div>
+                <p class="field-hint">Your home counts in what you own and your useable equity above, but stays out of the investment cash flow, land tax and capital gains tax. The cost to own it is its running costs plus loan interest. On a principal and interest loan, the principal repaid is not a cost (it becomes equity), but it is money out each week, so cash out adds it back in.</p>
+              </div>
+
+              <div class="acct-debt-goal" id="portfolioFirstInvest" hidden>
+                <p class="acct-eyebrow">Your first investment</p>
+                <p>The useable equity above is roughly what a lender may let you borrow against your home toward a deposit and buying costs. Run a purchase through the <a href="return-on-investment-calculator">ROI calculator</a> or check the <a href="commercial-lending-calculator">lending position</a>. Both can pull that equity straight in. Once you buy, add the investment here and its cash flow appears alongside your home.</p>
+              </div>
+
               <div class="acct-debt-goal" id="portfolioCashFlow" hidden>
-                <p class="acct-eyebrow">Cash flow before tax</p>
+                <p class="acct-eyebrow" id="portfolioCashFlowTitle">Cash flow before tax</p>
                 <div class="acct-placeholder-wrap" id="portfolioCashFlowWrap">
                   <div class="acct-overview acct-overview--modes" id="portfolioCashFlowStats"></div>
                 </div>
@@ -247,7 +259,7 @@
                   <span>Example figures &mdash; add a lease with a rent figure to see your real ones.</span>
                   <button type="button" class="btn btn-accent btn-sm" data-placeholder-add>Add a property</button>
                 </div>
-                <p class="field-hint">Rent from your current leases, less running costs, land tax (worked out for you under Tax and land tax) and loan interest. Income tax on what is left is not included.</p>
+                <p class="field-hint">Rent from your current leases, less running costs, land tax (worked out for you under Tax and land tax) and loan interest. Income tax on what is left is not included. On principal and interest loans, "after repayments" also takes off the principal repaid, which is cash out but builds equity rather than costing you.</p>
               </div>
 
               <div id="portfolioGaps" hidden></div>
@@ -277,7 +289,7 @@
                   <div class="input-money"><input type="text" inputmode="numeric" id="debtGoalExtra" autocomplete="off" placeholder="0" /></div>
                 </div>
                 <div class="acct-overview acct-overview--modes" id="debtGoalStats" hidden></div>
-                <p class="field-hint">A simple planning figure that is not saved anywhere. Assumes your debt is interest-only, so every dollar contributed goes straight to principal, at the blended rate across your properties.</p>
+                <p class="field-hint" id="debtGoalNote">A planning figure that is not saved anywhere. Works loan by loan, month by month: principal and interest loans reduce on their scheduled repayments, interest-only loans only fall with extra payments. Extra goes onto the highest-rate loan first, and once a loan is cleared its repayment goes onto the next. Rates are held where they are today.</p>
               </div>
 
           </div>
@@ -286,7 +298,7 @@
             <div class="acct-card-head">
               <h2 class="calc-subhead">Total Portfolio Return on Investment (ROI)</h2>
             </div>
-            <p class="acct-empty" id="portfolioPlanNote" hidden>The ROI projection needs a current value, loan balance, interest rate and rent on every property. Fill in what is missing under Your properties and it appears here.</p>
+            <p class="acct-empty" id="portfolioPlanNote" hidden>The ROI projection needs a current value, loan balance, interest rate and rent on every investment property (your home is left out). Fill in what is missing under Your properties and it appears here.</p>
               <div class="acct-debt-goal" id="portfolioPlanInputs">
                 <p class="acct-eyebrow">Growth assumptions</p>
                 <div class="acct-plan__row">
@@ -314,13 +326,13 @@
                     <div class="input-pct"><input type="text" inputmode="decimal" id="planRentGrowth" autocomplete="off" placeholder="5.0" value="5" /></div>
                   </div>
                 </div>
-                <p class="field-hint">One blended growth rate applied across the whole portfolio rather than property by property. Debt is assumed to reduce the way the ROI calculator models it: 50% of surplus cash after interest goes to principal, at your blended rate. No capital gains tax is included, since nothing here assumes you are selling.</p>
+                <p class="field-hint">One blended growth rate applied across the whole portfolio rather than property by property. Principal and interest loans reduce on their scheduled repayments; on top of that, 50% of any surplus cash left after repayments goes to principal (interest-only debt first), at your blended rate. No capital gains tax is included, since nothing here assumes you are selling.</p>
               </div>
 
               <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn">Generate portfolio ROI</button>
               <p class="acct-msg" id="portfolioRoiMsg" hidden></p>
               <div id="portfolioRoiResult" hidden>
-                <div class="acct-overview acct-overview--modes" id="portfolioRoiStats"></div>
+                <div class="acct-overview acct-overview--modes acct-overview--roi" id="portfolioRoiStats"></div>
                 <div id="portfolioRoiChart" class="acct-chart-wrap"></div>
                 <p class="acct-calc-links"><a id="portfolioRoiOpenLink" href="#">Open and fine-tune in the ROI calculator</a></p>
               </div>
@@ -905,22 +917,46 @@
     }
 
     /* Purely a planning figure on this page - not tied to any calculator or
-       saved report, and it never touches an ROI projection's IRR. Portfolio
-       Review models debt as interest-only, so an extra $/year contribution
-       goes straight to principal: payoff time is a simple division, and the
-       interest saved once paid off is that principal x the blended rate
-       implied by the saved properties (total interest / total debt). */
-    function renderDebtGoal(debt, blendedRate) {
+       saved report, and it never touches an ROI projection's IRR. Each loan
+       is run month by month (pcPortfolio.debtPayoff): P&I loans reduce on
+       schedule, interest-only loans only with extra, extra goes to the
+       highest rate first and a cleared loan's repayment rolls onto the next.
+       Compared with no extra to give "sooner by" and "interest saved". */
+    function fmtYears(y) {
+      var whole = Math.floor(y + 1e-9), months = Math.round((y - whole) * 12);
+      if (months === 12) { whole += 1; months = 0; }
+      return whole + " yr" + (whole === 1 ? "" : "s") + (months ? " " + months + " mo" : "");
+    }
+    function renderDebtGoal(loans) {
       var input = document.getElementById("debtGoalExtra");
       var statsEl = document.getElementById("debtGoalStats");
+      var base = pcPortfolio.debtPayoff(loans, 0);
+      var scheduled = loans.reduce(function (a, l) { return a + (l.principal || 0); }, 0);
       function recalc() {
         var extra = parseFloat((input.value || "").replace(/[^0-9.]/g, "")) || 0;
-        if (extra <= 0) { hide(statsEl); return; }
-        var years = debt / extra;
-        var interestSaved = debt * blendedRate;
-        statsEl.innerHTML =
-          '<div class="acct-overview__stat"><dt>Years to pay off entirely</dt><dd>' + years.toFixed(1) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Interest saved / yr once paid off</dt><dd>' + fmtMoney(interestSaved) + '</dd></div>';
+        /* three short tiles either way, so the row never wraps or leaves a gap */
+        var baseVal = base.cleared ? fmtYears(base.years) : "Not on its own";
+        var rows;
+        if (extra > 0) {
+          var run = pcPortfolio.debtPayoff(loans, extra);
+          var sooner = run.cleared && base.cleared && base.years - run.years >= 1 / 12 ? " (" + fmtYears(base.years - run.years) + " sooner)" : "";
+          rows = [
+            ["Debt-free on current repayments", baseVal],
+            ["With " + fmtMoney(extra) + " extra a year" + sooner, run.cleared ? fmtYears(run.years) : "Over 60 yrs"],
+            run.cleared && base.cleared
+              ? ["Interest saved", fmtMoney(Math.max(0, base.interest - run.interest))]
+              : ["Interest until debt-free", run.cleared ? fmtMoney(run.interest) : "—"]
+          ];
+        } else {
+          rows = [
+            ["Debt today", fmtMoney(loans.reduce(function (a, l) { return a + l.balance; }, 0))],
+            ["Principal repaid this year", fmtMoney(scheduled)],
+            ["Debt-free on current repayments", baseVal]
+          ];
+        }
+        statsEl.innerHTML = rows.map(function (r) {
+          return '<div class="acct-overview__stat"><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
+        }).join("");
         show(statsEl);
       }
       input.removeEventListener("input", input._pcRecalc || function () {});
@@ -1082,8 +1118,38 @@
         ["Higher gearing (80% LVR)", fmtMoney(t.usable80)]
       ] : SAMPLE_EQUITY);
       modesEl.appendChild(wrap);
-      modesEl.appendChild(tEl("p", "field-hint", "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs."));
+      modesEl.appendChild(tEl("p", "field-hint", "Two ways to look at the same equity: 70% is the more conservative lending benchmark, 80% assumes a lender willing to go higher. Both before costs." +
+        (ready && t.home && t.home.count ? " Includes your home, since its equity is usually what funds the next purchase." : "")));
       setPlaceholder("portfolioStatsWrap", !ready);
+
+      /* your home, on its own: what you own in it and what it costs to hold */
+      var homeEl = document.getElementById("portfolioHome");
+      var h = t.home || { count: 0 };
+      if (ready && h.count) {
+        var hs = [
+          ["Value", fmtMoney(h.value)],
+          ["Loan", fmtMoney(h.debt)],
+          ["Equity", fmtMoney(h.equity)]
+        ];
+        if (h.costed) {
+          /* weekly figures side by side: what it costs, what it repays, what leaves your account */
+          if (h.anyPI && h.repayKnown) {
+            hs.push(["Cost to own / wk", fmtMoney(h.costWeekly)]);
+            hs.push(["Principal repaid / wk", fmtMoney(h.principal / 52)]);
+            hs.push(["Cash out / wk", fmtMoney(h.cashOutWeekly)]);
+          } else {
+            hs.push(["Cost to own / yr", fmtMoney(h.cost)]);
+            hs.push(["Cost to own / wk", fmtMoney(h.costWeekly)]);
+            hs.push(["Loan interest / yr", fmtMoney(h.interest)]);
+          }
+        }
+        fillStats(document.getElementById("portfolioHomeStats"), hs);
+        show(homeEl);
+      } else { hide(homeEl); }
+      /* a homeowner with no investment yet: point them at their first one */
+      var homeOnly = ready && h.count > 0 && t.invest && t.invest.count === 0;
+      if (homeOnly) show(document.getElementById("portfolioFirstInvest")); else hide(document.getElementById("portfolioFirstInvest"));
+      document.getElementById("portfolioCashFlowTitle").textContent = h.count ? "Investment cash flow before tax" : "Cash flow before tax";
 
       var cfEl = document.getElementById("portfolioCashFlow");
       var cfReady = t.cashFlowCount > 0;
@@ -1099,12 +1165,16 @@
           ["Cash flow / yr", fmtSignedMoney(t.cashFlow)],
           ["Cash flow / wk", fmtSignedMoney(t.cashFlowWeekly)]
         ]);
+        if (t.anyPI && t.repayKnown) {
+          c.push(["Principal repaid / yr", fmtMoney(t.principal)]);
+          c.push(["After repayments / wk", fmtSignedMoney(t.cashFlowAfterRepayWeekly)]);
+        }
         if (t.grossYield != null) c.push([t.yieldKind === "net" ? "Net yield on value" : (t.yieldKind === "mixed" ? "Yield on value" : "Gross yield on value"), fmtPct(t.grossYield)]);
         return c;
       })() : SAMPLE_CASHFLOW;
       fillStats(document.getElementById("portfolioCashFlowStats"), cf);
       setPlaceholder("portfolioCashFlowWrap", !cfReady);
-      show(cfEl);
+      if (homeOnly) hide(cfEl); else show(cfEl);
 
       var soldEl = document.getElementById("portfolioIfSold");
       if (t.soldCount > 0) {
@@ -1128,6 +1198,7 @@
         { text: "Add a current value", refs: refs.value, field: "current_value" },
         { text: "Add a loan balance (0 if none)", refs: refs.loan, field: "loan_balance" },
         { text: "Add an interest rate", refs: refs.rate, field: "interest_rate" },
+        { text: "Add the years left on the loan", refs: refs.term || [], field: "loan_years_left" },
         { text: "Add a lease with a rent figure", refs: refs.rent, field: "__lease" },
         { text: "Add the purchase date and price for capital gains tax", refs: noPurchaseRefs, field: "purchase_date" }
       ].filter(function (g) { return g.refs.length; });
@@ -1166,7 +1237,9 @@
       } else { hide(gapsEl); }
 
       var goalEl = document.getElementById("portfolioDebtGoal");
-      if (t.debt > 0 && t.blendedRate > 0) { show(goalEl); renderDebtGoal(t.debt, t.blendedRate); } else { hide(goalEl); }
+      /* every loan counts here, your home's included */
+      var goalRate = t.allBlendedRate || t.blendedRate;
+      if (t.debt > 0 && goalRate > 0 && t.loans && t.loans.length) { show(goalEl); renderDebtGoal(t.loans); } else { hide(goalEl); }
 
       /* the plan projects value, rent and debt together, so it only makes
          sense once every counted property has its rent and interest */
@@ -1179,6 +1252,11 @@
       renderPortfolioRisk(riskReady ? { portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent } : SAMPLE_RISK_BASIS);
       setPlaceholder("portfolioRiskWrap", !riskReady);
       show(riskCardEl);
+      /* rate-rise and vacancy checks and the ROI projection are about
+         investments; with only a home there is nothing for them to test yet
+         (the debt goal stays, since it works on your home loan too) */
+      if (homeOnly) { hide(document.getElementById("portfolioRisk")); hide(planCardEl); }
+      else show(document.getElementById("portfolioRisk"));
     }
 
     /* ---- Your properties (the register) ---------------------------------
@@ -1269,6 +1347,8 @@
     }
 
     function renderLeaseStats(properties) {
+      /* your home has no tenants, so it never appears among the leases */
+      properties = (properties || []).filter(function (p) { return !(p.usage === "home" && p.property_type !== "commercial"); });
       var summaryEl = document.getElementById("leaseSummary");
       var statsEl = document.getElementById("leaseStats");
       var groupsEl = document.getElementById("leaseTimeline");
@@ -1492,6 +1572,8 @@
       var p = e.target && e.target.parentNode;
       if (p && p.classList && p.classList.contains("input-pct")) positionPct(p.parentNode);
     });
+    /* measured before the web font arrives, the % can land on the number; measure again once it has */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { positionPct(); });
 
     function isoPlusMonths(iso, months) {
       var d = new Date(iso + "T00:00:00Z");
@@ -1691,6 +1773,17 @@
             '<div class="field"><label>State</label><select data-t="state">' + stateOpts + '</select></div>'
           ) +
           fRow(
+            '<div class="field" data-usage-wrap><label>How it is used</label>' +
+              '<div class="acct-type-toggle" role="group">' +
+                '<button type="button" data-usage-btn="investment">Investment</button>' +
+                '<button type="button" data-usage-btn="home">My home</button>' +
+              '</div>' +
+              '<select data-t="usage" hidden><option value="investment">Investment</option><option value="home">My home</option></select>' +
+            '</div>',
+            '<div class="field" data-moved-out><label>' + fLabel("Was it once your home?", "the date you moved out, if so") + '</label><input type="date" data-t="moved_out_date" /></div>'
+          ) +
+          '<p class="field-hint" data-home-only hidden>Your home counts toward what you own and the equity you could borrow against, but not toward rent, cash flow, land tax or capital gains tax. Enter its running costs and loan below to see what it costs you to own.</p>' +
+          fRow(
             '<div class="field"><label>Owned by</label><select data-t="ownership_type">' + ownerOpts + '</select></div>',
             fText("holding_entity", "Holding entity name", "blank if held in your own name", "e.g. Smith Property Pty Ltd")
           ) +
@@ -1709,24 +1802,38 @@
           '<p class="acct-subhead">What you have put in</p>' +
           fRow(
             fMoney("improvements", "Capital improvements", "renovations, extensions; not repairs"),
-            fMoney("capital_works_claimed", "Building depreciation", "estimate from your depreciation schedule, if you have one")
+            fMoney("capital_works_claimed", "Building depreciation", "estimate from your depreciation schedule, if you have one", " data-invest-only")
           ) +
 
           '<p class="acct-subhead">Worth and owed today</p>' +
           fRow(
             fMoney("current_value", "Current value"),
-            fMoney("land_value", "Unimproved land value", "from your council rates or land tax notice"),
+            fMoney("land_value", "Unimproved land value", "from your council rates or land tax notice", " data-invest-only"),
             fMoney("loan_balance", "Loan balance", "enter 0 if none")
           ) +
           fRow(
             fPct("interest_rate", "Interest rate"),
-            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs. Not land tax, that is worked out for you. On a commercial lease, only what your net rent does not already cover")
+            fMoney("annual_running_costs", "Running costs per year", "rates, insurance, management, repairs. Not land tax, that is worked out for you. On a commercial lease, only what your net rent does not already cover", " data-running-costs")
           ) +
+          fRow(
+            '<div class="field"><label>Repayments</label>' +
+              '<div class="acct-type-toggle" role="group">' +
+                '<button type="button" data-loan-btn="io">Interest only</button>' +
+                '<button type="button" data-loan-btn="pi">Principal &amp; interest</button>' +
+              '</div>' +
+              '<select data-t="loan_type" hidden><option value="io">Interest only</option><option value="pi">Principal and interest</option></select>' +
+            '</div>',
+            '<div class="field" data-loan-years hidden><label>Years left on the loan <span data-years-hint></span></label><input type="text" inputmode="decimal" data-t="loan_years_left" autocomplete="off" /></div>',
+            '<div class="field" data-io-expiry><label>' + fLabel("Interest only ends", "optional, when repayments step up") + '</label><input type="date" data-t="io_expiry_date" /></div>'
+          ) +
+          '<p class="field-hint acct-repay-note" data-repay-note hidden></p>' +
 
+          '<div data-invest-only>' +
           '<p class="acct-subhead">What it earns</p>' +
           '<div data-lease-rows></div>' +
           '<button type="button" class="linklike" data-act="add-lease">+ Add another lease</button>' +
           '<p class="field-hint" data-res-hint>A single house usually has one lease. For a duplex, unit block, townhouses or a granny flat, add a lease for each unit or dwelling.</p>' +
+          '</div>' +
 
           '<p class="acct-subhead" data-sale-head>If you sold</p>' +
           fRow(
@@ -1737,7 +1844,7 @@
             fMoney("expected_sale_price", "Sale price", "starts at today's value"),
             fMoney("value_at_jul_2027", "Value on 1 July 2027", "starts at today's value, use a valuation if you have one", " data-v27")
           ) +
-          '<p class="field-hint">Your cost base is the purchase price plus buying costs and capital improvements, less the building write-off (Division 43), which reduces it whether or not you claimed it. ' +
+          '<p class="field-hint" data-invest-only>Your cost base is the purchase price plus buying costs and capital improvements, less the building write-off (Division 43), which reduces it whether or not you claimed it. ' +
             'Plant and equipment depreciation (Division 40) is handled separately by your accountant when you sell. The tax clock (12 months, and which financial year) runs from the contract dates, not settlement.</p>' +
           '<p class="acct-tax-preview" data-sale-preview></p>' +
 
@@ -1770,6 +1877,8 @@
         var v = property[key];
         if (input.type === "checkbox") { input.checked = !!v; return; }
         if (key === "ownership_type") { input.value = v || "individual"; return; }
+        if (key === "usage") { input.value = v === "home" ? "home" : "investment"; return; }
+        if (key === "loan_type") { input.value = v === "pi" ? "pi" : "io"; return; }
         input.value = v == null ? "" : v;
         if (input.parentNode.classList.contains("input-money")) input.value = withCommas(input.value);
       });
@@ -1786,6 +1895,13 @@
       /* an entity's sale leaves the cash with the entity, not the owner personally */
       var hand = m.owner && m.owner !== "individual" ? " with the " + (m.owner === "super" ? "super fund" : m.owner) : " in your hand";
       if (s.price == null) return "Add a current value, or a sale price, to see what selling would leave you with.";
+      if (m.home) {
+        return "Your home is generally exempt from capital gains tax (the main residence exemption). Sold for " + fmtMoney(s.price) +
+          ", you keep " + fmtMoney(s.proceeds) + " after selling costs" +
+          (m.loan != null ? " and owe " + fmtMoney(m.loan) + " to the lender, leaving " + fmtMoney(s.cashIfSold) + " in your hand." : ".") +
+          " Part of the gain can be taxable if you rented it out or used it for business, so check with your accountant if so.";
+      }
+      var movedNote = m.movedOut ? " You lived in it until " + fmtDate(m.movedOut + "T00:00:00") + ": the main residence exemption (including the rule that can cover up to six years of renting it out) may reduce or remove this tax. That is not included here, so ask your accountant." : "";
       var before = s.cashBeforeTax != null ? " Before tax you would have about " + fmtMoney(s.cashBeforeTax) + " after selling costs and the loan." : "";
       if (!c || !c.ready) {
         return "Add the " + listJoin(c && c.missing && c.missing.length ? c.missing : ["purchase price", "purchase date"]) + " to see capital gains tax." + before;
@@ -1798,6 +1914,19 @@
       if (c.needsRate) return head + ". The capital gain is " + fmtMoney(c.gain) + ". Add your marginal tax rate under Tax and land tax to see the tax and your cash in hand.";
       var out = head + ". Capital gains tax is " + fmtMoney(c.tax) + (c.rules === "new" ? " under the rules from 1 July 2027" : "");
       out += s.cashIfSold != null ? ", leaving " + fmtMoney(s.cashIfSold) + hand + "." : ".";
+      return out + movedNote;
+    }
+
+    /* what the loan's repayments are, in one sentence under the loan fields */
+    function repayText(m) {
+      if (!(m.loan > 0) || m.rate == null) return "";
+      if (m.loanType === "pi") {
+        if (m.termMissing) return "Enter the years left on the loan to see the repayments and how fast the balance falls.";
+        return "About " + fmtMoney(m.monthly) + " a month. Over the next 12 months that is " + fmtMoney(m.interest) +
+          " of interest and " + fmtMoney(m.principal) + " off the balance, which builds your equity.";
+      }
+      var out = "Interest only: about " + fmtMoney(m.interest / 12) + " a month, all of it interest, so the balance stays at " + fmtMoney(m.loan) + ".";
+      if (m.ioExpiry) out += " The interest-only period ends " + fmtDate(m.ioExpiry + "T00:00:00") + ", when repayments rise to start paying off the balance.";
       return out;
     }
 
@@ -1816,6 +1945,9 @@
       if (m.equity != null) { items.push(["Equity", fmtMoney(m.equity)]); items.push(["LVR", fmtPct(m.lvr)]); }
       if (m.grossYield != null) items.push([m.type === "commercial" ? "Net yield" : "Yield", fmtPct(m.grossYield)]);
       if (m.cashFlow != null) items.push(["Cash flow / yr", fmtSignedMoney(m.cashFlow)]);
+      if (m.homeCost != null) items.push(["Cost to own / wk", fmtMoney(m.homeCost / 52)]);
+      if (m.loanType === "pi" && m.monthly != null && m.loan > 0) items.push(["Repayments / mo", fmtMoney(m.monthly)]);
+      if (m.ioExpiry) items.push(["Interest only ends", fmtDate(m.ioExpiry + "T00:00:00")]);
       if (m.sale.cashIfSold != null) items.push(["Cash if sold", fmtMoney(m.sale.cashIfSold)]);
       return items;
     }
@@ -1842,7 +1974,8 @@
       details.querySelector(".acct-property__name").textContent = property.name || "Untitled property";
       var tag = details.querySelector(".acct-tag");
       var isCommercial = (details.querySelector('[data-f="property_type"]') || {}).value === "commercial";
-      tag.textContent = (property.is_sold ? "Sold · " : "") + (isCommercial ? "Commercial" : "Residential");
+      var isHomeCard = !isCommercial && (details.querySelector('[data-t="usage"]') || {}).value === "home";
+      tag.textContent = (property.is_sold ? "Sold · " : "") + (isCommercial ? "Commercial" : (isHomeCard ? "My home" : "Residential"));
       tag.className = "acct-tag " + (isCommercial ? "is-commercial" : "is-residential");
       details.classList.toggle("is-commercial", isCommercial);
       details.classList.toggle("is-residential", !isCommercial);
@@ -1850,7 +1983,7 @@
       var leaseCount = (property.leases || []).length;
       var hasPeriodic = (property.leases || []).some(function (l) { return l.is_periodic; });
       var tail = wale ? " · WALE " + wale.years.toFixed(1) + " yrs" : (hasPeriodic ? " · periodic lease" : "");
-      details.querySelector(".acct-property__meta").textContent =
+      details.querySelector(".acct-property__meta").textContent = isHomeCard ? (property.state || "") :
         (property.state ? property.state + " · " : "") + leaseCount + (leaseCount === 1 ? " lease" : " leases") + tail;
     }
 
@@ -1870,6 +2003,17 @@
       var stateSel = details.querySelector('[data-t="state"]');
       var waWrap = details.querySelector("[data-wa-metro]");
       var typeButtons = Array.prototype.slice.call(details.querySelectorAll("[data-type-btn]"));
+      var usageSel = details.querySelector('[data-t="usage"]');
+      var loanSel = details.querySelector('[data-t="loan_type"]');
+      var loanButtons = Array.prototype.slice.call(details.querySelectorAll("[data-loan-btn]"));
+      var yearsEl = details.querySelector('[data-t="loan_years_left"]');
+      /* quick picks: a home loan usually runs 30 years; commercial terms
+         vary too much to assume, so those are suggestions, never a default */
+      var yearsList = document.createElement("datalist");
+      yearsList.id = "loanYears-" + property.id;
+      details.appendChild(yearsList);
+      yearsEl.setAttribute("list", yearsList.id);
+      var usageButtons = Array.prototype.slice.call(details.querySelectorAll("[data-usage-btn]"));
 
       /* a brand-new property is stored as "Untitled property"; show an empty box to type into */
       nameInput.value = property.name && property.name !== "Untitled property" ? property.name : "";
@@ -1905,17 +2049,68 @@
         resHint.hidden = typeSelect.value !== "residential";
         /* the new-build choice and the 1 July 2027 value are residential-only questions */
         var commercial = typeSelect.value === "commercial";
-        newBuildWrap.hidden = commercial;
-        v27Wrap.hidden = commercial;
         if (commercial) newBuildWrap.querySelector("input").checked = false;
+        syncUsage();
         prefillSale();
       }
+      /* only a residential property can be your home; a home drops every
+         investment-only question (leases, land value, depreciation, 2027 CGT) */
+      function syncUsage() {
+        var commercial = typeSelect.value === "commercial";
+        if (commercial) usageSel.value = "investment";
+        var home = usageSel.value === "home";
+        details.querySelector("[data-usage-wrap]").hidden = commercial;
+        details.querySelector("[data-moved-out]").hidden = commercial || home;
+        details.querySelectorAll("[data-invest-only]").forEach(function (el) { el.hidden = home; });
+        details.querySelectorAll("[data-home-only]").forEach(function (el) { el.hidden = !home; });
+        newBuildWrap.hidden = commercial || home;
+        v27Wrap.hidden = commercial || home;
+        usageButtons.forEach(function (btn) { btn.classList.toggle("is-active", btn.getAttribute("data-usage-btn") === usageSel.value); });
+        var rc = details.querySelector("[data-running-costs] label span");
+        if (rc) rc.textContent = home
+          ? "(council and water rates, insurance, strata, repairs)"
+          : "(rates, insurance, management, repairs. Not land tax, that is worked out for you. On a commercial lease, only what your net rent does not already cover)";
+        details.classList.toggle("is-home", home);
+      }
+      usageButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (usageSel.value === btn.getAttribute("data-usage-btn")) return;
+          usageSel.value = btn.getAttribute("data-usage-btn");
+          syncUsage();
+          renderPropertyHead(details, property);
+          usageSel.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      });
       function syncTypeButtons() {
         typeButtons.forEach(function (btn) {
           btn.classList.toggle("is-active", btn.getAttribute("data-type-btn") === typeSelect.value);
         });
       }
       function syncWaMetro() { waWrap.hidden = stateSel.value !== "WA"; }
+      function syncLoan() {
+        var pi = loanSel.value === "pi";
+        var commercial = typeSelect.value === "commercial";
+        details.querySelector("[data-loan-years]").hidden = !pi;
+        details.querySelector("[data-io-expiry]").hidden = pi;
+        loanButtons.forEach(function (btn) { btn.classList.toggle("is-active", btn.getAttribute("data-loan-btn") === loanSel.value); });
+        details.querySelector("[data-years-hint]").textContent = commercial
+          ? "(set your loan's own term: commercial loans are often 5, 10 or 15 years)"
+          : "(a standard home loan is 30; use what is left on yours)";
+        yearsEl.placeholder = commercial ? "e.g. 10" : "30";
+        yearsList.innerHTML = (commercial ? [5, 10, 15, 20, 25] : [30, 25, 20, 15, 10]).map(function (y) { return '<option value="' + y + '"></option>'; }).join("");
+      }
+      loanButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var v = btn.getAttribute("data-loan-btn");
+          if (loanSel.value === v) return;
+          loanSel.value = v;
+          /* residential starts at the usual 30 years; commercial waits for the owner's own term */
+          if (v === "pi" && !yearsEl.value.trim() && typeSelect.value !== "commercial") yearsEl.value = "30";
+          syncLoan();
+          loanSel.dispatchEvent(new Event("change", { bubbles: true }));
+          if (v === "pi" && !yearsEl.value.trim()) yearsEl.focus();
+        });
+      });
       /* once sold, the "if you sold" scenario becomes the actual sale */
       var soldTick = details.querySelector('[data-t="is_sold"]');
       var saleHead = details.querySelector("[data-sale-head]");
@@ -1943,6 +2138,9 @@
         var built = pcPortfolio.build(others.concat([row]), taxSettings);
         var m = built.props[built.props.length - 1];
         renderStrip(details, m);
+        var repayEl = details.querySelector("[data-repay-note]");
+        repayEl.textContent = repayText(m);
+        repayEl.hidden = !repayEl.textContent;
         details.querySelector("[data-sale-preview]").textContent = salePreviewText(m);
         details.querySelector(".acct-property__name").textContent = row.name;
       }
@@ -1957,6 +2155,8 @@
         btn.addEventListener("click", function () { setType(btn.getAttribute("data-type-btn")); });
       });
       typeSelect.addEventListener("change", syncHint);
+      typeSelect.addEventListener("change", syncLoan);
+      syncLoan();
       typeSelect.addEventListener("change", syncTypeButtons);
       syncHint();
       syncTypeButtons();
@@ -2054,7 +2254,8 @@
         }, fields)).then(function (res) {
           if (res.error) { setMsg(msgEl, taxErrMsg(res.error), "error"); markDirty(); return; }
           propWarning = res.warning || "";
-          var leaseRows = Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
+          /* a home has no leases; any rows are left as they were, not saved */
+          var leaseRows = fields.usage === "home" ? [] : Array.prototype.slice.call(rowsWrap.querySelectorAll(".acct-lease-row"));
           var saves = leaseRows.map(function (row) {
             var lease = leaseForSave(row);
             lease.property_id = property.id;
@@ -2225,7 +2426,7 @@
 
       sec.appendChild(tEl("p", "acct-tax-fine",
         "Land tax is charged on the owner, per state, on unimproved land value, so thresholds do not stack across states. Each entity (for example a company set up for one large purchase) is its own taxpayer with its own threshold, so give properties in the same entity the same holding entity name. " +
-        "Uses the published general and trust rates; it leaves out exemptions (such as your own home), foreign-owner and absentee surcharges, " +
+        "Uses the published general and trust rates. A property marked My home is left out, since your principal place of residence is exempt; other exemptions, foreign-owner and absentee surcharges, " +
         "and SMSF-specific rules (an SMSF is taxed at general rates outside Queensland). Confirm the figure with your state revenue office or accountant."));
       return sec;
     }
@@ -2560,10 +2761,11 @@
       if (soldRows.length) ifHead.style.marginTop = "28px";
       sec.appendChild(ifHead);
 
+      var homeRows = heldRows.filter(function (x) { return x.m.home; });
       if (!ready.length) {
-        sec.appendChild(tEl("p", "acct-empty", heldRows.length
+        sec.appendChild(tEl("p", "acct-empty", heldRows.length > homeRows.length
           ? "Add a purchase date, purchase price and current value to a property to estimate its capital gains tax."
-          : "No properties held right now."));
+          : (homeRows.length ? "Your home is generally exempt from capital gains tax (the main residence exemption), so there is nothing to estimate yet. Investment properties you add will appear here." : "No properties held right now.")));
       } else {
         var noRate = totals.needsRate;
         var stats = [
@@ -2591,6 +2793,15 @@
         sec.appendChild(tNotes([gapLine("Not included yet, add the purchase date and price (and a current value): ",
           notReady.map(function (x) { return x.p.name || "Untitled property"; }))]));
       }
+      if (homeRows.length && ready.length) {
+        sec.appendChild(tNotes([gapLine("Not included, since your home is generally exempt (main residence): ",
+          homeRows.map(function (x) { return x.p.name || "Untitled property"; }))]));
+      }
+      var movedRows = ready.filter(function (x) { return x.m.movedOut; });
+      if (movedRows.length) {
+        sec.appendChild(tNotes([gapLine("Once your home, so the main residence exemption (including up to six years of renting it out) may reduce the tax shown: ",
+          movedRows.map(function (x) { return x.p.name || "Untitled property"; }))]));
+      }
 
       /* one panel for every sale's workings (actual and "what if"), each with a PDF */
       var panelRows = soldReady.concat(ready);
@@ -2606,7 +2817,7 @@
       sec.appendChild(tEl("p", "acct-tax-fine",
         "Assumptions: individuals and trusts are taxed at the flat marginal rate you enter above (Medicare levy included), with the cost base indexed at a 2.5% CPI assumption; a missing 1 July 2027 value is estimated by growing the purchase price to the sale price at a steady rate; " +
         "the 30% minimum applies to the taxable gain, so a lower rate is lifted to 30%. " +
-        "It leaves out the main residence exemption, foreign-resident rules, carried-forward losses and other concessions. Not tax advice."));
+        "A property marked My home is treated as fully exempt (main residence); partial exemptions (a home that was rented out or used for business, or a former home), foreign-resident rules, carried-forward losses and other concessions are left out. Not tax advice."));
       return sec;
     }
 
@@ -3223,7 +3434,8 @@
             name: p.name, type: p.propertyType === "commercial" ? "commercial" : "residential",
             value: p.value, loan: p.loan, ratePct: p.ratePct, weeklyRent: p.weeklyRent,
             runningCosts: p.runningCosts, state: p.state, owner: p.owner,
-            acqCosts: p.acqCosts, improvements: p.improvements
+            acqCosts: p.acqCosts, improvements: p.improvements, home: p.usage === "home",
+            loanType: p.loanType === "pi" ? "pi" : "io", yearsLeft: p.yearsLeft || null
           };
         });
       }
@@ -3234,7 +3446,9 @@
           type: p.ptype === "com" ? "commercial" : "residential",
           value: prNum(p.value), loan: prNum(p.loan), ratePct: p.ptype === "own" ? null : prNum(p.rate),
           weeklyRent: p.ptype === "own" ? null : prNum(p.rentwk),
-          runningCosts: null, state: p.stampState || "", owner: null, acqCosts: null, improvements: null
+          runningCosts: null, state: p.stampState || "", owner: null, acqCosts: null, improvements: null,
+          home: p.ptype === "own",
+          loanType: p.loantype === "pi" ? "pi" : "io", yearsLeft: prNum(p.years) || null
         };
       });
     }
@@ -3364,6 +3578,8 @@
           if (c.owner) row.ownership_type = c.owner;
           if (c.acqCosts) row.acquisition_costs = c.acqCosts;
           if (c.improvements) row.improvements = c.improvements;
+          if (c.home) row.usage = "home";
+          if (c.loanType === "pi") { row.loan_type = "pi"; if (c.yearsLeft) row.loan_years_left = c.yearsLeft; }
           return window.pcAuth.saveProperty(row).then(function (res) {
             if (res.error || !res.data) { failed = res.error || { message: "Could not add " + c.name + "." }; return null; }
             if (!firstId) firstId = res.data.id;
@@ -3597,16 +3813,27 @@
       return (lo + hi) / 2;
     }
 
+    function investOnly(s) {
+      if (s.investmentValue == null) return s;
+      return Object.assign({}, s, {
+        portfolioValue: s.investmentValue, portfolioDebt: s.investmentDebt,
+        portfolioEquity: s.investmentValue - s.investmentDebt
+      });
+    }
+
     /* project the portfolio forward at one blended capital-growth rate and
        one blended rental-growth rate (deliberately not split by property or
        residential/commercial - that level of detail lives in the ROI
-       calculator for a single property). Debt reduction assumes the same
-       "50% of after-interest surplus to principal" rule Portfolio Review
-       models. No sale is assumed for the value/equity/debt figures; IRR and
+       calculator for a single property). P&I investment loans reduce on
+       their scheduled repayments (one pooled amortising balance); then the
+       same "50% of surplus to principal" rule Portfolio Review models is
+       applied to what is left, interest-only debt first. No sale is assumed for the value/equity/debt figures; IRR and
        cash-on-cash use the projected equity as an unrealised, not-taxed,
        mark-to-market terminal value - there's no capital gains tax line
        because nothing here assumes the visitor is actually selling. */
     function buildPortfolioPlan(s, years, capGrowthPct, rentGrowthPct) {
+      /* investments only: your home earns no rent, so it has no place in a return projection */
+      s = investOnly(s);
       var price = s.portfolioValue || 0;
       var rent1 = s.netRentalIncome || 0;
       var rate = s.blendedRate > 0 ? s.blendedRate : 0.065;
@@ -3614,15 +3841,29 @@
       var debtNow = s.portfolioDebt || 0;
       var equityNow = s.portfolioEquity != null ? s.portfolioEquity : (price - debtNow);
       var balance = debtNow;
+      /* the P&I part repays on schedule; the rest is interest only */
+      var piBal = Math.min(debtNow, s.investPiDebt || 0);
+      var ioBal = debtNow - piBal;
+      var piPay = piBal > 0 ? (s.investPiMonthly || 0) : 0;
       var totalKept = 0;
       var rows = [{ year: 0, value: price, balance: debtNow, equity: price - debtNow }];
       for (var t = 1; t <= years; t++) {
         var rent = rent1 * Math.pow(1 + rentG, t - 1);
-        var interest = balance * rate;
-        var cashAfterInterest = rent - interest;
-        var debtPay = cashAfterInterest > 0 ? Math.min(dr * cashAfterInterest, balance) : 0;
-        balance -= debtPay;
-        var kept = cashAfterInterest - debtPay;
+        var piInt = 0, piPrin = 0;
+        for (var mo = 0; mo < 12 && piBal > 0; mo++) {
+          var mi = piBal * rate / 12, mp = Math.min(Math.max(0, piPay - mi), piBal);
+          piInt += mi; piPrin += mp; piBal -= mp;
+        }
+        var interest = piInt + ioBal * rate;
+        var cashAfterInterest = rent - interest - piPrin;
+        var extraPay = cashAfterInterest > 0 ? dr * cashAfterInterest : 0;
+        var toIo = Math.min(extraPay, ioBal);
+        ioBal -= toIo;
+        var toPi = Math.min(extraPay - toIo, piBal);
+        piBal -= toPi;
+        var debtPay = piPrin + toIo + toPi;
+        balance = piBal + ioBal;
+        var kept = cashAfterInterest - toIo - toPi;
         totalKept += kept;
         var value = price * Math.pow(1 + capG, t);
         rows.push({ year: t, value: value, balance: balance, equity: value - balance, kept: kept });
@@ -3659,7 +3900,18 @@
       var innerW = w - padL - padR, innerH = h - padT - padB;
       var maxV = 0;
       rows.forEach(function (r) { maxV = Math.max(maxV, r.value, r.equity, r.balance); });
-      maxV = maxV > 0 ? maxV * 1.08 : 1;
+      /* round the top of the axis up to a tidy step (1, 2, 2.5 or 5 x 10^n) so the gridlines read as clean figures */
+      var gridN = 4;
+      var rawStep = maxV > 0 ? maxV / gridN : 1;
+      var mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+      var step = [1, 2, 2.5, 5, 10].map(function (f) { return f * mag; }).filter(function (s) { return s >= rawStep; })[0];
+      maxV = step * gridN;
+      function axisMoney(v) {
+        if (v === 0) return "$0";
+        if (v >= 1e6) return "$" + String(Math.round(v / 1e6 * 100) / 100) + "M";
+        if (v >= 1e3) return "$" + String(Math.round(v / 1e3 * 10) / 10) + "k";
+        return "$" + Math.round(v);
+      }
       var n = rows.length - 1;
       function x(i) { return padL + (n > 0 ? (i / n) * innerW : 0); }
       function y(v) { return padT + innerH - (v / maxV) * innerH; }
@@ -3670,15 +3922,19 @@
         }).join(" ");
       }
 
-      var gridN = 4, gridLines = "", gridLabels = "";
+      var gridLines = "", gridLabels = "";
       for (var g = 0; g <= gridN; g++) {
-        var gv = maxV * g / gridN;
+        var gv = step * g;
         var gy = y(gv);
         gridLines += '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (w - padR) + '" y2="' + gy.toFixed(1) + '" class="acct-chart__grid" />';
-        gridLabels += '<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" class="acct-chart__axis" text-anchor="end">' + fmtMoney(gv) + '</text>';
+        gridLabels += '<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" class="acct-chart__axis" text-anchor="end">' + axisMoney(gv) + '</text>';
       }
+      /* at most about 8 year labels (every 1, 2, 5 or 10 years), always ending on the last year */
+      var every = [1, 2, 5, 10].filter(function (k) { return n / k <= 8; })[0] || Math.ceil(n / 8);
       var xLabels = rows.map(function (r, i) {
-        return '<text x="' + x(i).toFixed(1) + '" y="' + (h - 8) + '" class="acct-chart__axis" text-anchor="middle">' + (r.year === 0 ? "Now" : "Yr " + r.year) + '</text>';
+        var show = i === 0 || i === n || (i % every === 0 && n - i >= every * 0.6);
+        if (!show) return "";
+        return '<text x="' + x(i).toFixed(1) + '" y="' + (h - 8) + '" class="acct-chart__axis" text-anchor="' + (i === n && n > 0 ? "end" : (i === 0 ? "start" : "middle")) + '">' + (r.year === 0 ? "Now" : "Yr " + r.year) + '</text>';
       }).join("");
 
       host.innerHTML =
@@ -3730,8 +3986,8 @@
       var roiMsg = document.getElementById("portfolioRoiMsg");
       var resultEl = document.getElementById("portfolioRoiResult");
       hide(resultEl);
-      if (!portfolio || !portfolio.totals.complete) { setMsg(roiMsg, "Add a value, loan, interest rate and a lease with rent to every property first.", "error"); return; }
-      var s = portfolio.summary;
+      if (!portfolio || !portfolio.totals.complete) { setMsg(roiMsg, "Add a value, loan, interest rate and a lease with rent to every investment property first.", "error"); return; }
+      var s = investOnly(portfolio.summary);
       if (!(s.portfolioValue > 0)) { setMsg(roiMsg, "This portfolio has no combined value to project yet."); return; }
 
       var years = Math.max(1, Math.min(30, Math.round(parseFloat(document.getElementById("planYears").value) || 5)));
@@ -3773,15 +4029,20 @@
         setMsg(roiMsg, "Saved as “" + title + "”.", "ok");
         var plan = buildPortfolioPlan(s, years, capGrowthPct, rentGrowthPct);
         var statsEl = document.getElementById("portfolioRoiStats");
-        statsEl.innerHTML =
-          '<div class="acct-overview__stat"><dt>Combined value now</dt><dd>' + fmtMoney(s.portfolioValue) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Projected value, Yr ' + years + '</dt><dd>' + fmtMoney(plan.value) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Equity now</dt><dd>' + fmtMoney(plan.equityNow) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Projected equity, Yr ' + years + '</dt><dd>' + fmtMoney(plan.equity) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Debt paid down over ' + years + ' yr' + (years > 1 ? "s" : "") + '</dt><dd>' + fmtMoney(plan.debtReductionAmt) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Portfolio LVR, now &rarr; Yr ' + years + '</dt><dd>' + fmtPct(plan.lvrNow * 100) + ' &rarr; ' + fmtPct(plan.lvrThen * 100) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Avg. cash-on-cash return</dt><dd>' + (plan.cashOnCash != null ? fmtPct(plan.cashOnCash * 100) + "/yr" : "—") + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>IRR (compound)</dt><dd>' + (plan.irr != null ? fmtPct(plan.irr * 100) : "—") + '</dd></div>';
+        /* two even rows of four: where it is today and in year N, then debt and returns */
+        var yr = "Yr " + years;
+        statsEl.innerHTML = [
+          ["Value today", fmtMoney(s.portfolioValue)],
+          ["Value in " + yr, fmtMoney(plan.value)],
+          ["Equity today", fmtMoney(plan.equityNow)],
+          ["Equity in " + yr, fmtMoney(plan.equity)],
+          ["Debt paid off by " + yr, fmtMoney(plan.debtReductionAmt)],
+          ["LVR, today \u2192 " + yr, fmtPct(plan.lvrNow * 100) + " \u2192 " + fmtPct(plan.lvrThen * 100)],
+          ["Cash-on-cash, avg / yr", plan.cashOnCash != null ? fmtPct(plan.cashOnCash * 100) : "—"],
+          ["IRR", plan.irr != null ? fmtPct(plan.irr * 100) : "—"]
+        ].map(function (r) {
+          return '<div class="acct-overview__stat"><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
+        }).join("");
         renderRoiGrowthChart(plan.rows);
         document.getElementById("portfolioRoiOpenLink").href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
         show(resultEl);
@@ -3911,7 +4172,7 @@
         if (res && res.error) { setMsg(passMsg, res.error.message, "error"); return; }
         document.getElementById("profPassword").value = "";
         document.getElementById("profPasswordConfirm").value = "";
-        setMsg(passMsg, "Password updated. Use it next time you sign in.", "ok");
+        setMsg(passMsg, res.unchanged ? "That is already your password, so nothing needed changing. You're all set." : "Password updated. Use it next time you sign in.", "ok");
         var pu = window.pcAuth.user();
         if (pu) { try { window.localStorage.setItem(passwordNudgeDismissedKey(pu), "1"); } catch (e) {} }
         hide(document.getElementById("acctPasswordNudge"));
@@ -3946,6 +4207,14 @@
       var field = document.getElementById("profPassword");
       field.scrollIntoView({ behavior: "smooth", block: "center" });
       field.focus();
+    });
+    /* signed in by email link but already has a password (forgotten, or set
+       before this was tracked): record it so the nudge is gone everywhere */
+    document.getElementById("acctPasswordNudgeHave").addEventListener("click", function () {
+      var u = window.pcAuth.user();
+      if (u) { try { window.localStorage.setItem(passwordNudgeDismissedKey(u), "1"); } catch (e) {} }
+      hide(document.getElementById("acctPasswordNudge"));
+      window.pcAuth.markHasPassword();
     });
     document.getElementById("acctPasswordNudgeDismiss").addEventListener("click", function () {
       var u = window.pcAuth.user();

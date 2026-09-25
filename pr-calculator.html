@@ -82,7 +82,7 @@
         "name": "Is this portfolio review financial or tax advice?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "No. It is a point-in-time planning tool built from the figures you enter. It holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax. Speak to your accountant or a licensed adviser before acting on it."
+          "text": "No. It is a point-in-time planning tool built from the figures you enter. It holds rent, costs and values flat and ignores capital growth and capital gains tax. Loan repayments are shown for the next 12 months, with principal repaid kept separate from costs. Speak to your accountant or a licensed adviser before acting on it."
         }
       }
     ]
@@ -211,9 +211,13 @@
             <div class="result-row"><dt>Cash needed to buy</dt><dd data-out="cash">&mdash;</dd></div>
             <div class="result-row is-key"><dt>After-tax cash flow (per year)</dt><dd data-out="annual">&mdash;</dd></div>
             <div class="result-row is-final"><dt>After-tax cash flow (per week)</dt><dd data-out="weekly">&mdash;</dd></div>
+            <div class="result-row" data-pi-row hidden><dt>Principal repaid (per year, builds equity)</dt><dd data-out="principal">&mdash;</dd></div>
+            <div class="result-row is-key" data-pi-row hidden><dt>After-tax cash flow after repayments (per week)</dt><dd data-out="afterRepayWk">&mdash;</dd></div>
             <div class="result-row" data-own-row hidden><dt>Cost to own your home (per year)</dt><dd data-out="homeCost">&mdash;</dd></div>
             <div class="result-row" data-own-row hidden><dt>Cost to own your home (per week)</dt><dd data-out="homeCostWk">&mdash;</dd></div>
-            <div class="result-row is-key" data-own-row hidden><dt>After-tax cash flow, less your home (per week)</dt><dd data-out="afterHomeWk">&mdash;</dd></div>
+            <div class="result-row" data-own-pi-row hidden><dt>Principal repaid on your home (per year)</dt><dd data-out="homePrincipal">&mdash;</dd></div>
+            <div class="result-row" data-own-pi-row hidden><dt>Cash out on your home (per week)</dt><dd data-out="homeCashWk">&mdash;</dd></div>
+            <div class="result-row is-key" data-own-row hidden><dt>After repayments and your home (per week)</dt><dd data-out="afterHomeWk">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -317,10 +321,11 @@
         <div class="calc-assumptions">
           <h2 class="calc-subhead">How the numbers work</h2>
           <ul>
-            <li><strong>Loan and equity.</strong> Enter each property's loan in dollars; the loan to value ratio (LVR) is worked out for you, and the equity (your net position) is the rest. Interest is interest-only, loan &times; rate, so nothing is paid off the loan.</li>
+            <li><strong>Loan and equity.</strong> Enter each property's loan in dollars; the loan to value ratio (LVR) is worked out for you, and the equity (your net position) is the rest. Interest is loan &times; rate on an interest-only loan; on a principal and interest loan it is what the next 12 months of repayments charge (see Loan repayments below).</li>
             <li><strong>Rent collected</strong> is the weekly rent &times; 52 for a residential property, or the gross annual rent you enter for a commercial one.</li>
             <li><strong>Running costs</strong> are property management (a % of the rent), the letting / leasing fee, council rates, body corporate / strata, <strong>land tax</strong>, insurance, maintenance, a vacancy allowance, loan fees and sundry. Residential maintenance is per week &times; 52 and vacancy is weeks &times; the weekly rent; commercial maintenance is annual and vacancy is months &divide; 12 &times; the gross rent. Land tax is set by each state on the total land value you hold there, so it depends on the rest of your holdings; enter your assessed or expected figure. Net rent after costs is rent collected less all of these.</li>
             <li><strong>Commercial properties</strong> add a lease basis and the usual building outgoings - water &amp; sewer rates, fire &amp; essential services, air-conditioning / HVAC, cleaning &amp; security, and an outgoings audit / admin allowance. Each recoverable line has a &ldquo;recovered from the tenant&rdquo; tick: ticked, that outgoing drops out of your running costs. Choosing <strong>net lease</strong> ticks the usual recoverable set, <strong>gross lease</strong> clears them, and <strong>partial / mixed</strong> leaves them as you set them. <strong>Land tax is never auto-ticked</strong> under any lease basis - many retail leases can't pass it through to the tenant even on a net lease, so tick it yourself only if this lease does.</li>
+            <li><strong>Loan repayments.</strong> Each property's loan is interest only or principal and interest (P&amp;I) with the years left to run - residential suggests 30 years, commercial is left for you to set since terms vary (often 5, 10 or 15 years). On a P&amp;I loan the interest is what the next 12 months of repayments actually charge as the balance falls. The principal repaid is not a cost and does not change the tax (it becomes equity), so it stays out of cash flow before and after tax and break-even rent; it comes off a separate &ldquo;after repayments&rdquo; line, since it is still cash leaving your account.</li>
             <li><strong>Cash flow before tax</strong> is net rent after costs, less loan interest. A figure in brackets is what the property costs you to hold each year before tax.</li>
             <li><strong>Tax.</strong> Each property has its own entity and tax rate, set under Tax treatment on its card - useful where properties sit in different names, companies or trusts. A rental loss is refunded at that property's rate; a rental profit is taxed at it. Depreciation (building at cost &times; its rate, 2.5% by default, plus fittings at cost &times; their rate) is a further deduction and adds its own tax saving. The entity is for your report only and does not change the calculation, with one exception: a super fund (SMSF) is taxed at 15% on rental profit (enter 0 for pension phase), and its rental loss stays in the fund and carries forward, so no refund is shown for it.</li>
             <li><strong>Post-Budget negative gearing.</strong> Tick &ldquo;bought after the 2026 Federal Budget&rdquo; on a residential property and a rental loss on it is quarantined: it no longer offsets your salary or other income, so it earns no refund in the year. The loss carries forward against future rental profit from that property or the gain on its sale. Rental profits are still taxed, and depreciation only reduces a profit. Properties held before the Budget keep the current treatment. This change applies to residential property only - the Budget did not change negative gearing for commercial property, so this option is not shown on commercial cards. This is a modelling assumption, not tax advice.</li>
@@ -329,7 +334,7 @@
             <li><strong>Residential vs commercial.</strong> The comparison table and the schedule subtotals split the portfolio by type so you can see each side's value, yield and after-tax position on its own, then combined.</li>
             <li><strong>Owner-occupied (your home).</strong> Add your own home as a property type and it counts toward your combined value, debt and equity - useful for a true useable-equity figure, since home equity is usually what funds the next purchase. It is left out of every rent, yield, investment cash-flow and tax figure. Instead, its interest rate and running costs (rates, strata, insurance, maintenance) give a separate <strong>cost to own your home</strong>, per year and per week, and a line showing your investments' after-tax result once that cost is taken off. Buying costs (stamp duty, conveyancing) still count toward the cash needed to buy it.</li>
             <li><strong>Buying a property.</strong> Tick "being purchased" to add stamp duty (estimable by state), conveyancing and borrowing costs. These do not change the holding result; they feed "cash needed to buy" (your equity plus those costs). "Other one-off cost" and "Cost of improvements" are separate and always available: while buying, they add to that same cash-needed-to-buy figure; already own it, and they come straight off that property's equity instead.</li>
-            <li><strong>The portfolio</strong> figures add up every investment property; the yields are combined rent &divide; combined investment value (your home's value is excluded from that ratio, though it is included in the portfolio value, debt and equity above it). This is a point-in-time review: it holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax.</li>
+            <li><strong>The portfolio</strong> figures add up every investment property; the yields are combined rent &divide; combined investment value (your home's value is excluded from that ratio, though it is included in the portfolio value, debt and equity above it). This is a point-in-time review: it holds rent, costs and values flat and ignores capital growth and capital gains tax. Loan repayments are shown for the next 12 months, with principal repaid kept separate from costs.</li>
           </ul>
         </div>
 
@@ -357,7 +362,7 @@
           </details>
           <details>
             <summary>Is this portfolio review financial or tax advice?</summary>
-            <p>No. It is a point-in-time planning tool built from the figures you enter. It holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax. Speak to your accountant or a licensed adviser before acting on it.</p>
+            <p>No. It is a point-in-time planning tool built from the figures you enter. It holds rent, costs and values flat and ignores capital growth and capital gains tax. Loan repayments are shown for the next 12 months, with principal repaid kept separate from costs. Speak to your accountant or a licensed adviser before acting on it.</p>
           </details>
         </div>
           </div>
@@ -496,6 +501,41 @@
         '<span>Recovered from the tenant</span></label>';
     }
 
+    /* interest only vs principal and interest: the years field, its hint and
+       quick picks follow the property type (a home loan is usually 30 years;
+       commercial terms vary, so those are only suggestions) */
+    function syncLoanUi(id) {
+      var p = "p" + id + "_";
+      var card = propertyCards.querySelector('[data-prop="' + id + '"]');
+      var lt = document.getElementById(p + "loantype");
+      if (!card || !lt) return;
+      var pi = lt.value === "pi";
+      var isCom = ((document.getElementById(p + "ptype") || {}).value) === "com";
+      Array.prototype.forEach.call(card.querySelectorAll("[data-pi-only]"), function (el) { el.hidden = !pi; });
+      document.getElementById(p + "yearsHint").textContent = isCom
+        ? "(set your loan's own term: often 5, 10 or 15 years)"
+        : "(a standard home loan is 30)";
+      document.getElementById(p + "years").placeholder = isCom ? "e.g. 10" : "30";
+      document.getElementById(p + "yearsList").innerHTML = (isCom ? [5, 10, 15, 20, 25] : [30, 25, 20, 15, 10])
+        .map(function (y) { return '<option value="' + y + '"></option>'; }).join("");
+    }
+
+    /* the loan's next 12 months: interest charged and principal repaid */
+    function loanYear(p, loan, ratePct) {
+      var pi = ((document.getElementById(p + "loantype") || {}).value) === "pi";
+      var years = num(p + "years");
+      if (!pi || !(loan > 0)) return { pi: false, termMissing: false, interest: loan * ratePct / 100, principal: 0, monthly: loan * ratePct / 1200 };
+      if (!(years > 0)) return { pi: true, termMissing: true, interest: loan * ratePct / 100, principal: 0, monthly: null };
+      var n = Math.round(years * 12), r = ratePct / 1200;
+      var pay = r === 0 ? loan / n : loan * r / (1 - Math.pow(1 + r, -n));
+      var b = loan, int = 0, prin = 0;
+      for (var i = 0; i < 12 && b > 0; i++) {
+        var mi = b * r, mp = Math.min(pay - mi, b);
+        int += mi; prin += mp; b -= mp;
+      }
+      return { pi: true, termMissing: false, interest: int, principal: prin, monthly: pay };
+    }
+
     /* show/hide the residential-only and commercial-only bits of a card */
     function applyType(id, fromUser) {
       var p = "p" + id + "_";
@@ -518,6 +558,7 @@
       var pmEl = document.getElementById(p + "pmpct");
       if (pmEl) pmEl.placeholder = isCom ? "4.4" : "6.6";
       if (fromUser && isCom) autoRecovers(id);
+      syncLoanUi(id);
       /* the stamp-duty rate reads the property type directly (no separate
          "commercial property" tick to keep in sync any more) - just
          recompute the estimate in case a state is already selected. */
@@ -617,13 +658,24 @@
         '</div>' +
         '<p class="field-hint">Any other one-off spend on this property - BA / planning fees, reports, renovations or improvements. Available whether you&rsquo;re buying or already own it: if being purchased, it adds to the cash needed to buy; if already owned, it comes straight off this property&rsquo;s equity.</p>' +
         '<div class="field-row">' +
-          '<div class="field"><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
+          '<div class="field"><label for="' + p + 'rate">Interest rate <span>(% per year)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field" data-res-only><label for="' + p + 'rentwk">Rent <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentwk" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field" data-com-only hidden><label for="' + p + 'rentyr">Gross rent <span>(per year)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentyr" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'loantype">Repayments</label>' +
+          '<select id="' + p + 'loantype">' +
+            '<option value="io">Interest only</option>' +
+            '<option value="pi">Principal &amp; interest</option>' +
+          '</select></div>' +
+          '<div class="field" data-pi-only hidden><label for="' + p + 'years">Years left on the loan <span id="' + p + 'yearsHint"></span></label>' +
+          '<input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'years" list="' + p + 'yearsList" autocomplete="off" />' +
+          '<datalist id="' + p + 'yearsList"></datalist></div>' +
+        '</div>' +
+        '<p class="field-hint" id="' + p + 'repayHint" hidden></p>' +
         '<p class="field-hint" id="' + p + 'rentHint" data-invest-only>Gross rent &mdash; &nbsp;·&nbsp; Gross yield &mdash;</p>' +
         '<p class="field-hint" data-own-only hidden>Your home counts toward your overall value, debt and equity, but not toward rent, yield or investment cash flow. Add its running costs below to see what it costs you to own.</p>' +
         '<div data-own-only hidden>' +
@@ -652,6 +704,8 @@
           '<span>Loan interest / yr <strong id="' + p + 'oHomeInt">&mdash;</strong></span>' +
           '<span>Cost to own / yr <strong id="' + p + 'oHomeCost">&mdash;</strong></span>' +
           '<span>Cost to own / wk <strong id="' + p + 'oHomeWk">&mdash;</strong></span>' +
+          '<span data-pi-only hidden>Principal / yr <strong id="' + p + 'oHomePrin">&mdash;</strong></span>' +
+          '<span data-pi-only hidden>Cash out / wk <strong id="' + p + 'oHomeCashWk">&mdash;</strong></span>' +
         '</p>' +
         '</div>' +
 
@@ -780,6 +834,8 @@
           '<span>After-tax cash flow / yr <strong id="' + p + 'oAnnual">&mdash;</strong></span>' +
           '<span>After-tax cash flow / wk <strong id="' + p + 'oWeekly">&mdash;</strong></span>' +
           '<span id="' + p + 'neutralWrap">Rent / wk to break even <strong id="' + p + 'oNeutral">&mdash;</strong></span>' +
+          '<span data-pi-only hidden>Repayments / mo <strong id="' + p + 'oMonthly">&mdash;</strong></span>' +
+          '<span data-pi-only hidden>After repayments / wk <strong id="' + p + 'oAfterRepay">&mdash;</strong></span>' +
         '</p>' +
         '<button type="button" class="linklike dwelling-type__remove" data-remove="' + id + '">Remove this property</button>' +
         '</div>';
@@ -802,6 +858,14 @@
         render();
       });
       card.querySelector("#" + p + "ngstatus").addEventListener("change", render);
+      card.querySelector("#" + p + "loantype").addEventListener("change", function (e) {
+        var yEl = card.querySelector("#" + p + "years");
+        var isCom = card.querySelector("#" + p + "ptype").value === "com";
+        if (e.isTrusted && this.value === "pi" && !yEl.value.trim() && !isCom) yEl.value = "30";
+        syncLoanUi(id);
+        render();
+        if (e.isTrusted && this.value === "pi" && !yEl.value.trim()) yEl.focus();
+      });
       card.querySelector("#" + p + "ptype").addEventListener("change", function (e) {
         applyType(id, e.isTrusted);
         positionPct();
@@ -1055,7 +1119,8 @@
          rent, running costs, depreciation or tax treatment apply to a home */
       if (isOwn) {
         /* its own interest and running costs, kept apart from every investment total */
-        var homeInterest = loan * num(p + "rate") / 100;
+        var hl = loanYear(p, loan, num(p + "rate"));
+        var homeInterest = hl.interest;
         var homeRunning = num(p + "ownrates") + num(p + "ownstrata") + num(p + "owninsure") +
           num(p + "ownmaint") + num(p + "ownfees") + num(p + "ownother");
         return {
@@ -1063,6 +1128,8 @@
           isCom: false, isOwn: true, lease: "",
           homeRate: num(p + "rate") / 100, homeInterest: homeInterest, homeRunning: homeRunning,
           homeCost: homeInterest + homeRunning,
+          homePrincipal: hl.principal, homeCashOut: homeInterest + homeRunning + hl.principal,
+          homeMonthly: hl.monthly, isPI: hl.pi, termMissing: hl.termMissing, principal: 0,
           value: value, lvr: lvr, loan: loan, equity: equity, rate: 0, interest: 0,
           rentWk: 0, grossRent: 0, grossYield: null,
           pm: 0, letting: 0, council: 0, water: 0, strata: 0, landTax: 0,
@@ -1077,7 +1144,8 @@
       }
 
       var rate = num(p + "rate") / 100;
-      var interest = loan * rate;
+      var ly = loanYear(p, loan, rate * 100);
+      var interest = ly.interest;
 
       var rentWk = num(p + "rentwk");
       var grossRent = isCom ? num(p + "rentyr") : rentWk * 52;
@@ -1201,6 +1269,8 @@
         expenses: expenses, netRent: netRent, netYield: netYield, preTax: preTax,
         taxPreDepr: taxPreDepr, deprCredit: deprCredit, depr: depr, ngNew: ngNew, isSuper: isSuper,
         annual: annual, weekly: weekly, neutralWk: neutralWk, neutralYr: neutralYr,
+        isPI: ly.pi, termMissing: ly.termMissing, monthly: ly.monthly, principal: ly.principal,
+        afterRepay: annual - ly.principal,
         acqOn: acqOn, acq: acq, cashToComplete: equity + acq,
         valid: value > 0
       };
@@ -1211,7 +1281,7 @@
         pm: 0, letting: 0, council: 0, water: 0, strata: 0, landTax: 0, insurance: 0,
         maint: 0, fire: 0, hvac: 0, clean: 0, ogadmin: 0, vacancy: 0, loanFees: 0, sundry: 0,
         recovered: 0, interest: 0, preTax: 0, taxPreDepr: 0, deprCredit: 0, annual: 0,
-        acq: 0, cashToComplete: 0, anyAcq: false, anyNG: false };
+        acq: 0, cashToComplete: 0, anyAcq: false, anyNG: false, principal: 0, anyPI: false, termMissing: false };
     }
     function addTo(S, m) {
       S.n += 1;
@@ -1225,6 +1295,9 @@
       S.interest += m.interest; S.preTax += m.preTax; S.taxPreDepr += m.taxPreDepr;
       S.deprCredit += m.deprCredit; S.annual += m.annual;
       S.acq += m.acq; S.cashToComplete += m.cashToComplete;
+      S.principal += m.principal || 0;
+      if (m.isPI && !m.isOwn) S.anyPI = true;
+      if (m.termMissing && !m.isOwn) S.termMissing = true;
       if (m.acqOn) S.anyAcq = true;
       if (m.ngNew) S.anyNG = true;
       if (m.isSuper) S.anySuper = true;
@@ -1236,6 +1309,8 @@
       S.netYield = S.value > 0 ? S.netRent / S.value * 100 : null;
       S.pctValue = S.value > 0 ? S.annual / S.value * 100 : null;
       S.toNeutral = S.weekly < 0 ? -S.weekly : 0;
+      S.afterRepay = S.annual - S.principal;
+      S.afterRepayWk = S.afterRepay / 52;
       return S;
     }
 
@@ -1256,6 +1331,9 @@
       T.anyCom = C.n > 0;
       T.anyOwn = live.some(function (m) { return m.isOwn; });
       T.homeCost = live.reduce(function (a, m) { return a + (m.isOwn ? m.homeCost : 0); }, 0);
+      T.homePrincipal = live.reduce(function (a, m) { return a + (m.isOwn ? m.homePrincipal : 0); }, 0);
+      T.homeCashOut = T.homeCost + T.homePrincipal;
+      T.homePI = live.some(function (m) { return m.isOwn && m.isPI && !m.termMissing; });
       T.mixed = R.n > 0 && C.n > 0;
       T.valid = live.length > 0;
       I.valid = I.n > 0;
@@ -1321,7 +1399,24 @@
           var el = document.getElementById(p + sfx);
           if (el) el.textContent = unlocked ? str : mask(str);
         }
+        var rph = document.getElementById(p + "repayHint");
+        if (rph) {
+          var rtxt = "";
+          if (r.isPI && r.termMissing) rtxt = "Enter the years left on the loan to see the repayments.";
+          else if (r.isPI && r.loan > 0) {
+            var mo = r.isOwn ? r.homeMonthly : r.monthly;
+            var yi = r.isOwn ? r.homeInterest : r.interest;
+            var yp = r.isOwn ? r.homePrincipal : r.principal;
+            rtxt = "About " + money(mo) + " a month. Over the next 12 months that is " + money(yi) + " of interest and " + money(yp) + " off the balance.";
+          }
+          rph.textContent = rtxt;
+          rph.hidden = !rtxt;
+        }
+        putCard("oMonthly", r.isPI && r.monthly ? money(r.monthly) : "—");
+        putCard("oAfterRepay", r.valid && r.isPI && !r.termMissing ? signedMoney(r.afterRepay / 52) : "—");
         if (r.isOwn) {
+          putCard("oHomePrin", r.homePrincipal > 0 ? money(r.homePrincipal) : "—");
+          putCard("oHomeCashWk", r.homeCashOut > 0 ? money(r.homeCashOut / 52) : "—");
           putCard("oHomeRun", r.homeRunning > 0 ? money(r.homeRunning) : "—");
           putCard("oHomeInt", r.homeInterest > 0 ? money(r.homeInterest) : "—");
           putCard("oHomeCost", r.homeCost > 0 ? money(r.homeCost) : "—");
@@ -1359,9 +1454,15 @@
       put("pctValue", I.pctValue != null ? pct(I.pctValue) : "—");
       put("toNeutral", I.valid ? (I.toNeutral > 0 ? money(I.toNeutral) + " / wk" : "Already breaks even") : "—");
       Array.prototype.forEach.call(document.querySelectorAll("[data-own-row]"), function (el) { el.hidden = !T.anyOwn; });
+      Array.prototype.forEach.call(document.querySelectorAll("[data-own-pi-row]"), function (el) { el.hidden = !T.homePI; });
+      Array.prototype.forEach.call(document.querySelectorAll("[data-pi-row]"), function (el) { el.hidden = !(I.anyPI && !I.termMissing); });
+      put("principal", I.valid ? money(I.principal) : "—");
+      put("afterRepayWk", I.valid ? signedMoney(I.afterRepayWk) : "—");
       put("homeCost", T.homeCost > 0 ? money(T.homeCost) : "—");
       put("homeCostWk", T.homeCost > 0 ? money(T.homeCost / 52) : "—");
-      put("afterHomeWk", T.homeCost > 0 ? signedMoney((I.valid ? I.weekly : 0) - T.homeCost / 52) : "—");
+      put("homePrincipal", money(T.homePrincipal));
+      put("homeCashWk", money(T.homeCashOut / 52));
+      put("afterHomeWk", T.homeCashOut > 0 ? signedMoney((I.valid ? I.afterRepayWk : 0) - T.homeCashOut / 52) : "—");
       put("acq", T.anyAcq ? money(T.acq) : "None");
       put("cash", T.anyAcq ? money(T.cashToComplete) : "None");
 
@@ -1766,8 +1867,13 @@
           ? "After tax and depreciation you are ahead by " + money(T.annual) + " a year, about " + money(T.weekly) + " a week."
           : "After tax and depreciation it costs you " + money(-T.annual) + " a year, about " + money(-T.weekly) + " a week" +
             (T.toNeutral > 0 ? ", and it would take " + money(T.toNeutral) + " more rent a week to break even." : ".");
-        if (T.homeCost > 0) bottom += " Your home costs about " + money(T.homeCost / 52) + " a week to own, so after that you are " +
-          (T.weekly - T.homeCost / 52 >= 0 ? "ahead by " + money(T.weekly - T.homeCost / 52) : "down " + money(T.homeCost / 52 - T.weekly)) + " a week.";
+        if (I.anyPI && !I.termMissing) bottom += " Loan repayments also pay " + money(T.principal) + " a year off your investment loans, which builds equity.";
+        if (T.homeCost > 0) {
+          var leftWk = T.afterRepayWk - T.homeCashOut / 52;
+          bottom += " Your home costs about " + money(T.homeCost / 52) + " a week to own" +
+            (T.homePI ? ", or " + money(T.homeCashOut / 52) + " a week including principal" : "") +
+            ", so after repayments and your home you are " + (leftWk >= 0 ? "ahead by " + money(leftWk) : "down " + money(-leftWk)) + " a week.";
+        }
         y = window.pcPdf ? window.pcPdf.bottomLine(doc, L, y, bottom) : y;
       }
 
@@ -1828,6 +1934,10 @@
       row("After-tax cash flow (per year)", bracketMoney(T.annual), true);
       y += 6;
       bigrow("AFTER-TAX CASH FLOW (PER WEEK)", bracketMoney(T.weekly));
+      if (I.anyPI && !I.termMissing) {
+        row("  less Principal repaid on investment loans (builds equity)", money(T.principal));
+        row("After-tax cash flow after repayments (per week)", bracketMoney(T.afterRepayWk), true);
+      }
 
       if (T.anyOwn) {
         y += 8;
@@ -1838,7 +1948,11 @@
         row("Loan interest", money(homeInt));
         row("Cost to own (per year)", money(T.homeCost), true);
         row("Cost to own (per week)", money(T.homeCost / 52));
-        row("After-tax cash flow, less your home (per week)", bracketMoney(T.weekly - T.homeCost / 52), true);
+        if (T.homePI) {
+          row("Principal repaid (per year, builds equity)", money(T.homePrincipal));
+          row("Cash out on your home (per week)", money(T.homeCashOut / 52));
+        }
+        row("After repayments and your home (per week)", bracketMoney(T.afterRepayWk - T.homeCashOut / 52), true);
         ensure(26);
         doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
         doc.text(doc.splitTextToSize("Your home counts in the value, debt and equity above but not in the rent or cash flow. Its costs are not tax deductible, and it is generally exempt from land tax and capital gains tax.", w - 2 * L), L, y);
@@ -1907,7 +2021,7 @@
 
       ensure(90);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
-      var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and loans are treated as interest-only (no principal paid down). The tax lines apply each property's own entity and tax rate to its rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
+      var disc = "This report is a guide only, built from the figures entered above. It looks at the portfolio at one point in time: rent, running costs and values are held flat, and interest is for the next 12 months of each loan's repayments, and principal repaid on principal and interest loans is shown separately, not as a cost. The tax lines apply each property's own entity and tax rate to its rental result and depreciation; they do not work out your actual return, and they ignore capital gains tax, the timing of any refund, and rules specific to your circumstances. Land tax is whatever you entered, not a state calculation. Any purchase-cost stamp duty is estimated from published state transfer duty rates plus indicative title-office fees, not a state revenue office figure, and excludes surcharges and concessions. It is not financial, tax or investment advice. Speak to Project Carter and a licensed adviser before acting.";
       doc.text(doc.splitTextToSize(disc, w - 2 * L), L, y);
 
       var totalPages = doc.internal.getNumberOfPages();
@@ -1946,6 +2060,7 @@
         "Depreciation tax saving: " + money(T.deprCredit) + "/yr",
         "After-tax cash flow: " + signedMoney(T.annual) + "/yr",
         "After-tax cash flow: " + signedMoney(T.weekly) + "/wk",
+        (I.anyPI ? "Principal repaid on investment loans: " + money(T.principal) + "/yr; after repayments " + signedMoney(T.afterRepayWk) + "/wk" : null),
         "As a % of portfolio value: " + (I.pctValue != null ? pct(I.pctValue) : "n/a"),
         "Extra rent per week to break even: " + (T.toNeutral > 0 ? money(T.toNeutral) + "/wk" : "already breaks even")
       ];
@@ -1969,7 +2084,9 @@
         if (!r.valid) return;
         if (r.isOwn) {
           lines.push((r.label || ("Property " + (i + 1))) + " [Owner-occupied]: value " + money(r.value) +
-            ", debt " + money(r.loan) + " (" + pct(r.lvr) + "), cost to own " + money(r.homeCost) + "/yr (" + money(r.homeCost / 52) + "/wk) - not counted in rent/cash-flow figures above");
+            ", debt " + money(r.loan) + " (" + pct(r.lvr) + "), cost to own " + money(r.homeCost) + "/yr (" + money(r.homeCost / 52) + "/wk)" +
+            (r.isPI ? ", P&I " + (r.termMissing ? "(years left not entered)" : num("p" + r.id + "_years") + " yrs left, principal " + money(r.homePrincipal) + "/yr") : ", interest only") +
+            " - not counted in rent/cash-flow figures above");
           return;
         }
         var tag = (r.isCom ? "[Commercial, " + (LEASE[r.lease] || "net lease") + "]" : "[Residential]") +
@@ -2176,6 +2293,8 @@
         value: Math.round(p.value || 0),
         propertyType: p.isCom ? "commercial" : "residential",
         usage: p.isOwn ? "home" : "investment",
+        loanType: p.isPI ? "pi" : "io",
+        yearsLeft: p.isPI && !p.termMissing ? num("p" + p.id + "_years") : null,
         /* the rest lets the account page start a property from this card */
         loan: Math.round(p.loan || 0),
         ratePct: Math.round(((p.isOwn ? p.homeRate : p.rate) || 0) * 10000) / 100,

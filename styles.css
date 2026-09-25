@@ -1652,6 +1652,13 @@ h1, h2, h3 {
 .acct-overview__stat dd { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--text); }
 
 .acct-overview--modes { margin: 8px 0 10px; }
+/* the portfolio ROI results: always two even rows of four, labels on one line */
+.acct-overview--roi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.acct-overview--roi .acct-overview__stat dt,
+.acct-overview--roi .acct-overview__stat dd { white-space: nowrap; }
+@media (max-width: 900px) {
+  .acct-overview--roi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .acct-debt-goal { margin: 20px 0; padding-top: 18px; border-top: 1px solid var(--line-soft); }
 .acct-debt-goal .field { margin: 8px 0 12px; }
 

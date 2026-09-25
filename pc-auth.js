@@ -409,10 +409,28 @@
        never set one) add or change their password for next time - also
        flips profiles.has_password so the "set a password" nudge stops
        showing once they've done this */
+    /* record that this account has a password (so the "set a password"
+       nudge stops for good, on every device) without changing it */
+    markHasPassword: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      if (currentProfile) currentProfile.has_password = true;
+      var ignore = function () { return null; };
+      return Promise.all([
+        client.auth.updateUser({ data: { has_password: true } }).then(ignore, ignore),
+        client.from("profiles").update({ has_password: true }).eq("id", currentUser.id).then(ignore, ignore)
+      ]).then(function () { return { error: null }; });
+    },
+
     setPassword: function (newPassword) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
       return client.auth.updateUser({ password: newPassword, data: { has_password: true } }).then(function (res) {
+        /* Supabase refuses to "change" a password to the one already set.
+           That proves there is one, so it is a success, not an error. */
+        if (res.error && (res.error.code === "same_password" || /different from the old password/i.test(res.error.message || ""))) {
+          return api.markHasPassword().then(function () { return { error: null, unchanged: true }; });
+        }
         if (res.error) return { error: res.error };
         return client.from("profiles").update({ has_password: true }).eq("id", currentUser.id)
           .then(function (r2) {
@@ -590,6 +608,11 @@
       if (has("annual_running_costs")) row.annual_running_costs = money(property.annual_running_costs);
       if (has("holding_entity")) row.holding_entity = String(property.holding_entity || "").trim().slice(0, 120) || null;
       if (has("is_sold")) row.is_sold = !!property.is_sold;
+      if (has("usage")) row.usage = property.usage === "home" && row.property_type !== "commercial" ? "home" : "investment";
+      if (has("moved_out_date")) row.moved_out_date = day(property.moved_out_date);
+      if (has("loan_type")) row.loan_type = property.loan_type === "pi" ? "pi" : "io";
+      if (has("loan_years_left")) { var yl = money(property.loan_years_left); row.loan_years_left = yl != null && yl > 0 && yl <= 40 ? yl : null; }
+      if (has("io_expiry_date")) row.io_expiry_date = day(property.io_expiry_date);
       function write(r) {
         return property.id
           ? client.from("properties").update(r).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
@@ -597,7 +620,7 @@
       }
       /* these columns come from later database updates; if one has not been run
          yet, save everything else and say so instead of failing the whole save */
-      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status" };
+      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status", usage: "whether it is your home", moved_out_date: "the moved-out date", loan_type: "the loan type", loan_years_left: "the years left on the loan", io_expiry_date: "the interest-only end date" };
       var dropped = [];
       function attempt(r) {
         return write(r).then(function (res) {

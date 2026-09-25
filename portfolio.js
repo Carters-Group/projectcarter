@@ -13,6 +13,20 @@
    Blank means "not entered", zero means "none" (a loan balance of 0 is a
    property with no loan). Totals only count properties that have what each
    figure needs, and report who is missing, rather than guessing.
+
+   A residential property can be the owner's home (usage "home"). It counts
+   toward what you own (value, debt, equity, useable equity), because that is
+   the equity that funds the next purchase, but never toward the investment
+   figures (rent, yield, cash flow, land tax, capital gains tax). Its running
+   costs and loan interest are reported on their own as the cost of owning
+   your home.
+
+   Each loan is interest only (the default) or principal and interest with
+   a number of years left to run. On a P&I loan the first year's interest is
+   what the repayments actually charge as the balance falls, and the
+   principal repaid is shown on its own: it is not a cost (it becomes
+   equity), but it is cash leaving each month, so it comes off "after
+   repayments" and "cash out" figures and never off cash flow before tax.
    ========================================================================= */
 "use strict";
 
@@ -81,10 +95,12 @@ var pcPortfolio = (function () {
     var rate = num(p.interest_rate);
     var costs = num(p.annual_running_costs);
     var price = pos(p.purchase_price);
-    var rent = annualRent(p, today);
+    var home = isHome(p);
+    var rent = home ? { rent: 0, known: false } : annualRent(p, today);
 
     var m = {
       id: p.id, name: p.name || "Untitled property", sold: !!p.is_sold, entity: (p.holding_entity || "").trim(), type: p.property_type === "commercial" ? "commercial" : "residential", state: p.state || "", owner: p.ownership_type || "individual",
+      home: home, movedOut: !home && p.property_type !== "commercial" && p.moved_out_date ? p.moved_out_date : null,
       value: value, loan: loan, rate: rate, price: price,
       equity: value != null && loan != null ? value - loan : null,
       lvr: value != null && loan != null ? loan / value * 100 : null,
@@ -97,7 +113,34 @@ var pcPortfolio = (function () {
     };
 
     m.interest = loan != null && (loan === 0 || rate != null) ? loan * (rate || 0) / 100 : null;
+    /* the loan's structure: repayments, and the principal they pay off */
+    m.loanType = p.loan_type === "pi" ? "pi" : "io";
+    m.yearsLeft = m.loanType === "pi" ? pos(p.loan_years_left) : null;
+    m.ioExpiry = m.loanType === "io" && loan > 0 ? (p.io_expiry_date || null) : null;
+    m.termMissing = m.loanType === "pi" && loan > 0 && m.yearsLeft == null;
+    m.monthly = null; m.principal = null; m.repayment = null;
+    if (m.interest != null) {
+      if (m.loanType === "pi" && loan > 0 && m.yearsLeft != null) {
+        var fy = firstYear(loan, rate, m.yearsLeft);
+        m.monthly = fy.monthly;
+        m.interest = fy.interest;
+        m.principal = fy.principal;
+      } else if (!m.termMissing) {
+        m.monthly = m.interest / 12;
+        m.principal = 0;
+      }
+      if (m.principal != null) m.repayment = m.interest + m.principal;
+    }
     m.cashFlow = m.rent != null && m.interest != null ? m.rent - (costs || 0) - m.interest : null;
+    /* your home earns nothing, so what it costs to hold is its own figure:
+       running costs plus loan interest, per year */
+    m.homeCost = home && m.interest != null ? (costs || 0) + m.interest : null;
+    /* and what actually leaves your account for it: that plus principal */
+    m.homeCashOut = m.homeCost != null && m.principal != null ? m.homeCost + m.principal : null;
+
+    /* all-in cost: price plus buying costs (stamp duty, legals) and
+       improvements, the same things that make up a cost base */
+    m.totalCost = price != null ? price + (pos(p.acquisition_costs) || 0) + (pos(p.improvements) || 0) : null;
 
     m.growth = null;
     if (price != null && value != null) {
@@ -105,14 +148,20 @@ var pcPortfolio = (function () {
       m.growth = {
         amount: value - price,
         pct: (value / price - 1) * 100,
-        perYearPct: yrs != null && yrs >= 1 ? (Math.pow(value / price, 1 / yrs) - 1) * 100 : null
+        perYearPct: yrs != null && yrs >= 1 ? (Math.pow(value / price, 1 / yrs) - 1) * 100 : null,
+        afterCosts: value - m.totalCost
       };
     }
 
     var sellPct = cgtSettingsFrom(settings).sellingCostPct;
     var salePrice = pos(p.expected_sale_price) || value;
-    var sale = { price: salePrice, cgt: null, proceeds: null, tax: null, taxReform: null, cashIfSold: null, cashIfSoldReform: null, cashBeforeTax: null };
-    if (salePrice != null) {
+    var sale = { price: salePrice, cgt: null, proceeds: null, tax: null, taxReform: null, cashIfSold: null, cashIfSoldReform: null, cashBeforeTax: null, exempt: home, saleDate: p.planned_sale_date || null };
+    if (salePrice != null && home) {
+      /* main residence exemption: no capital gains tax on your own home */
+      sale.proceeds = salePrice * (1 - sellPct / 100);
+      sale.tax = 0;
+      if (loan != null) sale.cashBeforeTax = sale.cashIfSold = sale.proceeds - loan;
+    } else if (salePrice != null) {
       sale.proceeds = salePrice * (1 - sellPct / 100);
       if (loan != null) sale.cashBeforeTax = sale.proceeds - loan;
       if (typeof pcTax !== "undefined") {
@@ -133,6 +182,60 @@ var pcPortfolio = (function () {
     return m;
   }
 
+  /* the monthly repayment on a principal and interest loan */
+  function monthlyRepayment(balance, ratePct, years) {
+    var n = Math.round(years * 12);
+    if (!(balance > 0) || !(n > 0)) return 0;
+    var r = (ratePct || 0) / 100 / 12;
+    return r === 0 ? balance / n : balance * r / (1 - Math.pow(1 + r, -n));
+  }
+
+  /* the next 12 months of a P&I loan: interest charged and principal repaid */
+  function firstYear(balance, ratePct, years) {
+    var pay = monthlyRepayment(balance, ratePct, years), r = (ratePct || 0) / 100 / 12;
+    var b = balance, interest = 0, principal = 0;
+    for (var i = 0; i < 12 && b > 0; i++) {
+      var int = b * r, prin = Math.min(pay - int, b);
+      interest += int; principal += prin; b -= prin;
+    }
+    return { monthly: pay, interest: interest, principal: principal };
+  }
+
+  /* Month by month until every loan is cleared (or maxYears): interest on
+     each balance, scheduled principal on P&I loans, then the extra (plus the
+     repayment of any loan already cleared) onto the highest-rate balance.
+     loans: [{ balance, ratePct, monthly }] (monthly 0 = interest only). */
+  function debtPayoff(loans, extraPerYear, maxYears) {
+    maxYears = maxYears || 60;
+    var ls = (loans || []).filter(function (l) { return l.balance > 0; }).map(function (l) {
+      return { b: l.balance, r: (l.ratePct || 0) / 100 / 12, pay: l.monthly || 0 };
+    });
+    var start = ls.reduce(function (a, l) { return a + l.b; }, 0);
+    if (!start) return { cleared: true, months: 0, years: 0, interest: 0, remaining: 0 };
+    ls.sort(function (a, b) { return b.r - a.r; });
+    var extra = (extraPerYear || 0) / 12, interest = 0, month = 0, left = start;
+    while (month < maxYears * 12 && left > 0.5) {
+      month++;
+      var spare = extra;
+      ls.forEach(function (l) {
+        if (l.b <= 0) { spare += l.pay; return; }
+        var int = l.b * l.r;
+        interest += int;
+        if (l.pay > 0) l.b -= Math.max(0, Math.min(l.pay - int, l.b));
+      });
+      ls.forEach(function (l) {
+        if (spare <= 0 || l.b <= 0) return;
+        var put = Math.min(spare, l.b);
+        l.b -= put; spare -= put;
+      });
+      left = ls.reduce(function (a, l) { return a + Math.max(0, l.b); }, 0);
+    }
+    return { cleared: left <= 0.5, months: month, years: month / 12, interest: interest, remaining: Math.max(0, left) };
+  }
+
+  /* only a residential property can be the owner's home */
+  function isHome(p) { return p.usage === "home" && p.property_type !== "commercial"; }
+
   function sum(list, key) { return list.reduce(function (a, x) { return a + (x[key] || 0); }, 0); }
 
   function build(props, settings, today) {
@@ -145,6 +248,7 @@ var pcPortfolio = (function () {
     var metrics = all.filter(function (m) { return !m.sold; });
     var heldProps = (props || []).filter(function (p) { return !p.is_sold; });
 
+    /* your home is exempt from land tax, so it never joins a land tax group */
     var landTax = null;
     if (typeof pcTax !== "undefined") {
       landTax = pcTax.landTaxPortfolio(metrics.map(function (m, i) {
@@ -152,7 +256,7 @@ var pcPortfolio = (function () {
           id: m.id, name: m.name, state: m.state, owner: m.owner,
           landValue: pos(heldProps[i].land_value) || 0, waMetro: !!heldProps[i].wa_metro, entity: heldProps[i].holding_entity || ""
         };
-      }), {});
+      }).filter(function (x, i) { return !metrics[i].home; }), {});
       landTax.groups.forEach(function (g) {
         g.properties.forEach(function (gp) {
           metrics.forEach(function (m) { if (m.id === gp.id) m.landTaxShare = gp.share; });
@@ -168,10 +272,21 @@ var pcPortfolio = (function () {
 
     var withValue = metrics.filter(function (m) { return m.value != null; });
     var counted = metrics.filter(function (m) { return m.value != null && m.loan != null; });
+    /* what you own counts your home; everything about income counts only
+       the investments */
+    var invested = counted.filter(function (m) { return !m.home; });
+    var homes = counted.filter(function (m) { return m.home; });
     /* cash flow is only counted for properties whose balance-sheet figures
        are counted too, so the two halves of the portfolio always describe
        the same set of properties */
-    var flowed = counted.filter(function (m) { return m.cashFlow != null; });
+    var flowed = invested.filter(function (m) { return m.cashFlow != null; });
+    var investValue = sum(invested, "value");
+    var investDebt = sum(invested, "loan");
+    var homeValue = sum(homes, "value");
+    var homeDebt = sum(homes, "loan");
+    var homeCosted = homes.filter(function (m) { return m.homeCost != null; });
+    var homeCost = sum(homeCosted, "homeCost");
+    var homeRepaid = homeCosted.filter(function (m) { return m.principal != null; });
 
     var value = sum(counted, "value");
     var debt = sum(counted, "loan");
@@ -181,10 +296,23 @@ var pcPortfolio = (function () {
     var interest = sum(flowed, "interest");
     var landTaxFlow = sum(flowed, "landTaxShare");
     var cashFlow = rent - costs - landTaxFlow - interest;
+    /* principal on the investment loans: cash out, not a cost */
+    var principal = sum(flowed, "principal");
+    var repayKnown = flowed.every(function (m) { return m.principal != null; });
+    flowed.forEach(function (m) { m.cashAfterRepay = m.principal != null ? m.cashFlow - m.principal : null; });
+    /* every loan with a balance and a rate, for the debt reduction goal */
+    var loans = counted.filter(function (m) { return m.loan > 0 && m.rate != null; }).map(function (m) {
+      return { id: m.id, name: m.name, balance: m.loan, ratePct: m.rate, monthly: m.loanType === "pi" && m.yearsLeft != null ? m.monthly : 0, pi: m.loanType === "pi" && m.yearsLeft != null, principal: m.principal || 0 };
+    });
+    var piInvest = flowed.filter(function (m) { return m.loanType === "pi" && m.yearsLeft != null && m.loan > 0; });
 
     var geared = flowed.filter(function (m) { return m.loan > 0 && m.rate != null; });
     var gearedDebt = sum(geared, "loan");
     var blendedRate = gearedDebt > 0 ? sum(geared, "interest") / gearedDebt : null;
+    /* every loan with a rate, your home's included (for paying debt down) */
+    var allGeared = counted.filter(function (m) { return m.loan > 0 && m.rate != null; });
+    var allGearedDebt = sum(allGeared, "loan");
+    var allBlendedRate = allGearedDebt > 0 ? sum(allGeared, "interest") / allGearedDebt : null;
 
     var sold = metrics.filter(function (m) { return m.sale.cashIfSold != null; });
     var cgtItems = metrics.filter(function (m) { return m.sale.cgt; }).map(function (m) { return m.sale.cgt; });
@@ -195,7 +323,7 @@ var pcPortfolio = (function () {
     var soldProps = all.filter(function (m) { return m.sold; });
     var realised = { count: soldProps.length, byYear: {}, years: [] };
     soldProps.forEach(function (m) {
-      var fy = financialYear(m.sale.cgt && m.sale.cgt.saleDate);
+      var fy = financialYear((m.sale.cgt && m.sale.cgt.saleDate) || m.sale.saleDate);
       if (!realised.byYear[fy]) { realised.byYear[fy] = { fy: fy, gain: 0, tax: 0, needsRate: false, props: [] }; realised.years.push(fy); }
       var y = realised.byYear[fy];
       y.props.push(m);
@@ -216,7 +344,30 @@ var pcPortfolio = (function () {
       usable80: Math.max(0, value * 0.80 - debt),
       cashFlowCount: flowed.length,
       flowDebt: sum(flowed, "loan"),
-      complete: counted.length > 0 && flowed.length === counted.length,
+      complete: invested.length > 0 && flowed.length === invested.length,
+      invest: {
+        count: invested.length, value: investValue, debt: investDebt, equity: investValue - investDebt,
+        lvr: investValue > 0 ? investDebt / investValue * 100 : null
+      },
+      home: {
+        count: homes.length, value: homeValue, debt: homeDebt, equity: homeValue - homeDebt,
+        costed: homeCosted.length,
+        runningCosts: homeCosted.reduce(function (a, m) { return a + (m.runningCosts || 0); }, 0),
+        interest: sum(homeCosted, "interest"),
+        cost: homeCost, costWeekly: homeCost / 52,
+        anyPI: homeRepaid.some(function (m) { return m.loanType === "pi"; }),
+        repayKnown: homeRepaid.length === homeCosted.length,
+        principal: sum(homeRepaid, "principal"),
+        cashOut: homeCost + sum(homeRepaid, "principal"),
+        cashOutWeekly: (homeCost + sum(homeRepaid, "principal")) / 52
+      },
+      principal: principal, repayKnown: repayKnown,
+      anyPI: flowed.some(function (m) { return m.loanType === "pi"; }),
+      cashFlowAfterRepay: cashFlow - principal, cashFlowAfterRepayWeekly: (cashFlow - principal) / 52,
+      loans: loans,
+      piDebt: sum(piInvest, "loan"),
+      piMonthly: sum(piInvest, "monthly"),
+      allBlendedRate: allBlendedRate,
       rent: rent, runningCosts: costs, interest: interest, landTaxFlow: landTaxFlow,
       soldProperties: soldProps.length,
       cashFlow: cashFlow, cashFlowWeekly: cashFlow / 52,
@@ -228,7 +379,7 @@ var pcPortfolio = (function () {
       cgtNeedsRate: cgtTotals ? cgtTotals.needsRate : false,
       soldCount: sold.length,
       cashIfSold: sold.reduce(function (a, m) { return a + m.sale.cashIfSold; }, 0),
-      grossYield: value > 0 && flowed.length === counted.length && rent > 0 ? rent / value * 100 : null,
+      grossYield: investValue > 0 && flowed.length === invested.length && rent > 0 ? rent / investValue * 100 : null,
       /* commercial rent is entered net of outgoings, so its yield is a net yield */
       yieldKind: flowed.length && flowed.every(function (m) { return m.type === "commercial"; }) ? "net"
         : (flowed.some(function (m) { return m.type === "commercial"; }) ? "mixed" : "gross")
@@ -238,16 +389,18 @@ var pcPortfolio = (function () {
     var missing = {
       value: names(metrics.filter(function (m) { return m.value == null; })),
       loan: names(metrics.filter(function (m) { return m.value != null && m.loan == null; })),
-      rent: names(metrics.filter(function (m) { return m.rent == null; })),
-      rate: names(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
+      rent: names(metrics.filter(function (m) { return !m.home && m.rent == null; })),
+      rate: names(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; })),
+      term: names(metrics.filter(function (m) { return m.termMissing; }))
     };
     /* the same lists as {id, name} so each can link to the field to fill in */
     var refs = function (list) { return list.map(function (m) { return { id: m.id, name: m.name }; }); };
     var missingRefs = {
       value: refs(metrics.filter(function (m) { return m.value == null; })),
       loan: refs(metrics.filter(function (m) { return m.value != null && m.loan == null; })),
-      rent: refs(metrics.filter(function (m) { return m.rent == null; })),
-      rate: refs(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
+      rent: refs(metrics.filter(function (m) { return !m.home && m.rent == null; })),
+      rate: refs(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; })),
+      term: refs(metrics.filter(function (m) { return m.termMissing; }))
     };
 
     return { props: all, totals: totals, missing: missing, missingRefs: missingRefs, landTax: landTax, cgt: cgtTotals, realised: realised, summary: toSummary(totals) };
@@ -275,11 +428,22 @@ var pcPortfolio = (function () {
       grossRentalIncome: Math.round(t.rent),
       blendedRate: t.blendedRate,
       portfolioLvr: t.lvr != null ? Math.round(t.lvr * 10) / 10 : null,
+      /* the investments on their own (what an ROI projection should start
+         from) and your home on its own */
+      investmentValue: Math.round(t.invest ? t.invest.value : t.value),
+      investmentDebt: Math.round(t.invest ? t.invest.debt : t.debt),
+      homeValue: t.home ? Math.round(t.home.value) : 0,
+      homeDebt: t.home ? Math.round(t.home.debt) : 0,
+      homeCostAnnual: t.home ? Math.round(t.home.cost) : 0,
+      /* the P&I investment loans, so a projection can pay them down on schedule */
+      investPiDebt: Math.round(t.piDebt || 0),
+      investPiMonthly: Math.round((t.piMonthly || 0) * 100) / 100,
+      principalRepaid: Math.round(t.principal || 0),
       annualSurplus: Math.round(t.cashFlow),
       weeklySurplus: Math.round(t.cashFlowWeekly),
       propertyCount: t.counted
     };
   }
 
-  return { build: build, propertyMetrics: propertyMetrics, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary, financialYear: financialYear };
+  return { build: build, propertyMetrics: propertyMetrics, isHome: isHome, monthlyRepayment: monthlyRepayment, debtPayoff: debtPayoff, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary, financialYear: financialYear };
 })();
