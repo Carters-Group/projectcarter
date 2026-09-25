@@ -332,7 +332,7 @@
               <button type="button" class="btn btn-accent btn-block" id="portfolioRoiBtn">Generate portfolio ROI</button>
               <p class="acct-msg" id="portfolioRoiMsg" hidden></p>
               <div id="portfolioRoiResult" hidden>
-                <div class="acct-overview acct-overview--modes" id="portfolioRoiStats"></div>
+                <div class="acct-overview acct-overview--modes acct-overview--roi" id="portfolioRoiStats"></div>
                 <div id="portfolioRoiChart" class="acct-chart-wrap"></div>
                 <p class="acct-calc-links"><a id="portfolioRoiOpenLink" href="#">Open and fine-tune in the ROI calculator</a></p>
               </div>
@@ -3900,7 +3900,18 @@
       var innerW = w - padL - padR, innerH = h - padT - padB;
       var maxV = 0;
       rows.forEach(function (r) { maxV = Math.max(maxV, r.value, r.equity, r.balance); });
-      maxV = maxV > 0 ? maxV * 1.08 : 1;
+      /* round the top of the axis up to a tidy step (1, 2, 2.5 or 5 x 10^n) so the gridlines read as clean figures */
+      var gridN = 4;
+      var rawStep = maxV > 0 ? maxV / gridN : 1;
+      var mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+      var step = [1, 2, 2.5, 5, 10].map(function (f) { return f * mag; }).filter(function (s) { return s >= rawStep; })[0];
+      maxV = step * gridN;
+      function axisMoney(v) {
+        if (v === 0) return "$0";
+        if (v >= 1e6) return "$" + String(Math.round(v / 1e6 * 100) / 100) + "M";
+        if (v >= 1e3) return "$" + String(Math.round(v / 1e3 * 10) / 10) + "k";
+        return "$" + Math.round(v);
+      }
       var n = rows.length - 1;
       function x(i) { return padL + (n > 0 ? (i / n) * innerW : 0); }
       function y(v) { return padT + innerH - (v / maxV) * innerH; }
@@ -3911,15 +3922,19 @@
         }).join(" ");
       }
 
-      var gridN = 4, gridLines = "", gridLabels = "";
+      var gridLines = "", gridLabels = "";
       for (var g = 0; g <= gridN; g++) {
-        var gv = maxV * g / gridN;
+        var gv = step * g;
         var gy = y(gv);
         gridLines += '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (w - padR) + '" y2="' + gy.toFixed(1) + '" class="acct-chart__grid" />';
-        gridLabels += '<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" class="acct-chart__axis" text-anchor="end">' + fmtMoney(gv) + '</text>';
+        gridLabels += '<text x="' + (padL - 8) + '" y="' + (gy + 4).toFixed(1) + '" class="acct-chart__axis" text-anchor="end">' + axisMoney(gv) + '</text>';
       }
+      /* at most about 8 year labels (every 1, 2, 5 or 10 years), always ending on the last year */
+      var every = [1, 2, 5, 10].filter(function (k) { return n / k <= 8; })[0] || Math.ceil(n / 8);
       var xLabels = rows.map(function (r, i) {
-        return '<text x="' + x(i).toFixed(1) + '" y="' + (h - 8) + '" class="acct-chart__axis" text-anchor="middle">' + (r.year === 0 ? "Now" : "Yr " + r.year) + '</text>';
+        var show = i === 0 || i === n || (i % every === 0 && n - i >= every * 0.6);
+        if (!show) return "";
+        return '<text x="' + x(i).toFixed(1) + '" y="' + (h - 8) + '" class="acct-chart__axis" text-anchor="' + (i === n && n > 0 ? "end" : (i === 0 ? "start" : "middle")) + '">' + (r.year === 0 ? "Now" : "Yr " + r.year) + '</text>';
       }).join("");
 
       host.innerHTML =
@@ -4014,15 +4029,20 @@
         setMsg(roiMsg, "Saved as “" + title + "”.", "ok");
         var plan = buildPortfolioPlan(s, years, capGrowthPct, rentGrowthPct);
         var statsEl = document.getElementById("portfolioRoiStats");
-        statsEl.innerHTML =
-          '<div class="acct-overview__stat"><dt>Combined value now</dt><dd>' + fmtMoney(s.portfolioValue) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Projected value, Yr ' + years + '</dt><dd>' + fmtMoney(plan.value) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Equity now</dt><dd>' + fmtMoney(plan.equityNow) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Projected equity, Yr ' + years + '</dt><dd>' + fmtMoney(plan.equity) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Debt paid down over ' + years + ' yr' + (years > 1 ? "s" : "") + '</dt><dd>' + fmtMoney(plan.debtReductionAmt) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Portfolio LVR, now &rarr; Yr ' + years + '</dt><dd>' + fmtPct(plan.lvrNow * 100) + ' &rarr; ' + fmtPct(plan.lvrThen * 100) + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>Avg. cash-on-cash return</dt><dd>' + (plan.cashOnCash != null ? fmtPct(plan.cashOnCash * 100) + "/yr" : "—") + '</dd></div>' +
-          '<div class="acct-overview__stat"><dt>IRR (compound)</dt><dd>' + (plan.irr != null ? fmtPct(plan.irr * 100) : "—") + '</dd></div>';
+        /* two even rows of four: where it is today and in year N, then debt and returns */
+        var yr = "Yr " + years;
+        statsEl.innerHTML = [
+          ["Value today", fmtMoney(s.portfolioValue)],
+          ["Value in " + yr, fmtMoney(plan.value)],
+          ["Equity today", fmtMoney(plan.equityNow)],
+          ["Equity in " + yr, fmtMoney(plan.equity)],
+          ["Debt paid off by " + yr, fmtMoney(plan.debtReductionAmt)],
+          ["LVR, today \u2192 " + yr, fmtPct(plan.lvrNow * 100) + " \u2192 " + fmtPct(plan.lvrThen * 100)],
+          ["Cash-on-cash, avg / yr", plan.cashOnCash != null ? fmtPct(plan.cashOnCash * 100) : "—"],
+          ["IRR", plan.irr != null ? fmtPct(plan.irr * 100) : "—"]
+        ].map(function (r) {
+          return '<div class="acct-overview__stat"><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
+        }).join("");
         renderRoiGrowthChart(plan.rows);
         document.getElementById("portfolioRoiOpenLink").href = "return-on-investment-calculator?report=" + encodeURIComponent(res.data.id);
         show(resultEl);
