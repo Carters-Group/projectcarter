@@ -592,6 +592,9 @@
       if (has("is_sold")) row.is_sold = !!property.is_sold;
       if (has("usage")) row.usage = property.usage === "home" && row.property_type !== "commercial" ? "home" : "investment";
       if (has("moved_out_date")) row.moved_out_date = day(property.moved_out_date);
+      if (has("loan_type")) row.loan_type = property.loan_type === "pi" ? "pi" : "io";
+      if (has("loan_years_left")) { var yl = money(property.loan_years_left); row.loan_years_left = yl != null && yl > 0 && yl <= 40 ? yl : null; }
+      if (has("io_expiry_date")) row.io_expiry_date = day(property.io_expiry_date);
       function write(r) {
         return property.id
           ? client.from("properties").update(r).eq("id", property.id).eq("user_id", currentUser.id).select().maybeSingle()
@@ -599,7 +602,7 @@
       }
       /* these columns come from later database updates; if one has not been run
          yet, save everything else and say so instead of failing the whole save */
-      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status", usage: "whether it is your home", moved_out_date: "the moved-out date" };
+      var LATER_COLS = { holding_entity: "the entity name", is_sold: "the sold status", usage: "whether it is your home", moved_out_date: "the moved-out date", loan_type: "the loan type", loan_years_left: "the years left on the loan", io_expiry_date: "the interest-only end date" };
       var dropped = [];
       function attempt(r) {
         return write(r).then(function (res) {

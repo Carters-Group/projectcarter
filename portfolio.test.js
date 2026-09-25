@@ -275,3 +275,80 @@ test("a former home keeps its moved-out date for the capital gains note", functi
   var rented = Object.assign({}, houseA, { moved_out_date: "2024-01-15" });
   assert.equal(P.propertyMetrics(rented, settings, TODAY).movedOut, "2024-01-15");
 });
+
+/* ---- loan structure: interest only vs principal and interest ------------- */
+test("P&I repayment matches the standard formula ($500k, 6%, 30 years)", function () {
+  near(P.monthlyRepayment(500000, 6, 30), 2997.75, 0.01);
+  near(P.monthlyRepayment(120000, 0, 10), 1000, 0.0001);
+});
+
+test("a P&I loan: first-year interest and principal, cost vs cash out", function () {
+  var pi = Object.assign({}, myHome, { loan_balance: 500000, loan_type: "pi", loan_years_left: 30 });
+  var m = P.propertyMetrics(pi, settings, TODAY);
+  near(m.monthly, 2997.75, 0.01);
+  near(m.interest + m.principal, 2997.75 * 12, 0.1);
+  near(m.principal, 6140, 15);
+  assert.ok(m.interest < 30000);
+  /* cost to own is running costs + interest; cash out adds the principal */
+  near(m.homeCost, 7000 + m.interest, 0.001);
+  near(m.homeCashOut, m.homeCost + m.principal, 0.001);
+});
+
+test("interest only by default: no principal, repayment is the interest", function () {
+  var m = P.propertyMetrics(houseA, settings, TODAY);
+  assert.equal(m.loanType, "io");
+  assert.equal(m.principal, 0);
+  assert.equal(m.repayment, 30000);
+  assert.equal(m.interest, 30000);
+});
+
+test("P&I with no years left entered is flagged, not guessed", function () {
+  var shop = Object.assign({}, houseA, { id: "s", name: "Shop", property_type: "commercial", loan_type: "pi" });
+  var m = P.propertyMetrics(shop, settings, TODAY);
+  assert.equal(m.termMissing, true);
+  assert.equal(m.principal, null);
+  var r = P.build([shop], settings, TODAY);
+  assert.deepEqual(r.missing.term, ["Shop"]);
+  assert.equal(r.totals.repayKnown, false);
+});
+
+test("investment cash flow before tax ignores principal; after repayments takes it off", function () {
+  var pi = Object.assign({}, houseA, { loan_type: "pi", loan_years_left: 25 });
+  var r = P.build([pi], settings, TODAY);
+  var m = r.props[0], t = r.totals;
+  near(t.cashFlow, 40000 - 8000 - m.interest - (m.landTaxShare || 0), 0.01);
+  near(t.cashFlowAfterRepay, t.cashFlow - m.principal, 0.01);
+  assert.equal(t.anyPI, true);
+  assert.equal(r.summary.investPiDebt, 500000);
+  near(r.summary.investPiMonthly, P.monthlyRepayment(500000, 6, 25), 0.01);
+});
+
+test("the home's principal is kept apart from the investment figures", function () {
+  var home = Object.assign({}, myHome, { loan_type: "pi", loan_years_left: 30 });
+  var r = P.build([home, houseA], settings, TODAY);
+  assert.equal(r.totals.principal, 0);
+  assert.ok(r.totals.home.principal > 0);
+  near(r.totals.home.cashOut, r.totals.home.cost + r.totals.home.principal, 0.001);
+  assert.equal(r.totals.loans.length, 2);
+});
+
+test("debt payoff: P&I clears on schedule, interest only never clears alone", function () {
+  var pi = P.debtPayoff([{ balance: 500000, ratePct: 6, monthly: P.monthlyRepayment(500000, 6, 30) }], 0);
+  assert.equal(pi.cleared, true);
+  near(pi.years, 30, 0.01);
+  near(pi.interest, 2997.75 * 360 - 500000, 5);
+  var io = P.debtPayoff([{ balance: 500000, ratePct: 6, monthly: 0 }], 0);
+  assert.equal(io.cleared, false);
+  var extra = P.debtPayoff([{ balance: 500000, ratePct: 6, monthly: P.monthlyRepayment(500000, 6, 30) }], 12000);
+  assert.ok(extra.cleared && extra.years < 20 && extra.interest < pi.interest);
+  assert.equal(P.debtPayoff([], 5000).cleared, true);
+});
+
+test("debt payoff rolls a cleared loan's repayment onto the next", function () {
+  var small = { balance: 20000, ratePct: 5, monthly: P.monthlyRepayment(20000, 5, 2) };
+  var big = { balance: 300000, ratePct: 6, monthly: 0 };
+  var r = P.debtPayoff([small, big], 12000);
+  assert.equal(r.cleared, true);
+  var noRoll = P.debtPayoff([big], 12000);
+  assert.ok(r.years < noRoll.years + 2);
+});

@@ -20,6 +20,13 @@
    figures (rent, yield, cash flow, land tax, capital gains tax). Its running
    costs and loan interest are reported on their own as the cost of owning
    your home.
+
+   Each loan is interest only (the default) or principal and interest with
+   a number of years left to run. On a P&I loan the first year's interest is
+   what the repayments actually charge as the balance falls, and the
+   principal repaid is shown on its own: it is not a cost (it becomes
+   equity), but it is cash leaving each month, so it comes off "after
+   repayments" and "cash out" figures and never off cash flow before tax.
    ========================================================================= */
 "use strict";
 
@@ -106,10 +113,30 @@ var pcPortfolio = (function () {
     };
 
     m.interest = loan != null && (loan === 0 || rate != null) ? loan * (rate || 0) / 100 : null;
+    /* the loan's structure: repayments, and the principal they pay off */
+    m.loanType = p.loan_type === "pi" ? "pi" : "io";
+    m.yearsLeft = m.loanType === "pi" ? pos(p.loan_years_left) : null;
+    m.ioExpiry = m.loanType === "io" && loan > 0 ? (p.io_expiry_date || null) : null;
+    m.termMissing = m.loanType === "pi" && loan > 0 && m.yearsLeft == null;
+    m.monthly = null; m.principal = null; m.repayment = null;
+    if (m.interest != null) {
+      if (m.loanType === "pi" && loan > 0 && m.yearsLeft != null) {
+        var fy = firstYear(loan, rate, m.yearsLeft);
+        m.monthly = fy.monthly;
+        m.interest = fy.interest;
+        m.principal = fy.principal;
+      } else if (!m.termMissing) {
+        m.monthly = m.interest / 12;
+        m.principal = 0;
+      }
+      if (m.principal != null) m.repayment = m.interest + m.principal;
+    }
     m.cashFlow = m.rent != null && m.interest != null ? m.rent - (costs || 0) - m.interest : null;
     /* your home earns nothing, so what it costs to hold is its own figure:
        running costs plus loan interest, per year */
     m.homeCost = home && m.interest != null ? (costs || 0) + m.interest : null;
+    /* and what actually leaves your account for it: that plus principal */
+    m.homeCashOut = m.homeCost != null && m.principal != null ? m.homeCost + m.principal : null;
 
     /* all-in cost: price plus buying costs (stamp duty, legals) and
        improvements, the same things that make up a cost base */
@@ -153,6 +180,57 @@ var pcPortfolio = (function () {
     }
     m.sale = sale;
     return m;
+  }
+
+  /* the monthly repayment on a principal and interest loan */
+  function monthlyRepayment(balance, ratePct, years) {
+    var n = Math.round(years * 12);
+    if (!(balance > 0) || !(n > 0)) return 0;
+    var r = (ratePct || 0) / 100 / 12;
+    return r === 0 ? balance / n : balance * r / (1 - Math.pow(1 + r, -n));
+  }
+
+  /* the next 12 months of a P&I loan: interest charged and principal repaid */
+  function firstYear(balance, ratePct, years) {
+    var pay = monthlyRepayment(balance, ratePct, years), r = (ratePct || 0) / 100 / 12;
+    var b = balance, interest = 0, principal = 0;
+    for (var i = 0; i < 12 && b > 0; i++) {
+      var int = b * r, prin = Math.min(pay - int, b);
+      interest += int; principal += prin; b -= prin;
+    }
+    return { monthly: pay, interest: interest, principal: principal };
+  }
+
+  /* Month by month until every loan is cleared (or maxYears): interest on
+     each balance, scheduled principal on P&I loans, then the extra (plus the
+     repayment of any loan already cleared) onto the highest-rate balance.
+     loans: [{ balance, ratePct, monthly }] (monthly 0 = interest only). */
+  function debtPayoff(loans, extraPerYear, maxYears) {
+    maxYears = maxYears || 60;
+    var ls = (loans || []).filter(function (l) { return l.balance > 0; }).map(function (l) {
+      return { b: l.balance, r: (l.ratePct || 0) / 100 / 12, pay: l.monthly || 0 };
+    });
+    var start = ls.reduce(function (a, l) { return a + l.b; }, 0);
+    if (!start) return { cleared: true, months: 0, years: 0, interest: 0, remaining: 0 };
+    ls.sort(function (a, b) { return b.r - a.r; });
+    var extra = (extraPerYear || 0) / 12, interest = 0, month = 0, left = start;
+    while (month < maxYears * 12 && left > 0.5) {
+      month++;
+      var spare = extra;
+      ls.forEach(function (l) {
+        if (l.b <= 0) { spare += l.pay; return; }
+        var int = l.b * l.r;
+        interest += int;
+        if (l.pay > 0) l.b -= Math.max(0, Math.min(l.pay - int, l.b));
+      });
+      ls.forEach(function (l) {
+        if (spare <= 0 || l.b <= 0) return;
+        var put = Math.min(spare, l.b);
+        l.b -= put; spare -= put;
+      });
+      left = ls.reduce(function (a, l) { return a + Math.max(0, l.b); }, 0);
+    }
+    return { cleared: left <= 0.5, months: month, years: month / 12, interest: interest, remaining: Math.max(0, left) };
   }
 
   /* only a residential property can be the owner's home */
@@ -208,6 +286,7 @@ var pcPortfolio = (function () {
     var homeDebt = sum(homes, "loan");
     var homeCosted = homes.filter(function (m) { return m.homeCost != null; });
     var homeCost = sum(homeCosted, "homeCost");
+    var homeRepaid = homeCosted.filter(function (m) { return m.principal != null; });
 
     var value = sum(counted, "value");
     var debt = sum(counted, "loan");
@@ -217,6 +296,15 @@ var pcPortfolio = (function () {
     var interest = sum(flowed, "interest");
     var landTaxFlow = sum(flowed, "landTaxShare");
     var cashFlow = rent - costs - landTaxFlow - interest;
+    /* principal on the investment loans: cash out, not a cost */
+    var principal = sum(flowed, "principal");
+    var repayKnown = flowed.every(function (m) { return m.principal != null; });
+    flowed.forEach(function (m) { m.cashAfterRepay = m.principal != null ? m.cashFlow - m.principal : null; });
+    /* every loan with a balance and a rate, for the debt reduction goal */
+    var loans = counted.filter(function (m) { return m.loan > 0 && m.rate != null; }).map(function (m) {
+      return { id: m.id, name: m.name, balance: m.loan, ratePct: m.rate, monthly: m.loanType === "pi" && m.yearsLeft != null ? m.monthly : 0, pi: m.loanType === "pi" && m.yearsLeft != null, principal: m.principal || 0 };
+    });
+    var piInvest = flowed.filter(function (m) { return m.loanType === "pi" && m.yearsLeft != null && m.loan > 0; });
 
     var geared = flowed.filter(function (m) { return m.loan > 0 && m.rate != null; });
     var gearedDebt = sum(geared, "loan");
@@ -266,8 +354,19 @@ var pcPortfolio = (function () {
         costed: homeCosted.length,
         runningCosts: homeCosted.reduce(function (a, m) { return a + (m.runningCosts || 0); }, 0),
         interest: sum(homeCosted, "interest"),
-        cost: homeCost, costWeekly: homeCost / 52
+        cost: homeCost, costWeekly: homeCost / 52,
+        anyPI: homeRepaid.some(function (m) { return m.loanType === "pi"; }),
+        repayKnown: homeRepaid.length === homeCosted.length,
+        principal: sum(homeRepaid, "principal"),
+        cashOut: homeCost + sum(homeRepaid, "principal"),
+        cashOutWeekly: (homeCost + sum(homeRepaid, "principal")) / 52
       },
+      principal: principal, repayKnown: repayKnown,
+      anyPI: flowed.some(function (m) { return m.loanType === "pi"; }),
+      cashFlowAfterRepay: cashFlow - principal, cashFlowAfterRepayWeekly: (cashFlow - principal) / 52,
+      loans: loans,
+      piDebt: sum(piInvest, "loan"),
+      piMonthly: sum(piInvest, "monthly"),
       allBlendedRate: allBlendedRate,
       rent: rent, runningCosts: costs, interest: interest, landTaxFlow: landTaxFlow,
       soldProperties: soldProps.length,
@@ -291,7 +390,8 @@ var pcPortfolio = (function () {
       value: names(metrics.filter(function (m) { return m.value == null; })),
       loan: names(metrics.filter(function (m) { return m.value != null && m.loan == null; })),
       rent: names(metrics.filter(function (m) { return !m.home && m.rent == null; })),
-      rate: names(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
+      rate: names(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; })),
+      term: names(metrics.filter(function (m) { return m.termMissing; }))
     };
     /* the same lists as {id, name} so each can link to the field to fill in */
     var refs = function (list) { return list.map(function (m) { return { id: m.id, name: m.name }; }); };
@@ -299,7 +399,8 @@ var pcPortfolio = (function () {
       value: refs(metrics.filter(function (m) { return m.value == null; })),
       loan: refs(metrics.filter(function (m) { return m.value != null && m.loan == null; })),
       rent: refs(metrics.filter(function (m) { return !m.home && m.rent == null; })),
-      rate: refs(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; }))
+      rate: refs(metrics.filter(function (m) { return m.loan != null && m.loan > 0 && m.rate == null; })),
+      term: refs(metrics.filter(function (m) { return m.termMissing; }))
     };
 
     return { props: all, totals: totals, missing: missing, missingRefs: missingRefs, landTax: landTax, cgt: cgtTotals, realised: realised, summary: toSummary(totals) };
@@ -334,11 +435,15 @@ var pcPortfolio = (function () {
       homeValue: t.home ? Math.round(t.home.value) : 0,
       homeDebt: t.home ? Math.round(t.home.debt) : 0,
       homeCostAnnual: t.home ? Math.round(t.home.cost) : 0,
+      /* the P&I investment loans, so a projection can pay them down on schedule */
+      investPiDebt: Math.round(t.piDebt || 0),
+      investPiMonthly: Math.round((t.piMonthly || 0) * 100) / 100,
+      principalRepaid: Math.round(t.principal || 0),
       annualSurplus: Math.round(t.cashFlow),
       weeklySurplus: Math.round(t.cashFlowWeekly),
       propertyCount: t.counted
     };
   }
 
-  return { build: build, propertyMetrics: propertyMetrics, isHome: isHome, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary, financialYear: financialYear };
+  return { build: build, propertyMetrics: propertyMetrics, isHome: isHome, monthlyRepayment: monthlyRepayment, debtPayoff: debtPayoff, cgtInputFor: cgtInputFor, cgtSettingsFrom: cgtSettingsFrom, toSummary: toSummary, financialYear: financialYear };
 })();

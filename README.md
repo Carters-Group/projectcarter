@@ -169,6 +169,30 @@ counts as a property for the plan limit. The Portfolio Review calculator's
 costs give a separate cost to own, plus "after-tax cash flow, less your home"
 per week, and a card imported into the register arrives as My home.
 
+**Loan repayments.** Every property's loan is **Interest only** (the default,
+`properties.loan_type` = `'io'`) or **Principal & interest** (`'pi'`) with
+`loan_years_left`. Choosing P&I on a residential property fills in 30 years;
+commercial is left blank for the owner to set (terms vary, often 5, 10 or 15
+years, offered as quick picks), and a P&I loan with no term is listed under "To
+complete your picture" rather than guessed. Interest-only loans can carry an
+optional `io_expiry_date` (shown on the property strip and in the repayment
+note). `portfolio.js` works out the monthly repayment (standard amortisation)
+and the next 12 months' interest and principal; on P&I loans that first-year
+interest replaces loan x rate. Principal is **never a cost**: cash flow before
+tax, yields, tax and break-even rent are unchanged by it. It shows separately as
+"principal repaid" and comes off an "after repayments" figure (investments) and
+"cash out" (your home: cost to own + principal). The **debt reduction goal** runs
+every loan month by month (`pcPortfolio.debtPayoff`): P&I loans reduce on
+schedule, interest-only loans only with extra, extra goes to the highest rate
+first and a cleared loan's repayment rolls onto the next; it shows debt-free on
+current repayments, with the extra, and the interest saved. The portfolio ROI
+projection pays P&I investment loans down on schedule (one pooled amortising
+balance, `summary.investPiDebt` / `investPiMonthly`), then 50% of any surplus
+after repayments, interest-only debt first. The Portfolio Review calculator has
+the same Repayments choice on every card (home and investment), with repayments
+per month, "after-tax cash flow after repayments" and, for the home, principal
+repaid and cash out.
+
 `portfolio.js` (`window.pcPortfolio`, pure and unit-tested in
 `portfolio.test.js`) derives every figure from those fields, so no number is
 ever asked for twice and none can disagree: per property, equity, LVR, useable

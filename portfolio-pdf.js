@@ -186,6 +186,10 @@ var pcPortfolioPdf = (function () {
         row("Loan interest / yr", money(home.interest));
         row("Cost to own / yr", money(home.cost), true);
         row("Cost to own / week", money(home.costWeekly));
+        if (home.anyPI && home.repayKnown) {
+          row("Principal repaid / yr (builds equity)", money(home.principal));
+          row("Cash out / week", money(home.cashOutWeekly), true);
+        }
       }
       y += 6;
     }
@@ -200,6 +204,10 @@ var pcPortfolioPdf = (function () {
       row("Net rental income", money(t.rent - t.runningCosts - (t.landTaxFlow || 0)), true);
       row("Less loan interest", money(-t.interest));
       row("Cash flow before income tax", money(t.cashFlow), true);
+      if (t.anyPI && t.repayKnown) {
+        row("Less principal repaid (builds equity)", money(-t.principal));
+        row("Cash flow after loan repayments", money(t.cashFlowAfterRepay), true);
+      }
       if (t.yieldKind === "mixed") para("Commercial rent is entered net of outgoings, so the yield mixes net and gross figures.", 8, 130);
       y += 6;
     }
@@ -228,7 +236,7 @@ var pcPortfolioPdf = (function () {
     var pj = opts.projection;
     if (pj && pj.build && t.complete && P.summary.portfolioValue > 0) {
       var plan = pj.build(P.summary, pj.years, pj.capGrowthPct, pj.rentGrowthPct);
-      section("Where it is heading", "Over " + pj.years + " year" + (pj.years > 1 ? "s" : "") + " at " + pj.capGrowthPct + "% capital growth and " + pj.rentGrowthPct + "% rental growth a year, with half of any surplus after interest paying down debt. Change these under Total Portfolio ROI on your account.");
+      section("Where it is heading", "Over " + pj.years + " year" + (pj.years > 1 ? "s" : "") + " at " + pj.capGrowthPct + "% capital growth and " + pj.rentGrowthPct + "% rental growth a year. Principal and interest loans reduce on their scheduled repayments, and half of any surplus after repayments pays down debt as well. Change these under Total Portfolio ROI on your account.");
       tiles([["Value, year " + pj.years, money(plan.value)], ["Equity, year " + pj.years, money(plan.equity)], ["IRR", plan.irr != null ? pct(plan.irr * 100) : "-"]]);
       var step = pj.years > 10 ? 5 : (pj.years > 5 ? 2 : 1);
       var prow = plan.rows.filter(function (r) { return r.year === 0 || r.year % step === 0 || r.year === pj.years; }).map(function (r) {
@@ -293,7 +301,7 @@ var pcPortfolioPdf = (function () {
     }
 
     /* ---- 8. leases ------------------------------------------------------ */
-    var heldProps = props.filter(function (p) { return !p.is_sold; });
+    var heldProps = props.filter(function (p) { return !p.is_sold && !(p.usage === "home" && p.property_type !== "commercial"); });
     var leaseCount = heldProps.reduce(function (a, p) { return a + (p.leases || []).length; }, 0);
     if (leaseCount) {
       section("Leases and key dates");
@@ -340,6 +348,7 @@ var pcPortfolioPdf = (function () {
     if (ms.loan.length) miss.push("Loan balance: " + ms.loan.join(", "));
     if (ms.rent.length) miss.push("A lease with rent: " + ms.rent.join(", "));
     if (ms.rate.length) miss.push("Interest rate: " + ms.rate.join(", "));
+    if (ms.term && ms.term.length) miss.push("Years left on a principal and interest loan: " + ms.term.join(", "));
     if (miss.length) {
       section("To complete your picture", "These properties are left out of some figures above until the detail is added.");
       miss.forEach(function (m) { para("- " + m, 9, 70); });
