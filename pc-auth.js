@@ -409,10 +409,28 @@
        never set one) add or change their password for next time - also
        flips profiles.has_password so the "set a password" nudge stops
        showing once they've done this */
+    /* record that this account has a password (so the "set a password"
+       nudge stops for good, on every device) without changing it */
+    markHasPassword: function () {
+      var bad = requireClient();
+      if (bad) return Promise.resolve(bad);
+      if (currentProfile) currentProfile.has_password = true;
+      var ignore = function () { return null; };
+      return Promise.all([
+        client.auth.updateUser({ data: { has_password: true } }).then(ignore, ignore),
+        client.from("profiles").update({ has_password: true }).eq("id", currentUser.id).then(ignore, ignore)
+      ]).then(function () { return { error: null }; });
+    },
+
     setPassword: function (newPassword) {
       var bad = requireClient();
       if (bad) return Promise.resolve(bad);
       return client.auth.updateUser({ password: newPassword, data: { has_password: true } }).then(function (res) {
+        /* Supabase refuses to "change" a password to the one already set.
+           That proves there is one, so it is a success, not an error. */
+        if (res.error && (res.error.code === "same_password" || /different from the old password/i.test(res.error.message || ""))) {
+          return api.markHasPassword().then(function () { return { error: null, unchanged: true }; });
+        }
         if (res.error) return { error: res.error };
         return client.from("profiles").update({ has_password: true }).eq("id", currentUser.id)
           .then(function (r2) {

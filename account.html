@@ -195,6 +195,7 @@
               <span>You're signed in via an emailed link. Set a password so you can sign in directly, without waiting on an email.</span>
             </span>
             <button type="button" class="btn btn-ghost btn-sm" id="acctPasswordNudgeGo">Set a password</button>
+            <button type="button" class="linklike" id="acctPasswordNudgeHave">I already have one</button>
             <button type="button" class="linklike" id="acctPasswordNudgeDismiss">Not now</button>
           </div>
 
@@ -4151,7 +4152,7 @@
         if (res && res.error) { setMsg(passMsg, res.error.message, "error"); return; }
         document.getElementById("profPassword").value = "";
         document.getElementById("profPasswordConfirm").value = "";
-        setMsg(passMsg, "Password updated. Use it next time you sign in.", "ok");
+        setMsg(passMsg, res.unchanged ? "That is already your password, so nothing needed changing. You're all set." : "Password updated. Use it next time you sign in.", "ok");
         var pu = window.pcAuth.user();
         if (pu) { try { window.localStorage.setItem(passwordNudgeDismissedKey(pu), "1"); } catch (e) {} }
         hide(document.getElementById("acctPasswordNudge"));
@@ -4186,6 +4187,14 @@
       var field = document.getElementById("profPassword");
       field.scrollIntoView({ behavior: "smooth", block: "center" });
       field.focus();
+    });
+    /* signed in by email link but already has a password (forgotten, or set
+       before this was tracked): record it so the nudge is gone everywhere */
+    document.getElementById("acctPasswordNudgeHave").addEventListener("click", function () {
+      var u = window.pcAuth.user();
+      if (u) { try { window.localStorage.setItem(passwordNudgeDismissedKey(u), "1"); } catch (e) {} }
+      hide(document.getElementById("acctPasswordNudge"));
+      window.pcAuth.markHasPassword();
     });
     document.getElementById("acctPasswordNudgeDismiss").addEventListener("click", function () {
       var u = window.pcAuth.user();
