@@ -12,7 +12,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Project Carter | Corporate Property Advisor, Australia-Wide" />
   <meta property="og:description" content="Advisory for property developers, value-add commercial, family offices and managed funds across Australia. There is always a solution to every property." />
-  <meta property="og:image" content="assets/og-image.svg" />
+  <meta property="og:image" content="https://www.projectcarter.com.au/assets/og-image.png" />
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 
@@ -25,19 +25,54 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    "name": "Project Carter",
-    "alternateName": "Carters Investment Group",
-    "url": "https://www.projectcarter.com.au/",
-    "logo": "https://www.projectcarter.com.au/assets/favicon.svg",
-    "image": "https://www.projectcarter.com.au/assets/og-image.svg",
-    "description": "Corporate property advisor to developers, value-add commercial owners, family offices and managed funds across Australia. Feasibility, capital structuring and delivery for deals that don't fit a template.",
-    "areaServed": "AU",
-    "founder": {
-      "@type": "Person",
-      "name": "Trent Macartney",
-      "jobTitle": "Corporate Property Advisor"
-    }
+    "@graph": [
+      {
+        "@type": "ProfessionalService",
+        "@id": "https://www.projectcarter.com.au/#organization",
+        "name": "Project Carter",
+        "alternateName": "Carters Investment Group",
+        "url": "https://www.projectcarter.com.au/",
+        "logo": "https://www.projectcarter.com.au/assets/pc-instagram-avatar.png",
+        "image": "https://www.projectcarter.com.au/assets/og-image.png",
+        "description": "Corporate property advisor to developers, value-add commercial owners, family offices and managed funds across Australia. Feasibility, capital structuring and delivery for deals that don't fit a template, plus free commercial property calculators and a property portfolio dashboard.",
+        "areaServed": {
+          "@type": "Country",
+          "name": "Australia"
+        },
+        "knowsAbout": [
+          "Property development feasibility",
+          "Commercial property investment",
+          "Commercial property lending",
+          "Property portfolio management",
+          "Net operating income",
+          "Tax depreciation",
+          "Development approval costs",
+          "Gross realisation value"
+        ],
+        "founder": {
+          "@type": "Person",
+          "name": "Trent Macartney",
+          "jobTitle": "Corporate Property Advisor",
+          "url": "https://www.projectcarter.com.au/about"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/in/trent-macartney-793a8a37b/",
+          "https://www.instagram.com/trent.macartney/",
+          "https://www.facebook.com/profile.php?id=61591797982172",
+          "https://www.tiktok.com/@trentmacartney"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.projectcarter.com.au/#website",
+        "name": "Project Carter",
+        "url": "https://www.projectcarter.com.au/",
+        "publisher": {
+          "@id": "https://www.projectcarter.com.au/#organization"
+        },
+        "inLanguage": "en-AU"
+      }
+    ]
   }
   </script>
 </head>

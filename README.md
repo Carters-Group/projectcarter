@@ -44,6 +44,7 @@ assets/images/team/             Trent portrait
 .nojekyll                       leftover GitHub Pages marker (production is Vercel; harmless if kept)
 sitemap.xml                     lists every indexable page (noindex pages excluded) for search engines
 robots.txt                      allows all crawlers, points at sitemap.xml
+llms.txt                        plain-language site summary for AI assistants (llmstxt.org format): who Project Carter is, every calculator and page with a one-line description; keep it in step with the sitemap
 ```
 
 Every link on the site opens in the same tab (no `target="_blank"`); visitors use

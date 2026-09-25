@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Portfolio Review Calculator | Project Carter" />
   <meta property="og:description" content="Add each property's value, loan, rent and costs and see the combined after-tax weekly surplus or deficit, portfolio LVR and blended yields, plus a one-page PDF." />
-  <meta property="og:image" content="assets/og-image.svg" />
+  <meta property="og:image" content="https://www.projectcarter.com.au/assets/og-image.png" />
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,6 +30,62 @@
     "url": "https://www.projectcarter.com.au/portfolio-review-calculator",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
     "publisher": { "@type": "Organization", "name": "Project Carter" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I work out the after-tax cash flow on an investment property?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Start with the rent collected, take off every running cost (management, rates, strata, land tax, insurance, maintenance, vacancy, loan fees) to get net rent, then take off loan interest to get cash flow before tax. A loss is refunded at your tax rate and a profit is taxed at it, and depreciation adds a further tax saving. What is left is your after-tax cash flow, and divided by 52 it is the weekly cost or income of holding the property."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is neutral gearing and what rent do I need to break even?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A property is neutrally geared when its after-tax result is zero: it costs you nothing to hold. Each property card shows the rent that would get it there, with everything else held the same, per week for residential and per year for commercial."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I review residential and commercial properties together?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Each property can be residential or commercial, and the review splits the portfolio by type so you can see each side's value, yield and after-tax position on its own and then combined. Commercial cards add the lease basis and building outgoings, with a tick for each outgoing recovered from the tenant."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the 2026 Budget negative gearing change affect my numbers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tick \"bought after the 2026 Federal Budget\" on a residential property and a rental loss on it no longer offsets your other income, so no refund is shown for it that year. The loss carries forward against future rental profit or the gain on sale. Commercial property is not affected. This is a modelling assumption, not tax advice."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the portfolio review include my own home?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can add your home as an owner-occupied property. It counts toward your combined value, debt and equity, which gives a truer useable equity figure, but it is left out of rent, yield and tax figures. Its own running costs are shown separately as the cost to own your home."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this portfolio review financial or tax advice?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. It is a point-in-time planning tool built from the figures you enter. It holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax. Speak to your accountant or a licensed adviser before acting on it."
+        }
+      }
+    ]
   }
   </script>
 </head>
@@ -155,6 +211,9 @@
             <div class="result-row"><dt>Cash needed to buy</dt><dd data-out="cash">&mdash;</dd></div>
             <div class="result-row is-key"><dt>After-tax cash flow (per year)</dt><dd data-out="annual">&mdash;</dd></div>
             <div class="result-row is-final"><dt>After-tax cash flow (per week)</dt><dd data-out="weekly">&mdash;</dd></div>
+            <div class="result-row" data-own-row hidden><dt>Cost to own your home (per year)</dt><dd data-out="homeCost">&mdash;</dd></div>
+            <div class="result-row" data-own-row hidden><dt>Cost to own your home (per week)</dt><dd data-out="homeCostWk">&mdash;</dd></div>
+            <div class="result-row is-key" data-own-row hidden><dt>After-tax cash flow, less your home (per week)</dt><dd data-out="afterHomeWk">&mdash;</dd></div>
 
             <div class="calc-cta">
               <p class="calc-lock-note" id="lockNote">Figures are part-hidden. Unlock the full numbers and one-page PDF below.</p>
@@ -268,10 +327,38 @@
             <li><strong>After-tax cash flow</strong> is cash flow before tax plus the tax refund and the depreciation tax saving. Divided by 52 it is the weekly figure - the real out-of-pocket cost, or income, of holding the property.</li>
             <li><strong>Break-even rent.</strong> Each card shows the rent that would bring that property's yearly after-tax result to zero, with everything else held the same - per week for residential, per year for commercial.</li>
             <li><strong>Residential vs commercial.</strong> The comparison table and the schedule subtotals split the portfolio by type so you can see each side's value, yield and after-tax position on its own, then combined.</li>
-            <li><strong>Owner-occupied (your home).</strong> Add your own home as a property type and it counts toward your combined value, debt and equity - useful for a true useable-equity figure - but it carries no rent or running-cost fields and is left out of every rent, yield, cash-flow and tax figure entirely.</li>
+            <li><strong>Owner-occupied (your home).</strong> Add your own home as a property type and it counts toward your combined value, debt and equity - useful for a true useable-equity figure, since home equity is usually what funds the next purchase. It is left out of every rent, yield, investment cash-flow and tax figure. Instead, its interest rate and running costs (rates, strata, insurance, maintenance) give a separate <strong>cost to own your home</strong>, per year and per week, and a line showing your investments' after-tax result once that cost is taken off. Buying costs (stamp duty, conveyancing) still count toward the cash needed to buy it.</li>
             <li><strong>Buying a property.</strong> Tick "being purchased" to add stamp duty (estimable by state), conveyancing and borrowing costs. These do not change the holding result; they feed "cash needed to buy" (your equity plus those costs). "Other one-off cost" and "Cost of improvements" are separate and always available: while buying, they add to that same cash-needed-to-buy figure; already own it, and they come straight off that property's equity instead.</li>
             <li><strong>The portfolio</strong> figures add up every investment property; the yields are combined rent &divide; combined investment value (your home's value is excluded from that ratio, though it is included in the portfolio value, debt and equity above it). This is a point-in-time review: it holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax.</li>
           </ul>
+        </div>
+
+        <div class="calc-faq">
+          <h2 class="calc-subhead">Common questions</h2>
+          <details>
+            <summary>How do I work out the after-tax cash flow on an investment property?</summary>
+            <p>Start with the rent collected, take off every running cost (management, rates, strata, land tax, insurance, maintenance, vacancy, loan fees) to get net rent, then take off loan interest to get cash flow before tax. A loss is refunded at your tax rate and a profit is taxed at it, and depreciation adds a further tax saving. What is left is your after-tax cash flow, and divided by 52 it is the weekly cost or income of holding the property.</p>
+          </details>
+          <details>
+            <summary>What is neutral gearing and what rent do I need to break even?</summary>
+            <p>A property is neutrally geared when its after-tax result is zero: it costs you nothing to hold. Each property card shows the rent that would get it there, with everything else held the same, per week for residential and per year for commercial.</p>
+          </details>
+          <details>
+            <summary>Can I review residential and commercial properties together?</summary>
+            <p>Yes. Each property can be residential or commercial, and the review splits the portfolio by type so you can see each side's value, yield and after-tax position on its own and then combined. Commercial cards add the lease basis and building outgoings, with a tick for each outgoing recovered from the tenant.</p>
+          </details>
+          <details>
+            <summary>How does the 2026 Budget negative gearing change affect my numbers?</summary>
+            <p>Tick "bought after the 2026 Federal Budget" on a residential property and a rental loss on it no longer offsets your other income, so no refund is shown for it that year. The loss carries forward against future rental profit or the gain on sale. Commercial property is not affected. This is a modelling assumption, not tax advice.</p>
+          </details>
+          <details>
+            <summary>Does the portfolio review include my own home?</summary>
+            <p>You can add your home as an owner-occupied property. It counts toward your combined value, debt and equity, which gives a truer useable equity figure, but it is left out of rent, yield and tax figures. Its own running costs are shown separately as the cost to own your home.</p>
+          </details>
+          <details>
+            <summary>Is this portfolio review financial or tax advice?</summary>
+            <p>No. It is a point-in-time planning tool built from the figures you enter. It holds rent, costs and values flat and ignores capital growth, loan repayments and capital gains tax. Speak to your accountant or a licensed adviser before acting on it.</p>
+          </details>
         </div>
           </div>
         </div>
@@ -530,7 +617,7 @@
         '</div>' +
         '<p class="field-hint">Any other one-off spend on this property - BA / planning fees, reports, renovations or improvements. Available whether you&rsquo;re buying or already own it: if being purchased, it adds to the cash needed to buy; if already owned, it comes straight off this property&rsquo;s equity.</p>' +
         '<div class="field-row">' +
-          '<div class="field" data-invest-only><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
+          '<div class="field"><label for="' + p + 'rate">Interest rate <span>(% interest only)</span></label>' +
           '<div class="input-pct"><input type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" id="' + p + 'rate" autocomplete="off" placeholder="0" /></div></div>' +
           '<div class="field" data-res-only><label for="' + p + 'rentwk">Rent <span>(per week)</span></label>' +
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentwk" autocomplete="off" placeholder="0" /></div></div>' +
@@ -538,7 +625,35 @@
           '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'rentyr" autocomplete="off" placeholder="0" /></div></div>' +
         '</div>' +
         '<p class="field-hint" id="' + p + 'rentHint" data-invest-only>Gross rent &mdash; &nbsp;·&nbsp; Gross yield &mdash;</p>' +
-        '<p class="field-hint" data-own-only hidden>Your home does not carry a rent or running-cost figure here - just its value and loan, so it can count toward your overall equity position.</p>' +
+        '<p class="field-hint" data-own-only hidden>Your home counts toward your overall value, debt and equity, but not toward rent, yield or investment cash flow. Add its running costs below to see what it costs you to own.</p>' +
+        '<div data-own-only hidden>' +
+        '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0">Your home&rsquo;s yearly running costs</h3>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'ownrates">Council &amp; water rates <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'ownrates" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'ownstrata">Body corporate / strata <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'ownstrata" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'owninsure">Home &amp; contents insurance <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'owninsure" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'ownmaint">Repairs &amp; maintenance <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'ownmaint" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="' + p + 'ownfees">Annual loan fees <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'ownfees" autocomplete="off" placeholder="0" /></div></div>' +
+          '<div class="field"><label for="' + p + 'ownother">Other <span>(per year)</span></label>' +
+          '<div class="input-money"><input type="text" inputmode="numeric" id="' + p + 'ownother" autocomplete="off" placeholder="0" /></div></div>' +
+        '</div>' +
+        '<p class="field-hint">Your home is exempt from land tax and, when sold, generally from capital gains tax, so neither is asked for here. Its costs are not tax deductible.</p>' +
+        '<p class="dwelling-type__calc">' +
+          '<span>Running costs / yr <strong id="' + p + 'oHomeRun">&mdash;</strong></span>' +
+          '<span>Loan interest / yr <strong id="' + p + 'oHomeInt">&mdash;</strong></span>' +
+          '<span>Cost to own / yr <strong id="' + p + 'oHomeCost">&mdash;</strong></span>' +
+          '<span>Cost to own / wk <strong id="' + p + 'oHomeWk">&mdash;</strong></span>' +
+        '</p>' +
+        '</div>' +
 
         '<div data-invest-only>' +
         '<h3 class="calc-subhead" style="font-size:1rem;margin:6px 0 0" data-res-only>Yearly running costs</h3>' +
@@ -905,6 +1020,7 @@
               (fees.mortgage ? " and " + money(fees.mortgage) + " mortgage registration" : "") + ".";
           }
           note += " Edit it if you have the exact figure.";
+          if (((document.getElementById(p + "ptype") || {}).value) === "own") note += " Buying your own home, a first-home or owner-occupier concession may lower this.";
           noteEl.textContent = note;
         }
       }
@@ -938,9 +1054,15 @@
       /* owner-occupied: counts toward portfolio value/debt/equity only - no
          rent, running costs, depreciation or tax treatment apply to a home */
       if (isOwn) {
+        /* its own interest and running costs, kept apart from every investment total */
+        var homeInterest = loan * num(p + "rate") / 100;
+        var homeRunning = num(p + "ownrates") + num(p + "ownstrata") + num(p + "owninsure") +
+          num(p + "ownmaint") + num(p + "ownfees") + num(p + "ownother");
         return {
           id: id, label: (document.getElementById(p + "label").value || "").trim(),
           isCom: false, isOwn: true, lease: "",
+          homeRate: num(p + "rate") / 100, homeInterest: homeInterest, homeRunning: homeRunning,
+          homeCost: homeInterest + homeRunning,
           value: value, lvr: lvr, loan: loan, equity: equity, rate: 0, interest: 0,
           rentWk: 0, grossRent: 0, grossYield: null,
           pm: 0, letting: 0, council: 0, water: 0, strata: 0, landTax: 0,
@@ -1133,6 +1255,7 @@
       finishSeg(T); finishSeg(R); finishSeg(C); finishSeg(I);
       T.anyCom = C.n > 0;
       T.anyOwn = live.some(function (m) { return m.isOwn; });
+      T.homeCost = live.reduce(function (a, m) { return a + (m.isOwn ? m.homeCost : 0); }, 0);
       T.mixed = R.n > 0 && C.n > 0;
       T.valid = live.length > 0;
       I.valid = I.n > 0;
@@ -1174,6 +1297,7 @@
               var bits = [r.value > 0 ? money(r.value) : "no value yet"];
               if (r.lvr != null) bits.push(pct(r.lvr) + " LVR");
               if (!r.isOwn && r.valid) bits.push(signedMoney(r.weekly) + " / wk");
+              if (r.isOwn && r.homeCost > 0) bits.push(money(r.homeCost / 52) + " / wk to own");
               sum.textContent = bits.join("  ·  ");
             }
           }
@@ -1196,6 +1320,12 @@
         function putCard(sfx, str) {
           var el = document.getElementById(p + sfx);
           if (el) el.textContent = unlocked ? str : mask(str);
+        }
+        if (r.isOwn) {
+          putCard("oHomeRun", r.homeRunning > 0 ? money(r.homeRunning) : "—");
+          putCard("oHomeInt", r.homeInterest > 0 ? money(r.homeInterest) : "—");
+          putCard("oHomeCost", r.homeCost > 0 ? money(r.homeCost) : "—");
+          putCard("oHomeWk", r.homeCost > 0 ? money(r.homeCost / 52) : "—");
         }
         putCard("oNetYield", r.valid && r.netYield != null ? pct(r.netYield * 100) : "—");
         putCard("oPreTax", r.valid ? signedMoney(r.preTax) : "—");
@@ -1228,6 +1358,10 @@
       put("weekly", I.valid ? signedMoney(I.weekly) + "  (= " + signedMoney(I.annual) + "/yr)" : "—");
       put("pctValue", I.pctValue != null ? pct(I.pctValue) : "—");
       put("toNeutral", I.valid ? (I.toNeutral > 0 ? money(I.toNeutral) + " / wk" : "Already breaks even") : "—");
+      Array.prototype.forEach.call(document.querySelectorAll("[data-own-row]"), function (el) { el.hidden = !T.anyOwn; });
+      put("homeCost", T.homeCost > 0 ? money(T.homeCost) : "—");
+      put("homeCostWk", T.homeCost > 0 ? money(T.homeCost / 52) : "—");
+      put("afterHomeWk", T.homeCost > 0 ? signedMoney((I.valid ? I.weekly : 0) - T.homeCost / 52) : "—");
       put("acq", T.anyAcq ? money(T.acq) : "None");
       put("cash", T.anyAcq ? money(T.cashToComplete) : "None");
 
@@ -1632,6 +1766,8 @@
           ? "After tax and depreciation you are ahead by " + money(T.annual) + " a year, about " + money(T.weekly) + " a week."
           : "After tax and depreciation it costs you " + money(-T.annual) + " a year, about " + money(-T.weekly) + " a week" +
             (T.toNeutral > 0 ? ", and it would take " + money(T.toNeutral) + " more rent a week to break even." : ".");
+        if (T.homeCost > 0) bottom += " Your home costs about " + money(T.homeCost / 52) + " a week to own, so after that you are " +
+          (T.weekly - T.homeCost / 52 >= 0 ? "ahead by " + money(T.weekly - T.homeCost / 52) : "down " + money(T.homeCost / 52 - T.weekly)) + " a week.";
         y = window.pcPdf ? window.pcPdf.bottomLine(doc, L, y, bottom) : y;
       }
 
@@ -1692,6 +1828,22 @@
       row("After-tax cash flow (per year)", bracketMoney(T.annual), true);
       y += 6;
       bigrow("AFTER-TAX CASH FLOW (PER WEEK)", bracketMoney(T.weekly));
+
+      if (T.anyOwn) {
+        y += 8;
+        section("Your home");
+        var homeRun = 0, homeInt = 0;
+        m.live.forEach(function (r) { if (r.isOwn) { homeRun += r.homeRunning; homeInt += r.homeInterest; } });
+        row("Running costs", money(homeRun));
+        row("Loan interest", money(homeInt));
+        row("Cost to own (per year)", money(T.homeCost), true);
+        row("Cost to own (per week)", money(T.homeCost / 52));
+        row("After-tax cash flow, less your home (per week)", bracketMoney(T.weekly - T.homeCost / 52), true);
+        ensure(26);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(130);
+        doc.text(doc.splitTextToSize("Your home counts in the value, debt and equity above but not in the rent or cash flow. Its costs are not tax deductible, and it is generally exempt from land tax and capital gains tax.", w - 2 * L), L, y);
+        y += 22;
+      }
 
       if (m.C.n > 0) {
         y += 8;
@@ -1817,7 +1969,7 @@
         if (!r.valid) return;
         if (r.isOwn) {
           lines.push((r.label || ("Property " + (i + 1))) + " [Owner-occupied]: value " + money(r.value) +
-            ", debt " + money(r.loan) + " (" + pct(r.lvr) + ") - not counted in rent/cash-flow figures above");
+            ", debt " + money(r.loan) + " (" + pct(r.lvr) + "), cost to own " + money(r.homeCost) + "/yr (" + money(r.homeCost / 52) + "/wk) - not counted in rent/cash-flow figures above");
           return;
         }
         var tag = (r.isCom ? "[Commercial, " + (LEASE[r.lease] || "net lease") + "]" : "[Residential]") +
@@ -2023,11 +2175,12 @@
         name: p.label || "Untitled property",
         value: Math.round(p.value || 0),
         propertyType: p.isCom ? "commercial" : "residential",
+        usage: p.isOwn ? "home" : "investment",
         /* the rest lets the account page start a property from this card */
         loan: Math.round(p.loan || 0),
-        ratePct: p.isOwn ? null : Math.round((p.rate || 0) * 10000) / 100,
+        ratePct: Math.round(((p.isOwn ? p.homeRate : p.rate) || 0) * 10000) / 100,
         weeklyRent: p.isOwn ? null : Math.round((p.rentWk || 0) * 100) / 100,
-        runningCosts: p.isOwn ? null : Math.round(Math.max(0, (p.expenses || 0) - (p.landTax || 0))),
+        runningCosts: p.isOwn ? Math.round(p.homeRunning || 0) : Math.round(Math.max(0, (p.expenses || 0) - (p.landTax || 0))),
         state: stEl ? stEl.value : "",
         owner: ownerMap[p.entity] || null,
         acqCosts: p.acqOn ? Math.round(Math.max(0, (p.acq || 0) - improve)) : null,
