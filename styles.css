@@ -2572,20 +2572,22 @@ h1, h2, h3 {
 .acct-upgrade__amt strong { font-size: 22px; font-weight: 700; color: var(--accent-2); }
 .acct-upgrade__why { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .acct-billing-fine { margin: 16px 0 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
+/* The three notes sit in one panel under both plans, side by side in equal columns */
 .pricing-fine {
-  max-width: 1000px; margin-top: 0;
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px);
-  color: var(--muted); font-size: 0.76rem; line-height: 1.5;
+  /* same width as the two cards: the .wrap side padding is taken off, not painted */
+  width: calc(100% - 2 * var(--pad)); max-width: calc(1000px - 2 * var(--pad)); padding-inline: 0; margin-top: clamp(14px, 2vw, 24px);
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: rgba(20, 26, 36, 0.94); border: 1px solid var(--line); backdrop-filter: blur(6px);
+  color: var(--muted); font-size: 0.76rem; line-height: 1.55;
 }
-.pricing-fine p { margin: 0; padding: 12px clamp(18px, 1.8vw, 24px); background: rgba(20, 26, 36, 0.94); border: 1px solid var(--line); border-top: 0; backdrop-filter: blur(6px); }
-.pricing-fine p:last-child { background: rgba(28, 36, 49, 0.96); border-color: rgba(95, 161, 208, 0.6); }
-.pricing-fine strong { color: var(--text); font-weight: 600; }
+.pricing-fine p { margin: 0; padding: 16px clamp(16px, 1.8vw, 22px); }
+.pricing-fine p + p { border-left: 1px solid var(--line); }
+.pricing-fine strong { display: block; margin-bottom: 4px; color: var(--text); font-weight: 600; }
 .pricing-fine a { color: var(--accent); }
 @media (max-width: 780px) {
   .pricing-page { justify-content: flex-start; }
   .pricing-grid, .pricing-fine { grid-template-columns: 1fr; }
-  .pricing-fine p { border-top: 1px solid var(--line); margin-top: 12px; }
-  .pricing-fine p:last-child { border-top-color: rgba(95, 161, 208, 0.6); }
+  .pricing-fine p + p { border-left: 0; border-top: 1px solid var(--line); }
   .pricing-bg__strip { width: 900px; margin-left: -450px; background-size: 900px auto; height: 5946px; animation-name: pricing-drift-m; }
 }
 
