@@ -1445,6 +1445,23 @@ h1, h2, h3 {
 }
 .modal-close:hover { color: var(--text); }
 
+/* Done For You questions (pricing.html) - the enquiry form's steps inside the modal */
+.modal-card--form { width: min(600px, 100%); }
+.modal-card--form form, .dfy-done { display: grid; gap: 18px; }
+.modal-card--form form[hidden], .dfy-done[hidden] { display: none; }
+.modal-card--form h2 { margin: 0; }
+.dfy-lead, .dfy-done p { margin: -8px 0 0; color: var(--muted); }
+.modal-card--form .form-step legend { margin-bottom: 4px; }
+.modal-card--form .field input,
+.modal-card--form .field textarea { background: rgba(14, 14, 15, 0.6); }
+.opts--chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.opts--states, .opts--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.opts--chips .opt, .opts--states .opt { padding: 10px 12px; gap: 10px; font-size: 13.5px; }
+.opt--wide { grid-column: 1 / -1; }
+@media (max-width: 520px) {
+  .opts--chips, .opts--four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .calc-lead-form { display: grid; gap: 16px; }
 .calc-lead-form .btn { margin-top: 4px; }
 .calc-lead-form .field label span { color: var(--muted); font-weight: 500; }

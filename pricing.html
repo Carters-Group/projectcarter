@@ -183,7 +183,7 @@
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>One-on-one meeting with Trent to walk you through</span></li>
               <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>General advice on portfolio health and direction</span></li>
             </ul>
-            <a href="enquire" class="btn btn-accent plan-cta" data-plan="done-for-you">Tell us about your portfolio</a>
+            <a href="enquire" class="btn btn-accent plan-cta" id="dfyOpen" data-plan="done-for-you" aria-haspopup="dialog">Tell us about your portfolio</a>
           </article>
 
         </div>
@@ -197,6 +197,234 @@
     </div>
   </main>
 
+  <!-- ============ DONE FOR YOU QUESTIONS (modal) ============
+       Opens from the Done For You button (the button still links to the
+       enquiry page if scripts are off). Three short steps, posted to
+       Formspree with fetch so the visitor stays on the pricing page; the
+       same /api/email-reputation check as the enquiry form, failing open.
+  ============================================================== -->
+  <div class="modal" id="dfyModal" hidden>
+    <div class="modal-backdrop" data-dfy-close></div>
+    <div class="modal-card modal-card--form" role="dialog" aria-modal="true" aria-labelledby="dfyTitle">
+      <button type="button" class="modal-close" data-dfy-close aria-label="Close">&times;</button>
+
+      <form id="dfyForm" action="https://formspree.io/f/xqpkjvkb" method="POST" novalidate>
+        <h2 id="dfyTitle">Done For You</h2>
+        <p class="dfy-lead">A few quick questions so Trent can quote your setup.</p>
+        <input type="hidden" name="_subject" value="Done For You enquiry, pricing page" />
+        <input type="hidden" name="Source" value="Pricing page, Done For You" />
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp" />
+
+        <div class="form-progress">
+          <div class="form-progress-bar"><span id="dfyFill" style="width:33%"></span></div>
+          <p class="form-progress-label" id="dfyLabel" aria-live="polite">Step 1 of 3</p>
+        </div>
+
+        <fieldset class="form-step" data-step="1">
+          <legend>Your portfolio</legend>
+          <div class="q">
+            <p class="q-label">How many properties do you own?</p>
+            <div class="opts opts--chips" role="radiogroup" aria-label="How many properties do you own?">
+              <label class="opt"><input type="radio" name="Properties owned" value="1 to 2" /><span>1 to 2</span></label>
+              <label class="opt"><input type="radio" name="Properties owned" value="3 to 5" /><span>3 to 5</span></label>
+              <label class="opt"><input type="radio" name="Properties owned" value="6 to 10" /><span>6 to 10</span></label>
+              <label class="opt"><input type="radio" name="Properties owned" value="11 to 20" /><span>11 to 20</span></label>
+              <label class="opt"><input type="radio" name="Properties owned" value="More than 20" /><span>More than 20</span></label>
+            </div>
+          </div>
+          <div class="q">
+            <p class="q-label">How long have you been investing?</p>
+            <div class="opts opts--chips opts--four" role="radiogroup" aria-label="How long have you been investing?">
+              <label class="opt"><input type="radio" name="Investing for" value="Less than 2 years" /><span>Under 2 years</span></label>
+              <label class="opt"><input type="radio" name="Investing for" value="2 to 5 years" /><span>2 to 5 years</span></label>
+              <label class="opt"><input type="radio" name="Investing for" value="5 to 10 years" /><span>5 to 10 years</span></label>
+              <label class="opt"><input type="radio" name="Investing for" value="More than 10 years" /><span>10+ years</span></label>
+            </div>
+          </div>
+          <div class="q">
+            <p class="q-label">Estimated value of your portfolio</p>
+            <div class="opts opts--chips" role="radiogroup" aria-label="Estimated value of your portfolio">
+              <label class="opt"><input type="radio" name="Portfolio value" value="Under $2M" /><span>Under $2M</span></label>
+              <label class="opt"><input type="radio" name="Portfolio value" value="$2M to $5M" /><span>$2M to $5M</span></label>
+              <label class="opt"><input type="radio" name="Portfolio value" value="$5M to $10M" /><span>$5M to $10M</span></label>
+              <label class="opt"><input type="radio" name="Portfolio value" value="$10M to $25M" /><span>$10M to $25M</span></label>
+              <label class="opt"><input type="radio" name="Portfolio value" value="$25M or more" /><span>$25M or more</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-step" data-step="2" hidden>
+          <legend>What you need</legend>
+          <div class="q">
+            <p class="q-label">What are you after?</p>
+            <div class="opts" role="radiogroup" aria-label="What are you after?">
+              <label class="opt"><input type="radio" name="Help needed" value="Just the setup" /><span>Just the setup</span></label>
+              <label class="opt"><input type="radio" name="Help needed" value="Setup plus acquisition advice for my next purchase" /><span>Setup plus acquisition advice for my next purchase</span></label>
+              <label class="opt"><input type="radio" name="Help needed" value="Not sure yet, happy to talk it through" /><span>Not sure yet, happy to talk it through</span></label>
+            </div>
+            <p class="form-fineprint">Advice is general in nature. We don't find, negotiate or buy property for you.</p>
+          </div>
+          <div class="q">
+            <p class="q-label">What state are you in?</p>
+            <div class="opts opts--states" role="radiogroup" aria-label="What state are you in?">
+              <label class="opt"><input type="radio" name="State" value="NSW" /><span>NSW</span></label>
+              <label class="opt"><input type="radio" name="State" value="VIC" /><span>VIC</span></label>
+              <label class="opt"><input type="radio" name="State" value="QLD" /><span>QLD</span></label>
+              <label class="opt"><input type="radio" name="State" value="WA" /><span>WA</span></label>
+              <label class="opt"><input type="radio" name="State" value="SA" /><span>SA</span></label>
+              <label class="opt"><input type="radio" name="State" value="TAS" /><span>TAS</span></label>
+              <label class="opt"><input type="radio" name="State" value="ACT" /><span>ACT</span></label>
+              <label class="opt"><input type="radio" name="State" value="NT" /><span>NT</span></label>
+              <label class="opt opt--wide"><input type="radio" name="State" value="Outside Australia" /><span>Outside Australia</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-step" data-step="3" hidden>
+          <legend>Your details</legend>
+          <div class="field">
+            <label for="dfyName">Name</label>
+            <input type="text" id="dfyName" name="Name" autocomplete="name" required />
+          </div>
+          <div class="field">
+            <label for="dfyEmail">Email</label>
+            <input type="email" id="dfyEmail" name="Email" autocomplete="email" required />
+            <p class="form-note" id="dfyEmailNote" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="dfyPhone">Phone</label>
+            <input type="tel" id="dfyPhone" name="Phone" autocomplete="tel" required />
+          </div>
+          <div class="field">
+            <label for="dfyMessage">Anything else Trent should know? (optional)</label>
+            <textarea id="dfyMessage" name="Message" rows="3"></textarea>
+          </div>
+        </fieldset>
+
+        <p class="form-note is-bad" id="dfyError" aria-live="polite" hidden></p>
+
+        <div class="form-nav">
+          <button type="button" class="btn btn-ghost" id="dfyBack" hidden>Back</button>
+          <button type="button" class="btn btn-accent" id="dfyNext" disabled>Next</button>
+          <button type="submit" class="btn btn-accent" id="dfySubmit" hidden disabled>Send</button>
+        </div>
+      </form>
+
+      <div class="dfy-done" id="dfyDone" hidden>
+        <h2>Thanks, we have it</h2>
+        <p>Trent will look over your answers and get back to you with a quote for your setup.</p>
+        <button type="button" class="btn btn-accent" data-dfy-close>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var modal = document.getElementById("dfyModal"), open = document.getElementById("dfyOpen");
+      var form = document.getElementById("dfyForm"), done = document.getElementById("dfyDone");
+      var steps = form.querySelectorAll(".form-step");
+      var back = document.getElementById("dfyBack"), next = document.getElementById("dfyNext"), submit = document.getElementById("dfySubmit");
+      var fill = document.getElementById("dfyFill"), label = document.getElementById("dfyLabel");
+      var err = document.getElementById("dfyError"), email = document.getElementById("dfyEmail"), emailNote = document.getElementById("dfyEmailNote");
+      var current = 0, lastFocus = null, sending = false;
+      var emailCheck = { email: "", ok: null };
+
+      function stepValid(i) {
+        var s = steps[i], groups = {};
+        s.querySelectorAll('input[type="radio"]').forEach(function (r) { if (!(r.name in groups)) groups[r.name] = false; });
+        s.querySelectorAll('input[type="radio"]:checked').forEach(function (r) { groups[r.name] = true; });
+        for (var k in groups) if (!groups[k]) return false;
+        var ok = true;
+        s.querySelectorAll("input[required]").forEach(function (el) {
+          if (!el.value.trim() || (el.type === "email" && !el.checkValidity())) ok = false;
+        });
+        if (ok && i === steps.length - 1 && emailCheck.email === email.value.trim() && emailCheck.ok === false) ok = false;
+        return ok;
+      }
+      function show(i) {
+        current = i;
+        steps.forEach(function (s, n) { s.hidden = n !== i; });
+        var last = i === steps.length - 1;
+        back.hidden = i === 0; next.hidden = last; submit.hidden = !last;
+        fill.style.width = Math.round((i + 1) / steps.length * 100) + "%";
+        label.textContent = "Step " + (i + 1) + " of " + steps.length;
+        refresh();
+      }
+      function refresh() {
+        var v = stepValid(current);
+        next.disabled = !v; submit.disabled = !v || sending;
+      }
+      function openModal(e) {
+        e.preventDefault();
+        lastFocus = document.activeElement;
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+        var first = modal.querySelector(".form-step:not([hidden]) input, #dfyDone:not([hidden]) button");
+        if (first) first.focus();
+      }
+      function closeModal() {
+        modal.hidden = true;
+        document.body.style.overflow = "";
+        if (lastFocus) lastFocus.focus();
+      }
+
+      /* Same deliverability check as the enquiry form; any hiccup lets the lead through. */
+      function verifyEmail() {
+        var v = email.value.trim();
+        if (!v || !email.checkValidity() || emailCheck.email === v) return Promise.resolve(emailCheck.ok !== false);
+        emailNote.textContent = "Checking your email address…"; emailNote.className = "form-note is-checking";
+        return fetch("/api/email-reputation", {
+          method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ email: v })
+        }).then(function (r) {
+          return r.json().then(function (d) { return r.status === 200 && d && d.ok === false; }).catch(function () { return false; });
+        }).catch(function () { return false; }).then(function (bad) {
+          emailCheck = { email: v, ok: !bad };
+          emailNote.textContent = bad ? "That email address doesn't look reachable. Please double-check it." : "";
+          emailNote.className = "form-note" + (bad ? " is-bad" : "");
+          refresh();
+          return !bad;
+        });
+      }
+
+      open.addEventListener("click", openModal);
+      modal.querySelectorAll("[data-dfy-close]").forEach(function (b) { b.addEventListener("click", closeModal); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !modal.hidden) closeModal(); });
+      form.addEventListener("input", refresh);
+      form.addEventListener("change", function (e) {
+        refresh();
+        /* Answering the last question on a step moves straight on, like a quiz. */
+        if (e.target.type === "radio" && current < steps.length - 1 && stepValid(current)) {
+          var s = steps[current], radios = s.querySelectorAll('input[type="radio"]');
+          if (e.target.name === radios[radios.length - 1].name) setTimeout(function () { show(current + 1); }, 220);
+        }
+      });
+      email.addEventListener("blur", verifyEmail);
+      next.addEventListener("click", function () { if (stepValid(current)) show(current + 1); });
+      back.addEventListener("click", function () { show(current - 1); });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!stepValid(current) || sending) return;
+        sending = true; submit.textContent = "Sending…"; refresh(); err.hidden = true;
+        verifyEmail().then(function (ok) {
+          if (!ok) throw new Error("email");
+          return fetch(form.action, { method: "POST", body: new FormData(form), headers: { "Accept": "application/json" } });
+        }).then(function (r) {
+          if (!r.ok) throw new Error("send");
+          form.hidden = true; done.hidden = false;
+          done.querySelector("button").focus();
+        }).catch(function (x) {
+          if (x && x.message !== "email") {
+            err.textContent = "That didn't send. Please try again, or use the contact page.";
+            err.hidden = false;
+          }
+        }).then(function () { sending = false; submit.textContent = "Send"; refresh(); });
+      });
+
+      show(0);
+    })();
+  </script>
 
   <script src="script.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
