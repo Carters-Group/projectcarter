@@ -2578,16 +2578,22 @@ h1, h2, h3 {
   width: calc(100% - 2 * var(--pad)); max-width: calc(1000px - 2 * var(--pad)); padding-inline: 0; margin-top: clamp(14px, 2vw, 24px);
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
   background: rgba(20, 26, 36, 0.94); border: 1px solid var(--line); backdrop-filter: blur(6px);
-  color: var(--muted); font-size: 0.76rem; line-height: 1.55;
+  line-height: 1.4;
 }
-.pricing-fine p { margin: 0; padding: 16px clamp(16px, 1.8vw, 22px); }
-.pricing-fine p + p { border-left: 1px solid var(--line); }
-.pricing-fine strong { display: block; margin-bottom: 4px; color: var(--text); font-weight: 600; }
-.pricing-fine a { color: var(--accent); }
+.pricing-fine a {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 15px clamp(16px, 1.8vw, 22px);
+  color: var(--text); font-size: 0.86rem; font-weight: 600; text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.pricing-fine a + a { border-left: 1px solid var(--line); }
+.pricing-fine a svg { width: 15px; height: 15px; flex: none; color: var(--accent); transition: transform 0.15s ease; }
+.pricing-fine a:hover, .pricing-fine a:focus-visible { color: var(--accent-2); background: rgba(95, 161, 208, 0.08); }
+.pricing-fine a:hover svg, .pricing-fine a:focus-visible svg { transform: translateX(3px); }
 @media (max-width: 780px) {
   .pricing-page { justify-content: flex-start; }
   .pricing-grid, .pricing-fine { grid-template-columns: 1fr; }
-  .pricing-fine p + p { border-left: 0; border-top: 1px solid var(--line); }
+  .pricing-fine a + a { border-left: 0; border-top: 1px solid var(--line); }
   .pricing-bg__strip { width: 900px; margin-left: -450px; background-size: 900px auto; height: 5946px; animation-name: pricing-drift-m; }
 }
 
