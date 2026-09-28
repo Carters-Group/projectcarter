@@ -87,6 +87,11 @@
   /* ---- Formspree lead ping on first sign-up ---------------------------- */
   function maybePingLead() {
     if (!currentUser) return;
+    /* Only genuinely new accounts. The flag below lives in this browser, so
+       without this an existing customer signing in on a new phone or laptop
+       would email Trent a second "New Project Carter account". */
+    var created = Date.parse(currentUser.created_at || "");
+    if (!created || Date.now() - created > 24 * 60 * 60 * 1000) return;
     var key = "pc_lead_pinged_" + currentUser.id;
     try { if (window.localStorage.getItem(key) === "1") return; } catch (e) {}
     var u = publicUser();

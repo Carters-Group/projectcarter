@@ -5,7 +5,10 @@
  * This function fetches Nominatim server-side and returns the same JSON array
  * the calculator already consumes (Nominatim search hits).
  *
- * GET or POST with `q`. Does not store addresses. Logs status only, never q.
+ * GET or POST with `q`. Does not store addresses: a warm instance keeps the
+ * last few hundred results in memory for up to 6 hours so a repeated lookup
+ * doesn't spend OSM's one-request-a-second allowance, and that memory goes
+ * when the instance does. Logs status only, never q.
  *
  * Vercel Node serverless: /api/geocode.js -> /api/geocode (no vercel.json).
  */
@@ -21,8 +24,47 @@ var NOMINATIM_GAP_MS = 1100;
 var WINDOW_MS = 60000;
 var MAX_PER_WINDOW = 10;
 
+var CACHE_MS = 6 * 60 * 60 * 1000;
+var CACHE_MAX = 500;
+var MAX_WAIT_MS = 2500;
 var lastNominatimAt = 0;
 var ipHits = Object.create(null);
+var cache = new Map();
+
+function cacheKey(q) {
+  return q.toLowerCase().replace(/[\s,]+/g, " ").trim();
+}
+function cacheGet(q) {
+  var hit = cache.get(cacheKey(q));
+  if (!hit) return null;
+  if (Date.now() - hit.at > CACHE_MS) {
+    cache.delete(cacheKey(q));
+    return null;
+  }
+  return hit.data;
+}
+function cacheSet(q, data) {
+  if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value);
+  cache.set(cacheKey(q), { at: Date.now(), data: data });
+}
+/* Nominatim allows about one request a second per app. When two visitors
+   look up at once, the second waits its turn (briefly) instead of failing. */
+function waitForSlot() {
+  var start = Date.now();
+  return new Promise(function (resolve) {
+    (function check() {
+      var now = Date.now();
+      if (now - lastNominatimAt >= NOMINATIM_GAP_MS) {
+        lastNominatimAt = now;
+        resolve(true);
+      } else if (now - start > MAX_WAIT_MS) {
+        resolve(false);
+      } else {
+        setTimeout(check, NOMINATIM_GAP_MS - (now - lastNominatimAt) + 10);
+      }
+    })();
+  });
+}
 
 function hostOf(value) {
   if (!value) return "";
@@ -164,8 +206,20 @@ module.exports = async function (req, res) {
       return;
     }
 
-    var now = Date.now();
-    if (rateLimited(clientIp(req), now) || now - lastNominatimAt < NOMINATIM_GAP_MS) {
+    if (rateLimited(clientIp(req), Date.now())) {
+      logStatus(429);
+      send(res, 429, []);
+      return;
+    }
+
+    var cached = cacheGet(q);
+    if (cached) {
+      logStatus("200 cached");
+      send(res, 200, cached);
+      return;
+    }
+
+    if (!(await waitForSlot())) {
       logStatus(429);
       send(res, 429, []);
       return;
@@ -181,7 +235,6 @@ module.exports = async function (req, res) {
     }, TIMEOUT_MS);
 
     try {
-      lastNominatimAt = Date.now();
       var upstream = await fetch(url, {
         method: "GET",
         signal: ac.signal,
@@ -197,7 +250,9 @@ module.exports = async function (req, res) {
         return;
       }
       var data = await upstream.json();
-      send(res, 200, Array.isArray(data) ? data : []);
+      var hits = Array.isArray(data) ? data : [];
+      if (hits.length) cacheSet(q, hits);
+      send(res, 200, hits);
     } catch (e) {
       logStatus(504);
       send(res, 504, []);
