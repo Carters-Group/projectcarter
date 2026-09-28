@@ -138,6 +138,10 @@ async function ensureWebhook(url) {
   if (!/^https:\/\/[^/]+\/api\/stripe-webhook(\?[^#\s]*)?$/.test(url)) {
     throw new Error("The webhook URL should look like https://<your-site>/api/stripe-webhook");
   }
+  /* a copied example (YOUR-BRANCH-URL, <site>...) registers fine but Stripe can never reach it */
+  if (/YOUR-|<|>/i.test(url)) {
+    throw new Error("That URL still has a placeholder in it. Use the real site address, e.g. https://projectcarter-git-dev-carters-group.vercel.app/api/stripe-webhook");
+  }
   var list = await stripe("GET", "/webhook_endpoints?limit=100");
   var existing = (list.data || []).filter(function (w) { return w.url === url; })[0];
   if (existing) {
