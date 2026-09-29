@@ -1721,6 +1721,8 @@ h1, h2, h3 {
 .acct-risk-card__assumptions { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
 .acct-risk-card .acct-overview { grid-template-columns: 1fr; margin: 12px 0 0; }
 .acct-risk-card .acct-overview__stat { padding: 10px 12px; }
+.acct-risk-card dd.is-warn { color: #e0a34a; }
+.acct-risk-card dd small { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
 @media (max-width: 640px) {
   .acct-risk-grid { grid-template-columns: 1fr; }
 }
@@ -1816,6 +1818,9 @@ h1, h2, h3 {
   }
   .acct-dashboard > * { grid-column: 1 / -1; }
   .acct-dash-portfolio, .acct-dash-risk { grid-column: span 6; }
+  /* half-width risk card: the three scenarios stack, each with its four figures two by two, so none is left alone on a row */
+  .acct-dash-risk .acct-risk-grid { grid-template-columns: 1fr; }
+  .acct-dash-risk .acct-risk-card .acct-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .acct-dash-props { grid-column: span 7; }
   .acct-dash-leases { grid-column: span 5; }
   /* adding or editing a property: the form takes the full width and the leases card drops

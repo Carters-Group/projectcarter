@@ -272,7 +272,7 @@
             </div>
               <div class="acct-debt-goal acct-risk-section" id="portfolioRisk">
                 <p class="acct-risk-section__title">Check your portfolio risk</p>
-                <p class="field-hint">How your cash flow would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
+                <p class="field-hint">How your cash flow and equity would hold up under three stress scenarios, applied across your whole portfolio at once.</p>
                 <div class="acct-placeholder-wrap" id="portfolioRiskWrap">
                   <div class="acct-risk-grid" id="portfolioRiskGrid"></div>
                 </div>
@@ -975,15 +975,19 @@
        row for a report saved before then, until the visitor re-saves
        Portfolio Review. */
     var RISK_SCENARIOS = [
-      { label: "Mild",     tone: "mild",     rate: 0.005, vacWeeks: 4 },
-      { label: "Moderate", tone: "moderate", rate: 0.015, vacWeeks: 8 },
-      { label: "Severe",   tone: "severe",   rate: 0.03,  vacWeeks: 16 }
+      { label: "Mild",     tone: "mild",     rate: 0.005, vacWeeks: 4,  valueDrop: 0.05 },
+      { label: "Moderate", tone: "moderate", rate: 0.015, vacWeeks: 8,  valueDrop: 0.15 },
+      { label: "Severe",   tone: "severe",   rate: 0.03,  vacWeeks: 16, valueDrop: 0.25 }
     ];
+    /* a fall in values doesn't touch cash flow; it cuts equity and lifts the
+       LVR, which is what a lender reads at the next refinance or purchase */
+    var RISK_LVR_WARN = 80;
     function renderPortfolioRisk(s) {
       var gridEl = document.getElementById("portfolioRiskGrid");
       var noteEl = document.getElementById("portfolioRiskNote");
       gridEl.innerHTML = "";
       var hasVacancyData = s.grossRentalIncome != null && s.grossRentalIncome > 0;
+      var hasValueData = s.value > 0;
       RISK_SCENARIOS.forEach(function (sc) {
         var extraInterest = (s.portfolioDebt || 0) * sc.rate;
         var cashFlowIfRates = (s.annualSurplus || 0) - extraInterest;
@@ -998,19 +1002,31 @@
             '<div class="acct-overview__stat"><dt>Cash flow if vacancy hits</dt><dd>' + fmtSignedMoney(cashFlowIfVacancy) + '</dd></div>';
         }
 
+        if (hasValueData) {
+          var fallenValue = s.value * (1 - sc.valueDrop);
+          var debt = s.debt || 0;
+          var lvrAfter = debt / fallenValue * 100;
+          rows +=
+            '<div class="acct-overview__stat"><dt>Equity if values fall ' + Math.round(sc.valueDrop * 100) + '%</dt><dd>' + fmtSignedMoney(fallenValue - debt) + '</dd></div>' +
+            '<div class="acct-overview__stat"><dt>LVR if values fall</dt><dd' + (lvrAfter > RISK_LVR_WARN ? ' class="is-warn"' : '') + '>' +
+              fmtPct(lvrAfter) + (lvrAfter > RISK_LVR_WARN ? ' <small>over 80%</small>' : '') + '</dd></div>';
+        }
+
         var card = document.createElement("div");
         card.className = "acct-risk-card is-" + sc.tone;
         card.innerHTML =
           '<p class="acct-risk-card__title">' + sc.label + '</p>' +
           '<p class="acct-risk-card__assumptions">+' + (sc.rate * 100).toFixed(1) + '% rates' +
-            (hasVacancyData ? ' OR +' + sc.vacWeeks + ' wks vacancy' : '') + '</p>' +
+            (hasVacancyData ? ' OR +' + sc.vacWeeks + ' wks vacancy' : '') +
+            (hasValueData ? ' OR values down ' + Math.round(sc.valueDrop * 100) + '%' : '') + '</p>' +
           '<div class="acct-overview acct-overview--modes">' + rows + '</div>';
         gridEl.appendChild(card);
       });
       if (noteEl) {
-        noteEl.textContent = hasVacancyData
-          ? "Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise and vacancy are shown as separate scenarios, not stacked together, since both hitting at once in the same year is unlikely. A guide to overall cash-flow exposure, not a precise forecast."
-          : "Approximate, and showing rate-rise cash-flow exposure only - add a lease with a rent figure to each property to also see vacancy exposure.";
+        noteEl.textContent = (hasVacancyData
+          ? "Approximate: uses your portfolio's blended rate rather than each property's own terms. Rate rise, vacancy and a fall in values are shown as separate scenarios, not stacked together, since all hitting at once in the same year is unlikely. A guide to overall exposure, not a precise forecast."
+          : "Approximate, and showing rate-rise exposure only for cash flow - add a lease with a rent figure to each property to also see vacancy exposure.") +
+          (hasValueData ? " A fall in values doesn't change your cash flow, but it cuts your equity and lifts your LVR, which is what a lender looks at when you refinance or buy again. Over 80% is flagged, since that is where most lenders tighten." : "");
       }
     }
 
@@ -1060,7 +1076,7 @@
       ["Cash flow / wk", fmtSignedMoney(377)],
       ["Yield on value", fmtPct(6.0)]
     ];
-    var SAMPLE_RISK_BASIS = { portfolioDebt: 1528000, annualSurplus: 19600, grossRentalIncome: 156400 };
+    var SAMPLE_RISK_BASIS = { portfolioDebt: 1528000, annualSurplus: 19600, grossRentalIncome: 156400, value: 2600000, debt: 1528000 };
 
     /* Toggles the blur on a placeholder block and its matching CTA row
        (id + "Cta"), wiring the CTA's "Add a property" button once. */
@@ -1249,7 +1265,7 @@
       if (!planOk) hide(document.getElementById("portfolioRoiResult"));
 
       var riskReady = t.cashFlowCount > 0;
-      renderPortfolioRisk(riskReady ? { portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent } : SAMPLE_RISK_BASIS);
+      renderPortfolioRisk(riskReady ? { portfolioDebt: t.flowDebt, annualSurplus: t.cashFlow, grossRentalIncome: t.rent, value: t.value, debt: t.debt } : SAMPLE_RISK_BASIS);
       setPlaceholder("portfolioRiskWrap", !riskReady);
       show(riskCardEl);
       /* rate-rise and vacancy checks and the ROI projection are about

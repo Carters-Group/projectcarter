@@ -250,15 +250,28 @@ var pcPortfolioPdf = (function () {
     }
 
     /* ---- 5. what could go wrong ---------------------------------------- */
-    if (flowReady) {
-      section("What could go wrong", "Your yearly cash flow under three stress tests, applied across the whole portfolio. A rate rise and a vacancy are shown separately, not stacked.");
-      var scen = [["Mild", 0.005, 4], ["Moderate", 0.015, 8], ["Severe", 0.03, 16]];
-      table([{ head: "Scenario" }, { head: "Rate rise", width: 70, num: true }, { head: "Cash flow if rates rise", width: 120, num: true },
-        { head: "Vacancy", width: 70, num: true }, { head: "Cash flow if vacant", width: 110, num: true }],
-        scen.map(function (s) {
-          return [s[0], "+" + (s[1] * 100).toFixed(1) + "%", money(t.cashFlow - t.flowDebt * s[1]), s[2] + " weeks", money(t.cashFlow - t.rent * s[2] / 52)];
-        }));
-      para("Approximate: uses your blended rate rather than each loan's own terms.", 8, 130);
+    var valueRisk = ready && t.value > 0;
+    if (flowReady || valueRisk) {
+      section("What could go wrong", "Your portfolio under three stress tests, applied across the whole portfolio. A rate rise, a vacancy and a fall in values are shown separately, not stacked.");
+      var scen = [["Mild", 0.005, 4, 0.05], ["Moderate", 0.015, 8, 0.15], ["Severe", 0.03, 16, 0.25]];
+      if (flowReady) {
+        table([{ head: "Scenario" }, { head: "Rate rise", width: 70, num: true }, { head: "Cash flow if rates rise", width: 120, num: true },
+          { head: "Vacancy", width: 70, num: true }, { head: "Cash flow if vacant", width: 110, num: true }],
+          scen.map(function (s) {
+            return [s[0], "+" + (s[1] * 100).toFixed(1) + "%", money(t.cashFlow - t.flowDebt * s[1]), s[2] + " weeks", money(t.cashFlow - t.rent * s[2] / 52)];
+          }));
+        para("Approximate: uses your blended rate rather than each loan's own terms.", 8, 130);
+        y += 4;
+      }
+      if (valueRisk) {
+        table([{ head: "Scenario" }, { head: "Values fall", width: 70, num: true }, { head: "Portfolio value", width: 100, num: true },
+          { head: "Equity", width: 100, num: true }, { head: "LVR", width: 60, num: true }],
+          scen.map(function (s) {
+            var v = t.value * (1 - s[3]);
+            return [s[0], Math.round(s[3] * 100) + "%", money(v), money(v - t.debt), pct(t.debt / v * 100)];
+          }));
+        para("A fall in values doesn't change your cash flow, but it cuts your equity and lifts your LVR, which is what a lender looks at when you refinance or buy again. Most lenders tighten above 80%.", 8, 130);
+      }
       y += 6;
     }
 
