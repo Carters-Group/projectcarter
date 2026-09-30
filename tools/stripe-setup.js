@@ -2,7 +2,11 @@
    Project Carter - one-off Stripe product setup (run on your own computer)
    -------------------------------------------------------------------------
    Creates the products and annual prices shown on pricing.html. Safe to run
-   more than once: anything that already exists is left alone.
+   more than once: anything that already exists is left alone, except a price
+   whose amount below has changed. Stripe prices can't be edited, so that one
+   gets a new price that takes over the lookup key (checkout and upgrades pick
+   it up straight away) and the old price is archived. Existing subscriptions
+   stay on the old price until they are moved in the Stripe dashboard.
 
    Run it in PowerShell from the project folder:
 
@@ -39,10 +43,10 @@ var PRODUCTS = [
     name: "Project Carter - Do It Yourself",
     description: "12 months of access to the full dashboard, calculators, PDFs, tax and CGT for your properties. The first property is free.",
     prices: [
-      { lookup_key: "diy_2_properties_annual", nickname: "2 properties, 12 months",  amount: 25000, property_limit: 2 },
-      { lookup_key: "diy_3_properties_annual", nickname: "3 properties, 12 months",  amount: 50000, property_limit: 3 },
-      { lookup_key: "diy_4_properties_annual", nickname: "4 properties, 12 months",  amount: 75000, property_limit: 4 },
-      { lookup_key: "diy_5_properties_annual", nickname: "5 properties, 12 months",  amount: 99700, property_limit: 5 }
+      { lookup_key: "diy_2_properties_annual", nickname: "2 properties, 12 months",  amount:  9900, property_limit: 2 },
+      { lookup_key: "diy_3_properties_annual", nickname: "3 properties, 12 months",  amount: 19800, property_limit: 3 },
+      { lookup_key: "diy_4_properties_annual", nickname: "4 properties, 12 months",  amount: 29700, property_limit: 4 },
+      { lookup_key: "diy_5_properties_annual", nickname: "5 properties, 12 months",  amount: 39600, property_limit: 5 }
     ]
   },
   {
@@ -100,9 +104,10 @@ async function ensureProduct(p) {
 
 async function ensurePrice(productId, pr) {
   var found = await stripe("GET", "/prices?lookup_keys[]=" + encodeURIComponent(pr.lookup_key) + "&limit=1");
-  if (found.data && found.data.length) {
-    console.log("price exists     " + pr.lookup_key + "  " + found.data[0].id);
-    return found.data[0];
+  var old = found.data && found.data[0];
+  if (old && old.unit_amount === pr.amount) {
+    console.log("price exists     " + pr.lookup_key + "  " + old.id);
+    return old;
   }
   var meta = { app: "projectcarter" };
   if (pr.property_limit) meta.property_limit = String(pr.property_limit);
@@ -113,10 +118,15 @@ async function ensurePrice(productId, pr) {
     recurring: { interval: "year" },
     tax_behavior: "inclusive",
     lookup_key: pr.lookup_key,
+    transfer_lookup_key: old ? "true" : undefined,
     nickname: pr.nickname,
     metadata: meta
   });
   console.log("created price    " + pr.lookup_key + "  " + made.id + "  A$" + (pr.amount / 100).toLocaleString("en-AU"));
+  if (old) {
+    await stripe("POST", "/prices/" + old.id, { active: "false" });
+    console.log("archived price   " + old.id + "  (was A$" + (old.unit_amount / 100).toLocaleString("en-AU") + ")");
+  }
   return made;
 }
 

@@ -2362,7 +2362,7 @@
 
     function taxErrMsg(err) {
       var m = (err && err.message) || "Something went wrong.";
-      if (/pc_free_used/.test(m)) return "The free plan covers your first property, and that has been used. Add more from $250 a year and everything unlocks.";
+      if (/pc_free_used/.test(m)) return "The free plan covers your first property, and that has been used. Add more for $99 a year each and everything unlocks.";
       if (/pc_property_limit/.test(m)) return "You have reached the number of properties your plan covers. Contact us to add more.";
       if (/pc_read_only/.test(m)) return "Your paid plan has ended, so your properties are read-only. Renew to edit them again.";
       if (/pc_locked_field/.test(m)) return"That detail is set at acquisition, so it is locked on the free plan. Upgrade to change it.";
@@ -2995,7 +2995,7 @@
       if (plan.readonly) return "Your paid plan has ended, so your properties are read-only until you renew.";
       return plan.paid
         ? "Your plan covers " + plan.limit + (plan.limit === 1 ? " property" : " properties") + ". Need more?"
-        : "The free plan covers your first property. Add more from $250 a year and everything unlocks.";
+        : "The free plan covers your first property. Add more for $99 a year each and everything unlocks.";
     }
     /* a paid plan tops out at five properties self-serve; beyond that is a conversation */
     function planLimitLink() { if (plan.readonly) return { href: "#acctBillingCard", text: "Renew" }; return plan.paid ? { href: "enquire", text: "Contact us" } : { href: "#acctBillingCard", text: "Choose a plan" }; }
@@ -3003,7 +3003,7 @@
     /* "Your plan and billing" card: what they have, what it covers, when it runs to,
        and one step to add more properties. Reads the cached plan + billing row. */
     var billing = null;
-    var UPGRADE_PRICES = { 2: 250, 3: 500, 4: 750, 5: 997 };
+    var UPGRADE_PRICES = { 2: 99, 3: 198, 4: 297, 5: 396 };
     var upgradePick = null;     /* the plan key chosen in the chips */
     var upgradeSeq = 0;         /* ignores a price that arrives after a newer pick */
 
@@ -3043,7 +3043,7 @@
         : plan.paid ? "Update your card, download invoices or cancel in Stripe."
         : plan.readonly ? "Your paid plan has ended, so your properties are read-only. Renew with a plan that covers all " + leaseProperties.length + " to edit them again."
         : status === "canceled" ? "Your paid plan has ended. Your first property is still free."
-        : "Your first property is free. Paid plans start at $250 a year.";
+        : "Your first property is free. Paid plans start at $99 a year.";
 
       manage.hidden = !(plan.paid || hasCustomer);
       /* paid: upgrade on the existing subscription. Free or ended: buy straight

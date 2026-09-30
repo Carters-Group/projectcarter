@@ -24,7 +24,7 @@ Everything on this site is general information and planning tools, not financial
 ## Portfolio dashboard
 
 - [Property portfolio management](https://www.projectcarter.com.au/property-portfolio-management): one account for value, debt, equity, cash flow, leases and WALE, land tax and capital gains tax across residential and commercial properties
-- [Pricing](https://www.projectcarter.com.au/pricing): first property free, $250 a year per extra property, $997 a year for five; Done For You service quoted case by case for larger portfolios
+- [Pricing](https://www.projectcarter.com.au/pricing): first property free, then $99 a year for each extra property ($396 a year for five); Done For You service quoted case by case for larger portfolios
 
 ## Projects
 
