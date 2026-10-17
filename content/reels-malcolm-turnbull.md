@@ -34,6 +34,14 @@ Sources: https://www.sbs.com.au/news/liberals-vote-to-dump-turnbull-in-leadershi
 **Close:** "Should ex-PMs stay quiet? Comment below."
 Sources: https://www.chathamhouse.org/2026/05/malcolm-turnbull-aukus-huge-wealth-transfer-australian-government-us-and-uk · https://www.spectator.com.au/2026/02/the-exorcism-of-malcolm-turnbull/
 
+## Reel 6: The $444 million reef grant (2018) [strong]
+**Hook:** "$444 million. No tender. Six staff."
+> 2018. The Turnbull government hands $444 million to save the Great Barrier Reef. Not to a government agency. To a small private charity, the Great Barrier Reef Foundation. It had about six full-time staff. It didn't apply for the money, and there was no tender. Months later, the Auditor-General found there were no clear criteria to show it was value for money.
+**Close:** "Who decides where your tax dollars go?"
+Optional (verify): the grant was reportedly offered at a meeting between Turnbull, Josh Frydenberg and the foundation's chair, and the foundation said it was surprised by the offer.
+Legal care: don't suggest anyone personally benefited. The criticism is about the process.
+Sources: https://www.sbs.com.au/news/article/audit-finds-no-clear-criteria-for-444m-reef-grant/qxyc8vghe · https://www.sbs.com.au/news/concerns-grow-over-444-million-great-barrier-reef-money · https://indaily.com.au/news/2018/08/08/auditor-considers-inquiry-into-surprise-barrier-reef-money
+
 ---
 
 ## More ideas (verify before scripting)
