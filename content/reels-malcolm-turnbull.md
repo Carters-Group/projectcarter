@@ -40,6 +40,12 @@ Sources: https://www.chathamhouse.org/2026/05/malcolm-turnbull-aukus-huge-wealth
 **Close:** "Who decides where your tax dollars go?"
 Optional (verify): the grant was reportedly offered at a meeting between Turnbull, Josh Frydenberg and the foundation's chair, and the foundation said it was surprised by the offer.
 Legal care: don't suggest anyone personally benefited. The criticism is about the process.
+
+**Follow-up reel: "So what happened to the $444 million?"**
+> The money was meant to be spent over six years, to June 2024, on water quality, killing crown-of-thorns starfish, reef restoration science, Indigenous and community programs, and monitoring. Up to $44.3m could go on administration. But the Auditor-General estimated the total admin and fundraising cost could reach about $86 million. By 2022, almost all of it was committed, with only $5.2m left. The foundation says it funded more than 460 projects. Has the reef improved? There's no independent final verdict yet.
+Close: "Money well spent? You decide."
+Check before posting: whether a final evaluation of the partnership has come out since 2024.
+Sources: https://www.abc.net.au/news/2023-04-22/remember-that-record-funding-for-the-great-barrier-reef/102252268 · https://www.anao.gov.au/work/performance-audit/award-4433-million-grant-to-the-great-barrier-reef-foundation · https://www.anao.gov.au/work/performance-audit/implementation-the-great-barrier-reef-foundation-partnership · https://www.barrierreef.org/what-we-do/reef-trust-partnership
 Sources: https://www.sbs.com.au/news/article/audit-finds-no-clear-criteria-for-444m-reef-grant/qxyc8vghe · https://www.sbs.com.au/news/concerns-grow-over-444-million-great-barrier-reef-money · https://indaily.com.au/news/2018/08/08/auditor-considers-inquiry-into-surprise-barrier-reef-money
 
 ---
