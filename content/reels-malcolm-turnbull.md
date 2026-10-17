@@ -48,6 +48,17 @@ Check before posting: whether a final evaluation of the partnership has come out
 Sources: https://www.abc.net.au/news/2023-04-22/remember-that-record-funding-for-the-great-barrier-reef/102252268 · https://www.anao.gov.au/work/performance-audit/award-4433-million-grant-to-the-great-barrier-reef-foundation · https://www.anao.gov.au/work/performance-audit/implementation-the-great-barrier-reef-foundation-partnership · https://www.barrierreef.org/what-we-do/reef-trust-partnership
 Sources: https://www.sbs.com.au/news/article/audit-finds-no-clear-criteria-for-444m-reef-grant/qxyc8vghe · https://www.sbs.com.au/news/concerns-grow-over-444-million-great-barrier-reef-money · https://indaily.com.au/news/2018/08/08/auditor-considers-inquiry-into-surprise-barrier-reef-money
 
+## Reel 7: The $96.5 million weather website (2025) [very timely, partly a Turnbull story]
+**Hook:** "They said $4 million. It cost $96.5 million."
+> October 2025. The Bureau of Meteorology launches a new website. Australians hate it. The radar is hard to read and the place names are hard to see. 400,000 complaints pour in. Then the new BOM boss reveals the cost: not the $4.1 million first quoted, but $96.5 million, about 20 times more. Most of it went to one contract with Accenture, which grew from $31 million to $78 million over nine extensions. And who approved the overhaul? The Turnbull government, after a 2015 cyber attack.
+**Close:** "Was it worth $96 million? Check the radar."
+Accuracy notes:
+- The figure is $96.5m, not $85m.
+- The BOM says the cost covers back-end systems, not just the site you see. The website is about 10% of the wider IT overhaul (ROBUST, reported at close to $800m).
+- The Turnbull government approved and funded the program, but the website was built and launched under Labor (Minister Murray Watt). Say that, or the video looks one-sided.
+- The executive who ran it, Peter Stone, was reported to be leaving at the end of June 2026.
+Sources: https://www.abc.net.au/news/2025-11-23/bureau-of-meteorology-new-website-cost-blowout-to-96-million/106042202 · https://www.abc.net.au/news/2025-11-24/bom-website-approved-by-coalition-ceo-says/106047518 · https://www.abc.net.au/news/2025-12-11/weather-bureau-updates-new-website-after-critisicm/106128956 · https://www.sbs.com.au/news/article/bom-under-pressure-over-website-redesign-cost-blowout/mjb611x0p · https://www.thenewdaily.com.au/news/2025/11/25/bom-website-upgrade-turnbull · https://www.mediaweek.com.au/bureau-of-meteorology-executive-exits-amidst-96m-website-saga/
+
 ---
 
 ## More ideas (verify before scripting)
