@@ -38,7 +38,7 @@ Maybe it's because people remember. In 2016 his nickel refinery in Townsville co
 
 *On screen: an email signed "Terry Smith"*
 
-Administrators also found he'd been approving company spending under a fake name, "Terry Smith". The nephew who ran the company left the country instead of answering questions. This month, a court found him guilty of contempt.
+The administrators said he'd been approving company spending under another name, "Terry Smith". Palmer says there was nothing suspicious about it, because staff knew it was him. And the company's director, his nephew, left the country instead of answering the liquidators' questions. This month, a court found the nephew guilty of contempt.
 
 So when that same man spends a hundred million dollars telling you he'll fix the country... Australians aren't that dumb.
 
@@ -47,7 +47,7 @@ So when that same man spends a hundred million dollars telling you he'll fix the
 
 But here's the thing. Maybe he wasn't trying to win.
 
-After the 2019 election, Palmer said his real goal was stopping Bill Shorten. His ads hammered Labor, and most of his preferences flowed to the Coalition. Labor's own review said his spending drowned out their message. Palmer was claiming credit within days.
+After the 2019 election, Palmer said his real goal was stopping Bill Shorten. His ads hammered Labor, and most of his preferences flowed to the Coalition. Labor's own review said his spending swamped their advertising. Palmer was claiming credit within days.
 
 *On screen: "Didn't win a seat. Claims he picked the government."*
 
@@ -60,7 +60,7 @@ Parliament has now passed laws capping how much anyone can donate and spend at e
 
 *On screen: Clive Palmer, smiling.*
 
-The man who spent a quarter of a billion dollars on politics and got almost nothing for it says the caps are an attack on democracy.
+The man who spent a quarter of a billion dollars on politics and got almost nothing for it says the caps attack his political freedom.
 
 **[2:35] CLOSE**
 *Text on black: "$260,000,000. 0 lower house seats."*
@@ -80,9 +80,10 @@ You can't buy Australians.
 - **"Zero lower house seats since 2013":** Palmer won Fairfax himself in 2013. Since then, no lower house seats. The 2022 Senate seat was Ralph Babet, who later left the party. (verify Babet's current party)
 - **"More than Labor spent" (2022):** from The Conversation's analysis. The Coalition spent more.
 - **"$200 a vote":** worked out from $123.5m and the UAP's 2022 House vote of about 4.1%, roughly 600,000 votes. Check the AEC vote total before putting the number on screen. In 2022 the party got about $1.9m back in public funding.
-- **The 2019 twist:** "his preferences decided it" is Palmer's own claim. The Labor review (Emerson and Weatherill) said his spending drowned out Labor's ads. The script says exactly that, no more.
+- **The 2019 twist:** "his preferences decided it" is Palmer's own claim. The Labor review (Emerson and Weatherill) said his spending "disrupted any impact" Labor's own advertising could have had. The script says exactly that, no more.
 - **Spending caps:** the reforms cap donations at $50,000 and spending at $800,000 per seat. Check the start date (reported as mid-2026, possibly delayed) and whether his High Court challenge has been filed or heard.
 - **Mensink:** found guilty of contempt on 8 October 2026. His penalty hasn't been set.
+- **Check the quote:** the line "attack his political freedom" paraphrases reports that he says the caps infringe political freedoms. Find his exact words and quote them if you can.
 - **Legal care:** no "scam", "stole" or "fraud" about Palmer. He's never been convicted over Queensland Nickel. Keep "Administrators found" and "Palmer said" as written.
 
 ## Sources
