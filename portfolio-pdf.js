@@ -130,7 +130,7 @@ var pcPortfolioPdf = (function () {
     doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(BLUE[0], BLUE[1], BLUE[2]);
     doc.text("PROJECT CARTER", L, y);
     doc.setFont("helvetica", "normal"); doc.setTextColor(120);
-    doc.text("Corporate Property Advisor", w - L, y, { align: "right" });
+    doc.text("Developer & Value-Add Investor", w - L, y, { align: "right" });
     doc.setDrawColor(BLUE[0], BLUE[1], BLUE[2]); doc.setLineWidth(1.2); doc.line(L, y + 12, w - L, y + 12); doc.setLineWidth(0.2);
     doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
     doc.text("Portfolio Review", L, y + 44);

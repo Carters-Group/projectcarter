@@ -1,8 +1,8 @@
 # Project Carter — website
 
-Website for **Project Carter** — Trent Macartney, a corporate property advisor
-working with property developments, value-add commercial, family offices and
-managed funds. Positioning: a creative angle where others see roadblocks —
+Website for **Project Carter** — Trent Macartney, a developer and value-add commercial investor,
+turning problem sites into quality assets and bringing character back in place of
+modern boxes. Positioning: a creative angle where others see roadblocks —
 "there is always a solution to every property".
 
 The site's structure and visual language are modelled on
@@ -401,7 +401,7 @@ Everything below is placeholder and should be replaced before the site goes publ
 | About / bio copy | `index.html` → `#about` |
 | Project copy, stats and galleries | `project-*.html` |
 | Contact phone / email | `enquire.html` (currently `0411 940 010` / `trent@cartersinvestments.com.au`) |
-| Royal Terraces / City West Villas renders | placeholder concept images — swap for final renders when available (`assets/images/projects/`) |
+| Royal Terraces / City West Villas renders | Royal Terraces uses the approved renders (copied from the live royalterraces.com.au build); City West Villas still placeholders (`assets/images/projects/`) |
 | ABN / registered entity details | footer, if required |
 
 Already in place (not placeholders): Supabase URL + anon key in `pc-auth.js`,

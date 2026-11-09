@@ -1,13 +1,13 @@
 # Project Carter
 
-> Project Carter is Trent Macartney's corporate property advisory, working Australia-wide with property developers, value-add commercial owners, family offices and managed funds on feasibility, capital structuring and delivery. The site also offers free Australian commercial property calculators and a property portfolio dashboard (first property free).
+> Project Carter is Trent Macartney's development and value-add commercial investment business, working Australia-wide to turn problem sites into quality assets and to build places with character rather than modern boxes. The site also offers free Australian commercial property calculators and a property portfolio dashboard (first property free).
 
 Everything on this site is general information and planning tools, not financial, tax, legal or planning advice. Figures are estimates built from what the user enters. Enquiries are taken only through the enquiry form.
 
 ## About
 
-- [About Trent Macartney](https://www.projectcarter.com.au/about): background, who he works with and service area (Australia-wide)
-- [Approach](https://www.projectcarter.com.au/approach): the four-stage process and the six service areas
+- [About Trent Macartney](https://www.projectcarter.com.au/about): background, the projects and why they look the way they do
+- [Approach](https://www.projectcarter.com.au/approach): the five-stage process and what Project Carter takes on
 - [Enquire](https://www.projectcarter.com.au/enquire): the only way to contact Project Carter
 
 ## Free calculators (Australia)
@@ -29,6 +29,6 @@ Everything on this site is general information and planning tools, not financial
 ## Projects
 
 - [Haig On The Park](https://www.projectcarter.com.au/project-haig-on-the-park): four sustainable homes, South Toowoomba QLD, completed and sold out
-- [Royal Terraces](https://www.projectcarter.com.au/project-royal-terraces): nine Art Deco-inspired terrace homes, Toowoomba City QLD, construction commencing
+- [Royal Terraces](https://www.projectcarter.com.au/project-royal-terraces): nine heritage-inspired terrace homes, Toowoomba City QLD, DA approved; project site https://www.royalterraces.com.au
 - [City West Villas](https://www.projectcarter.com.au/project-city-west-villas): four north-facing villas in a heritage precinct, Toowoomba City QLD, construction commencing
 - [189 Balaclava Road](https://www.projectcarter.com.au/project-balaclava-road): two-level commercial freehold value-add, Caulfield North VIC
