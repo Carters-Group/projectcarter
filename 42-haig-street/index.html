@@ -37,6 +37,7 @@
   --line:rgba(236,234,226,.17);--card:#172120;color-scheme:dark}
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 17.5px/1.7 var(--body)}
 img{max-width:100%;display:block}
@@ -221,6 +222,10 @@ form input,form select,form textarea{font:400 16px var(--body);color:var(--ink);
 form textarea{min-height:90px;resize:vertical}
 .reg .privacy{font-size:13.5px;color:var(--ink-2);line-height:1.55}
 .ok{font-size:14.5px;color:var(--green);font-weight:600}
+.done{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:6px;padding:clamp(24px,4vw,36px);display:grid;gap:12px;align-content:start;outline:none}
+.done .tick{width:52px;height:52px;border-radius:50%;background:var(--green);color:var(--paper);display:grid;place-items:center;font:700 28px/1 var(--body)}
+.done h3{font-size:clamp(24px,2.4vw,30px)}
+.done p{color:var(--ink-2)}
 .contact-card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px 18px;display:grid;gap:4px;margin-top:8px}
 .contact-card b{font:600 20px var(--head)}
 .notice{border:2px solid var(--ink);padding:clamp(20px,3vw,32px);display:grid;gap:12px;max-width:900px}
@@ -465,6 +470,12 @@ dialog::backdrop{background:rgba(8,12,11,.94)}
       <p>Send your details and Trent will be in touch to arrange a time, and answer any questions.</p>
       <div class="contact-card"><b>Trent Macartney</b><span><a href="tel:+61411940010">0411 940 010</a></span><span><a href="mailto:trent@cartersinvestments.com.au">trent@cartersinvestments.com.au</a></span></div>
     </div>
+    <div class="done" id="f-done" role="status" aria-live="polite" tabindex="-1" hidden>
+      <span class="tick" aria-hidden="true">✓</span>
+      <h3>Thanks, your enquiry has been sent.</h3>
+      <p>Trent will be in touch shortly to arrange a time to see Unit 2. If it's urgent, call him on <a href="tel:+61411940010"><b>0411&nbsp;940&nbsp;010</b></a>.</p>
+      <p><button type="button" class="btn btn-outline" id="f-again">Send another enquiry</button></p>
+    </div>
     <form id="reg-form" novalidate>
       <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
       <p class="full cap" style="margin:0">All fields are required except the message and the updates box.</p>
@@ -669,6 +680,7 @@ if("IntersectionObserver" in window){
 /* ---------- enquiry form ----------
    Offline for now (Trent, 22 Nov 2026): no Formspree form yet, so a sent enquiry opens the visitor's email app
    with the details filled in. At go-live, set FORM to a new Formspree endpoint (not the Royal St one). */
+$("#f-again").addEventListener("click",()=>{$("#f-done").hidden=true;$("#reg-form").hidden=false;$("#f-first").focus()});
 const FORM="https://formspree.io/f/xqpkjvkb";   // Project Carter's Formspree form (same inbox as /enquire); subject line marks it as a 42 Haig St enquiry
 $("#reg-form").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -690,11 +702,25 @@ $("#reg-form").addEventListener("submit",async e=>{
   try{
     const r=await fetch(FORM,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(data)});
     if(!r.ok)throw new Error(r.status);
-    f.reset();say("Thank you. Trent will be in touch shortly to arrange a time.");
+    // Clear confirmation (Trent, 22 Nov 2026): the form is replaced by a "sent" panel so nobody wonders whether it went
+    try{if(window.fbq){fbq("track","Lead",{content_name:"Unit 2, 42 Haig Street"});fbq("track","CompleteRegistration",{content_name:"Unit 2, 42 Haig Street"})}}catch(_){}
+    const first=data.first_name;f.reset();ok.hidden=true;f.hidden=true;
+    const done=$("#f-done");done.querySelector("h3").textContent="Thanks "+first+", your enquiry has been sent.";done.hidden=false;
+    setTimeout(()=>{const y=done.getBoundingClientRect().top+scrollY-Math.max(16,(innerHeight-done.offsetHeight)/2);document.documentElement.style.scrollBehavior="auto";scrollTo(0,y);document.documentElement.style.scrollBehavior=""},30);done.focus({preventScroll:true});
   }catch(err){say("Sorry, that didn't send. Please call Trent Macartney on 0411 940 010.",true)}
   finally{btn.disabled=false}
 });
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script>
+/* Meta Pixel, Haig-only (Trent, 22 Nov 2026: a new pixel just for Haig, not the Royal one). Off until HAIG_PIXEL is set.
+   PageView on load; Lead + CompleteRegistration after a sent enquiry, with the home only (never contact details).
+   When switching it on, add the Meta paragraphs back into privacy.html (copy from the Royal St policy). */
+const HAIG_PIXEL="";
+if(HAIG_PIXEL){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
+s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init',HAIG_PIXEL);fbq('track','PageView');}
+</script>
 </body>
 </html>
