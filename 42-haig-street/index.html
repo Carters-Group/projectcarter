@@ -713,10 +713,10 @@ $("#reg-form").addEventListener("submit",async e=>{
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script>
-/* Meta Pixel, Haig-only (Trent, 22 Nov 2026: a new pixel just for Haig, not the Royal one). Off until HAIG_PIXEL is set.
+/* Meta Pixel, Haig-only (Trent, 22 Nov 2026: a new pixel just for Haig, not the Royal one). On since 22 Nov 2026.
    PageView on load; Lead + CompleteRegistration after a sent enquiry, with the home only (never contact details).
-   When switching it on, add the Meta paragraphs back into privacy.html (copy from the Royal St policy). */
-const HAIG_PIXEL="";
+ privacy.html has the matching Meta paragraphs. */
+const HAIG_PIXEL="1134666466156401";   // dataset "42 haig st" (Events Manager, created 22 Nov 2026). A second empty "42 Haig St" dataset (1451146603233009) is unused
 if(HAIG_PIXEL){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
 s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
