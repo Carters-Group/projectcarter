@@ -2726,3 +2726,131 @@ h1, h2, h3 {
 @media (max-width: 620px) {
   .gallery.renders.cols-2 { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+   Partnerships landing page (partner.html)
+   ========================================================= */
+.pt-hero .project-locale { max-width: 46ch; font-size: 1.12rem; }
+.pt-hero .pm-hero-actions { margin-top: 32px; }
+
+.pt-section { padding-block: clamp(64px, 10vw, 120px); border-top: 1px solid var(--line-soft); }
+.pt-section--alt { background: var(--bg-2); }
+
+.pt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.98rem;
+  border: 1px solid var(--line-soft);
+}
+.pt-table th, .pt-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 16px 20px;
+  border-top: 1px solid var(--line-soft);
+}
+.pt-table thead th {
+  border-top: 0;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  background: var(--bg-2);
+}
+.pt-section--alt .pt-table thead th { background: var(--bg-3); }
+.pt-table td { color: var(--muted); }
+.pt-table td:first-child { color: var(--text); font-weight: 500; }
+.pt-table .is-us { color: var(--text); }
+.pt-table .is-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pt-table tr.is-total td { color: var(--text); font-weight: 600; border-top: 1px solid var(--line); }
+.pt-table tr.is-sub td { padding-top: 8px; padding-bottom: 8px; border-top: 0; font-size: 0.92rem; }
+.pt-table-wrap { overflow-x: auto; }
+
+.pt-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.pt-card-list { list-style: none; margin: 0; padding: 0; }
+.pt-card-list li {
+  position: relative;
+  padding: 6px 0 6px 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.pt-card-list li::before { content: "→"; position: absolute; left: 0; color: var(--accent); }
+.service-card .pt-card-list { margin-top: -6px; }
+
+.service-card .pt-fee {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 4.4vw, 50px);
+  font-weight: 600;
+  line-height: 1;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.service-card .pt-fee small { font-size: 0.42em; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
+.service-card .pt-fee-label {
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600;
+  color: var(--accent); margin: 0 0 16px;
+}
+
+.pt-callout {
+  margin: clamp(28px, 4vw, 40px) 0 0;
+  padding: 22px 26px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: rgba(95, 161, 208, 0.06);
+  color: var(--text);
+}
+.pt-callout p { margin: 0; color: var(--muted); }
+.pt-callout p + p { margin-top: 10px; }
+.pt-callout strong { color: var(--text); }
+
+.pt-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+}
+.pt-example-head { font-size: clamp(22px, 2.6vw, 30px); margin: 0 0 8px; }
+.pt-example-sub { color: var(--muted); margin: 0 0 20px; font-size: 0.95rem; }
+.pt-note { font-size: 12.5px; color: var(--muted); margin: 14px 0 0; }
+
+/* Apply section: copy left, multi-step form right */
+.pt-apply { position: relative; overflow: hidden; }
+.pt-apply .landing-inner { align-items: start; }
+.pt-apply .landing-copy { max-width: 44ch; }
+.pt-apply .landing-copy h2 { font-size: clamp(34px, 5vw, 58px); margin: 0 0 20px; }
+.pt-apply .landing-copy p { color: var(--muted); }
+.pt-apply .landing-form { background: rgba(20, 26, 36, 0.92); }
+.pt-apply .field input.is-optional::placeholder { color: rgba(154, 168, 184, 0.6); }
+
+.pt-done { display: grid; gap: 16px; }
+.pt-done[hidden] { display: none; }
+.pt-done h3 { font-size: clamp(26px, 3vw, 34px); }
+.pt-done p { margin: 0; color: var(--muted); }
+.pt-done .btn { justify-self: start; }
+.pt-form-error { color: #e0a34a; font-size: 13px; margin: 0; }
+.pt-form-error:empty { display: none; }
+
+.pt-fine {
+  border-top: 1px solid var(--line-soft);
+  padding-block: 36px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.pt-fine p { margin: 0 0 10px; max-width: 110ch; }
+
+@media (max-width: 900px) {
+  .pt-split { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .pt-table th, .pt-table td { padding: 12px 14px; }
+  .pt-table--compare { font-size: 0.9rem; }
+}
+.pt-hero .project-eyebrow { text-shadow: 0 1px 10px rgba(12, 16, 22, 0.85); }

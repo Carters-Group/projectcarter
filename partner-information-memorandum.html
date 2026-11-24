@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Information Memorandum | Project Carter Partnerships</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0c1016" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <script>
+    /* Light gate: the IM opens after the /partner form is sent (it sets
+       pc_im_unlocked). ?view=1 opens it directly for links Trent sends by
+       hand. If storage is blocked, show it rather than lose the reader. */
+    (function () {
+      try {
+        if (/[?&]view=1\b/.test(location.search)) { localStorage.setItem("pc_im_unlocked", "1"); return; }
+        if (localStorage.getItem("pc_im_unlocked") !== "1") location.replace("partner#apply");
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c1016; --bg-2: #141a24; --bg-3: #1c2431;
+      --text: #eef2f7; --muted: #9aa8b8;
+      --line: rgba(180, 205, 232, 0.14); --line-soft: rgba(180, 205, 232, 0.08);
+      --accent: #5fa1d0;
+      --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+      --font-body: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #070a0e; color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); }
+
+    .im-bar {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 16px; background: rgba(12, 16, 22, 0.94); border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .im-bar a.back { color: var(--muted); text-decoration: none; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+    .im-bar a.back::before { content: "← "; color: var(--accent); }
+    .im-btn {
+      font: 600 12px/1 var(--font-body); letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 12px 18px; border: 0; background: var(--accent); color: #0c1016; cursor: pointer; text-decoration: none;
+    }
+
+    .im-doc { max-width: 900px; margin: 32px auto 64px; padding: 0 16px; display: grid; gap: 24px; }
+    .im-page { background: var(--bg); border: 1px solid var(--line-soft); padding: clamp(28px, 6vw, 64px); }
+
+    .im-cover { position: relative; min-height: 640px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; padding: clamp(28px, 6vw, 64px); }
+    .im-cover-media { position: absolute; inset: 0; background: url('assets/images/projects/royal-terraces/royal-view-hero.jpg') center / cover no-repeat; }
+    .im-cover-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,16,22,0.55) 0%, rgba(12,16,22,0.2) 35%, rgba(12,16,22,0.92) 78%, #0c1016 100%); }
+    .im-cover > *:not(.im-cover-media) { position: relative; }
+    .im-brand { position: absolute !important; top: clamp(28px, 6vw, 64px); left: clamp(28px, 6vw, 64px); font-family: var(--font-display); font-weight: 700; letter-spacing: 0.12em; font-size: 20px; }
+    .im-brand small { display: block; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.24em; color: var(--muted); font-weight: 600; }
+    .im-tag { position: absolute !important; right: 12px; top: 12px; font-size: 10px; color: rgba(238,242,247,0.7); background: rgba(12,16,22,0.5); padding: 4px 8px; }
+
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.01em; line-height: 1.05; margin: 0; }
+    h1 { font-size: clamp(40px, 7vw, 72px); margin-bottom: 18px; }
+    h2 { font-size: clamp(28px, 4vw, 40px); margin-bottom: 18px; }
+    h3 { font-size: 21px; margin: 26px 0 10px; }
+    .eyebrow { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; color: var(--accent); margin: 0 0 14px; }
+    .sec-num { font-family: var(--font-display); color: var(--accent); letter-spacing: 0.18em; font-size: 14px; margin: 0 0 8px; }
+    p { margin: 0 0 14px; color: var(--muted); }
+    p.lead { color: var(--text); font-size: 1.08rem; }
+    strong { color: var(--text); font-weight: 600; }
+    ul.list { list-style: none; padding: 0; margin: 0 0 14px; }
+    ul.list li { position: relative; padding: 5px 0 5px 20px; color: var(--muted); }
+    ul.list li::before { content: "→"; position: absolute; left: 0; color: var(--accent); }
+
+    .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 13px; color: var(--muted); margin-top: 18px; }
+
+    table { width: 100%; border-collapse: collapse; margin: 6px 0 16px; font-size: 14px; }
+    th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-top: 1px solid var(--line-soft); }
+    thead th { border-top: 0; background: var(--bg-2); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    td { color: var(--muted); }
+    td:first-child { color: var(--text); }
+    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    tr.total td { color: var(--text); font-weight: 600; border-top: 1px solid var(--line); }
+    td.tick { color: var(--accent); font-weight: 600; text-align: center; }
+    th.c { text-align: center; }
+    table { border: 1px solid var(--line-soft); }
+
+    .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); margin: 10px 0 6px; }
+    .phase { background: var(--bg); padding: 20px 22px; }
+    .phase h3 { margin-top: 4px; }
+    .phase .gate { font-size: 12.5px; color: var(--text); border-top: 1px solid var(--line-soft); padding-top: 10px; margin: 10px 0 0; }
+    .phase .gate b { color: var(--accent); font-weight: 600; }
+
+    .glance { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); margin: 10px 0 18px; }
+    .glance div { background: var(--bg-2); padding: 18px; }
+    .glance b { display: block; font-family: var(--font-display); font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.1; }
+    .glance span { font-size: 12px; color: var(--muted); }
+
+    .callout { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: rgba(95,161,208,0.06); padding: 16px 20px; margin: 14px 0; }
+    .callout p { margin: 0; }
+
+    .projects { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); }
+    .proj { background: var(--bg); }
+    .proj-img { aspect-ratio: 16 / 9; background: var(--bg-2) center / cover no-repeat; }
+    .proj div.b { padding: 16px 18px; }
+    .proj h3 { margin: 0 0 4px; font-size: 19px; }
+    .proj .st { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 0 0 8px; }
+    .proj p { font-size: 13.5px; margin: 0; }
+
+    ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0 0 16px; }
+    ol.steps li { counter-increment: s; position: relative; padding: 10px 0 10px 46px; border-top: 1px solid var(--line-soft); color: var(--muted); }
+    ol.steps li::before { content: counter(s, decimal-leading-zero); position: absolute; left: 0; top: 10px; font-family: var(--font-display); color: var(--accent); letter-spacing: 0.12em; }
+    .fine { font-size: 12px; line-height: 1.6; }
+    .foot { font-size: 11px; color: var(--muted); border-top: 1px solid var(--line-soft); margin-top: 26px; padding-top: 12px; display: flex; justify-content: space-between; gap: 12px; }
+
+    @media (max-width: 640px) {
+      .phases, .projects, .glance { grid-template-columns: 1fr; }
+      .im-cover { min-height: 520px; }
+      th, td { padding: 9px 10px; }
+    }
+
+    /* Print / Save as PDF: one A4 sheet per .im-page, light paper colours */
+    @page { size: A4; margin: 14mm; }
+    @media print {
+      :root { --bg: #fff; --bg-2: #f1f4f8; --text: #0c1016; --muted: #3c4856; --line: #c9d3de; --line-soft: #dde4ec; --accent: #2f6f9e; }
+      body { background: #fff; font-size: 11pt; }
+      .im-bar { display: none; }
+      .im-doc { margin: 0; padding: 0; max-width: none; gap: 0; display: block; }
+      .im-page { border: 0; padding: 0; break-after: page; }
+      .im-page:last-child { break-after: auto; }
+      .phase, .proj, tr, .callout { break-inside: avoid; }
+      .im-cover { min-height: 260mm; padding: 14mm; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .im-cover p, .im-cover .meta { color: rgba(255,255,255,0.85); }
+      .im-cover h1 { color: #fff; }
+      .im-cover .eyebrow { color: #9fcbeb; }
+      .im-cover-media::after { background: linear-gradient(180deg, rgba(12,16,22,0.55) 0%, rgba(12,16,22,0.2) 35%, rgba(12,16,22,0.95) 80%, #0c1016 100%); }
+      .proj-img, thead th, .glance div { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="im-bar">
+    <a class="back" href="partner">Partnerships</a>
+    <button class="im-btn" type="button" onclick="window.print()">Save as PDF</button>
+  </div>
+
+  <main class="im-doc">
+
+    <!-- ===== COVER ===== -->
+    <section class="im-page im-cover">
+      <div class="im-cover-media" aria-hidden="true"></div>
+      <div class="im-brand">PROJECT CARTER<small>CARTERS INVESTMENT GROUP</small></div>
+      <span class="im-tag">Artist's impression, indicative only</span>
+      <p class="eyebrow">Information Memorandum</p>
+      <h1>Development &amp; Commercial Partnerships</h1>
+      <p class="lead">You own the asset. I deliver the uplift.</p>
+      <div class="meta">
+        <span>Trent Macartney, Founder</span>
+        <span>Edition: November 2026</span>
+        <span>Confidential, general information only</span>
+      </div>
+    </section>
+
+    <!-- ===== 1. INTRODUCTION ===== -->
+    <section class="im-page">
+      <p class="sec-num">01</p>
+      <h2>Introduction</h2>
+      <p class="lead">I'm Trent Macartney, a developer and value-add commercial investor. I go after the sites and buildings other people walk away from, and do the work to turn them into something worth keeping.</p>
+      <p>Most of my work is on my own account: heritage-inspired homes in Toowoomba, a commercial freehold being repositioned in Melbourne, and boutique residential projects taken from bare site to sold homes. This memorandum explains how I now offer the same process to investors who have the capital or the land, but not the time or the team to run a project themselves.</p>
+
+      <h3>Why this exists</h3>
+      <p>Investors with money or a site usually end up with one of three options, and none of them is a great fit:</p>
+      <ul class="list">
+        <li><strong>A buyer's agent</strong> finds and buys the asset, then the job ends at settlement. The approvals, delivery and exit, which is where the value is made, are left with you.</li>
+        <li><strong>A passive fund</strong> takes your capital, but you don't own the asset, you don't control the decisions, and fees run every year whether the result comes or not.</li>
+        <li><strong>Doing it yourself</strong> means managing consultants, councils, builders and agents for two or three years, usually on top of a business or career.</li>
+      </ul>
+      <p>The partnership sits in between. You own the asset outright. I take on the responsibility for delivering it, and most of my reward comes from the uplift.</p>
+
+      <h3>The model at a glance</h3>
+      <div class="glance">
+        <div><b>$20,000</b><span>Engagement fee + GST, on signing</span></div>
+        <div><b>2.5%</b><span>Acquisition fee + GST, less the $20,000</span></div>
+        <div><b>75 / 25</b><span>Uplift split, you / Carters</span></div>
+        <div><b>$0</b><span>Ongoing management fee from Carters</span></div>
+        <div><b>2 to 3 yrs</b><span>Typical term, engagement to exit</span></div>
+        <div><b>100%</b><span>Of the asset owned by you</span></div>
+      </div>
+      <div class="foot"><span>Project Carter, Information Memorandum</span><span>General information only</span></div>
+    </section>
+
+    <!-- ===== 2. HOW IT WORKS ===== -->
+    <section class="im-page">
+      <p class="sec-num">02</p>
+      <h2>How it works</h2>
+      <p>Every project runs through four phases. Each one ends with a decision point where you see the numbers and approve the next step before money is committed.</p>
+      <div class="phases">
+        <div class="phase">
+          <p class="sec-num">Phase 1</p>
+          <h3>Strategy &amp; due diligence</h3>
+          <ul class="list">
+            <li>Investment brief: goals, capital, risk appetite, timeframe and target return</li>
+            <li>Site search, on and off market, against the brief</li>
+            <li>Planning, title, physical, environmental and market due diligence</li>
+            <li>Feasibility, business plan, budget and program</li>
+          </ul>
+          <p class="gate"><b>Decision point:</b> you approve the site, the business plan and the budget.</p>
+        </div>
+        <div class="phase">
+          <p class="sec-num">Phase 2</p>
+          <h3>Acquisition</h3>
+          <ul class="list">
+            <li>Price and contract negotiation, including conditions that protect the plan</li>
+            <li>Finance introductions, lender packs and valuation</li>
+            <li>Coordination with your solicitor and accountant on structure and settlement</li>
+          </ul>
+          <p class="gate"><b>Decision point:</b> you sign the contract and settle, in your own name or entity.</p>
+        </div>
+        <div class="phase">
+          <p class="sec-num">Phase 3</p>
+          <h3>Approvals &amp; value-add</h3>
+          <ul class="list">
+            <li>Design, consultant team and council approvals for development</li>
+            <li>Re-leasing, refurbishment, signage and new income for commercial</li>
+            <li>Builder tender, pricing comparisons and contract recommendation</li>
+            <li>Monthly reporting on budget, program and risk</li>
+          </ul>
+          <p class="gate"><b>Decision point:</b> you approve the builder or works contract and any material budget change.</p>
+        </div>
+        <div class="phase">
+          <p class="sec-num">Phase 4</p>
+          <h3>Delivery &amp; exit</h3>
+          <ul class="list">
+            <li>Project management through construction or repositioning</li>
+            <li>Final approvals, defects and handover</li>
+            <li>Sales strategy: off the plan, on completion, or as a whole asset</li>
+            <li>Or independent revaluation and refinance if you're holding</li>
+          </ul>
+          <p class="gate"><b>Decision point:</b> you approve the sale or the refinance.</p>
+        </div>
+      </div>
+      <div class="foot"><span>Project Carter, Information Memorandum</span><span>General information only</span></div>
+    </section>
+
+    <!-- ===== 3. ROLES ===== -->
+    <section class="im-page">
+      <p class="sec-num">03</p>
+      <h2>Roles &amp; governance</h2>
+      <p class="lead">Ownership and delivery are kept deliberately separate. You hold the asset and the big decisions. I hold the responsibility for getting it done.</p>
+      <table>
+        <thead><tr><th>Responsibility</th><th class="c">You</th><th class="c">Carters</th></tr></thead>
+        <tbody>
+          <tr><td>Provide the capital or the land</td><td class="tick">●</td><td></td></tr>
+          <tr><td>Own the asset, in your own name or entity</td><td class="tick">●</td><td></td></tr>
+          <tr><td>Arrange finance</td><td class="tick">●</td><td class="tick">Assists</td></tr>
+          <tr><td>Approve the business plan and budget</td><td class="tick">●</td><td class="tick">Prepares</td></tr>
+          <tr><td>Approve reserved matters (below)</td><td class="tick">●</td><td class="tick">Recommends</td></tr>
+          <tr><td>Find, brief and manage consultants, builders and agents</td><td></td><td class="tick">●</td></tr>
+          <tr><td>Day-to-day project management against the approved plan</td><td></td><td class="tick">●</td></tr>
+          <tr><td>Monthly reporting on budget, program and risk</td><td></td><td class="tick">●</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Reserved matters: the decisions that stay with you</h3>
+      <ul class="list">
+        <li>Buying the site or asset, and the contract price</li>
+        <li>The business plan, budget and target return</li>
+        <li>Spending beyond the approved budget tolerance</li>
+        <li>Appointing the builder or the main works contractor</li>
+        <li>New borrowing, refinancing or giving security over the asset</li>
+        <li>Selling the asset, or the sales strategy for an off the plan release</li>
+      </ul>
+
+      <div class="callout">
+        <p><strong>Logic over feel.</strong> Every recommendation comes with the feasibility and the options behind it. Reserved matters have a set turnaround time in the agreement, so a project is never left waiting on a decision.</p>
+      </div>
+
+      <h3>Reporting</h3>
+      <p>A monthly report covering spend against budget, the program, approvals status, risks and the current feasibility. At each decision point, a short decision paper with the recommendation and the numbers.</p>
+      <div class="foot"><span>Project Carter, Information Memorandum</span><span>General information only</span></div>
+    </section>
+
+    <!-- ===== 4. FEES ===== -->
+    <section class="im-page">
+      <p class="sec-num">04</p>
+      <h2>Fees &amp; worked examples</h2>
+      <table>
+        <thead><tr><th>Fee</th><th>Amount</th><th>When</th></tr></thead>
+        <tbody>
+          <tr><td>Engagement fee</td><td>$20,000 + GST</td><td>On signing the engagement</td></tr>
+          <tr><td>Acquisition fee</td><td>2.5% of the purchase price, or of the agreed land value if you already own the site, less the $20,000 engagement fee, + GST</td><td>At settlement, or at the start for an existing site</td></tr>
+          <tr><td>Uplift share</td><td>25% of the uplift to Carters, 75% to you, + GST on Carters' share</td><td>At the agreed exit: sale, or revaluation at completion</td></tr>
+          <tr><td>Ongoing management fee</td><td>None</td><td></td></tr>
+        </tbody>
+      </table>
+
+      <h3>How uplift is measured</h3>
+      <ul class="list">
+        <li><strong>Development:</strong> net profit on sale after every project cost: land, acquisition costs, finance, consultants, authority fees, construction, selling costs and the engagement and acquisition fees.</li>
+        <li><strong>Value-add commercial:</strong> an independent valuation at completion, less the total cost base: purchase, acquisition costs, capital works, fees and holding costs net of rental income.</li>
+        <li><strong>Payment timing:</strong> on sale for a development. For an asset you keep, on revaluation at completion, with the option to defer to a later sale or refinance.</li>
+        <li><strong>Third-party costs:</strong> consultants, builders, authority fees and agents are project costs paid by the owner, and are included before uplift is calculated.</li>
+      </ul>
+
+      <h3>Example A: development</h3>
+      <table>
+        <thead><tr><th>$2.5M development site</th><th class="num">You</th><th class="num">Carters</th></tr></thead>
+        <tbody>
+          <tr><td>Engagement fee</td><td class="num"></td><td class="num">$20,000</td></tr>
+          <tr><td>Acquisition fee: 2.5% of $2,500,000 = $62,500, less $20,000</td><td class="num"></td><td class="num">$42,500</td></tr>
+          <tr><td>Net profit after all costs and fees: $1,200,000, split 75 / 25</td><td class="num">$900,000</td><td class="num">$300,000</td></tr>
+          <tr class="total"><td>Total</td><td class="num">$900,000</td><td class="num">$362,500</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Example B: value-add commercial, held</h3>
+      <table>
+        <thead><tr><th>$4.0M commercial building</th><th class="num">You</th><th class="num">Carters</th></tr></thead>
+        <tbody>
+          <tr><td>Engagement fee</td><td class="num"></td><td class="num">$20,000</td></tr>
+          <tr><td>Acquisition fee: 2.5% of $4,000,000 = $100,000, less $20,000</td><td class="num"></td><td class="num">$80,000</td></tr>
+          <tr><td>Revalued at $5,600,000, less a $4,950,000 cost base (purchase $4.0M, acquisition costs $250K, capital works $500K, fees $100K, net holding costs $100K) = $650,000 uplift, split 75 / 25</td><td class="num">$487,500</td><td class="num">$162,500</td></tr>
+          <tr class="total"><td>Total</td><td class="num">$487,500</td><td class="num">$262,500</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Example C: no uplift</h3>
+      <table>
+        <thead><tr><th>$2.5M site, project breaks even</th><th class="num">You</th><th class="num">Carters</th></tr></thead>
+        <tbody>
+          <tr><td>Engagement and acquisition fees, as in Example A</td><td class="num"></td><td class="num">$62,500</td></tr>
+          <tr><td>Uplift: $0</td><td class="num">$0</td><td class="num">$0</td></tr>
+        </tbody>
+      </table>
+      <p class="fine">Examples are illustrative only, not forecasts, and exclude GST. The fees and the uplift definition for each project are set out in the written agreement.</p>
+      <div class="foot"><span>Project Carter, Information Memorandum</span><span>General information only</span></div>
+    </section>
+
+    <!-- ===== 5. TRACK RECORD ===== -->
+    <section class="im-page">
+      <p class="sec-num">05</p>
+      <h2>Track record</h2>
+      <p>The same process, on my own projects.</p>
+      <div class="projects">
+        <div class="proj">
+          <div class="proj-img" style="background-image:url('assets/images/projects/royal-terraces/royal-view.jpg')"></div>
+          <div class="b">
+            <p class="st">DA approved</p>
+            <h3>Royal Terraces</h3>
+            <p>Nine heritage-inspired terraces in Toowoomba City. Painted facades, iron-lace balconies and a 7.9 star average energy rating (7.1 to 8.4 across the nine homes). Artist's impression, indicative only.</p>
+          </div>
+        </div>
+        <div class="proj">
+          <div class="proj-img" style="background-image:url('assets/images/projects/balaclava/balaclava-street.jpg')"></div>
+          <div class="b">
+            <p class="st">Value-add underway</p>
+            <h3>189 Balaclava Road</h3>
+            <p>A 1,455sqm two-level commercial freehold in Caulfield North, being repositioned with longer leases, refreshed internals, rooftop signage and solar income.</p>
+          </div>
+        </div>
+        <div class="proj">
+          <div class="proj-img" style="background-image:url('assets/images/projects/city-west-villas/cwv-cover.jpg')"></div>
+          <div class="b">
+            <p class="st">Construction commencing</p>
+            <h3>City West Villas</h3>
+            <p>Four north-facing villas in a Toowoomba heritage precinct, designed to match their historic surrounds.</p>
+          </div>
+        </div>
+        <div class="proj">
+          <div class="proj-img" style="background-image:url('assets/images/projects/haig/haig-06.jpg')"></div>
+          <div class="b">
+            <p class="st">3 of 4 sold</p>
+            <h3>Haig On The Park</h3>
+            <p>Four energy-efficient homes in South Toowoomba averaging 7.5-star NatHERS, taken from site to completed homes.</p>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span>Project Carter, Information Memorandum</span><span>General information only</span></div>
+    </section>
+
+    <!-- ===== 6. FIT + NEXT STEPS ===== -->
+    <section class="im-page">
+      <p class="sec-num">06</p>
+      <h2>Is it a fit?</h2>
+      <ul class="list">
+        <li>Cash or equity of $500K or more, or a site you already own</li>
+        <li>Deals from around $1.5M purchase price or land value</li>
+        <li>A two to three year horizon</li>
+        <li>Comfortable owning the asset in your own name or entity, and arranging finance with guidance</li>
+        <li>Open to development, value-add commercial, or either</li>
+        <li>Wants to make the big calls with the numbers in front of you, not manage trades</li>
+        <li>Sophisticated or wholesale investors preferred</li>
+      </ul>
+
+      <h3>Next steps</h3>
+      <ol class="steps">
+        <li><strong>Introductory call.</strong> Your goals, capital or site, and timeframe. No cost, no obligation.</li>
+        <li><strong>Position review.</strong> A short written summary of the strategy that fits, and the kind of deal to target.</li>
+        <li><strong>Engagement.</strong> We sign the engagement agreement and the $20,000 engagement fee is paid.</li>
+        <li><strong>Search and due diligence.</strong> Phase 1 begins, ending with a site, a business plan and a budget for your approval.</li>
+      </ol>
+      <p>To book the introductory call, reply to my email or use the form at <a href="partner">projectcarter.com.au/partner</a>.</p>
+
+      <h3>Important information</h3>
+      <p class="fine">This memorandum is general information only and has been prepared without taking into account your objectives, financial situation or needs. It is not financial, legal or tax advice, and it is not an offer of a financial product, a security or an interest in a managed investment scheme. Investors acquire and own property directly and engage Carters Investment Group to provide project and development management services under a written agreement, which prevails over this document. Examples are illustrative, not forecasts, and outcomes are not guaranteed. Property investment and development involve risk, including the possible loss of capital. Renders are artist's impressions, indicative only. Seek independent legal, tax and financial advice before making any decision. Fees are shown exclusive of GST.</p>
+      <div class="foot"><span>Project Carter, Information Memorandum</span><span>&copy; 2026 Project Carter</span></div>
+    </section>
+  </main>
+</body>
+</html>
