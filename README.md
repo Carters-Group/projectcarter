@@ -435,6 +435,26 @@ After a successful submit the visitor is sent to `thanks.html` (via the hidden
 conversion only fires on a real enquiry. On Formspree's free plan `_next` needs
 the full URL, e.g. `https://your-domain.com/thanks`.
 
+### Bot check on /enquire (Cloudflare Turnstile)
+
+`enquire.html` has a Cloudflare Turnstile widget on its last step, switched off
+until `TURNSTILE_SITE_KEY` is set in the page script. To switch it on:
+
+1. Cloudflare dashboard → Turnstile → Add widget, hostnames
+   `www.projectcarter.com.au` and `projectcarter.com.au`, mode Managed.
+2. Paste the **site key** into `TURNSTILE_SITE_KEY` in `enquire.html`.
+3. On the Vercel project add env var `TURNSTILE_SECRET_KEY` (the **secret
+   key**), and optionally `FORMSPREE_ENQUIRE_FORM` (the ID of a new Formspree
+   form just for /enquire, so the public `xqpkjvkb` ID isn't used). Redeploy.
+
+The form posts to `api/enquire.js`, not to Formspree. That function checks the
+Turnstile token with Cloudflare, the honeypot, links and spam phrases, then
+forwards to Formspree server-side. Bots posting straight to `xqpkjvkb` (how the
+Sep to Nov 2026 spam got in) still reach that form from the other pages that
+use it, so a separate /enquire form ID keeps enquiries clean. With no secret
+set, the token check is skipped and the other checks still run. The CSP
+already allows `challenges.cloudflare.com`.
+
 Alternatives if you'd rather not use Formspree: [Netlify Forms](https://docs.netlify.com/forms/setup/)
 (only if you host on Netlify) or [Basin](https://usebasin.com) — same idea, swap
 the `<form>` `action`.
