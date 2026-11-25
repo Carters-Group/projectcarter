@@ -119,7 +119,7 @@
            the check is skipped and the form still works.
       ================================================================== -->
       <form class="landing-form card" id="form"
-            action="https://formspree.io/f/xqpkjvkb"
+            action="/api/enquire"
             method="POST" novalidate>
         <input type="hidden" name="_subject" value="New enquiry, Project Carter landing page" />
         <input type="hidden" name="_next" value="thanks" />
@@ -258,6 +258,9 @@
               <textarea id="message" name="Message" rows="3"></textarea>
               <p class="form-note" id="messageNote" aria-live="polite"></p>
             </div>
+            <!-- Cloudflare Turnstile bot check (rendered by script when TURNSTILE_SITE_KEY is set).
+                 It adds a hidden cf-turnstile-response field that posts with the form. -->
+            <div class="field" id="turnstileBox" hidden></div>
           </div>
         </fieldset>
 
@@ -294,6 +297,38 @@
     var current = 0;
 
     var emailCheck = { email: "", ok: null, busy: false };
+
+    /* Cloudflare Turnstile. Paste the widget's SITE key here (public, safe in
+       client code). The SECRET key goes in this form's Formspree settings so
+       Formspree rejects any post without a valid token, which also stops bots
+       that post straight to the endpoint. Empty = no widget, form unchanged. */
+    var TURNSTILE_SITE_KEY = "";
+    var turnstile = { token: "", rendered: false };
+    var turnstileBox = document.getElementById("turnstileBox");
+
+    function renderTurnstile() {
+      if (!TURNSTILE_SITE_KEY || turnstile.rendered || !window.turnstile) return;
+      turnstile.rendered = true;
+      turnstileBox.hidden = false;
+      window.turnstile.render(turnstileBox, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: "dark",
+        size: "flexible",
+        "refresh-expired": "auto",
+        callback: function (t) { turnstile.token = t; refresh(); },
+        "expired-callback": function () { turnstile.token = ""; refresh(); },
+        "error-callback": function () { turnstile.token = ""; refresh(); }
+      });
+    }
+    function turnstileOk() { return !TURNSTILE_SITE_KEY || !!turnstile.token; }
+
+    if (TURNSTILE_SITE_KEY) {
+      window.onTurnstileLoad = function () { if (current === total - 1) renderTurnstile(); };
+      var ts = document.createElement("script");
+      ts.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad";
+      ts.async = true;
+      document.head.appendChild(ts);
+    }
 
     /* Spam screening. These only stop scripts that drive this page; a bot
        posting straight to Formspree skips them, so the Formspree-side spam
@@ -380,7 +415,7 @@
     function refresh() {
       var valid = stepValid(current);
       nextBtn.disabled = !valid;
-      submitBtn.disabled = !valid || emailCheck.busy || emailRejected();
+      submitBtn.disabled = !valid || emailCheck.busy || emailRejected() || !turnstileOk() || sending;
     }
 
     function render(moveFocus) {
@@ -392,6 +427,7 @@
       var last = current === total - 1;
       nextBtn.hidden = last;
       submitBtn.hidden = !last;
+      if (last) renderTurnstile();
       refresh();
       if (moveFocus) {
         var el = steps[current].querySelector("input, textarea");
@@ -419,6 +455,7 @@
     form.addEventListener("submit", function (e) {
       if (!stepValid(current)) { e.preventDefault(); return; }
       if (form._gotcha && form._gotcha.value) { e.preventDefault(); return; }
+      if (!turnstileOk()) { e.preventDefault(); return; }
       if (Date.now() - loadedAt < MIN_FILL_MS) {
         /* far too fast to be a person: act as if it sent, send nothing */
         e.preventDefault();
@@ -432,11 +469,51 @@
         messageInput.focus();
         return;
       }
-      if (!emailVerified()) {
-        e.preventDefault();
-        verifyEmail().then(function (ok) { if (ok) form.submit(); });
-      }
+      e.preventDefault();
+      (emailVerified() ? Promise.resolve(true) : verifyEmail()).then(function (ok) {
+        if (ok) sendLead();
+      });
     });
+
+    /* Posts to /api/enquire, which checks the Turnstile token server-side
+       and forwards to Formspree. The Formspree ID lives only on the server. */
+    var sending = false;
+    function sendLead() {
+      if (sending) return;
+      sending = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+      var data = {};
+      new FormData(form).forEach(function (v, k) {
+        data[k] = data[k] ? data[k] + ", " + v : v;
+      });
+      fetch(form.action, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(data)
+      }).then(function (r) {
+        return r.json().catch(function () { return { ok: false }; });
+      }).then(function (res) {
+        if (res && res.ok) { window.location.href = "thanks"; return; }
+        var msg = "Sorry, that didn't send. Please try again in a moment.";
+        if (res && res.reason === "spam") msg = "This looks like an advertising message or contains a link, so it wasn't sent. If you're enquiring about a property, please remove any links and reword it.";
+        if (res && res.reason === "captcha") msg = "The security check expired. Please tick it again and resend.";
+        fail(msg);
+      }).catch(function () {
+        fail("Sorry, that didn't send. Please check your connection and try again.");
+      });
+    }
+    function fail(msg) {
+      sending = false;
+      submitBtn.textContent = "Send enquiry";
+      messageNote.textContent = msg;
+      messageNote.className = "form-note is-bad";
+      if (TURNSTILE_SITE_KEY && window.turnstile && turnstile.rendered) {
+        turnstile.token = "";
+        window.turnstile.reset(turnstileBox);
+      }
+      refresh();
+    }
 
     render(false);
   })();
