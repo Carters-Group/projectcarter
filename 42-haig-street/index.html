@@ -488,6 +488,7 @@ dialog::backdrop{background:rgba(8,12,11,.94)}
       <label class="full">Message (optional)<textarea id="f-msg" placeholder="Times that suit you for an inspection, or any questions"></textarea></label>
       <label class="full check"><input id="f-updates" type="checkbox"><span>Keep me updated about future TN Macartney Projects developments (optional; unsubscribe at any time).</span></label>
       <p class="full privacy">TN Macartney Projects Pty Ltd collects your details to contact you about Unit 2, 42 Haig Street. We keep them in our enquiries register and share them only as our <a href="privacy.html">privacy policy</a> describes. It also explains how to see or correct your details and how to complain.</p>
+      <div class="full" id="f-turnstile"></div>
       <div class="full" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">
         <button class="btn btn-dark" type="submit">Send enquiry</button>
         <span class="ok" id="f-ok" role="status" aria-live="polite" hidden></span>
@@ -681,7 +682,15 @@ if("IntersectionObserver" in window){
    Offline for now (Trent, 22 Nov 2026): no Formspree form yet, so a sent enquiry opens the visitor's email app
    with the details filled in. At go-live, set FORM to a new Formspree endpoint (not the Royal St one). */
 $("#f-again").addEventListener("click",()=>{$("#f-done").hidden=true;$("#reg-form").hidden=false;$("#f-first").focus()});
-const FORM="https://formspree.io/f/xqpkjvkb";   // Project Carter's Formspree form (same inbox as /enquire); subject line marks it as a 42 Haig St enquiry
+/* Posts to Project Carter's /api/enquire (same as /enquire): it checks the Cloudflare Turnstile token, the honeypot and
+   spam wording server-side, then forwards to Formspree. The subject line marks it as a 42 Haig St enquiry. (25 Nov 2026) */
+const FORM="/api/enquire";
+const TURNSTILE_SITE_KEY="0x4AAAAAAGR2ENzdiprSVls5";   // Project Carter widget (projectcarter.com.au); secret is on Vercel
+let tsToken="";
+window.onTurnstileLoad=()=>{window.turnstile.render("#f-turnstile",{sitekey:TURNSTILE_SITE_KEY,theme:"light",size:"flexible","refresh-expired":"auto",
+  callback:t=>{tsToken=t},"expired-callback":()=>{tsToken=""},"error-callback":()=>{tsToken=""}})};
+{const s=document.createElement("script");s.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad";s.async=true;document.head.appendChild(s)}
+const resetTurnstile=()=>{tsToken="";try{window.turnstile&&window.turnstile.reset("#f-turnstile")}catch(_){}};
 $("#reg-form").addEventListener("submit",async e=>{
   e.preventDefault();
   const f=e.target,ok=$("#f-ok"),btn=f.querySelector("button[type=submit]"),v=id=>$(id).value.trim();
@@ -698,13 +707,20 @@ $("#reg-form").addEventListener("submit",async e=>{
     location.href="mailto:trent@cartersinvestments.com.au?subject="+encodeURIComponent(data._subject)+"&body="+encodeURIComponent(body);
     return say("Your email app should open with your enquiry ready to send. If it doesn't, call Trent on 0411 940 010.");
   }
+  if(!tsToken)return say("Please tick the \"Verify you are human\" box, then send.",true);
+  data["cf-turnstile-response"]=tsToken;
   data._replyto=data.email;btn.disabled=true;say("Sending…");
   try{
     const r=await fetch(FORM,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(data)});
-    if(!r.ok)throw new Error(r.status);
+    if(!r.ok){
+      const res=await r.json().catch(()=>({}));resetTurnstile();
+      if(res.reason==="captcha")return say("The security check expired. Please tick it again and resend.",true);
+      if(res.reason==="spam")return say("Your message looks like advertising or contains a link, so it wasn't sent. Please remove any links and try again.",true);
+      throw new Error(r.status);
+    }
     // Clear confirmation (Trent, 22 Nov 2026): the form is replaced by a "sent" panel so nobody wonders whether it went
     try{if(window.fbq){fbq("track","Lead",{content_name:"Unit 2, 42 Haig Street"});fbq("track","CompleteRegistration",{content_name:"Unit 2, 42 Haig Street"})}}catch(_){}
-    const first=data.first_name;f.reset();ok.hidden=true;f.hidden=true;
+    const first=data.first_name;f.reset();resetTurnstile();ok.hidden=true;f.hidden=true;
     const done=$("#f-done");done.querySelector("h3").textContent="Thanks "+first+", your enquiry has been sent.";done.hidden=false;
     setTimeout(()=>{const y=done.getBoundingClientRect().top+scrollY-Math.max(16,(innerHeight-done.offsetHeight)/2);document.documentElement.style.scrollBehavior="auto";scrollTo(0,y);document.documentElement.style.scrollBehavior=""},30);done.focus({preventScroll:true});
   }catch(err){say("Sorry, that didn't send. Please call Trent Macartney on 0411 940 010.",true)}

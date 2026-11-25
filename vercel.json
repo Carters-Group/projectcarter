@@ -115,7 +115,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.facebook.com; connect-src 'self' https://formspree.io https://www.facebook.com https://connect.facebook.net https://vitals.vercel-insights.com; frame-src https://www.facebook.com; form-action 'self' https://formspree.io; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://connect.facebook.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.facebook.com; connect-src 'self' https://formspree.io https://www.facebook.com https://connect.facebook.net https://vitals.vercel-insights.com https://challenges.cloudflare.com; frame-src https://www.facebook.com https://challenges.cloudflare.com; form-action 'self' https://formspree.io; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
         }
       ]
     }
