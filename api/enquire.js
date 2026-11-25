@@ -178,7 +178,8 @@ module.exports = async function (req, res) {
       return;
     }
 
-    var text = [body.Message, body.Name].join(" ");
+    /* /enquire uses Message/Name; the 42 Haig St form uses message/first_name/last_name. */
+    var text = [body.Message, body.Name, body.message, body.first_name, body.last_name].join(" ");
     if (/https?:\/\/|www\./i.test(text) || SPAM_PHRASES.test(text)) {
       send(res, 422, { ok: false, reason: "spam" });
       return;
