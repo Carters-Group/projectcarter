@@ -2854,3 +2854,90 @@ h1, h2, h3 {
   .pt-table--compare { font-size: 0.9rem; }
 }
 .pt-hero .project-eyebrow { text-shadow: 0 1px 10px rgba(12, 16, 22, 0.85); }
+
+/* =========================================================
+   Readiness scorecards (readiness.html, commercial-readiness.html,
+   development-readiness.html). One question per screen, no progress
+   bar or count; reuses .landing, .opt and .field from the enquire page.
+   ========================================================= */
+.quiz { max-width: 520px; min-height: 360px; }
+.quiz-step { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 18px; animation: stepIn 0.34s ease both; }
+.quiz-q {
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  font-size: clamp(24px, 3vw, 30px);
+  line-height: 1.1;
+  color: var(--text);
+}
+.quiz-help { margin: -6px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.quiz .form-nav[hidden] { display: none; }
+.quiz-points { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 8px; color: rgba(244, 243, 241, 0.84); font-size: 15px; }
+.quiz-points li { padding-left: 22px; position: relative; }
+.quiz-points li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 10px; height: 2px; background: var(--accent); }
+
+/* Results: the card widens to the full grid once the score shows */
+.quiz-done .landing-inner { grid-template-columns: 1fr; }
+.quiz-done .landing-copy { display: none; }
+.quiz-done .quiz { max-width: 860px; justify-self: center; }
+.rs { display: grid; gap: 28px; outline: none; animation: stepIn 0.4s ease both; }
+.rs-head { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: center; }
+.rs-head .kicker { margin-bottom: 6px; }
+.rs-ring { position: relative; width: 132px; height: 132px; }
+.rs-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.rs-ring circle { fill: none; stroke-width: 9; }
+.rs-ring-bg { stroke: rgba(255, 255, 255, 0.1); }
+.rs-ring-fg { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 1.1s cubic-bezier(0.4, 0, 0.2, 1); }
+.rs-num { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1; }
+.rs-num strong { font-family: var(--font-display); font-size: 46px; font-weight: 700; }
+.rs-num span { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; margin-top: 4px; }
+.rs-band { margin: 0 0 8px; font-family: var(--font-display); text-transform: uppercase; font-size: clamp(30px, 4vw, 42px); line-height: 1; }
+.rs-lead { margin: 0; color: rgba(244, 243, 241, 0.84); line-height: 1.55; }
+.rs-cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px 22px; }
+.rs-cat-top { display: flex; justify-content: space-between; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.rs-cat-top span:last-child { color: var(--text); }
+.rs-cat-bar { height: 4px; background: rgba(255, 255, 255, 0.1); }
+.rs-cat-bar span { display: block; height: 100%; background: var(--accent); }
+.rs-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.rs h3 { margin: 0 0 12px; font-size: 20px; }
+.rs-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rs-list li { position: relative; padding-left: 26px; font-size: 14px; line-height: 1.5; color: rgba(244, 243, 241, 0.86); }
+.rs-list li::before { position: absolute; left: 0; top: 0; font-weight: 700; }
+.rs-list.is-good li::before { content: "\2713"; color: var(--accent); }
+.rs-list.is-tip li::before { content: "\2192"; color: #e0a34a; }
+.rs-empty { margin: 0; color: var(--muted); font-size: 14px; }
+.rs-next { border-top: 1px solid var(--line); padding-top: 22px; }
+.rs-next p { margin: 0 0 18px; color: rgba(244, 243, 241, 0.84); line-height: 1.55; }
+.rs-ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Choice cards on readiness.html */
+.rd-choices { display: grid; gap: 16px; width: 100%; max-width: 520px; justify-self: end; }
+.rd-choice {
+  display: grid;
+  gap: 8px;
+  padding: clamp(22px, 3vw, 32px);
+  background: rgba(20, 20, 22, 0.72);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.rd-choice:hover, .rd-choice:focus-visible { border-color: var(--accent); transform: translateY(-2px); }
+.rd-choice .kicker { margin: 0; }
+.rd-choice h2 { margin: 0; font-size: clamp(26px, 3vw, 34px); }
+.rd-choice p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+.rd-choice .link-arrow { margin-top: 6px; }
+
+@media (max-width: 900px) {
+  .quiz, .rd-choices { justify-self: stretch; max-width: none; }
+  .quiz { min-height: 0; }
+}
+@media (max-width: 640px) {
+  .rs-head { grid-template-columns: 1fr; justify-items: start; gap: 18px; }
+  .rs-cols { grid-template-columns: 1fr; }
+  .rs-ctas .btn { flex: 1 1 100%; text-align: center; }
+}
