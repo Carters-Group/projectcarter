@@ -42,7 +42,7 @@
 
   var answers = {};             /* id -> string (radio) | string[] (check) */
   var questions = Q.questions;
-  var current = 0;              /* 0..questions.length-1 = questions, questions.length = details */
+  var current = Q.intro ? -1 : 0; /* -1 = start screen, 0..n-1 = questions, n = details */
   var detailsIdx = questions.length;
   var turnstile = { token: "", rendered: false, el: null };
   var sending = false;
@@ -229,7 +229,39 @@
     nav.hidden = current === 0 && nextBtn.hidden;
   }
 
+  /* Start screen: the hook. Nothing is asked until they click Start. */
+  function renderIntro() {
+    var I = Q.intro;
+    stage.innerHTML =
+      '<div class="quiz-step quiz-intro">' +
+      '<p class="kicker">' + esc(I.kicker) + "</p>" +
+      '<h2 class="quiz-intro-head">' + esc(I.title) + "</h2>" +
+      '<p class="quiz-help">' + esc(I.text) + "</p>" +
+      '<ul class="quiz-intro-list">' + I.points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul>" +
+      '<button type="button" class="btn btn-accent quiz-start" id="quizStart">' + esc(I.button) + "</button>" +
+      '<p class="form-fineprint quiz-intro-meta">' + esc(I.meta) + "</p>" +
+      "</div>";
+    document.getElementById("quizStart").addEventListener("click", start);
+  }
+
+  function start() {
+    if (current !== -1) return;
+    loadedAt = Date.now();
+    current = 0;
+    if (main) main.classList.add("quiz-started");
+    render();
+  }
+
+  /* Phone-only button under the headline: start and jump to the card */
+  var jump = document.getElementById("quizJump");
+  if (jump) jump.addEventListener("click", function (e) {
+    e.preventDefault();
+    start();
+    root.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
   function render() {
+    if (current === -1) { renderIntro(); nav.hidden = true; return; }
     if (current === detailsIdx) renderDetails();
     else renderQuestion(current);
     refreshNav();

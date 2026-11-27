@@ -18,6 +18,18 @@
     id: "development",
     subject: "Development readiness scorecard",
     cats: { site: "Site & planning", capital: "Capital", finance: "Numbers & finance", team: "Experience & team", plan: "Structure & timing" },
+    intro: {
+      kicker: "Free 2-minute scorecard",
+      title: "Most developments are won or lost before the first slab is poured",
+      text: "The wrong site, thin equity or no feasibility can sink a project before it starts. Check where you stand before you commit to a site.",
+      points: [
+        "Your development readiness score out of 100",
+        "How you rate on site, capital, numbers and team",
+        "The gaps to close before you buy or build"
+      ],
+      button: "Start my score",
+      meta: "Free. One question at a time, about 2 minutes."
+    },
     questions: [
       { id: "type", short: "Project type", q: "What kind of development are you thinking about?", options: [
         { v: "A small project: duplex or 2 to 4 townhouses", p: null },

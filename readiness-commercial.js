@@ -11,6 +11,18 @@
     id: "commercial",
     subject: "Commercial readiness scorecard",
     cats: { capital: "Capital", finance: "Finance", structure: "Structure & team", plan: "Plan & timing", experience: "Experience" },
+    intro: {
+      kicker: "Free 2-minute scorecard",
+      title: "Find out before the agent does",
+      text: "Agents and lenders size you up in the first conversation. Get your own read first, so you walk in knowing exactly where you stand.",
+      points: [
+        "Your commercial readiness score out of 100",
+        "How you rate on capital, finance, structure and experience",
+        "The gaps to close before you make an offer"
+      ],
+      button: "Start my score",
+      meta: "Free. One question at a time, about 2 minutes."
+    },
     questions: [
       { id: "goal", short: "Goal", q: "What are you looking to do?", options: [
         { v: "Buy my first commercial property", p: null },

@@ -2941,3 +2941,19 @@ h1, h2, h3 {
   .rs-cols { grid-template-columns: 1fr; }
   .rs-ctas .btn { flex: 1 1 100%; text-align: center; }
 }
+
+/* Readiness start screen (the hook before question one) */
+.quiz-intro { gap: 16px; }
+.quiz-intro .kicker { margin: 0; }
+.quiz-intro-head { margin: 0; font-size: clamp(28px, 3.4vw, 38px); line-height: 1.04; }
+.quiz-intro .quiz-help { margin: 0; font-size: 15px; }
+.quiz-intro-list { list-style: none; margin: 4px 0 6px; padding: 0; display: grid; gap: 10px; }
+.quiz-intro-list li { position: relative; padding-left: 26px; font-size: 15px; line-height: 1.45; color: rgba(244, 243, 241, 0.88); }
+.quiz-intro-list li::before { content: "\2713"; position: absolute; left: 0; top: 0; color: var(--accent); font-weight: 700; }
+.quiz-start { width: 100%; text-align: center; padding-block: 16px; font-size: 15px; }
+.quiz-intro-meta { text-align: center; margin: 0; }
+.quiz-jump { display: none; }
+@media (max-width: 900px) {
+  .quiz-jump { display: inline-block; }
+  .quiz-started .quiz-jump { display: none; }
+}
